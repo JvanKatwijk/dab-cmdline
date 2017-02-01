@@ -32,16 +32,16 @@
 #include	<stdio.h>
 #include	"audio-base.h"
 #include	"ringbuffer.h"
+#include	<string>
 
 class	audioSink  : public audioBase {
 public:
-	                audioSink		(int16_t);
+	                audioSink		(int16_t, std::string, bool *);
 			~audioSink		(void);
 	void		stop			(void);
 	void		restart			(void);
-	bool		selectDevice		(int16_t);
+	bool		selectDevice		(const std::string);
 	bool		selectDefaultDevice	(void);
-	bool		set_streamSelector	(int);
 private:
 	int16_t		numberofDevices		(void);
 const	char		*outputChannelwithRate	(int16_t, int32_t);

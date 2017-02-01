@@ -29,7 +29,10 @@
 #include	<stdio.h>
 /*
  */
-	audioSink::audioSink	(int16_t latency):audioBase () {
+	audioSink::audioSink	(int16_t latency,
+	                         std::string soundChannel,
+	                         bool *err):
+	                                             audioBase () {
 int32_t	i;
 	this	-> latency	= latency;
 	this	-> CardRate	= 48000;
@@ -52,7 +55,7 @@ int32_t	i;
 	for (i = 0; i < numofDevices; i ++)
 	   outTable [i] = -1;
 	ostream		= NULL;
-	selectDefaultDevice ();
+	*err =  !selectDevice (soundChannel);
 }
 
 	audioSink::~audioSink	(void) {
@@ -74,9 +77,23 @@ int32_t	i;
 	delete[] outTable;
 }
 
-bool	audioSink::selectDevice (int16_t odev) {
+bool	audioSink::selectDevice (const std::string soundChannel) {
 PaError err;
-	fprintf (stderr, "select device with %d\n", odev);
+int16_t	odev, i;
+
+	fprintf (stderr, "selecting device %s\n", soundChannel. c_str ());
+
+	for (i = 0; i <  numofDevices; i ++) {
+	   const std::string so = 
+	             outputChannelwithRate (i, CardRate);
+	   if (so == std::string (""))
+	      continue;
+	   fprintf (stderr, "device %s seems available as %d\n",
+	                                   so. c_str (), i);
+	   if (so. find (soundChannel,0) != std::string::npos)
+	      odev = i;
+	}
+
 	if (!isValidDevice (odev)) {
 	   fprintf (stderr, "invalid device (%d) selected\n", odev);
 	   return false;
@@ -100,7 +117,7 @@ PaError err;
 	                          Pa_GetDeviceInfo (odev) ->
 	                                      defaultHighOutputLatency * latency;
 	bufSize	= (int)((float)outputParameters. suggestedLatency);
-//	bufSize	= latency * 20 * 256;
+	bufSize	= latency * 20 * 256;
 
 	outputParameters. hostApiSpecificStreamInfo = NULL;
 //
@@ -228,35 +245,13 @@ bool	audioSink::isValidDevice (int16_t dev) {
 }
 
 bool	audioSink::selectDefaultDevice (void) {
-	return selectDevice (Pa_GetDefaultOutputDevice ());
+	return selectDevice ("default");
 }
 
 int32_t	audioSink::cardRate	(void) {
 	return 48000;
 }
 
-bool	audioSink::set_streamSelector (int idx) {
-int16_t	outputDevice;
-
-	if (idx == 0)
-	   return false;
-
-	outputDevice = outTable [idx];
-	if (!isValidDevice (outputDevice)) {
-	   return false;
-	}
-
-	stop	();
-	if (!selectDevice (outputDevice)) {
-	   fprintf (stderr, "error selecting device\n");
-	   selectDefaultDevice ();
-	   return false;
-	}
-
-	fprintf (stderr, "selected output device %d %d\n", idx, outputDevice);
-	return true;
-}
-//
 int16_t	audioSink::numberofDevices	(void) {
 	return numofDevices;
 }

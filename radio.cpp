@@ -51,7 +51,7 @@
 	              int		gain,
 	              std::string	soundChannel) {
 int16_t	latency;
-
+bool	err;
 //
 //	Before printing anything, we set
 	setlocale (LC_ALL, "");
@@ -74,7 +74,11 @@ int16_t	latency;
 //	situations wrt the output buffering
 	latency			= 4;
 //
-	soundOut		= new audioSink		(latency);
+	soundOut		= new audioSink	(latency, soundChannel, &err);
+	if (err) {
+	   fprintf (stderr, "no valid sound channel, fatal\n");
+	   exit (2);
+	}
 
 	this	-> dabBand		= dabBand == "BAND III" ?
 	                                         BAND_III : L_BAND;
@@ -108,7 +112,7 @@ int16_t	latency;
 	int r = inputDevice	-> restartReader ();
 	if (!r) {
 	   fprintf (stderr, "Opening  input stream failed, fatal\n");
-	   exit (21);
+	   exit (3);
 	}
 	inputDevice	-> setGain (gain);
 	sleep (15);

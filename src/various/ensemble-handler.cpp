@@ -98,6 +98,7 @@ std::string name = "";
 	   i --;
 	}
 	locker. unlock ();
+	return name;
 }
 
 void	ensembleHandler::clearEnsemble	(void) {
