@@ -54,21 +54,20 @@ Example
 	
 
 For building the dab-cmdline version, a CMakeLists.txt file is available.
-A number of settings, in particular for input devices, can be set.
+A number of settings, in particular for input devices, can be set by uncommenting or commenting lines
 
-#	set(SDRPLAY true)
-#	set(AIRSPY true)
-#	set(DABSTICK true)
+   set(SDRPLAY true)
+   
+   set(AIRSPY true)
+   
+   set(DABSTICK true)
 
-by default no device is selected, uncomment the lines for the devices
-to be included in the configuration.
-Obviously, including a device requires the installation of the library
-for that device.
+I.e. uncommenting "set(DABSTICK true)" means that dabstick is included in the configuration.
+Obviously, including a device requires the installation of the library for that device.
 
-#	add_definitions (-DMOT_BASICS)
+   add_definitions (-DMOT_BASICS)
 
-Uncommenting this line implies that some support for
-PAD's (Programme Associated Data) is switched on.
+Uncommenting this line implies that some support forc PAD's (Programme Associated Data) is switched on. The labels are printed on the console.
 
 
 Libraries (together with the "development" or ".h" files) required are:
