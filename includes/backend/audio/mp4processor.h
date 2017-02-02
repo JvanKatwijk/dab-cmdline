@@ -38,20 +38,27 @@
 #include	"faad-decoder.h"
 #include	"pad-handler.h"
 
-class	labelHandler;
+class	Radio;
 
 class	mp4Processor : public dabProcessor {
 public:
-			mp4Processor	(int16_t,
-	                                 audioSink *,
-	                                 labelHandler	*);
+			mp4Processor	(Radio		*,
+	                                 audioSink	*,
+	                                 int16_t);
 			~mp4Processor	(void);
 	void		addtoFrame	(uint8_t *);
 private:
 	bool		processSuperframe (uint8_t [], int16_t);
 	audioSink	*ourSink;
 	padHandler	my_padHandler;
-	FILE		*mp4File;
+	void            handle_aacFrame (uint8_t *,
+                                         int16_t,
+                                         uint8_t,
+                                         uint8_t,
+                                         uint8_t,
+                                         uint8_t,
+                                         bool*);
+
 	int16_t		superFramesize;
 	int16_t		blockFillIndex;
 	int16_t		blocksInBuffer;
@@ -61,9 +68,6 @@ private:
 	uint8_t		**RSMatrix;
 	int16_t		RSDims;
 	int16_t		au_start	[10];
-	int16_t		au_count;
-	int16_t		au_errors;
-	int16_t		nErrors;
 	int32_t		baudRate;
 
 	firecode_checker	fc;
@@ -71,11 +75,18 @@ private:
 	uint8_t		*outVector;
 //	and for the aac decoder
 	faadDecoder	aacDecoder;
+
 	int16_t		frameCount;
 	int16_t		successFrames;
 	int16_t		frameErrors;
+	int16_t		rsErrors;
+	int16_t		aacErrors;
+	int16_t		aacFrames;
+	int16_t		charSet;
+	void            show_frameErrors        (int);
+        void            show_rsErrors           (int);
+        void            show_aacErrors          (int);
 
-	void		show_successRate	(int);
 	void		isStereo		(bool);
 };
 

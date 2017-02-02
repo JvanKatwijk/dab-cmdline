@@ -33,17 +33,17 @@
 class	dabProcessor;
 class	protection;
 class	audioSink;
-class	labelHandler;
+class	Radio;
 
 class	dabAudio:public dabVirtual {
 public:
-	dabAudio	(uint8_t dabModus,
+	dabAudio	(Radio		*,
+	                 uint8_t dabModus,
 	                 int16_t fragmentSize,
 	                 int16_t bitRate,
 	                 int16_t uepFlag,
 	                 int16_t protLevel,
-	                 audioSink *,
-	                 labelHandler *);
+	                 audioSink	*);
 	~dabAudio	(void);
 int32_t	process		(int16_t *, int16_t);
 void	stopRunning	(void);
@@ -54,7 +54,7 @@ private:
 void	run		(void);
 volatile bool		running;
 	std::thread	threadHandle;
-	labelHandler	*my_labelHandler;
+	Radio		*myRadio;
 	uint8_t		dabModus;
 	int16_t		fragmentSize;
 	int16_t		bitRate;

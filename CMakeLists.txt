@@ -26,12 +26,11 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 #	adjust to your likings
 
 #	if you want support for any of these devices, uncomment the line
-#	set(SDRPLAY true)
+	set(SDRPLAY true)
 	set(AIRSPY true)
-#	set(DABSTICK true)
+	set(DABSTICK true)
 
-#	add_definitions (-DTECHNICAL_DATA)	# to show some additional data
-#	add_definitions (-DMOT_BASICS__) 	# use at your own risk
+	add_definitions (-DMOT_BASICS__) 	# use at your own risk
 #	add_definitions (-DMSC_DATA__)		# use at your own risk
 #
 ########################################################################
@@ -141,7 +140,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/various/ringbuffer.h
 	     ./includes/various/Xtan2.h
 	     ./includes/various/ensemble-handler.h
-	     ./includes/various/label-handler.h
 	)
 
 	set (${objectName}_SRCS
@@ -184,7 +182,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/various/fft.cpp
 	     ./src/various/Xtan2.cpp
 	     ./src/various/ensemble-handler.cpp
-	     ./src/various/label-handler.cpp
 	)
 
 
@@ -273,12 +270,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 	   set (${objectName}_UIS
 	        ${${objectName}_UIS}
-	        ./src/input/dabstick/dabstick-widget.ui
-	   )
-
-	   set (${objectName}_MOCS
-	        ${${objectName}_MOCS}
-	        ./src/input/dabstick/dabstick.h
 	   )
 
 	   include_directories (

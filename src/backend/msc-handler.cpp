@@ -26,6 +26,7 @@
 #include	"dab-virtual.h"
 #include	"dab-audio.h"
 #include	"dab-data.h"
+#include	"radio.h"
 //
 //	Interface program for processing the MSC.
 //	Merely a dispatcher for the selected service
@@ -36,11 +37,11 @@
 #define	CUSize	(4 * 16)
 //	Note CIF counts from 0 .. 3
 //
-		mscHandler::mscHandler	(DabParams	*p,
-	                                 audioSink	*my_audioSink,
-	                                 labelHandler	*mh) {
+		mscHandler::mscHandler	(Radio		*myRadio,
+	                                 DabParams	*p,
+	                                 audioSink	*my_audioSink) {
+	this	-> myRadio	= myRadio;
 	this	-> my_audioSink	= my_audioSink;
-	this	-> my_labelHandler	= mh;
 
 	cifVector		= new int16_t [55296];
 	cifCount		= 0;	// msc blocks in CIF
@@ -133,13 +134,13 @@ int16_t	*myBegin;
 	   delete dabHandler;
 
 	   if (audioService)
-	      dabHandler = new dabAudio (new_dabModus,
+	      dabHandler = new dabAudio (myRadio,
+	                                 new_dabModus,
 	                                 new_Length * CUSize,
 	                                 new_bitRate,
 	                                 new_uepFlag,
 	                                 new_protLevel,
-	                                 my_audioSink,
-	                                 my_labelHandler);
+	                                 my_audioSink);
 
 	   else	 {	// dealing with data
 	      dabHandler = new dabData (new_DSCTy,

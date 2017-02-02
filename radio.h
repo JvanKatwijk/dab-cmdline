@@ -32,13 +32,16 @@
 
 #include	<vector>
 #include	<string>
+#include	<list>
 
 #include	"ofdm-processor.h"
 #include	"fic-handler.h"
 #include	"msc-handler.h"
 #include	"ringbuffer.h"
 #include	"ensemble-handler.h"
-#include	"label-handler.h"
+
+#include	<mutex>
+#include	<condition_variable>
 
 class	virtualInput;
 class	audioSink;
@@ -71,17 +74,25 @@ const	char		*get_programm_language_string (uint8_t);
 	std::string		requestedProgram;
 	std::string		requestedChannel;
 	ensembleHandler theEnsemble;
-	labelHandler	showLabel;
 	int		coarseCorrector;
 	int		fineCorrector;
 	bool		setDevice		(std::string);
 	void		TerminateProcess	(void);
-	void		setChannel		(std::string);
-	void		setService		(std::string);
+	bool		setChannel		(std::string);
+	bool		setService		(std::string);
 
 	void		set_fineCorrectorDisplay	(int);
 	void		set_coarseCorrectorDisplay	(int);
 //
+//
+	std::mutex	g_lockqueue;
+	std::mutex	labelMutex;
+	std::condition_variable g_queuecheck;
+	std::list<std::string> labelQueue;
+//
+//	Kind of signal handler here
+public:
+	void		showLabel		(std::string);
 };
 
 #endif

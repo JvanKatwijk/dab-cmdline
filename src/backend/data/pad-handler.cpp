@@ -23,14 +23,14 @@
 #include	"pad-handler.h"
 #include	<cstring>
 #include	"charsets.h"
-#include	"label-handler.h"
+#include	"radio.h"
 #include	"mot-data.h"
 /**
   *	\class padHandler
   *	Handles the pad sectors passed on from mp4Processor
   */
-	padHandler::padHandler	(labelHandler *mh) {
-	my_labelHandler		= mh;
+	padHandler::padHandler	(Radio *myRadio) {
+	this	-> myRadio	= myRadio;
 	my_motHandler		= new motHandler ();
 }
 
@@ -209,7 +209,7 @@ int16_t  dataLength                = 0;
 //	if at the end, show the label
 	      if (last) {
 	         if (!moreXPad) {
-	            my_labelHandler -> showLabel (dynamicLabelText);
+	            myRadio -> showLabel (dynamicLabelText);
 	                              
 	         }
 	         else
@@ -238,7 +238,7 @@ int16_t  dataLength                = 0;
 	                                      dataLength);
 	   dynamicLabelText. append(segmentText);
 	   if (!moreXPad && isLastSegment) {
-	      my_labelHandler -> showLabel (dynamicLabelText);
+	      myRadio -> showLabel (dynamicLabelText);
 	   }
 	}
 }

@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013
+ *    Copyright (C) 2016
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -32,7 +32,7 @@
 //
 #include	"charsets.h"
 #include	"pad-handler.h"
-#include	"label-handler.h"
+#include	"radio.h"
 
 //
 //	Now for real
@@ -42,27 +42,31 @@
   *	that are processed by the "faadDecoder" class
   */
 
-	mp4Processor::mp4Processor (int16_t		bitRate,
+	mp4Processor::mp4Processor (Radio		*myRadio,
 	                            audioSink		*as,
-	                            labelHandler	*mh):
-	                                  my_padHandler (mh),
+	                            int16_t		bitRate) :
+	                                  my_padHandler (myRadio),
 	                                  my_rsDecoder (8, 0435, 0, 1, 10),
 	                                  aacDecoder (as) {
 int16_t	i;
 
 	this	-> bitRate	= bitRate;	// input rate
+
 	superFramesize		= 110 * (bitRate / 8);
 	RSDims			= bitRate / 8;
 	frameBytes		= new uint8_t [RSDims * 120];	// input
 	outVector		= new uint8_t [RSDims * 110];
 	blockFillIndex	= 0;
 	blocksInBuffer	= 0;
-	frameCount	= 0;
-	frameErrors	= 0;
-//
-//	error display
-	au_count	= 0;
-	au_errors	= 0;
+
+	blockFillIndex	= 0;
+	blocksInBuffer	= 0;
+	frameCount      = 0;
+        frameErrors     = 0;
+        aacErrors       = 0;
+        aacFrames       = 0;
+        successFrames   = 0;
+        rsErrors        = 0;
 }
 
 	mp4Processor::~mp4Processor (void) {
@@ -104,6 +108,11 @@ int16_t	nbits	= 24 * bitRate;
 //	since we processed a full cycle of 5 blocks, we just start a
 //	new sequence, beginning with block blockFillIndex
 	      blocksInBuffer	= 0;
+	      if (++successFrames > 25) {
+                 show_rsErrors (rsErrors);
+                 successFrames  = 0;
+                 rsErrors       = 0;
+              }
 	   }
 	   else {	// virtual shift to left in block sizes
 	      blocksInBuffer  = 4;
@@ -137,10 +146,6 @@ int32_t		tmp		= 0;
 	      rsIn [k] = frameBytes [(base + j + k * RSDims) % (RSDims * 120)];
 //
 	   ler = my_rsDecoder. dec (rsIn, rsOut, 135);
-	   if (ler > 0) {
-//	      fprintf (stderr, "corrected %d errors\n", ler);
-	      nErrors += ler;
-	   }
 	   if (ler < 0)
 	      return false;
 	   for (k = 0; k < 110; k ++) 
@@ -199,65 +204,81 @@ int32_t		tmp		= 0;
 //
 //	extract the AU'si and prepare a buffer, sufficiently
 //	long for conversion to PCM samples
+
 	for (i = 0; i < num_aus; i ++) {
 	   int16_t	aac_frame_length;
-	   au_count ++;
-	   uint8_t theAU [2 * 960];	// sure, large enough
-	   memset (theAU, 0, sizeof (theAU));
 //
-//	The crc takes the two last bytes from the au vector,
-//	but first some - hopefully superfluous - sanity checks
 	   if (au_start [i + 1] < au_start [i]) {
-//	should not happen, all errors were corrected
 //	      fprintf (stderr, "%d %d\n", au_start [i + 1], au_start [i]);
 	      return false;
 	   }
+
 	   aac_frame_length = au_start [i + 1] - au_start [i] - 2;
+// sanity check
 	   if ((aac_frame_length >= 960) || (aac_frame_length < 0)) {
-//	should not happen, all errors were corrected
-//	      fprintf (stderr, "serious error in frame, framelength = %d\n",
-//	                            aac_frame_length);
 	      return false;
 	   }
+
 //	but first the crc check
 	   if (check_crc_bytes (&outVector [au_start [i]],
 	                        aac_frame_length)) {
-//
-//	create a real aac vector, starting with the newly created
-//	header
-	      memcpy (theAU,
-	              &outVector [au_start [i]],
-	              aac_frame_length * sizeof (uint8_t));
-
-	      if (((theAU [0] >> 5) & 07) == 4)
-	         my_padHandler. processPAD (theAU);
-
+	      bool err;
+	      handle_aacFrame (&outVector [au_start [i]],
+	                                   aac_frame_length,
+	                                   dacRate,
+	                                   sbrFlag,
+	                                   mpegSurround,
+	                                   aacChannelMode,
+	                                   &err);
 	      isStereo (aacChannelMode);
-//	just a few bytes extra, such that the decoder can look
-//	beyond the last byte
-	      for (j = aac_frame_length;
-	           j < aac_frame_length + 10; j ++)
-	         theAU [j] = 0;
-	      tmp = aacDecoder. MP42PCM (dacRate,
-	                                 sbrFlag,
-	                                 mpegSurround,
-	                                 aacChannelMode,
-	                                 theAU,
-	                                 aac_frame_length);
-	      if (tmp == 0)
-	         frameErrors ++;
-	      else
-	         outSamples += tmp;
+	      if (err) 
+	         aacErrors ++;
+	      if (++aacFrames > 25) {
+	         show_aacErrors (aacErrors);
+	         aacErrors	= 0;
+	         aacFrames	= 0;
+	      }
 	   }
 	   else {
-	      au_errors ++;
 	      fprintf (stderr, "CRC failure with dab+ frame should not happen\n");
 	   }
 	}
 	return true;
 }
 
-void	mp4Processor::show_successRate	(int s) {
+void	mp4Processor::handle_aacFrame (uint8_t *v,
+	                               int16_t frame_length,
+	                               uint8_t	dacRate,
+	                               uint8_t	sbrFlag,
+	                               uint8_t	mpegSurround,
+	                               uint8_t	aacChannelMode,
+	                               bool	*error) {
+uint8_t theAudioUnit [2 * 960 + 10];	// sure, large enough
+
+	memcpy (theAudioUnit, v, frame_length);
+	memset (&theAudioUnit [frame_length], 0, 10);
+
+	if (((theAudioUnit [0] >> 5) & 07) == 4)
+	   my_padHandler. processPAD (theAudioUnit);
+
+	int tmp = aacDecoder. MP42PCM (dacRate,
+	                               sbrFlag,
+	                               mpegSurround,
+	                               aacChannelMode,
+	                               theAudioUnit,
+	                               frame_length);
+	*error	= tmp == 0;
+}
+
+void	mp4Processor::show_frameErrors	(int s) {
+	(void)s;
+}
+
+void	mp4Processor::show_rsErrors	(int s) {
+	(void)s;
+}
+
+void	mp4Processor::show_aacErrors	(int s) {
 	(void)s;
 }
 

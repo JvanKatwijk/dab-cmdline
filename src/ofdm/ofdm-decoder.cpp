@@ -140,7 +140,7 @@ int16_t	currentBlock	= 0;
   *	in the buffer.
   */
 void	ofdmDecoder::processBlock_0 (DSPCOMPLEX *vi) {
-	   std::unique_lock<std::mutex> locker (g_lockqueue);
+	std::unique_lock<std::mutex> locker (g_lockqueue);
 	bufferSpace. wait ();
 	memcpy (command [0], vi, sizeof (DSPCOMPLEX) * T_u);
 	myMutex. lock ();

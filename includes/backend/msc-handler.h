@@ -37,14 +37,14 @@
 #include	"dab-constants.h"
 
 class	dabVirtual;
-class	labelHandler;
+class	Radio;
 
 using namespace std;
 class mscHandler {
 public:
-		mscHandler		(DabParams	*,
-	                                 audioSink *,
-	                                 labelHandler *);
+		mscHandler		(Radio		*,
+	                                 DabParams	*,
+	                                 audioSink 	*);
 		~mscHandler		(void);
 	void	process_mscBlock	(int16_t *, int16_t);
 	void	set_audioChannel	(audiodata	*);
@@ -52,8 +52,8 @@ public:
 	void	stopProcessing		(void);
 	void	stopHandler		(void);
 private:
+	Radio		*myRadio;
 	audioSink	*my_audioSink;
-	labelHandler	*my_labelHandler;
 	bool		audioService;
 	std::mutex	mutexer;
 	dabVirtual	*dabHandler;

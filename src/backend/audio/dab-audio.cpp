@@ -27,7 +27,7 @@
 #include	"eep-protection.h"
 #include	"uep-protection.h"
 #include	"audiosink.h"
-#include	"label-handler.h"
+#include	"radio.h"
 #include	<chrono>
 //
 //	As an experiment a version of the backend is created
@@ -38,20 +38,21 @@
 //	inline rather than through a special class-object
 //
 //	fragmentsize == Length * CUSize
-	dabAudio::dabAudio	(uint8_t dabModus,
+	dabAudio::dabAudio	(Radio	*myRadio,
+	                         uint8_t dabModus,
 	                         int16_t fragmentSize,
 	                         int16_t bitRate,
 	                         int16_t uepFlag,
 	                         int16_t protLevel,
-	                         audioSink *my_audioSink,
-	                         labelHandler *mh) {
+	                         audioSink *my_audioSink) {
 int32_t i, j;
+
+	this	-> myRadio		= myRadio;
 	this	-> dabModus		= dabModus;
 	this	-> fragmentSize		= fragmentSize;
 	this	-> bitRate		= bitRate;
 	this	-> uepFlag		= uepFlag;
 	this	-> protLevel		= protLevel;
-	this	-> my_labelHandler	= mh;
 
 	outV			= new uint8_t [bitRate * 24];
 	interleaveData		= new int16_t *[16]; // max size
@@ -73,9 +74,9 @@ int32_t i, j;
 	                                        my_audioSink);
 	else
 	if (dabModus == DAB_PLUS) 
-	   our_dabProcessor = new mp4Processor (bitRate,
+	   our_dabProcessor = new mp4Processor (myRadio,
 	                                        my_audioSink,
-	                                        my_labelHandler);
+	                                        bitRate);
 	else		// cannot happen
 	   our_dabProcessor = new dabProcessor ();
 

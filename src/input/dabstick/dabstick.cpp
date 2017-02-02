@@ -202,7 +202,7 @@ int32_t	r;
 	if (r < 0)
 	   return false;
 
-	this -> rtlsdr_set_center_freq (device, lastFrequency + vfoOffset);
+	this -> rtlsdr_set_center_freq (device, frequency + vfoOffset);
 	workerHandle = std::thread (controlThread, this);
 	rtlsdr_set_tuner_gain (device, gain);
 	running	= true;

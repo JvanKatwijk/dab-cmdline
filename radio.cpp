@@ -93,9 +93,9 @@ bool	err;
   *	The ficHandler shares information with the mscHandler
   *	but the handlers do not change each others modes.
   */
-	my_mscHandler	= new mscHandler (&dabModeParameters,
-                                          soundOut,
-	                                  &showLabel);
+	my_mscHandler	= new mscHandler (this,
+	                                  &dabModeParameters,
+                                          soundOut);
 	my_ficHandler	= new ficHandler (&theEnsemble);
 /**
   *	The default for the ofdmProcessor depends on
@@ -108,21 +108,39 @@ bool	err;
 	                                        my_ficHandler,
 	                                        threshold,
 	                                        3);
-	setChannel (channel);
+	if (!setChannel (channel)) {
+	   fprintf (stderr, "selecting channel %s failed, fatal\n",
+	                          channel. c_str ());
+	   exit (3);
+	}
+
 	int r = inputDevice	-> restartReader ();
 	if (!r) {
 	   fprintf (stderr, "Opening  input stream failed, fatal\n");
-	   exit (3);
+	   exit (4);
 	}
+
 	inputDevice	-> setGain (gain);
 	sleep (15);
 
 	if (theEnsemble. ensembleExists ()) {
 	   fprintf (stderr, "trying to open program %s\n",
 	                               requestedProgram. c_str ()); 
-	   setService (theEnsemble. findService (requestedProgram));
-	   while (1)
-	      sleep (1);
+	   if (!setService (theEnsemble. findService (requestedProgram))) {
+	      exit (5);
+	   }
+	
+	   while (1) {
+	      std::unique_lock<std::mutex> locker (g_lockqueue);
+              g_queuecheck. wait (locker);
+	      while (!labelQueue. empty ()) {
+	         labelMutex. lock ();
+	         fprintf (stderr, "%s\r", labelQueue. front (). c_str ());
+	         labelQueue. pop_front ();
+	         labelMutex. unlock ();
+	      }
+           }
+
 	}
 	else {
 	   fprintf (stderr, "could not find useful data in channel %s",
@@ -133,6 +151,16 @@ bool	err;
 
 	Radio::~Radio (void) {
 }
+
+void	Radio::showLabel (const std::string s) {
+	std::unique_lock<std::mutex> locker (g_lockqueue);
+	labelMutex. lock ();
+	labelQueue. insert (labelQueue. cend (), s);
+	labelMutex. unlock ();
+	g_queuecheck. notify_one ();
+}
+
+
 //
 ///	the values for the different Modes:
 void	Radio::setModeParameters (uint8_t Mode) {
@@ -249,6 +277,7 @@ struct dabFrequencies Lband_frequencies [] = {
 {NULL, 0}
 };
 
+//	These tables are not used in the command line version
 static 
 const char *table12 [] = {
 "none",
@@ -350,11 +379,8 @@ const char *Radio::get_programm_language_string (uint8_t language) {
 	return table9 [language];
 }
 
-//	
-//	The public slots are called from other places within the dab software
-//	so please provide some implementation, perhaps an empty one
 //
-//	a slot called by the ofdmprocessor
+//	Not used by this version
 void	Radio::set_fineCorrectorDisplay (int v) {
 	fineCorrector = v;
 }
@@ -385,7 +411,7 @@ void	Radio::TerminateProcess (void) {
 
 /**
   */
-void	Radio::setChannel (std::string s) {
+bool	Radio::setChannel (std::string s) {
 int16_t	i;
 struct dabFrequencies *finger;
 int32_t	tunedFrequency;
@@ -407,44 +433,47 @@ int32_t	tunedFrequency;
 	if (tunedFrequency == 0) {
 	   fprintf (stderr, "could not find a legal frequency for channel %s\n",
 	                                     s. c_str ());
-	   return;
+	   return false;
 	}
 
 	fprintf (stderr, "frequency = %d\n", tunedFrequency);
 	inputDevice		-> setVFOFrequency (tunedFrequency);
+	return true;
 }
 
 //	Note that the audiodata or the packetdata contains quite some
 //	info on the service (i.e. rate, address, etc)
 //	Here we only support audio services.
-void	Radio::setService (std::string name) {
-int16_t	i;
+bool	Radio::setService (std::string name) {
+audiodata d;
 
-	fprintf (stderr, "setService (%s) %d\n", name. c_str (), name. size ());
 	switch (my_ficHandler -> kindofService (name)) {
 	   case AUDIO_SERVICE:
-	      { audiodata d;
-	        my_ficHandler	-> dataforAudioService (name, &d);
-	        if (d. defined) {
-	           my_mscHandler	-> set_audioChannel (&d);
-	           fprintf (stderr, "valid audio service\n");
-	        }
-	        else {
-	           fprintf (stderr, "Insufficient data to execute the service");
-	           TerminateProcess ();
-	        }
-	        break;
-	      }
+	     my_ficHandler	-> dataforAudioService (name, &d);
+	     if (d. defined) {
+	        my_mscHandler	-> set_audioChannel (&d);
+	        fprintf (stderr, "valid audio service %s\n", name. c_str ());
+	        return true;
+	     }
+	     else {
+	        fprintf (stderr, "Insufficient data to execute service %s",
+	                                           name. c_str ());
+	        return false;
+	     }
+	     break;
 //
 //	For the command line version, we do not have a data service
 	   case PACKET_SERVICE:
-	      fprintf (stderr, "Data services not supported in this version\n");
-	      return;
+	      fprintf (stderr,
+	               "Data services not supported in this version\n");
+	      return false;
 
 	   default:
-	      fprintf (stderr, "insufficient information to execute the service\n");
-	      return;
+	      fprintf (stderr,
+	               "kind of service %s unclear, fatal\n", name. c_str ());
+	      return false;
 	}
+	return false;
 }
 
 //

@@ -162,18 +162,6 @@ int32_t	sdrplay::getVFOFrequency	(void) {
 	return vfoFrequency - vfoOffset;
 }
 
-<<<<<<< HEAD
-=======
-void	sdrplay::setExternalGain	(int newGain) {
-	if (newGain < 0 || newGain > 102)
-	   return;
-
-	currentGain = maxGain () - newGain;
-	my_mir_sdr_SetGr (currentGain, 1, 0);
-	gainDisplay	-> display (maxGain () - currentGain);
-}
-
->>>>>>> e4f340834bbae03165f30dde02d9eb25c9f203ed
 int16_t	sdrplay::maxGain	(void) {
 	return 101;
 }

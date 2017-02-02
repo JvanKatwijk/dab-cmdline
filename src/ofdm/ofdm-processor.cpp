@@ -325,7 +325,7 @@ SyncOnPhase:
 
 Block_0:
 /**
-  *	Block 0 is special in that it is used for fine time synchronization
+  *	Block 0 is special in that it is used for coarse time synchronization
   *	and its content is used as a reference for decoding the
   *	first datablock.
   *	We read the missing samples in the ofdm buffer

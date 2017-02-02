@@ -12,6 +12,8 @@ Parameters can be set through the command line on starting the program:
 
 -D device, selects the device (one of the configured ones, default a dabstick);
 
+-G Gain, the gain to be set for the selected device. While for both airspy and dabstick a gain setting of 80 works fine, for the sdrplay, the best results I had were with a setting of app 40 to 50.
+
 -B Band, selects the DAB band (default Band III),
 
 -M Mode, selects the DAB Mode (default Mode 1),

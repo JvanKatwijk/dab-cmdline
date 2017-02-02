@@ -27,15 +27,15 @@
 #include	<string>
 
 class	motHandler;
-class	labelHandler;
+class	Radio;
 
 class	padHandler {
 public:
-		padHandler	(labelHandler *);
+		padHandler	(Radio *);
 		~padHandler	(void);
 	void	processPAD	(uint8_t *);
 private:
-	labelHandler	*my_labelHandler;
+	Radio	*myRadio;
 	void	handle_variablePAD	(uint8_t *, int16_t, uint8_t);
 	void	handle_shortPAD		(uint8_t *, int16_t);
 	void	dynamicLabel		(uint8_t *, int16_t, uint8_t);
