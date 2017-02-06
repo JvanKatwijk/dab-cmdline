@@ -58,6 +58,7 @@ bool	err;
 	fprintf (stderr, "looking for channel %s\n", channel. c_str ());
 //	
 //	the name of the device is passed on from the main program
+//	it better be available
 	if (!setDevice (device)) {
 	   fprintf (stderr, "NO VALID DEVICE, GIVING UP\n");
 	   exit (1);
@@ -129,7 +130,8 @@ bool	err;
 	   if (!setService (theEnsemble. findService (requestedProgram))) {
 	      exit (5);
 	   }
-	
+//
+//	When here, we actally do not have to do anything but wait
 	   while (1) {
 	      std::unique_lock<std::mutex> locker (g_lockqueue);
               g_queuecheck. wait (locker);
@@ -145,7 +147,7 @@ bool	err;
 	else {
 	   fprintf (stderr, "could not find useful data in channel %s",
 	                               requestedChannel. c_str ());
-	   TerminateProcess ();
+	   exit (6);
 	}
 }
 
@@ -385,7 +387,7 @@ void	Radio::set_fineCorrectorDisplay (int v) {
 	fineCorrector = v;
 }
 
-//	a slot called by the ofdmprocessor
+//	Not used by this version
 void	Radio::set_coarseCorrectorDisplay (int v) {
 	coarseCorrector = v * kHz (1);
 }
@@ -425,7 +427,6 @@ int32_t	tunedFrequency;
 	for (i = 0; finger [i]. key != NULL; i ++) {
 	   if (std::string (finger [i]. key) == s) {
 	      tunedFrequency	= KHz (finger [i]. fKHz);
-	      fprintf (stderr, "fingering %d\n", tunedFrequency);
 	      break;
 	   }
 	}

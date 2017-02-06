@@ -1,5 +1,6 @@
 
 DAB-CMDLINE
+========================================================================
 
 DAB-CMDLINE is a DAB decoding program that is completely controlled
 through the command line.
@@ -7,12 +8,12 @@ The program is derived from the DAB-rpi and the sdr-j-dab programs,
 however, no use is made of any Qt or qwt library.
 
 The configuration is still pretty experimental, and may change almost daily.
+============================================================================
+Command line parameters
 
 Parameters can be set through the command line on starting the program:
 
 -D device, selects the device (one of the configured ones, default a dabstick);
-
--G Gain, the gain to be set for the selected device. While for both airspy and dabstick a gain setting of 80 works fine, for the sdrplay, the best results I had were with a setting of app 40 to 50.
 
 -B Band, selects the DAB band (default Band III),
 
@@ -54,23 +55,24 @@ device to send the output to is "default".
 Example
 	./linux/dab-cmdline -M 1 -B "BAND III"  -D airspy -C 12C -P "Radio 4" -G 80 -A default
 	
+============================================================================
 
-For building the dab-cmdline version, a CMakeLists.txt file is available.
-A number of settings, in particular for input devices, can be set by uncommenting or commenting lines
+For building the dab-cmdline version, a CMakeLists.txt file is available
+(It does not make much sense to use qmake for a qt-free application).
 
-   set(SDRPLAY true)
-   
-   set(AIRSPY true)
-   
-   set(DABSTICK true)
+Devices can be configured "in" or "out" by commenting or uncommenting
 
-I.e. uncommenting "set(DABSTICK true)" means that dabstick is included in the configuration.
-Obviously, including a device requires the installation of the library for that device.
+#	set(SDRPLAY true)
+#	set(AIRSPY true)
+#	set(DABSTICK true)
 
-   add_definitions (-DMOT_BASICS)
+I.e. uncommenting "set(DABSTICK true)" means that dabstick is included in the configuration. Obviously, including a device requires the installation of the library for that device.
+
+#	add_definitions (-DMSC_BASICS)
 
 Uncommenting this line implies that some support forc PAD's (Programme Associated Data) is switched on. The labels are printed on the console.
 
+=============================================================================
 
 Libraries (together with the "development" or ".h" files) required are:
 
@@ -97,6 +99,72 @@ cmake ..
 make
 make install
 
-========================================================================
-The software is made available under the GPL V2.0.
+============================================================================
+Ubuntu Linux
+---
+For generating an executable under Ubuntu, you can put the following
+commands into a script or execute them directly.
+
+1. Fetch the required components
+   #!/bin/bash
+   sudo apt-get update
+   sudo apt-get install build-essential g++
+   sudo apt-get install libfftw3-dev portaudio19-dev  libfaad-dev zlib1g-dev rtl-sdr libusb-1.0-0-dev mesa-common-dev libgl1-mesa-dev libsamplerate-dev
+   cd
+2.a.  Assuming you want to use a dabstick as device,
+   fetch a version of the library for the dabstick
+   # http://www.sm5bsz.com/linuxdsp/hware/rtlsdr/rtlsdr.htm
+   wget http://sm5bsz.com/linuxdsp/hware/rtlsdr/rtl-sdr-linrad4.tbz
+   tar xvfj rtl-sdr-linrad4.tbz 
+   cd rtl-sdr-linrad4
+   sudo autoconf
+   sudo autoreconf -i
+   ./configure --enable-driver-detach
+   make
+   sudo make install
+   sudo ldconfig
+   cd
+2.b. Assuming you want to use an Airspy as device,
+   fetch a version of the library for the airspy
+   sudo apt-get install build-essential cmake libusb-1.0-0-dev pkg-config
+   wget https://github.com/airspy/host/archive/master.zip
+   unzip master.zip
+   cd host-master
+   mkdir build
+   cd build
+   cmake ../ -DINSTALL_UDEV_RULES=ON
+   make
+   sudo make install
+   sudo ldconfig
+##Clean CMake temporary files/dirs:
+   cd host-master/build
+   rm -rf *
+
+3. Get a copy of the dab-rpi sources and use qmake
+   git clone https://github.com/JvanKatwijk/qt-dab.git
+   cd qt-dab
+   qmake qt-dab.pro
+   make
+
+or, if you have installed everything and want to use cmake
+   git clone https://github.com/JvanKatwijk/qt-dab.git
+   cd qt-dab
+   mkdir build
+   cd build
+   cmake ..
+   make
+
+=============================================================================
+
+
+	Copyright (C)  2016, 2017
+	Jan van Katwijk (J.vanKatwijk@gmail.com)
+	Lazy Chair Programming
+
+	The qt-dab software is made available under the GPL-2.0.
+	SDR-J is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
 

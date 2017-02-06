@@ -31,7 +31,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	set(DABSTICK true)
 
 	add_definitions (-DMOT_BASICS__) 	# use at your own risk
-#	add_definitions (-DMSC_DATA__)		# use at your own risk
 #
 ########################################################################
 	find_package (PkgConfig)

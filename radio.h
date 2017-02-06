@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef _GUI
-#define _GUI
+#ifndef __GUI
+#define __GUI
 
 #include	"dab-constants.h"
 
@@ -68,6 +68,8 @@ private:
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscHandler;
 	audioSink	*soundOut;
+//
+//	not used now, maybe later
 const	char		*get_programm_type_string (uint8_t);
 const	char		*get_programm_language_string (uint8_t);
 
@@ -90,7 +92,7 @@ const	char		*get_programm_language_string (uint8_t);
 	std::condition_variable g_queuecheck;
 	std::list<std::string> labelQueue;
 //
-//	Kind of signal handler here
+//	Kind of signal handler here, i.e. called from elsewhere
 public:
 	void		showLabel		(std::string);
 };

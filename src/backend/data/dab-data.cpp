@@ -38,7 +38,7 @@
 	                         uint8_t DGflag,
 	                       	 int16_t FEC_scheme,
 	                         bool	show_crcErrors) {
-int32_t i, j;
+int32_t i;
 	this	-> DSCTy		= DSCTy;
 	this	-> packetAddress	= packetAddress;
 	this	-> fragmentSize		= fragmentSize;

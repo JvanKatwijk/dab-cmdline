@@ -27,11 +27,8 @@
 
 #include	<stdint.h>
 
-static
-uint8_t	PI_X [24] = {
-	1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
-	1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0
-};
+extern
+uint8_t	PI_X [];
 
 class	protection {
 public:

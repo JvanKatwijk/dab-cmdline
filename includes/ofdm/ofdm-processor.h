@@ -40,6 +40,9 @@ class	ofdmDecoder;
 class	mscHandler;
 class	ficHandler;
 
+#define SEARCH_RANGE            (2 * 36)
+#define CORRELATION_LENGTH      24
+
 class ofdmProcessor {
 public:
 		ofdmProcessor  	(virtualInput *,
@@ -74,18 +77,16 @@ private:
 
 	uint8_t		freqsyncMethod;
 	bool		f2Correction;
-	int32_t		tokenCount;
 	DSPCOMPLEX	*ofdmBuffer;
 	uint32_t	ofdmBufferIndex;
 	uint32_t	ofdmSymbolCount;
 	phaseReference	phaseSynchronizer;
 	ofdmDecoder	my_ofdmDecoder;
-	DSPFLOAT	avgCorr;
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscBuffer;
 
-	float		*correlationVector;
-	float		*refArg;
+	float		correlationVector [CORRELATION_LENGTH + SEARCH_RANGE];
+	float		refArg [CORRELATION_LENGTH];
 	int32_t		sampleCnt;
 	int32_t		inputSize;
 	int32_t		inputPointer;

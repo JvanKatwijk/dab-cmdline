@@ -90,7 +90,7 @@ uint32_t samplerate_count;
 	my_airspy_get_samplerates (device, myBuffer, samplerate_count);
 
 	selectedRate	= 0;
-	for (i = 0; i < samplerate_count; i ++) {
+	for (i = 0; i < (int)samplerate_count; i ++) {
 	   if (abs (myBuffer [i] - 2048000) < distance) {
 	      distance	= abs (myBuffer [i] - 2048000);
 	      selectedRate = myBuffer [i];
@@ -550,6 +550,6 @@ bool	airspyHandler::load_airspyFunctions (void) {
 //	a special for compatibility with the dab-rpi software
 void	airspyHandler::setGain		(int value) {
 	gain	= value * 21 / 100;
-	int	result = my_airspy_set_sensitivity_gain (device, gain);
+	(void) my_airspy_set_sensitivity_gain (device, gain);
 }
 

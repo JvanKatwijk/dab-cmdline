@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013, 2014
+ *    Copyright (C) 2015, 2016
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -25,8 +25,6 @@
 #include	"fic-handler.h"
 #include	"fft.h"
 //
-#define	SEARCH_RANGE		(2 * 36)
-#define	CORRELATION_LENGTH	24
 
 /**
   *	\brief ofdmProcessor
@@ -67,7 +65,6 @@ int32_t	i;
 	ofdmBuffer			= new DSPCOMPLEX [76 * T_s];
 	ofdmBufferIndex			= 0;
 	ofdmSymbolCount			= 0;
-	tokenCount			= 0;
 	sampleCnt			= 0;
 /**
   *	the class phaseReference will take a number of samples
@@ -90,8 +87,6 @@ int32_t	i;
 	bufferContent	= 0;
 //
 //	and for the correlation 
-	refArg			= new float [CORRELATION_LENGTH];
-	correlationVector	= new float [SEARCH_RANGE + CORRELATION_LENGTH];
 	for (i = 0; i < CORRELATION_LENGTH; i ++)  {
 	   refArg [i] = arg (phaseSynchronizer. refTable [(T_u + i) % T_u] *
 	              conj (phaseSynchronizer. refTable [(T_u + i + 1) % T_u]));
@@ -107,8 +102,6 @@ int32_t	i;
 	delete		ofdmBuffer;
 	delete		oscillatorTable;
 	delete		fft_handler;
-	delete[] 	correlationVector;
-	delete[]	refArg;
 }
 
 void	ofdmProcessor::start	(void) {

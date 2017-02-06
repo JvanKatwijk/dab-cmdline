@@ -126,30 +126,24 @@ int32_t	viterbiCounter	= 0;
 //
 	for (i = 0; i < L1; i ++) {
 	   for (j = 0; j < 128; j ++) {
-	      if (PI1 [j % 32] == 1) 
+	      if (PI1 [j % 32] != 0) 
 	         viterbiBlock [viterbiCounter] = v [inputCounter ++];
-	      else
-	         viterbiBlock [viterbiCounter] = 128;
 	      viterbiCounter ++;	
 	   }
 	}
 
 	for (i = 0; i < L2; i ++) {
 	   for (j = 0; j < 128; j ++) {
-	      if (PI2 [j % 32] == 1) 
+	      if (PI2 [j % 32] != 0) 
 	         viterbiBlock [viterbiCounter] = v [inputCounter ++];
-	      else
-	         viterbiBlock [viterbiCounter] = 128;
 	      viterbiCounter ++;	
 	   }
 	}
 //	we had a final block of 24 bits  with puncturing according to PI_X
 //	This block constitues the 6 * 4 bits of the register itself.
 	for (i = 0; i < 24; i ++) {
-	   if (PI_X [i] == 1) 
+	   if (PI_X [i] != 0) 
 	      viterbiBlock [viterbiCounter] = v [inputCounter ++];
-	   else
-	      viterbiBlock [viterbiCounter] = 128;
 	   viterbiCounter ++;
 	}
 

@@ -45,7 +45,7 @@
 	                         int16_t uepFlag,
 	                         int16_t protLevel,
 	                         audioSink *my_audioSink) {
-int32_t i, j;
+int32_t i;
 
 	this	-> myRadio		= myRadio;
 	this	-> dabModus		= dabModus;
@@ -125,6 +125,7 @@ int16_t	countforInterleaver	= 0;
 int16_t	interleaverIndex	= 0;
 uint8_t	shiftRegister [9];
 int16_t	Data [fragmentSize];
+int16_t	tempX [fragmentSize];
 
 	while (running) {
 	   while (Buffer -> GetRingBufferReadAvailable () <= fragmentSize) {
@@ -141,9 +142,9 @@ int16_t	Data [fragmentSize];
 	   Buffer	-> getDataFromBuffer (Data, fragmentSize);
 
 	   for (i = 0; i < fragmentSize; i ++) {
-	      interleaveData [interleaverIndex][i] = Data [i];
-	      Data [i] = interleaveData [(interleaverIndex + 
+	      tempX [i] = interleaveData [(interleaverIndex + 
 	                                 interleaveMap [i & 017]) & 017][i];
+	      interleaveData [interleaverIndex][i] = Data [i];
 	   }
 	   interleaverIndex = (interleaverIndex + 1) & 0x0F;
 //	only continue when de-interleaver is filled
@@ -152,7 +153,7 @@ int16_t	Data [fragmentSize];
 	      continue;
 	   }
 //
-	   protectionHandler -> deconvolve (Data, fragmentSize, outV);
+	   protectionHandler -> deconvolve (tempX, fragmentSize, outV);
 //
 //	and the inline energy dispersal
 	   memset (shiftRegister, 1, 9);
