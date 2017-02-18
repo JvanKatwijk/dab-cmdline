@@ -82,14 +82,13 @@ int32_t i;
 
 	fprintf (stderr, "we have now %s\n", dabModus == DAB_PLUS ? "DAB+" : "DAB");
 	Buffer		= new RingBuffer<int16_t>(64 * 32768);
-	running		= true;
 	start ();
 }
 
 	dabAudio::~dabAudio	(void) {
 int16_t	i;
-	if (running) {
-	   running = false;
+	if (running. load ()) {
+	   running. store (false);
 	   threadHandle. join ();
 	}
 	delete protectionHandler;
@@ -102,6 +101,7 @@ int16_t	i;
 }
 
 void	dabAudio::start		(void) {
+	running. store (true);
 	threadHandle = std::thread (&dabAudio::run, this);
 }
 
@@ -110,7 +110,7 @@ int32_t	fr;
 	   if (Buffer -> GetRingBufferWriteAvailable () < cnt)
 	      fprintf (stderr, "dab-concurrent: buffer full\n");
 	   while ((fr = Buffer -> GetRingBufferWriteAvailable ()) <= cnt) {
-	      if (!running)
+	      if (!running. load ())
 	         return 0;
 	      usleep (1);
 	   }
@@ -129,16 +129,16 @@ uint8_t	shiftRegister [9];
 int16_t	Data [fragmentSize];
 int16_t	tempX [fragmentSize];
 
-	while (running) {
+	while (running. load ()) {
 	   while (Buffer -> GetRingBufferReadAvailable () <= fragmentSize) {
 	      std::unique_lock <std::mutex> lck (ourMutex);
 	      auto now = std::chrono::system_clock::now ();
 	      Locker. wait_until (lck, now + 1ms);	// 1 msec waiting time
-	      if (!running)
+	      if (!running. load ())
 	         break;
 	   }
 
-	   if (!running) 
+	   if (!running. load ()) 
 	      break;
 
 	   Buffer	-> getDataFromBuffer (Data, fragmentSize);
@@ -173,8 +173,8 @@ int16_t	tempX [fragmentSize];
 //
 //	It might take a msec for the task to stop
 void	dabAudio::stopRunning (void) {
-	if (running) {
-	   running = false;
+	if (running. load ()) {
+	   running. store (false);
 	   threadHandle. join ();
 	}
 }

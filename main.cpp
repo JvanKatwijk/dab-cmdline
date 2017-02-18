@@ -28,16 +28,33 @@
 #include	<unistd.h>
 #include	<signal.h>
 #include	<getopt.h>
+#include	<atomic>
 #include	"dab-constants.h"
+#include	"audiosink.h"
+#include	"virtual-input.h"
+#ifdef	HAVE_DABSTICK
+#include	"dabstick.h"
+#endif
+#ifdef	HAVE_SDRPLAY
+#include	"sdrplay.h"
+#endif
+#ifdef	HAVE_AIRSPY
+#include	"airspy-handler.h"
+#endif
 #include	"radio.h"
 
 Radio	*myRadio	= NULL;
-bool	running		= false;
+std::atomic<bool> run (false);
+
 
 static void sighandler (int signum) {
         fprintf (stderr, "Signal caught, terminating!\n");
-	running	= false;
+	run. store (false);
 }
+
+virtualInput     *setDevice		(std::string s);
+void		setModeParameters	(uint8_t Mode);
+DabParams       dabModeParameters;
 
 int	main (int argc, char **argv) {
 // Default values
@@ -52,6 +69,8 @@ int16_t		latency		= 4;
 int	opt;
 struct sigaction sigact;
 
+virtualInput	*inputDevice;
+audioSink	*soundOut;
 //
 	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:")) != -1) {
 	   switch (opt) {
@@ -102,22 +121,135 @@ struct sigaction sigact;
 	sigaction(SIGTERM, &sigact, NULL);
 	sigaction(SIGQUIT, &sigact, NULL);
 	bool	success;
+	bool	err;
+
 //	The real radio is
-	myRadio = new Radio (dabDevice,
-	                     dabMode,
+
+//	the name of the device is passed on from the main program
+//	it better be available
+	inputDevice	= setDevice (dabDevice);
+	if (inputDevice	== NULL) {
+	   fprintf (stderr, "NO VALID DEVICE, GIVING UP\n");
+	   exit (2);
+	}
+//
+	soundOut	= new audioSink	(latency, soundChannel, &err);
+	if (err) {
+	   fprintf (stderr, "no valid sound channel, fatal\n");
+	   exit (3);
+	}
+
+	setModeParameters (dabMode);
+	myRadio = new Radio (inputDevice,
+	                     soundOut,
+	                     &dabModeParameters,
 	                     dabBand,
 	                     dabChannel,
 	                     programName,
 	                     dabGain,
-	                     soundChannel,
-	                     latency,
 	                     &success);
 	if (!success)
 	   exit (2);
 	fflush (stdout);
 	fflush (stderr);
-	delete myRadio;
+//	delete myRadio;
 	exit (1);
 }
 
+
+virtualInput	*setDevice (std::string s) {
+bool	success;
+virtualInput	*inputDevice;
+
+#ifdef HAVE_AIRSPY
+	if (s == "airspy") {
+	   inputDevice	= new airspyHandler (&success, 80, Mhz (220));
+	   fprintf (stderr, "devic selected\n");
+	   if (!success) {
+	      delete inputDevice;
+	      return NULL;
+	   }
+	   else 
+	      return inputDevice;
+	}
+	else
+#endif
+#ifdef	HAVE_SDRPLAY
+	if (s == "sdrplay") {
+	   inputDevice	= new sdrplay (&success, 60, Mhz (220));
+	   if (!success) {
+	      delete inputDevice;
+	      return NULL;
+	   }
+	   else 
+	      return inputDevice;
+	}
+	else
+#endif
+#ifdef	HAVE_DABSTICK
+	if (s == "dabstick") {
+	   inputDevice	= new dabStick (&success, 75, KHz (220000));
+	   if (!success) {
+	      delete inputDevice;
+	      return NULL;
+	   }
+	   else
+	      return inputDevice;
+	}
+	else
+#endif
+    {	// s == "no device"
+//	and as default option, we have a "no device"
+	   inputDevice	= new virtualInput ();
+	}
+	return NULL;
+}
+
+///	the values for the different Modes:
+void	setModeParameters (uint8_t Mode) {
+
+	if (Mode == 2) {
+	   dabModeParameters. dabMode	= 2;
+	   dabModeParameters. L		= 76;		// blocks per frame
+	   dabModeParameters. K		= 384;		// carriers
+	   dabModeParameters. T_null	= 664;		// null length
+	   dabModeParameters. T_F	= 49152;	// samples per frame
+	   dabModeParameters. T_s	= 638;		// block length
+	   dabModeParameters. T_u	= 512;		// useful part
+	   dabModeParameters. guardLength	= 126;
+	   dabModeParameters. carrierDiff	= 4000;
+	} else
+	if (Mode == 4) {
+	   dabModeParameters. dabMode		= 4;
+	   dabModeParameters. L			= 76;
+	   dabModeParameters. K			= 768;
+	   dabModeParameters. T_F		= 98304;
+	   dabModeParameters. T_null		= 1328;
+	   dabModeParameters. T_s		= 1276;
+	   dabModeParameters. T_u		= 1024;
+	   dabModeParameters. guardLength	= 252;
+	   dabModeParameters. carrierDiff	= 2000;
+	} else 
+	if (Mode == 3) {
+	   dabModeParameters. dabMode		= 3;
+	   dabModeParameters. L			= 153;
+	   dabModeParameters. K			= 192;
+	   dabModeParameters. T_F		= 49152;
+	   dabModeParameters. T_null		= 345;
+	   dabModeParameters. T_s		= 319;
+	   dabModeParameters. T_u		= 256;
+	   dabModeParameters. guardLength	= 63;
+	   dabModeParameters. carrierDiff	= 2000;
+	} else {	// default = Mode I
+	   dabModeParameters. dabMode		= 1;
+	   dabModeParameters. L			= 76;
+	   dabModeParameters. K			= 1536;
+	   dabModeParameters. T_F		= 196608;
+	   dabModeParameters. T_null		= 2656;
+	   dabModeParameters. T_s		= 2552;
+	   dabModeParameters. T_u		= 2048;
+	   dabModeParameters. guardLength	= 504;
+	   dabModeParameters. carrierDiff	= 1000;
+	}
+}
 

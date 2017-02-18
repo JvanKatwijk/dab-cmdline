@@ -95,10 +95,7 @@ int32_t	i;
 }
 
 	ofdmProcessor::~ofdmProcessor	(void) {
-	running		= false;	// this will cause an
-	                                // exception to be raised
-	                        	// through the getNextSampleReady
-	threadHandle. join ();
+	stop ();
 	delete		ofdmBuffer;
 	delete		oscillatorTable;
 	delete		fft_handler;
@@ -112,7 +109,7 @@ void	ofdmProcessor::start	(void) {
 	sLevel		= 0;
 	localPhase	= 0;
 	theRig	-> resetBuffer ();
-	running		= true;
+	running. store (true);
 	threadHandle	= std::thread (&ofdmProcessor::run, this);
 }
 
@@ -128,18 +125,18 @@ void	ofdmProcessor::start	(void) {
 DSPCOMPLEX ofdmProcessor::getSample (int32_t phase) {
 DSPCOMPLEX temp;
 	
-	if (!running)
+	if (!running. load ())
 	   throw 21;
 
 	if (bufferContent == 0) {
 	   bufferContent = theRig -> Samples ();
-	   while ((bufferContent == 0) && running) {
+	   while ((bufferContent == 0) && running. load ()) {
 	      usleep (1000);
 	      bufferContent = theRig -> Samples (); 
 	   }
 	}
 
-	if (!running)	
+	if (!running. load ())	
 	   throw 20;
 //
 //	so here, bufferContent > 0, fetch a sample
@@ -165,16 +162,16 @@ DSPCOMPLEX temp;
 void	ofdmProcessor::getSamples (DSPCOMPLEX *v, int16_t n, int32_t phase) {
 int32_t		i;
 
-	if (!running)
+	if (!running. load ())
 	   throw 21;
 	if (n > bufferContent) {
 	   bufferContent = theRig -> Samples ();
-	   while ((bufferContent < n) && running) {
-	      usleep (10);
+	   while ((bufferContent < n) && running. load ()) {
+	      usleep (1000);
 	      bufferContent = theRig -> Samples ();
 	   }
 	}
-	if (!running)	
+	if (!running. load ())	
 	   throw 20;
 //
 //	so here, bufferContent >= n
@@ -214,6 +211,7 @@ int32_t		syncBufferSize	= 32768;
 int32_t		syncBufferMask	= syncBufferSize - 1;
 float		envBuffer	[syncBufferSize];
 
+	my_ofdmDecoder. start ();
 	this	-> my_ficHandler -> clearEnsemble ();
 	try {
 
@@ -410,20 +408,24 @@ ReadyForNewFrame:
 	catch (int e) {
 	   ;
 	}
-	running	= false;
-	fprintf (stderr, "ofdmProcessor is closing down\n");
+	my_ofdmDecoder. stop ();
+	running. store (false);
+	fprintf (stderr, "ofdmProcessor is shutting down\n");
 }
 
 void	ofdmProcessor:: reset	(void) {
-	if (running) {
-	   running = false;
+	if (running. load ()) {
+	   running. store (false);
 	   threadHandle. join ();
 	}
 	start ();
 }
 
 void	ofdmProcessor::stop	(void) {	
-	running	= false;
+	if (running. load ()) {
+	   running. store (false);
+	   threadHandle. join ();
+	}
 }
 
 #define	RANGE	36

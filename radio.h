@@ -33,6 +33,8 @@
 #include	<vector>
 #include	<string>
 #include	<list>
+#include	<atomic>
+#include	<thread>
 
 #include	"ofdm-processor.h"
 #include	"fic-handler.h"
@@ -48,28 +50,26 @@ class	audioSink;
 
 class Radio {
 public:
-        	Radio		(std::string,
-	                         uint8_t,
+        	Radio		(virtualInput	*,
+	                         audioSink	*,
+	                         DabParams	*,
 	                         std::string,
 	                         std::string,	// channel
 	                         std::string,	// program
 	                         int,		// gain (0 .. 100)
-	                         int16_t,	// latency
-	                         std::string,	// audiochannel
 	                         bool	*);
 		~Radio		(void);
-	void	stop		(void);
+	void	Stop		(void);
 private:
-	int16_t		threshold;
-	void		setModeParameters	(uint8_t);
-
-	DabParams	dabModeParameters;
-	uint8_t		dabBand;
 	virtualInput	*inputDevice;
+	audioSink	*soundOut;
+	DabParams	*dabModeParameters;
+	int16_t		threshold;
+	std::thread     threadHandle;
+	uint8_t		dabBand;
 	ofdmProcessor	*my_ofdmProcessor;
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscHandler;
-	audioSink	*soundOut;
 //
 //	not used now, maybe later
 const	char		*get_programm_type_string (uint8_t);
@@ -83,15 +83,18 @@ const	char		*get_programm_language_string (uint8_t);
 	bool		setDevice		(std::string);
 	bool		setChannel		(std::string);
 	bool		setService		(std::string);
-
 	void		set_fineCorrectorDisplay	(int);
 	void		set_coarseCorrectorDisplay	(int);
 //
 //
 	std::mutex	g_lockqueue;
 	std::mutex	labelMutex;
+	std::mutex	commandMutex;
 	std::condition_variable g_queuecheck;
 	std::list<std::string> labelQueue;
+	std::list<int> commandQueue;
+	void		setCommand		(int c);
+	void		listener		(void);
 //
 //	Kind of signal handler here, i.e. called from elsewhere
 public:

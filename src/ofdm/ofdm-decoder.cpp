@@ -1,22 +1,22 @@
 #
 /*
- *    Copyright (C) 2013 2015
+ *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of the SDR-J (JSDR).
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    This file is part of the DAB-cmdline
+ *    DAB-cmdline is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DAB-cmdline is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DAB-cmdline; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *	Once the bits are "in", interpretation and manipulation
@@ -70,17 +70,19 @@ int16_t	i;
 	for (i = 0; i < params -> L; i ++)
 	   command [i] = new DSPCOMPLEX [T_u];
 	amount		= 0;
-	start ();
+//
+//	will be started from within ofdmProcessor
 }
 
 	ofdmDecoder::~ofdmDecoder	(void) {
 int16_t	i;
-	running	= false;
+	if (running. load ()) {
+	   running. store (false);
 //	signal to unlock - if required
-	std::unique_lock<std::mutex> locker (g_lockqueue);
-	bufferSpace. notify ();
-	g_queuecheck. notify_one ();
-	threadHandle. join ();
+	   bufferSpace. notify ();
+	   Locker. notify_all ();
+	   threadHandle. join ();
+	}
 
 	delete		fft_handler;
 	delete[]	phaseReference;
@@ -91,15 +93,17 @@ int16_t	i;
 
 void	ofdmDecoder::start	(void) {
 	amount		= 0;
-	running		= true;
+	running. store (true);
 	threadHandle	= std::thread (&ofdmDecoder::run, this);
 }
 	
 void	ofdmDecoder::stop		(void) {
-	running = false;
-	std::unique_lock<std::mutex> locker (g_lockqueue);
-	g_queuecheck. notify_one ();
-	threadHandle. join ();
+	if (running. load ()) {
+	   running. store (false);
+	   Locker. notify_all ();
+	   amount	= 100;
+	   threadHandle. join ();
+	}
 }
 /**
   *	The code in the thread executes a simple loop,
@@ -110,15 +114,16 @@ void	ofdmDecoder::stop		(void) {
   */
 void	ofdmDecoder::run	(void) {
 int16_t	currentBlock	= 0;
+std::unique_lock<std::mutex> lck (ourMutex);
 //
 //	we will ensure that a signal is sent on task termination
-	while (running) {
-	   std::unique_lock<std::mutex> locker (g_lockqueue);
-	   while ((amount < 0) && running) {
-	      g_queuecheck. wait (locker);
+	while (running. load ()) {
+	   while ((amount <= 0) && running. load ()) {
+	      auto now = std::chrono::system_clock::now ();
+	      Locker. wait_until (lck, now + 1ms);
 	   }
 	      
-	   while ((amount > 0) && running) {
+	   while ((amount > 0) && running. load ()) {
 	      if (currentBlock == 0)
 	         processBlock_0 ();
 	      else
@@ -133,40 +138,36 @@ int16_t	currentBlock	= 0;
 	      bufferSpace. notify ();
 	   }
 	}
-	fprintf (stderr, "ofdm decoder is closing down now\n");
 }
 /**
   *	We need some functions to enter the ofdmProcessor data
   *	in the buffer.
   */
 void	ofdmDecoder::processBlock_0 (DSPCOMPLEX *vi) {
-	std::unique_lock<std::mutex> locker (g_lockqueue);
 	bufferSpace. wait ();
 	memcpy (command [0], vi, sizeof (DSPCOMPLEX) * T_u);
 	myMutex. lock ();
 	amount ++;
 	myMutex. unlock ();
-	g_queuecheck. notify_one ();
+	Locker. notify_one ();
 }
 
 void	ofdmDecoder::decodeFICblock (DSPCOMPLEX *vi, int32_t blkno) {
-	   std::unique_lock<std::mutex> locker (g_lockqueue);
 	bufferSpace. wait ();
 	memcpy (command [blkno], &vi [T_g], sizeof (DSPCOMPLEX) * T_u);
 	myMutex. lock ();
 	amount ++;
 	myMutex. unlock ();
-	g_queuecheck. notify_one ();
+	Locker. notify_one ();
 }
 
 void	ofdmDecoder::decodeMscblock (DSPCOMPLEX *vi, int32_t blkno) {
-	std::unique_lock<std::mutex> locker (g_lockqueue);
 	bufferSpace. wait ();
 	memcpy (command [blkno], &vi [T_g], sizeof (DSPCOMPLEX) * T_u);
 	myMutex. lock ();
 	amount ++;
 	myMutex. unlock ();
-	g_queuecheck. notify_one ();
+	Locker. notify_one ();
 }
 /**
   *	Note that the distinction, made in the ofdmProcessor class

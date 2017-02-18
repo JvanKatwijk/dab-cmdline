@@ -85,6 +85,21 @@ std::string name;
 	return name;
 }
 
+std::string	ensembleHandler::nextof (const std::string &s) {
+std::string name;
+
+	locker. lock ();
+	for (std::list<std::string>::iterator list_iter = stationList. begin ();
+	     list_iter != stationList. end (); list_iter ++) {
+	   if ((*list_iter). find (s, 0) != std::string::npos) {
+	      name = *(++list_iter);
+	      break;
+	   }
+	}
+	locker. unlock ();
+	return name;
+}
+
 std::string	ensembleHandler::getProgram (int16_t i) {
 std::string name = "";
 

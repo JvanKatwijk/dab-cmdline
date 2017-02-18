@@ -29,6 +29,7 @@
 #include	<thread>
 #include	<mutex>
 #include	<condition_variable>
+#include	<atomic>
 
 class	dabProcessor;
 class	protection;
@@ -52,7 +53,7 @@ protected:
 	RingBuffer<int16_t>	*audioBuffer;
 private:
 void	run		(void);
-volatile bool		running;
+	std::atomic<bool>	running;
 	std::thread	threadHandle;
 	Radio		*myRadio;
 	uint8_t		dabModus;

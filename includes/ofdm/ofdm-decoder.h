@@ -30,6 +30,7 @@
 #include	<thread>
 #include	<mutex>
 #include	<condition_variable>
+#include	<atomic>
 #include	"semaphore.h"
 
 class	ficHandler;
@@ -54,10 +55,10 @@ private:
 	Semaphore	bufferSpace;
 	std::thread	threadHandle;
 	std::mutex	myMutex;
-	std::mutex	g_lockqueue;
-	std::condition_variable	g_queuecheck;
+	std::mutex	ourMutex;
+	std::condition_variable	Locker;
 	void		run		(void);
-	bool		running;
+	std::atomic<bool>	running;
 	DSPCOMPLEX	**command;
 	int16_t		amount;
 	int16_t		currentBlock;
