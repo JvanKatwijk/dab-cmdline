@@ -37,11 +37,10 @@
 #include	"airspy-handler.h"
 #endif
 
+extern	bool	running;
 /**
-  *	We use the creation function merely to set up the
-  *	user interface and make the connections between the
-  *	gui elements and the handling agents. All real action
-  *	is embedded in actions, initiated by gui buttons
+  *	The "radio" class is reminiscent of the time that
+  *	it "was" the GUI class.
   */
 	Radio::Radio (std::string	device,
 	              uint8_t		dabMode,
@@ -49,10 +48,14 @@
 	              std::string	channel,
 	              std::string	programName,
 	              int		gain,
-	              std::string	soundChannel) {
+	              std::string	soundChannel,
+	              int16_t		latency
+	              bool		*OK) {
 int16_t	latency;
 bool	err;
-//
+
+	*OK		= false;
+	running		= false;
 //	Before printing anything, we set
 	setlocale (LC_ALL, "");
 	fprintf (stderr, "looking for channel %s\n", channel. c_str ());
@@ -61,7 +64,7 @@ bool	err;
 //	it better be available
 	if (!setDevice (device)) {
 	   fprintf (stderr, "NO VALID DEVICE, GIVING UP\n");
-	   exit (1);
+	   return;
 	}
 //
 	inputDevice	-> setGain (gain);
@@ -73,12 +76,12 @@ bool	err;
 //
 //	latency is used to allow different settings for different
 //	situations wrt the output buffering
-	latency			= 4;
+	this	-> latency	= latency;
 //
 	soundOut		= new audioSink	(latency, soundChannel, &err);
 	if (err) {
 	   fprintf (stderr, "no valid sound channel, fatal\n");
-	   exit (2);
+	   return;
 	}
 
 	this	-> dabBand		= dabBand == "BAND III" ?
@@ -91,13 +94,11 @@ bool	err;
   *	The actual work is done elsewhere: in ofdmProcessor
   *	and ofdmDecoder for the ofdm related part, ficHandler
   *	for the FIC's and mscHandler for the MSC.
-  *	The ficHandler shares information with the mscHandler
-  *	but the handlers do not change each others modes.
   */
+	my_ficHandler	= new ficHandler (&theEnsemble);
 	my_mscHandler	= new mscHandler (this,
 	                                  &dabModeParameters,
                                           soundOut);
-	my_ficHandler	= new ficHandler (&theEnsemble);
 /**
   *	The default for the ofdmProcessor depends on
   *	the input device, note that in this setup the
@@ -112,46 +113,70 @@ bool	err;
 	if (!setChannel (channel)) {
 	   fprintf (stderr, "selecting channel %s failed, fatal\n",
 	                          channel. c_str ());
-	   exit (3);
+	   return;
 	}
 
 	int r = inputDevice	-> restartReader ();
 	if (!r) {
 	   fprintf (stderr, "Opening  input stream failed, fatal\n");
-	   exit (4);
+	   return;
 	}
 
 	inputDevice	-> setGain (gain);
 	sleep (15);
 
-	if (theEnsemble. ensembleExists ()) {
-	   fprintf (stderr, "trying to open program %s\n",
-	                               requestedProgram. c_str ()); 
-	   if (!setService (theEnsemble. findService (requestedProgram))) {
-	      exit (5);
-	   }
-//
-//	When here, we actally do not have to do anything but wait
-	   while (1) {
-	      std::unique_lock<std::mutex> locker (g_lockqueue);
-              g_queuecheck. wait (locker);
-	      while (!labelQueue. empty ()) {
-	         labelMutex. lock ();
-	         fprintf (stderr, "%s\r", labelQueue. front (). c_str ());
-	         labelQueue. pop_front ();
-	         labelMutex. unlock ();
-	      }
-           }
-
-	}
-	else {
+	if (!theEnsemble. ensembleExists ()) {
 	   fprintf (stderr, "could not find useful data in channel %s",
 	                               requestedChannel. c_str ());
-	   exit (6);
+	   return;
+	}
+//
+//	Eigenlijk zou het bovenstaande in de init van main moeten
+//	staan, en een soort "gui handler" het restje moeten doen
+//
+void	RadioInterface::
+	fprintf (stderr, "trying to open program %s\n",
+	                               requestedProgram. c_str ()); 
+	if (!setService (theEnsemble. findService (requestedProgram))) 
+	   return;
+//
+//	When here, we actally do not have to do anything but wait
+	running	= true;
+	*OK		= true;
+//
+//	OK, here we start a listener that tells us when to change
+//	one of the settings
+//	a. gain
+//	b. next/previous program
+	while (running) {
+	   std::unique_lock<std::mutex> locker (g_lockqueue);
+	   auto now = std::chrono::system_clock::now ();
+           g_queuecheck. wait_until (locker, now + 100ms);
+	  
+	   while (!labelQueue. empty ()) {
+	      labelMutex. lock ();
+	      fprintf (stderr, "%s\r", labelQueue. front (). c_str ());
+	      labelQueue. pop_front ();
+	      labelMutex. unlock ();
+	   }
 	}
 }
 
 	Radio::~Radio (void) {
+	inputDevice		-> stopReader ();	// might be concurrent
+	my_mscHandler		-> stopHandler ();	// might be concurrent
+	my_ofdmProcessor	-> stop ();	// definitely concurrent
+	soundOut		-> stop ();
+//	
+//	everything should be halted by now
+	delete		my_ficHandler;
+	delete		my_mscHandler;
+	delete		my_ofdmProcessor;
+	delete		soundOut;
+}
+
+void	Radio::stop	(void) {
+	running		= false;
 }
 
 void	Radio::showLabel (const std::string s) {
@@ -161,7 +186,6 @@ void	Radio::showLabel (const std::string s) {
 	labelMutex. unlock ();
 	g_queuecheck. notify_one ();
 }
-
 
 //
 ///	the values for the different Modes:
@@ -390,25 +414,6 @@ void	Radio::set_fineCorrectorDisplay (int v) {
 //	Not used by this version
 void	Radio::set_coarseCorrectorDisplay (int v) {
 	coarseCorrector = v * kHz (1);
-}
-
-/**
-  *	\brief TerminateProcess
-  *	Pretty critical, since there are many threads involved
-  *	A clean termination is what is needed, regardless of the GUI
-  */
-void	Radio::TerminateProcess (void) {
-	inputDevice		-> stopReader ();	// might be concurrent
-	my_mscHandler		-> stopHandler ();	// might be concurrent
-	my_ofdmProcessor	-> stop ();	// definitely concurrent
-	soundOut		-> stop ();
-//
-//	everything should be halted by now
-	delete		my_ofdmProcessor;
-	delete		my_ficHandler;
-	delete		my_mscHandler;
-	delete		soundOut;
-	exit (21);
 }
 
 /**

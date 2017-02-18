@@ -415,7 +415,6 @@ ReadyForNewFrame:
 }
 
 void	ofdmProcessor:: reset	(void) {
-	fprintf (stderr, "reset aangeroepen\n");
 	if (running) {
 	   running = false;
 	   threadHandle. join ();
@@ -424,7 +423,6 @@ void	ofdmProcessor:: reset	(void) {
 }
 
 void	ofdmProcessor::stop	(void) {	
-	fprintf (stderr, "stop aangeroepen\n");
 	running	= false;
 }
 

@@ -50,12 +50,11 @@
 static
 void	RTLSDRCallBack (uint8_t *buf, uint32_t len, void *ctx) {
 dabStick	*theStick	= (dabStick *)ctx;
-int32_t	tmp;
 
 	if ((theStick == NULL) || (len != READLEN_DEFAULT))
 	   return;
 
-	tmp = theStick -> _I_Buffer -> putDataIntoBuffer (buf, len);
+	(void) theStick -> _I_Buffer -> putDataIntoBuffer (buf, len);
 }
 //
 //	for handling the events in libusb, we need a controlthread
@@ -74,7 +73,6 @@ void	controlThread (dabStick *theStick) {
 int16_t	deviceCount;
 int32_t	r;
 int16_t	deviceIndex;
-int16_t	i;
 
 	*success		= false;	// just the default
 	this	-> gain		= gain;
@@ -134,13 +132,12 @@ int16_t	i;
 	fprintf (stderr, "samplerate set to %d\n", r);
 	rtlsdr_set_tuner_gain_mode (device, 0);
 
-	gainsCount = rtlsdr_get_tuner_gains (device, NULL);
-	fprintf(stderr, "Supported gain values (%d): ", gainsCount);
+	gainsCount	= rtlsdr_get_tuner_gains (device, NULL);
+	fprintf (stderr, "Supported gain values (%d): ", gainsCount);
 	gains		= new int [gainsCount];
-	gainsCount = rtlsdr_get_tuner_gains (device, gains);
+	gainsCount	= rtlsdr_get_tuner_gains (device, gains);
 	gain		= gain * gainsCount / 100;
 	rtlsdr_set_tuner_gain (device, gain);
-
 
 	_I_Buffer		= new RingBuffer<uint8_t>(1024 * 1024);
 	*success 		= true;

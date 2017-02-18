@@ -117,7 +117,7 @@ int16_t	odev, i;
 	                          Pa_GetDeviceInfo (odev) ->
 	                                      defaultHighOutputLatency * latency;
 	bufSize	= (int)((float)outputParameters. suggestedLatency);
-	bufSize	= latency * 20 * 256;
+	bufSize	= latency * 128;
 
 	outputParameters. hostApiSpecificStreamInfo = NULL;
 //

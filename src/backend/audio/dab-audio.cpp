@@ -42,7 +42,7 @@
 	                         uint8_t dabModus,
 	                         int16_t fragmentSize,
 	                         int16_t bitRate,
-	                         int16_t uepFlag,
+	                         bool	shortForm,
 	                         int16_t protLevel,
 	                         audioSink *my_audioSink) {
 int32_t i;
@@ -51,7 +51,7 @@ int32_t i;
 	this	-> dabModus		= dabModus;
 	this	-> fragmentSize		= fragmentSize;
 	this	-> bitRate		= bitRate;
-	this	-> uepFlag		= uepFlag;
+	this	-> shortForm		= shortForm;
 	this	-> protLevel		= protLevel;
 
 	outV			= new uint8_t [bitRate * 24];
@@ -61,7 +61,7 @@ int32_t i;
 	   memset (interleaveData [i], 0, fragmentSize * sizeof (int16_t));
 	}
 
-	if (uepFlag == 0)
+	if (shortForm)
 	   protectionHandler	= new uep_protection (bitRate,
 	                                              protLevel);
 	else
@@ -88,8 +88,10 @@ int32_t i;
 
 	dabAudio::~dabAudio	(void) {
 int16_t	i;
-	running = false;
-	threadHandle. join ();
+	if (running) {
+	   running = false;
+	   threadHandle. join ();
+	}
 	delete protectionHandler;
 	delete our_dabProcessor;
 	delete	Buffer;
@@ -166,12 +168,14 @@ int16_t	tempX [fragmentSize];
 	   }
 	   our_dabProcessor -> addtoFrame (outV);
 	}
+	fprintf (stderr, "dab-audio handling says goodbye\n");
 }
 //
 //	It might take a msec for the task to stop
 void	dabAudio::stopRunning (void) {
-	running = false;
-	threadHandle. join ();
-//	myAudioSink	-> stop ();
+	if (running) {
+	   running = false;
+	   threadHandle. join ();
+	}
 }
 
