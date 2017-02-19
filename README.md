@@ -8,6 +8,12 @@ The program is derived from the DAB-rpi and the sdr-j-dab programs,
 however, no use is made of any Qt or qwt library.
 
 The configuration is still pretty experimental, and may change almost daily.
+
+===========================================================================
+The  basic idea is that the full dab handling will be done by
+a piece of program, to be stored as a library. 
+Currently, we still compile in all sources, but the example program
+interfaces to the would be library through a simple API.
 ============================================================================
 Command line parameters
 
