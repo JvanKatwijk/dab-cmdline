@@ -45,15 +45,16 @@ _________
 For each of the parameters there is a default, i.e., if the command
 
 	./linux/dab-cmdline
+	
 is given, the assumptions are 
 
- the Mode is "1",
+ 1) the Mode is "1",
  
- the band is "BAND III", that the channel selected is "11C",
+ 2) the band is "BAND III", that the channel selected is "11C",
  
- the program we are looking for is "Classic FM", and 
+ 3) the program we are looking for is "Classic FM", and 
  
- the device to send the output to is "default". (Note again, that the choice for the input device was fixed when creating the dab-library.
+ 4) the device to send the output to is "default". (Note again, that the choice for the input device was fixed when creating the dab-library.
  
 
 Example of a full specification of the command line
