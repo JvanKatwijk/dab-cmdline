@@ -87,9 +87,12 @@ Libraries for the example program are further:
 	The API
 
 The API has three elements,
-	1) typedefinition of the dabBand
-	2) a specification of the types of the callbacks
-	3) a specification of the functions comprising the API.
+
+ 1) typedefinition of the dabBand
+ 
+ 2) a specification of the types of the callbacks
+ 
+ 3) a specification of the functions comprising the API.
  
 
 	enum dabBand {
@@ -100,6 +103,8 @@ The API has three elements,
 
 
 	T H E  C A L L B A C K F U N C T I O N S 
+	
+	
  The ensemble  - when discovered in the selected channel - is presented as a list of strings,
  The boolean parameter tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is
  no decent signal.
@@ -135,11 +140,15 @@ Some technical data of the selected program is passed through a function, whose 
 
 	A P I - F U N C T I O N S
 ---------------------------------------------------------------------
- The initialization function takes as parameters the immutable system par
-  the dabMode is just 1, 2 or 4
-  the dabBand, see the type above
-  the callback for the sound handling,
-  the callback for the dynamic label
+ The initialization function takes as parameters the immutable system are
+ 
+  1) the dabMode is just 1, 2 or 4,
+  
+  2) the dabBand, see the type above,
+  
+  3) the callback for the sound handling,
+  
+  4) the callback for the dynamic label
 
  Note that by creating a dab-library, you already selected a device.
  The function returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
