@@ -3,3 +3,11 @@ As an example of how to use the dab-library, we present a program that
 -together with the library - is a command line only version of the
 dab software.
 
+If/when you have installed the dab-library, and you have installed portaudio and libsamplerate, then 
+
+mkdir build; cd build; cmake ..; make
+
+should do the trick
+
+The resulting program is dab-cmdline
+

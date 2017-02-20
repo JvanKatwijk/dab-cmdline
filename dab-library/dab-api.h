@@ -36,6 +36,7 @@
 //	An example of the use of the library - using this API -
 //	is enclosed in the directory "example" in this distribution
 
+extern "C" {
 	enum dabBand {
 	   BAND_III	= 0,
 	   L_BAND	= 1
@@ -142,5 +143,6 @@
 //
 //	You will need a few libraries to be installed, and
 //	you have to make a choice for the device you want
+}
 #endif
 

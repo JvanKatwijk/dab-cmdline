@@ -33,8 +33,8 @@
 #include	"dab-api.h"
 #include	<atomic>
 //
-//	we deal with some callbacks, so we some data that needs
-//	to be accessed should be kept global
+//	we deal with some callbacks, so we have some data that needs
+//	to be accessed from global contexts
 static
 std::atomic<bool> run;
 
@@ -66,11 +66,17 @@ void	callblockHandler (std::list<std::string> ensemble, bool b) {
 	dab_Service (theRadio, programName, NULL);
 }
 
+//
+//	The function is called from within the library with
+//	a string, the so-called dynamic label
 static
 void	labelHandler (std::string dynamicLabel) {
 	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
 }
-
+//
+//	The function is called from within the library with
+//	a buffer full of PCM samples. We pass them on to the
+//	audiohandler, based on portaudio.
 static
 void	pcmHandler (int16_t *buffer, int size, int rate) {
 static bool isStarted	= false;
