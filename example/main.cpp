@@ -87,7 +87,6 @@ int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
-std::string	dabDevice	= "airspy";
 dabBand		theBand		= BAND_III;
 int		theGain		= 80;	// scale = 0 .. 100
 std::string	soundChannel	= "default";
@@ -98,9 +97,6 @@ struct sigaction sigact;
 //
 	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:")) != -1) {
 	   switch (opt) {
-	      case 'D':
-	         dabDevice	= optarg;
-	         break;
 
 	      case 'M':
 	         theMode	= atoi (optarg);
@@ -152,7 +148,7 @@ struct sigaction sigact;
 	   exit (3);
 	}
 
-	theRadio	= dab_initialize ("airspy", theMode, theBand,
+	theRadio	= dab_initialize (theMode, theBand,
 		                                   pcmHandler, labelHandler);
 	if (theRadio == NULL) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
@@ -162,6 +158,10 @@ struct sigaction sigact;
 	dab_Gain	(theRadio, theGain);
 	dab_Channel	(theRadio, theChannel);
 	dab_run		(theRadio, callblockHandler);
+//
+//	Note that while "dab_run" returns, another thread will be running
+//	for controlling the dab decoding process.
+
 	run. store (true);
 	while (run. load ())
 	   sleep (1);

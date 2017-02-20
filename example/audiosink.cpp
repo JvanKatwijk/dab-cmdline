@@ -79,7 +79,7 @@ int32_t	i;
 
 bool	audioSink::selectDevice (const std::string soundChannel) {
 PaError err;
-int16_t	odev, i;
+int16_t	odev	= 0, i;
 
 	fprintf (stderr, "selecting device %s\n", soundChannel. c_str ());
 

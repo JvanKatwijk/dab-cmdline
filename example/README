@@ -1,3 +1,5 @@
 
+As an example of how to use the dab-library, we present a program that
+-together with the library - is a command line only version of the
+dab software.
 
-The files in this directory form the example program.

@@ -27,7 +27,6 @@
 #include	"dab-constants.h"
 #include	"dab-virtual.h"
 
-#include	"audiosink.h"	// defines audioSink
 
 	dabVirtual::dabVirtual	(void) {
 }

@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of the DAB-library
+ *    This file is the API description of the DAB-library.
  *    Many of the ideas as implemented in the DAB-library are derived from
  *    other work, made available through the GNU general Public License. 
  *    All copyrights of the original authors are acknowledged.
@@ -32,8 +32,9 @@
 
 //	Experimental API for controlling the dab software library
 //
+//	Version 0.4
 //	An example of the use of the library - using this API -
-//	is enclosed in this directory
+//	is enclosed in the directory "example" in this distribution
 
 	enum dabBand {
 	   BAND_III	= 0,
@@ -74,24 +75,24 @@
 	                                 int16_t,	// protection
 	                                 int16_t	// bitRate
 	                                );
-	                                 
+//
 //
 //	if a NULL is provided, no data will be transferred.
 //
 ////////////////////// A P I - F U N C T I O N S ///////////////////////
 //	The initialization function takes as parameters the 
 //	immutable system parameters,
-//	i.e the device, represented by its name (e.g. "dabstick")
 //	    the dabMode is just 1, 2 or 4
 //	    the dabBand, see the type above
 //	    the callback for the sound handling,
 //	    the callback for the dynamic label
 //
+//	Note that by creating a dab-library, you already selected a device
+//
 //	The function returns a non-NULL handle when the device
 //	could be opened for delivery input.
 //	Otherwise it return NULL.
-	void	*dab_initialize	(std::string,	// device name
-	                         uint8_t,	// dab Mode
+	void	*dab_initialize	(uint8_t,	// dab Mode
 	                         dabBand,	// Band
 	                         cb_audio_t,	// callback for sound output
 	                         cb_data_t	// callback for dynamic labels
@@ -132,5 +133,14 @@
 //
 //	the exit function will close down the library software
 	void	dab_exit	(void **handle);
+//
+//
+////////////////// G E N E R A T I N G  T H E  L I B R A R Y //////////////
+//
+//	The dab-library directory contains a CMakeLists.txt script
+//	for use with CMake
+//
+//	You will need a few libraries to be installed, and
+//	you have to make a choice for the device you want
 #endif
 

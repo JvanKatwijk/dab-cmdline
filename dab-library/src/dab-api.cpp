@@ -4,7 +4,8 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of the DAB-library
+ *    This file is the implementation part of the dab-api, it
+ *	binds the dab-library to the api
  *    Many of the ideas as implemented in the DAB-library are derived from
  *    other work, made available through the GNU general Public License. 
  *    All copyrights of the original authors are recognized.
@@ -45,10 +46,9 @@
 //	a global variable and some forward declarations
 DabParams	dabModeParameters;
 void	setModeParameters (uint8_t Mode, DabParams *dabModeParameters);
-virtualInput	*setDevice (std::string s);
+virtualInput	*setDevice (void);
 
-void	*dab_initialize	(std::string device,	// device name
-	                 uint8_t     dabMode,	// dab Mode
+void	*dab_initialize	(uint8_t     dabMode,	// dab Mode
 	                 dabBand     band,	// Band
 	                 cb_audio_t  soundOut,	// callback for sound output
 	                 cb_data_t   dataOut	// callback for sound output
@@ -56,7 +56,7 @@ void	*dab_initialize	(std::string device,	// device name
 virtualInput *inputDevice;
 
 	setModeParameters (dabMode, &dabModeParameters);
-	inputDevice	= setDevice (device);
+	inputDevice	= setDevice ();
 	if (inputDevice == NULL)
 	   return NULL;
 	return (void *)(new dabClass (inputDevice,
@@ -115,52 +115,39 @@ void	dab_exit	(void **handle_p) {
 }
 
 
-virtualInput	*setDevice (std::string s) {
+virtualInput	*setDevice (void) {
 bool	success;
 virtualInput	*inputDevice;
 
 #ifdef HAVE_AIRSPY
-	if (s == "airspy") {
-	   inputDevice	= new airspyHandler (&success, 80, Mhz (220));
-	   fprintf (stderr, "devic selected\n");
-	   if (!success) {
-	      delete inputDevice;
-	      return NULL;
-	   }
-	   else 
-	      return inputDevice;
+	inputDevice	= new airspyHandler (&success, 80, Mhz (220));
+	fprintf (stderr, "devic selected\n");
+	if (!success) {
+	   delete inputDevice;
+	   return NULL;
+	}
+	else 
+	   return inputDevice;
+#elif defined (HAVE_SDRPLAY)
+	inputDevice	= new sdrplay (&success, 60, Mhz (220));
+	if (!success) {
+	   delete inputDevice;
+	   return NULL;
+	}
+	else 
+	   return inputDevice;
+#elif defined (HAVE_DABSTICK)
+	inputDevice	= new dabStick (&success, 75, KHz (220000));
+	if (!success) {
+	   delete inputDevice;
+	   return NULL;
 	}
 	else
+	   return inputDevice;
 #endif
-#ifdef	HAVE_SDRPLAY
-	if (s == "sdrplay") {
-	   inputDevice	= new sdrplay (&success, 60, Mhz (220));
-	   if (!success) {
-	      delete inputDevice;
-	      return NULL;
-	   }
-	   else 
-	      return inputDevice;
-	}
-	else
-#endif
-#ifdef	HAVE_DABSTICK
-	if (s == "dabstick") {
-	   inputDevice	= new dabStick (&success, 75, KHz (220000));
-	   if (!success) {
-	      delete inputDevice;
-	      return NULL;
-	   }
-	   else
-	      return inputDevice;
-	}
-	else
-#endif
-    {	// s == "no device"
+	fprintf (stderr, "it appeared that you did not select a device, \nyou can run, but you will be connected to a virtual device, only providing zeros\n");
 //	and as default option, we have a "no device"
-	   inputDevice	= new virtualInput ();
-	}
-	return NULL;
+	return  new virtualInput ();
 }
 
 ///	the values for the different Modes:
