@@ -1,5 +1,5 @@
 
-DAB-CMDLINE
+	DAB-CMDLINE
 ========================================================================
 
 DAB-CMDLINE is a DAB decoding program that is completely controlled
@@ -9,7 +9,7 @@ however, no use is made of any GUI package.
 
 ===========================================================================
 The  basic idea is that the full dab handling will be done by
-a piece of program, that is built as a library.
+a piece of program, that is reusable, i.e. built as a library.
 The rationale being that it is now easy to create implementations
 with different GUIs, even in different languages.
 
@@ -21,16 +21,14 @@ in the dab-library directory and running
 
 	mkdir build; cd build; cmake ..; make; make install
 
-Note that - to keep things simple, the supported device, i.e. one of
+Note that - to keep things simple - the supported device, i.e. one of
 dabstick, airspy or sdrplay, is "compiled in" the library.
 
 ============================================================================
 As an example, a simple command line based program is given in
 the directory "example".
-This program, when compiled and linked - for which purpose there is
+This program, when compiled and linked, for which purpose there is
 also a CMakeLists.txt file - supports the following Command line parameters
-
-Parameters can be set through the command line on starting the program:
 
  -B Band, selects the DAB band (default Band III),
 
@@ -40,17 +38,12 @@ Parameters can be set through the command line on starting the program:
 
  -P the program name, a prefix suffices. For e.g. "Classic FM" it suffices to give "Classic". However, when passing on a non-unique prefix (e.g. "radio" for "Radio Maria" and "Radio Veronica") the software will select one arbitrarily. Note that letter case is IMPORTANT. The names of the programs in the ensemble being received in the selected channel will be printed during recognition.
 
-Important: If no program names are found, or if no match can be made between the
-program name and the list of program names, the program has no other choice than halt.
+Important: If no program names are found, or if no match can be made between the program name and the list of program names, the program has no other choice than to halt, what it does.
 
  -G the gain to be applied on the device, a value in the range from 1 .. 100.
 The value will be translated to an acceptable value for the device.
-In case the gain is
-table driven, as in the case of a dabstick, a value of e.g. 75 is translated
-into the element on three quarters of the table (basic assumption is that the
-table elements are more or less linear). For e.g. the airspy the values are mapped upon the range 0 .. 21 of the sensitivity slider.
-For e.g. the sdrplay, it is simple since there are 101 attenuation values.
-Setting the gain to N, implies setting the attenuation to 101 - N.
+In case the gain is table driven, as in the case of a dabstick, a value of e.g. 75 is translated into the element on three quarters of the table (basic assumption is that the table elements are more or less linear). For e.g. the airspy the values are mapped upon the range 0 .. 21 of the sensitivity slider. 
+For e.g. the sdrplay, it is simple since there are 101 attenuation values. Setting the gain to N, implies setting the attenuation to 101 - N.
 
  -A the output channel, again as with the program name, a prefix of the name suffices. As with the programs, the names of the sound channels identified will be printed. Note, however, that not all names appearing on the namelist are useful,
 some of them will just not work, a well known  issue with the combination portaudio/alsa under Linux. 
