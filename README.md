@@ -14,6 +14,7 @@ Communication with the library is through some calls and a few callback function
 The library can be created by adapting the CMakeLists.txt file in the dab-library directory and running
 
 	mkdir build; cd build; cmake ..; make; make install
+	IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
 
 Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device before running the sequence mentioned above..
 
