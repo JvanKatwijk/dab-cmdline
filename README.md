@@ -103,19 +103,19 @@ The API has three elements,
 
 
 
-	T H E  C A L L B A C K F U N C T I O N S 
+	T H E   C A L L B A C K  F U N C T I O N S 
 	
 	
- The ensemble  - when discovered in the selected channel - is presented as a list of strings,
+ The ensemble  - when discovered in the selected channel - is presented as a list of strings. The list is handed over to the user  of the library by a callback function.
  The boolean parameter tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is
  no decent signal.
- The type of the callback function should be conformant to
+ The type of the callback function providing the program nmes as appearing in the ensemble, should be conformant to
  
 	typedef void (*cb_ensemble_t)(std::list<std::string>, bool);
 
  Note that this function is *required* to be provided for,
 
- The resulting audio samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters.
+ The resulting audio samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters. The PCM samples are passed on by the library to the user through a callback function.
  The type of the callback function should be conformant to
 
 	typedef void (*cb_audio_t)(int16_t *, int, int);
@@ -128,7 +128,7 @@ The API has three elements,
 
  if a NULL is provided, no data will be transferred.
 
-Some technical data of the selected program is passed through a function, whose type is to be conformant to
+Some technical data of the selected program is passed through a callback function, whose type is to be conformant to
 
 	typedef void (*cb_programdata_t)(int16_t,	// start address
 	                                 int16_t,	// length
@@ -147,9 +147,9 @@ Some technical data of the selected program is passed through a function, whose 
   
   2) the dabBand, see the type above,
   
-  3) the callback for the sound handling,
+  3) the callback function for the sound handling,
   
-  4) the callback for the dynamic label
+  4) the callback for handling the dynamic label
 
  Note that by creating a dab-library, you already selected a device.
  The function returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
@@ -159,7 +159,9 @@ Some technical data of the selected program is passed through a function, whose 
 	                         cb_audio_t,	// callback for sound output
 	                         cb_data_t	// callback for dynamic labels
 	                         );
-				 
+	
+  This handle is used to identify the library instance.
+  
   The gain of the device can be set and changed to a value  in the range 0 .. 100. The value is mapped upon an appropriate value for the device
   
 	void	dab_Gain	(void *handle, uint16_t);	
