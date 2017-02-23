@@ -1,6 +1,5 @@
 #
 /*
- *
  *    Copyright (C) 2013
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
@@ -96,6 +95,7 @@ public:
 	void	setupforNewFrame	(void);
 	void	clearEnsemble		(void);
 	bool	syncReached		(void);
+	std::string service_with_id	(int32_t);
 	uint8_t	kindofService		(std::string &);
 	void	dataforAudioService	(std::string&, audiodata *);
 	void	dataforDataService	(std::string&, packetdata *);
@@ -148,7 +148,7 @@ private:
 	bool		isSynced;
 //
 //	these were signals
-	void		addtoEnsemble	(const std::string &);
+	void		addtoEnsemble	(const std::string &, int32_t);
 	void		nameofEnsemble  (int, const std::string &);
 	void		changeinConfiguration (void);
 };

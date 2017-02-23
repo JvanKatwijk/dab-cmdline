@@ -46,6 +46,7 @@ public:
 	void	clearEnsemble		(void);
 	bool	syncReached		(void);
 	int16_t	get_ficRatio		(void);
+	std::string service_with_id	(int32_t);
 	uint8_t	kindofService		(std::string &);
 	void	dataforDataService	(std::string &, packetdata *);
 	void	dataforAudioService	(std::string &, audiodata *);

@@ -258,3 +258,6 @@ bool	ficHandler::syncReached	(void) {
 	return fibProcessor. syncReached ();
 }
 
+std::string ficHandler::service_with_id (int32_t serviceId) {
+	return fibProcessor. service_with_id (serviceId);
+}

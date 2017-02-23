@@ -840,7 +840,7 @@ char		label [17];
 	                        (const char *) label,
 	                           (CharacterSet) charSet));
 //	         fprintf (stderr, "FIG1/1: SId = %4x\t%s\n", SId, label);
-	         addtoEnsemble (myIndex -> serviceLabel. label);
+	         addtoEnsemble (myIndex -> serviceLabel. label, SId);
 	         myIndex -> serviceLabel. hasName = true;
 	      }
 	      break;
@@ -1050,6 +1050,23 @@ int16_t i;
 	firstTime	= true;
 }
 
+std::string fib_processor::service_with_id (int32_t serviceId) {
+int16_t i;
+
+	for (i = 0; i < 64; i ++) {
+	   if (!listofServices [i]. inUse)
+	      continue;
+
+	   if (!listofServices [i]. serviceLabel. hasName)
+              continue;
+
+	   
+	   if (listofServices [i]. serviceId == serviceId) 
+	      return listofServices [i]. serviceLabel. label;
+	}
+	return "no service found";
+}
+	
 uint8_t	fib_processor::kindofService (std::string &s) {
 int16_t	i, j;
 int32_t	selectedService;
@@ -1176,8 +1193,8 @@ int32_t	selectedService;
 //
 //	and now for the would-be signals
 
-void	fib_processor::addtoEnsemble	(const std::string &s) {
-	ensemble -> addtoEnsemble (s);
+void	fib_processor::addtoEnsemble	(const std::string &s, int32_t SId) {
+	ensemble -> addtoEnsemble (s, SId);
 }
 
 void	fib_processor::nameofEnsemble  (int id, const std::string &s) {

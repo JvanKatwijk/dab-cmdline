@@ -38,11 +38,12 @@ class	ensembleHandler {
 public:
 		ensembleHandler		(void);
 		~ensembleHandler	(void);
-	void	addtoEnsemble		(const std::string &);
+	void	addtoEnsemble		(const std::string &, int32_t);
 	void	nameforEnsemble		(int id, const std::string &s);
 	std::string nameofEnsemble	(void);
 	bool	ensembleExists		(void);
 	std::string findService		(const std::string &);
+	std::string findService		(int32_t);
 	std::string getProgram		(int16_t);
 	void	clearEnsemble		(void);
 	std::list<std::string> data	(void);

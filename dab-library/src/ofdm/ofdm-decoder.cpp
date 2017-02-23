@@ -120,7 +120,7 @@ std::unique_lock<std::mutex> lck (ourMutex);
 	while (running. load ()) {
 	   while ((amount <= 0) && running. load ()) {
 	      auto now = std::chrono::system_clock::now ();
-	      Locker. wait_until (lck, now + 1ms);
+	      Locker. wait_until (lck, now + std::chrono::milliseconds (1));
 	   }
 	      
 	   while ((amount > 0) && running. load ()) {

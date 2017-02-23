@@ -119,7 +119,7 @@ int16_t	i, j;
 	   while (Buffer -> GetRingBufferReadAvailable () <= fragmentSize) {
               std::unique_lock <std::mutex> lck (ourMutex);
               auto now = std::chrono::system_clock::now ();
-              Locker. wait_until (lck, now + 1ms);      // 1 msec waiting time
+              Locker. wait_until (lck, now + std::chrono::milliseconds (1));      // 1 msec waiting time
               if (!running)
                  break;
            }
