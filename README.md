@@ -109,7 +109,7 @@ The API has three elements,
  The ensemble  - when discovered in the selected channel - is presented as a list of strings. The list is handed over to the user  of the library by a callback function.
  The boolean parameter tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is
  no decent signal.
- The type of the callback function providing the program nmes as appearing in the ensemble, should be conformant to
+ The type of the callback function providing the program names as appearing in the ensemble, should be conformant to
  
 	typedef void (*cb_ensemble_t)(std::list<std::string>, bool);
 
