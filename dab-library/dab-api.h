@@ -32,7 +32,7 @@
 
 //	Experimental API for controlling the dab software library
 //
-//	Version 0.4
+//	Version 0.5
 //	An example of the use of the library - using this API -
 //	is enclosed in the directory "example" in this distribution
 
@@ -127,6 +127,9 @@ extern "C" {
 //	The name of the program may be a prefix of the real name,
 //	however, letter case is important.
 	bool	dab_Service	(void *handle, std::string, cb_programdata_t);
+//
+//	experimenting with:
+	bool	dab_Service_Id	(void *handle, int32_t, cb_programdata_t);
 //
 //	the function stop will stop the running of the thread 
 //	executing the dab decoding software

@@ -892,7 +892,7 @@ char		label [17];
 	                           " (data)",
                                    (CharacterSet) charSet));
 #ifdef	MSC_DATA__
-	         addtoEnsemble (myIndex -> serviceLabel. label);
+	         addtoEnsemble (myIndex -> serviceLabel. label, SId);
 #endif
                  myIndex -> serviceLabel. hasName = true;
               }
@@ -1050,7 +1050,7 @@ int16_t i;
 	firstTime	= true;
 }
 
-std::string fib_processor::service_with_id (int32_t serviceId) {
+std::string fib_processor::nameFor (int32_t serviceId) {
 int16_t i;
 
 	for (i = 0; i < 64; i ++) {

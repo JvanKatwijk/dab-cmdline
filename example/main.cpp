@@ -45,6 +45,7 @@ static
 audioSink	*soundOut	= NULL;
 
 std::string	programName	= "Classic FM";
+int32_t		serviceId	= -1;
 
 static void sighandler (int signum) {
         fprintf (stderr, "Signal caught, terminating!\n");
@@ -63,7 +64,10 @@ void	callblockHandler (std::list<std::string> ensemble, bool b) {
 	   run. store (false);
 	   return;
 	}
-	dab_Service (theRadio, programName, NULL);
+	if (serviceId == -1)
+	   dab_Service (theRadio, programName, NULL);
+	else
+	   dab_Service_Id (theRadio, serviceId, NULL);
 }
 
 //
@@ -101,7 +105,7 @@ int	opt;
 struct sigaction sigact;
 
 //
-	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:")) != -1) {
+	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:S:")) != -1) {
 	   switch (opt) {
 
 	      case 'M':
@@ -134,6 +138,13 @@ struct sigaction sigact;
 	      case 'L':
 	         latency	= atoi (optarg);
 	         break;
+
+	      case 'S': {
+                 std::stringstream ss;
+                 ss << std::hex << optarg;
+                 ss >> serviceId;
+                 break;
+              }
 
 	      default:
 	         break;

@@ -206,7 +206,11 @@ void	dabClass::run_dab	(cb_ensemble_t h) {
 //	we started the ofdmprocessor, so we also stop it here
 	my_ofdmProcessor	-> stop ();
 }
-	
+
+bool	dabClass::dab_service (int32_t serviceId, cb_programdata_t t) {
+	return dab_service (my_ficHandler -> nameFor (serviceId), t);
+}
+
 bool	dabClass::dab_service (std::string aname, cb_programdata_t t) {
 audiodata d;
 std::string name	= theEnsemble. findService (aname);

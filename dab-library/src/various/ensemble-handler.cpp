@@ -41,7 +41,7 @@ int	ensembleHandler::size (void) {
 	return stationList. size ();
 }
 
-void	ensembleHandler::addtoEnsemble (const std::string &s) {
+void	ensembleHandler::addtoEnsemble (const std::string &s, int32_t SId) {
 uint16_t i;
 
 	for (i = 0; i <  s. size () - 4; i ++)

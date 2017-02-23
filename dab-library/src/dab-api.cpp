@@ -97,6 +97,21 @@ bool	dab_Service	(void *handle, std::string name, cb_programdata_t t) {
 
 	return ((dabClass *)handle) -> dab_service (name, t);
 }
+
+bool	dab_Service_Id	(void *handle, int32_t serviceId, cb_programdata_t t) {
+	
+	if (((dabClass *)handle) == NULL)
+	   return false;
+
+	if (!((dabClass *)handle) -> dab_running ())
+	   return false;
+
+	if (!((dabClass *)handle) -> ensembleArrived ())
+	   return false;
+
+
+	return ((dabClass *)handle) -> dab_service (serviceId, t);
+}
 //
 void	dab_stop	(void	*handle) {
 	if (((dabClass *)handle) == NULL)

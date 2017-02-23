@@ -61,6 +61,7 @@ public:
 	void		dab_run		(cb_ensemble_t);
 	void		dab_stop	(void);
 	bool		dab_service	(std::string, cb_programdata_t);
+	bool		dab_service	(int32_t, cb_programdata_t);
 	bool		ensembleArrived	(void);
 private:
 	void		run_dab		(cb_ensemble_t);

@@ -95,7 +95,7 @@ public:
 	void	setupforNewFrame	(void);
 	void	clearEnsemble		(void);
 	bool	syncReached		(void);
-	std::string service_with_id	(int32_t);
+	std::string nameFor		(int32_t);
 	uint8_t	kindofService		(std::string &);
 	void	dataforAudioService	(std::string&, audiodata *);
 	void	dataforDataService	(std::string&, packetdata *);
