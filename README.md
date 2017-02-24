@@ -44,8 +44,9 @@ is given, the assumptions are
  
  3) the program we are looking for is "Classic FM", and 
  
- 4) the device to send the output to is "default". (Note again, that the choice for the input device was fixed when creating the dab-library.
+ 4) the device to send the output to is "default". 
  
+(Note again, that the choice for the input device was fixed when creating the dab-library).
 
 Example of a full specification of the command line
 
@@ -91,7 +92,7 @@ The API has three elements,
  2) a specification of the types of the callbacks
  
  3) a specification of the functions comprising the API.
- 
+
 
 	enum dabBand {
 	   BAND_III	= 0,
@@ -100,12 +101,12 @@ The API has three elements,
 
 
 
-	T H E   C A L L B A C K  F U N C T I O N S 
+	T H E   C A L L B A C K  F U N C T I O N S 	
 	
-	
- The ensemble  - when discovered in the selected channel - is presented as a list of strings. The list is handed over to the user  of the library by a user defined callback function.
- The boolean parameter in this function tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is no decent signal.
- The type of the callback function providing the program names as appearing in the ensemble, should be conformant to
+
+The ensemble  - when discovered in the selected channel - is presented as a list of strings. That list is handed over to the user of the library by a user defined callback function. The boolean parameter in this function tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is no decent signal.
+
+The type of the callback function providing the program names as appearing in the ensemble, should be conformant to
  
 	typedef void (*cb_ensemble_t)(std::list<std::string>, bool);
 
@@ -147,8 +148,8 @@ Some technical data of the selected program is passed through a callback functio
   
   4) the callback for handling the dynamic label or NULL if no sound output is required.
 
- Note that by creating a dab-library, you already selected and a device, so the handler software for the device is part of the library.
- The initialization unction returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
+Note that by creating a dab-library, you already selected and a device, so the handler software for the device is part of the library.
+The initialization function returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
  
 	void	*dab_initialize	(uint8_t,	// dab Mode
 	                         dabBand,	// Band
@@ -156,9 +157,9 @@ Some technical data of the selected program is passed through a callback functio
 	                         cb_data_t	// callback for dynamic labels
 	                         );
 	
-  This handle is used to identify the library instance in the other functions defined in the API.
+The return valie, i.e. the handle, is used to identify the library instance in the other functions defined in the API.
   
-  The gain of the device can be set and changed to a value  in the range 0 .. 100. The value is mapped upon an appropriate value for the device
+The gain of the device can be set and changed to a value  in the range 0 .. 100 using the function dab_Gain. The parameter value is mapped upon an appropriate value for the device
   
 	void	dab_Gain	(void *handle, uint16_t);	
 
@@ -167,7 +168,7 @@ Some technical data of the selected program is passed through a callback functio
  
 	bool	dab_Channel	(void *handle, std::string);
 
- The function dab_run will start a separate thread, running the dab decoding software at the selected channel.If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble.  If no data was found, the boolean parameter is set to false, and the list is empty. 
+The function dab_run will start a separate thread, running the dab decoding software at the selected channel. If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble. If no data was found, the boolean parameter is set to false, and the list is empty. 
  
  Note that the thread executing the dab decoding will continue to run.
  
@@ -193,6 +194,6 @@ The function stop will stop the running of the thread that is executing the dab 
 	Jan van Katwijk (J.vanKatwijk@gmail.com)
 	Lazy Chair Programming
 
- The dab-library software is made available under the GPL-2.0.
- All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 	GNU General Public License for more details.
+The dab-library software is made available under the GPL-2.0.
+All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 	GNU General Public License for more details.
 
