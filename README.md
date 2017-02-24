@@ -78,14 +78,15 @@ and - obviously, the libraries for the device included.
 
 Libraries for the example program are further:
 
-	portaudio, version 19.xxx rather than 18.xxx that is
-	installed default on some debian based systems;
+	portaudio, version 19.xxx rather than 18.xxx that is installed default on some debian based systems;
 
 	libsamplerate
 
 
 ==============================================================================================================
 	The API
+
+The API is the API of the dab library, it is a simple API with only a few functions. It is advised to look at the example program (especially the "main" program) to see how the API is used.
 
 The API has three elements,
 
@@ -106,23 +107,22 @@ The API has three elements,
 	T H E   C A L L B A C K  F U N C T I O N S 
 	
 	
- The ensemble  - when discovered in the selected channel - is presented as a list of strings. The list is handed over to the user  of the library by a callback function.
- The boolean parameter tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is
- no decent signal.
+ The ensemble  - when discovered in the selected channel - is presented as a list of strings. The list is handed over to the user  of the library by a user defined callback function.
+ The boolean parameter in this function tells whether or not an ensemble was found. If no ensemble was found, it is (almost) certain that there is no decent signal.
  The type of the callback function providing the program names as appearing in the ensemble, should be conformant to
  
 	typedef void (*cb_ensemble_t)(std::list<std::string>, bool);
 
  Note that this function is *required* to be provided for,
 
- The resulting audio samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters. The PCM samples are passed on by the library to the user through a callback function.
+ The resulting audio samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters. The PCM samples are passed on by the library to the user through a user defined callback function.
  The type of the callback function should be conformant to
 
 	typedef void (*cb_audio_t)(int16_t *, int, int);
 
  if a NULL is provided as callback function, no data will be transferred.
 
- The dynamic labelvalue - if any - is passed through a callback function, whose type is to be conformant to
+ The dynamic labelvalue - if any - is passed through a user callback function, whose type is to be conformant to
  
 	typedef void (*cb_data_t)(std::string);
 
@@ -130,8 +130,8 @@ The API has three elements,
 
 Some technical data of the selected program is passed through a callback function, whose type is to be conformant to
 
-	typedef void (*cb_programdata_t)(int16_t,	// start address
-	                                 int16_t,	// length
+	typedef void (*cb_programdata_t)(int16_t,	// start address of the data for the selected program
+	                                 int16_t,	// length in terms of CU's
 	                                 int16_t,	// subchId
 	                                 int16_t,	// protection
 	                                 int16_t	// bitRate
@@ -143,16 +143,16 @@ Some technical data of the selected program is passed through a callback functio
 ---------------------------------------------------------------------
  The initialization function takes as parameters the immutable system are
  
-  1) the dabMode is just 1, 2 or 4,
+  1) the dabMode is just one of 1, 2 or 4 (Mode 3 is not supported),
   
   2) the dabBand, see the type above,
   
-  3) the callback function for the sound handling,
+  3) the callback function for the sound handling or NULL if no sound output is required,
   
-  4) the callback for handling the dynamic label
+  4) the callback for handling the dynamic label or NULL if no sound output is required.
 
- Note that by creating a dab-library, you already selected a device.
- The function returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
+ Note that by creating a dab-library, you already selected and a device, so the handler software for the device is part of the library.
+ The initialization unction returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
  
 	void	*dab_initialize	(uint8_t,	// dab Mode
 	                         dabBand,	// Band
@@ -160,24 +160,24 @@ Some technical data of the selected program is passed through a callback functio
 	                         cb_data_t	// callback for dynamic labels
 	                         );
 	
-  This handle is used to identify the library instance.
+  This handle is used to identify the library instance in the other functions defined in the API.
   
   The gain of the device can be set and changed to a value  in the range 0 .. 100. The value is mapped upon an appropriate value for the device
   
 	void	dab_Gain	(void *handle, uint16_t);	
 
- The function setupChannel maps the name of the channel onto a frequency for the device and prepares the device for action.
- If the software was already running for another channel, then the thread running the software will be halter first
+ The function dab_Channel maps the name of the channel onto a frequency for the device and prepares the device for action.
+ If the software was already running for another channel, then the thread running the software will be halted first.
  
 	bool	dab_Channel	(void *handle, std::string);
 
- The function runDAB will start a separate thread, running the dab decoding software at the selected channel.If DAB data, i.e. an ensemble, is found, then the function passed as callback is called with as parameter the std::list of strings, representing the names of the programs in that ensemble.  If no data was found, the list is empty. 
+ The function dab_run will start a separate thread, running the dab decoding software at the selected channel.If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble.  If no data was found, the boolean parameter is set to false, and the list is empty. 
  
  Note that the thread executing the dab decoding will continue to run.
  
 	void	dab_run		(void *handle, cb_ensemble_t);
 
- With dab_Service, the user may - finally - select a program to be decoded. This - obviously only makes sense when there are programs and "runDAB" is still active. The name of the program may be a prefix of the real name, however, letter case is important.
+ With dab_Service, the user may - finally - select a program to be decoded. This - obviously only makes sense when there are programs and "dab_run" is still active. The name of the program may be a prefix of the real name, however, letter case is important.
  
 	bool	dab_Service	(void *handle, std::string, cb_programdata_t);
 
@@ -185,7 +185,7 @@ The function stop will stop the running of the thread that is executing the dab 
 
 	void	dab_stop	(void *handle);
 
- The exit function will close down the library software
+ The exit function will close down the library software and will set the handle, the address of which is passed as parameter, to NULL.
  
 	void	dab_exit	(void **handle);
 
