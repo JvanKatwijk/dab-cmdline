@@ -87,6 +87,8 @@ extern "C" {
 //	    the dabBand, see the type above
 //	    the callback for the sound handling,
 //	    the callback for the dynamic label
+//	    the time (in seconds) to give the software chance to identify 
+//	      an ensemble
 //
 //	Note that by creating a dab-library, you already selected a device
 //
@@ -96,7 +98,8 @@ extern "C" {
 	void	*dab_initialize	(uint8_t,	// dab Mode
 	                         dabBand,	// Band
 	                         cb_audio_t,	// callback for sound output
-	                         cb_data_t	// callback for dynamic labels
+	                         cb_data_t,	// callback for dynamic labels
+	                         int16_t	waitingTime = 10
 	                         );
 //
 //	The gain of the device can be set and changed to a value

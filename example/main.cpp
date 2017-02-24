@@ -75,7 +75,7 @@ void	callblockHandler (std::list<std::string> ensemble, bool b) {
 //	a string, the so-called dynamic label
 static
 void	labelHandler (std::string dynamicLabel) {
-	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
+//	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
 }
 //
 //	The function is called from within the library with
@@ -95,6 +95,7 @@ static bool isStarted	= false;
 	
 int	main (int argc, char **argv) {
 // Default values
+int16_t		del		= 10;
 uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 dabBand		theBand		= BAND_III;
@@ -107,6 +108,10 @@ struct sigaction sigact;
 //
 	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:S:")) != -1) {
 	   switch (opt) {
+
+	      case 'D':
+	         del	= atoi (optarg);
+	         break;
 
 	      case 'M':
 	         theMode	= atoi (optarg);
@@ -166,7 +171,7 @@ struct sigaction sigact;
 	}
 
 	theRadio	= dab_initialize (theMode, theBand,
-		                                   pcmHandler, labelHandler);
+		                                   pcmHandler, labelHandler, del);
 	if (theRadio == NULL) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
 	   exit (4);

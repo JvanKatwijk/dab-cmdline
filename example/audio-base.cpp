@@ -49,7 +49,7 @@ void	audioBase::stop	(void) {
 //
 //	This one is a hack for handling different baudrates coming from
 //	the aac decoder. call is from the GUI, triggered by the
-//	aac decoder or the mp3 decoder
+//	aac decoder or the mp2 decoder
 void	audioBase::audioOut	(int16_t *buffer,
 	                         int32_t amount, int32_t rate) {
 	switch (rate) {

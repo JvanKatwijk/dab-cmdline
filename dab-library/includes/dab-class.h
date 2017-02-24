@@ -52,6 +52,7 @@ public:
         		dabClass	(virtualInput	*,
 	                         	DabParams	*,
 	                         	dabBand,
+	                                int16_t,		// waiting time
 	                         	cb_audio_t,
 	                                cb_data_t);
 			~dabClass	(void);
@@ -64,13 +65,14 @@ public:
 	bool		dab_service	(int32_t, cb_programdata_t);
 	bool		ensembleArrived	(void);
 private:
-	void		run_dab		(cb_ensemble_t);
 	virtualInput	*inputDevice;
 	DabParams	*dabModeParameters;
 	dabBand		theBand;
+	int16_t		waitingTime;
 	cb_audio_t	soundOut;
 	cb_data_t	dataOut;
 	std::thread     threadHandle;
+	void		run_dab		(cb_ensemble_t);
 	std::atomic<bool> run;
 	ofdmProcessor	*my_ofdmProcessor;
 	ficHandler	*my_ficHandler;

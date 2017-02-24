@@ -122,16 +122,15 @@ int16_t	odev	= 0, i;
 	outputParameters. hostApiSpecificStreamInfo = NULL;
 //
 	fprintf (stderr, "Suggested size for outputbuffer = %d\n", bufSize);
-	err = Pa_OpenStream (
-	             &ostream,
-	             NULL,
-	             &outputParameters,
-	             CardRate,
-	             bufSize,
-	             0,
-	             this	-> paCallback_o,
-	             this
-	      );
+	err = Pa_OpenStream (&ostream,
+	                     NULL,
+	                     &outputParameters,
+	                     CardRate,
+	                     bufSize,
+	                     0,
+	                     this	-> paCallback_o,
+	                     this
+	                    );
 
 	if (err != paNoError) {
 	   fprintf (stderr, "Open ostream error\n");

@@ -5,7 +5,7 @@
  *    Lazy Chair Programming
  *
  *    This file is the implementation part of the dab-api, it
- *	binds the dab-library to the api
+ *    binds the dab-library to the api.
  *    Many of the ideas as implemented in the DAB-library are derived from
  *    other work, made available through the GNU general Public License. 
  *    All copyrights of the original authors are recognized.
@@ -48,10 +48,11 @@ DabParams	dabModeParameters;
 void	setModeParameters (uint8_t Mode, DabParams *dabModeParameters);
 virtualInput	*setDevice (void);
 
-void	*dab_initialize	(uint8_t     dabMode,	// dab Mode
-	                 dabBand     band,	// Band
-	                 cb_audio_t  soundOut,	// callback for sound output
-	                 cb_data_t   dataOut	// callback for sound output
+void	*dab_initialize	(uint8_t	dabMode,  // dab Mode
+	                 dabBand	band,	  // Band
+	                 cb_audio_t	soundOut, // callback for sound output
+	                 cb_data_t	dataOut,  // callback for sound output
+	                 int16_t	waitingTime 
 	                 ) {
 virtualInput *inputDevice;
 
@@ -61,7 +62,8 @@ virtualInput *inputDevice;
 	   return NULL;
 	return (void *)(new dabClass (inputDevice,
 	                              &dabModeParameters,
-	                              BAND_III,
+	                              band,
+	                              waitingTime,
 	                              soundOut,
 	                              dataOut));
 }

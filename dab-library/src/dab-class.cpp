@@ -36,12 +36,14 @@
 	dabClass::dabClass (virtualInput	*inputDevice,
 	                    DabParams		*dabModeParameters,
 	                    dabBand		theBand,
+	                    int16_t		waitingTime,
 	                    cb_audio_t		soundOut,
 	                    cb_data_t		dataOut) {
 
 	this	-> inputDevice		= inputDevice;
 	this	-> dabModeParameters	= dabModeParameters;
 	this	-> theBand		= theBand;
+	this	-> waitingTime		= waitingTime;
 	this	-> soundOut		= soundOut;
 	this	-> dataOut		= dataOut;
 
@@ -195,7 +197,7 @@ void	dabClass::run_dab	(cb_ensemble_t h) {
 	my_ofdmProcessor	-> start ();
 	inputDevice		-> setGain (deviceGain);
 	run. store (true);
-	sleep (10);		// give everyone the opportunity to do domething
+	sleep (waitingTime);	// give everyone the opportunity to do domething
 
 	fprintf (stderr, "going to tell the world\n");
 	h (theEnsemble. data (), theEnsemble. ensembleExists ());
