@@ -4,10 +4,10 @@
 
 DAB-CMDLINE is a DAB decoding program completely controlled through the command line.
 The program is derived from the DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
-It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from the DAB-rpi and sdr-j-DAB programs.
+It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors DAB-rpi and sdr-j-DAB programs.
 
 ===========================================================================
-There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s), using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
+There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a fab handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
 
 Communication with the library is through some simple calls, while a few callback functions provide the communication back from the library.
 
