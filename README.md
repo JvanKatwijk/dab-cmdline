@@ -7,12 +7,11 @@ The program is derived from the DAB-rpi and the sdr-j-DAB programs, however, no 
 It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors DAB-rpi and sdr-j-DAB programs.
 
 ===========================================================================
-There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a fab handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
+There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
 
-Communication with the library is through some simple calls, while a few callback functions provide the communication back from the library.
+The library provides entries for the functionality through through some simple calls, while a few callback functions provide the communication back from the library.
 
-As an example of the use of the library, a simple command line based program is given in the directory "example".
-This program, when compiled and linked, for which purpose there is a CMakeLists.txt file - supports the following Command line parameters
+An example of the use of the library is a simple command line based program, the sources of which are given in the directory "example". This program, when compiled and linked (a CMakeLists.txt file for use with cmake is available) supports the following Command line parameters:
 
  -B Band, selects the DAB band (default Band III),
 
@@ -46,9 +45,9 @@ is given, the assumptions are
  
  4) the device to send the output to is "default". 
  
-(Note again, that the choice for the input device was fixed when creating the dab-library).
+Note again, that the choice for the input device was fixed when creating the dab-library.
 
-Example of a full specification of the command line
+An example of a full specification of the command line is
 
 	./linux/dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
 	
@@ -58,7 +57,7 @@ The library can be created by adapting the CMakeLists.txt file in the dab-librar
 	mkdir build; cd build; cmake ..; make; make install
 	IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
 
-Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the CMakeLists.txt file before running the sequence mentioned above..
+Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the CMakeLists.txt file before running the sequence mentioned above.
 
 ============================================================================
 Libraries (together with the "development" or ".h" files) needed for creating the library are
@@ -89,9 +88,9 @@ The API has three elements,
 
  1) typedefinition of the dabBand
  
- 2) a specification of the types of the callbacks
+ 2) the type specifications of the callback functions,
  
- 3) a specification of the functions comprising the API.
+ 3) a specification of the functions callable in the API.
 
 
 	enum dabBand {
@@ -112,7 +111,7 @@ The type of the callback function providing the program names as appearing in th
 
  Note that this function is *required* to be provided for,
 
- The resulting audio samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters. The PCM samples are passed on by the library to the user through a user defined callback function.
+ The resulting audio (PCM) samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters. The PCM samples are passed on by the library to the user through a user defined callback function.
  The type of the callback function should be conformant to
 
 	typedef void (*cb_audio_t)(int16_t *, int, int);
@@ -166,25 +165,25 @@ The gain of the device can be set and changed to a value  in the range 0 .. 100 
  The function dab_Channel maps the name of the channel onto a frequency for the device and prepares the device for action.
  If the software was already running for another channel, then the thread running the software will be halted first.
  
-	bool	dab_Channel	(void *handle, std::string);
+     bool	dab_Channel	(void *handle, std::string);
 
 The function dab_run will start a separate thread, running the dab decoding software at the selected channel. If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble. If no data was found, the boolean parameter is set to false, and the list is empty. 
  
  Note that the thread executing the dab decoding will continue to run.
  
-	void	dab_run		(void *handle, cb_ensemble_t);
+     void	dab_run		(void *handle, cb_ensemble_t);
 
  With dab_Service, the user may - finally - select a program to be decoded. This - obviously only makes sense when there are programs and "dab_run" is still active. The name of the program may be a prefix of the real name, however, letter case is important.
  
-	bool	dab_Service	(void *handle, std::string, cb_programdata_t);
+     bool	dab_Service	(void *handle, std::string, cb_programdata_t);
 
 The function stop will stop the running of the thread that is executing the dab decoding software
 
-	void	dab_stop	(void *handle);
+     void	dab_stop	(void *handle);
 
  The exit function will close down the library software and will set the handle, the address of which is passed as parameter, to NULL.
  
-	void	dab_exit	(void **handle);
+     void	dab_exit	(void **handle);
 
 
 
