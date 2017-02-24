@@ -3,24 +3,16 @@
 ========================================================================
 
 DAB-CMDLINE is a DAB decoding program completely controlled through the command line.
-The program is derived from the DAB-rpi and the sdr-j-dab programs, however, no use is made of any GUI package.
+The program is derived from the DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
+It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from the DAB-rpi and sdr-j-DAB programs.
 
 ===========================================================================
-The  basic idea is that the full DAB handling will be done by a reusable piece of program, i.e. built as a library.
-The rationale being that it is now easy to create implementations with different GUIs, even GUI's in different languages.
+There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s), using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
 
-Communication with the library is through some calls and a few callback functions provide the output, described in the api document.
+Communication with the library is through some simple calls, while a few callback functions provide the communication back from the library.
 
-The library can be created by adapting the CMakeLists.txt file in the dab-library directory and running
-
-	mkdir build; cd build; cmake ..; make; make install
-	IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
-
-Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device before running the sequence mentioned above..
-
-============================================================================
 As an example of the use of the library, a simple command line based program is given in the directory "example".
-This program, when compiled and linked, for which purpose there is also a CMakeLists.txt file - supports the following Command line parameters
+This program, when compiled and linked, for which purpose there is a CMakeLists.txt file - supports the following Command line parameters
 
  -B Band, selects the DAB band (default Band III),
 
@@ -28,7 +20,7 @@ This program, when compiled and linked, for which purpose there is also a CMakeL
 
  -C the channel the default is 11C, the channel I am listening to mostly,
 
- -P the program name, a prefix suffices. For e.g. "Classic FM" it suffices to give "Classic". However, when passing on a non-unique prefix (e.g. "Radio" for "Radio Maria" and "Radio Veronica") the software will select one arbitrarily. Note that letter case is IMPORTANT. The names of the programs in the ensemble being received in the selected channel will be printed during recognition.
+ -P the program name, a prefix suffices. For e.g. "Classic FM" it suffices to give "Classic". However, when passing on a non-unique prefix (e.g. "Radio" for "Radio Maria" and "Radio Veronica") the software will select one arbitrarily. Note that letter case is IMPORTANT is the current version. The names of the programs in the ensemble being received in the selected channel will be printed during recognition.
 
 Important: If no program names are found, or if no match can be made between the program name and the list of program names, the program has no other choice than to halt, what it does.
 
@@ -36,12 +28,9 @@ Important: If no program names are found, or if no match can be made between the
 The value will be translated to an acceptable value for the device. In case the gain is table driven, as in the case of a dabstick, a value of e.g. 75 is translated into the element on three quarters of the table (basic assumption is that the table elements are more or less linear). For e.g. the airspy the values are mapped upon the range 0 .. 21 of the sensitivity slider. 
 For e.g. the sdrplay, it is simple since there are 101 attenuation values. Setting the gain to N, implies setting the attenuation to 101 - N.
 
- -A the output channel, again as with the program name, a prefix of the name suffices. As with the programs, the names of the sound channels identified will be printed. Note, however, that not all names appearing on the namelist are useful,
+ -A the output channel, again as with the program name, a prefix of the name suffices. As with the programs, the names of the sound channels identified will be printed. Note, however, that in Linux not all all names appearing on the namelist are useful,
 some of them will just not work, a well known  issue with the combination portaudio/alsa under Linux. 
 Important: If a name is selected for a channel that cannot be opened the program will try to open the default output device.
-
-Important:
-_________
 
 For each of the parameters there is a default, i.e., if the command
 
@@ -63,7 +52,14 @@ Example of a full specification of the command line
 	./linux/dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
 	
 ============================================================================
+The library can be created by adapting the CMakeLists.txt file in the dab-library directory and running
 
+	mkdir build; cd build; cmake ..; make; make install
+	IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
+
+Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the CMakeLists.txt file before running the sequence mentioned above..
+
+============================================================================
 Libraries (together with the "development" or ".h" files) needed for creating the library are
 
 	libfaad
@@ -198,5 +194,5 @@ The function stop will stop the running of the thread that is executing the dab 
 	Lazy Chair Programming
 
  The dab-library software is made available under the GPL-2.0.
- All SDR-J softwware is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 	GNU General Public License for more details.
+ All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 	GNU General Public License for more details.
 
