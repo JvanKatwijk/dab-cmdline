@@ -190,12 +190,14 @@ The function stop will stop the running of the thread that is executing the dab 
 
 	The use of Python as GUI
 	
-Current experiments are being done to interface the library to Python. A wrapper for the API is to be found
+Current experiments are being done to interface the library to Python 3. A wrapper for the API is to be found
 in the file dab-python.cpp and a simple Python program was written to control the library through this
 interface and to process the resulting sound samples.
 
+In order to include the wrapper in the library, one has to uncomment PYTHON in the CMakeLists.txt file (and adapt the path name(s) in the CMakeLists.txt file.
+
 The results are as yet not completely satisfactory: the current experiment uses the soundDevice.py software,
-and while there is sound, there is too much stuttering to enjoy the sound. The stuttering is probably due to the pretty large amounts of callbacks that are to be executed and the in-between buffering that is done between the callback from the dab-library and the callback from the soundDevice software.
+and while there is sound, there is too much stuttering to enjoy the result. The stuttering is probably due to the pretty large amounts of callbacks that are to be executed and the in-between buffering that is done between the callback from the dab-library and the callback from the soundDevice software.
 
 ===========================================================================
 
