@@ -190,8 +190,7 @@ The function stop will stop the running of the thread that is executing the dab 
 
 	The use of Python for the GUI
 	
-Current experiments are being done to interface the library to Python 3. A wrapper for the API is to be found
-in the file dab-python.cpp and a simple Python program (not included, available on request) was written to control the library through this interface and to process the resulting sound samples.
+An experiment is being done to interface the library to Python 3. A wrapper for the API is to be found in the file dab-python.cpp and a simple Python program (not included, available on request) was written to control the library through this interface and to process the resulting sound samples.
 
 Default the Python interface is not included in the library. In order to include the wrapper in the library, one has to uncomment
 
