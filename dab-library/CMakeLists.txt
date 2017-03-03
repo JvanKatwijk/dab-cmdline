@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.8.11 )
 set (objectName dab_lib)
-add_definitions ( -Wall)
+add_definitions ( -Wall -g)
 #	modify if you want
 set (CMAKE_INSTALL_PREFIX /usr/local/)
 
@@ -26,10 +26,12 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 #	adjust to your likings
 
 #	Choose one of
-	set(SDRPLAY true)
+#	set(SDRPLAY true)
 	set(AIRSPY true)
-	set(DABSTICK true)
+#	set(DABSTICK true)
 #
+#######################################################################
+#	set(PYTHON true)
 ########################################################################
 	find_package (PkgConfig)
 
@@ -74,7 +76,12 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	           ./includes/various
 	           ./devices
 	           /usr/include/
+#	           /usr/include/python3.5m
 	)
+
+	if (PYTHON)
+	   include_directories (/usr/include/python3.5m)
+	endif (PYTHON)
 
 	set (${objectName}_HDRS
 	     ./dab-api.h
@@ -110,6 +117,13 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/various/ensemble-handler.h
 	     ./devices/virtual-input.h
 	)
+
+	if (PYTHON)
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ./dab-python.cpp
+           )
+	endif (PYTHON)
 
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
@@ -229,6 +243,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	          ${SNDFILES_INCLUDE_DIRS}
 	)
 
+	if (PYTHON)
+	   list(APPEND extraLibs -lpython3.5m)
+	endif (PYTHON)
 #####################################################################
 
 	add_library (${objectName} SHARED
@@ -255,4 +272,3 @@ configure_file(
 
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-
