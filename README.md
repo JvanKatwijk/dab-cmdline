@@ -137,9 +137,9 @@ Some technical data of the selected program is passed through a callback functio
 
 	A P I - F U N C T I O N S
 ---------------------------------------------------------------------
- The initialization function takes as parameters the immutable system are
+ The initialization function takes as parameters the immutable values for
  
-  1) the dabMode is just one of 1, 2 or 4 (Mode 3 is not supported),
+  1) the dabMode, is just one of 1, 2 or 4 (Mode 3 is not supported),
   
   2) the dabBand, see the type above,
   
