@@ -146,7 +146,7 @@ Some technical data of the selected program is passed through a callback functio
   
   3) the callback function for the sound handling or NULL if no sound output is required,
   
-  4) the callback for handling the dynamic label or NULL if no sound output is required.
+  4) the callback for handling the dynamic label or NULL if no text output is required.
 
 Note that by creating a dab-library, you already selected a device, so the handler software for the device is part of the library.
 The initialization function returns a non-NULL handle when the device could be opened for delivering input, otherwise it returns NULL.
