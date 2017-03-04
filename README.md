@@ -4,7 +4,7 @@
 
 DAB-CMDLINE is a DAB decoding program completely controlled through the command line.
 The program is derived from the DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
-It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors DAB-rpi and sdr-j-DAB programs.
+It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors, the  DAB-rpi and sdr-j-DAB programs.
 
 ===========================================================================
 There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
@@ -111,7 +111,7 @@ The type of the callback function providing the program names as appearing in th
 
  Note that this function is *required* to be provided for,
 
- The resulting audio (PCM) samples - if any - are returned as pairs of 16 bit integers, with the length (in items), and the baudrate as other parameters. The PCM samples are passed on by the library to the user through a user defined callback function.
+ The resulting audio (PCM) samples - if any - are returned as pairs of 16 bit integers, with the length (in 16 bit integers, not pairs), and the baudrate as other parameters. The PCM samples are passed to the user through a user defined callback function.
  The type of the callback function should be conformant to
 
 	typedef void (*cb_audio_t)(int16_t *, int, int);
@@ -122,7 +122,7 @@ The type of the callback function providing the program names as appearing in th
  
 	typedef void (*cb_data_t)(std::string);
 
- if a NULL is provided, no data will be transferred.
+ if a NULL is provided, no data will be transferred. 
 
 Some technical data of the selected program is passed through a callback function, whose type is to be conformant to
 
@@ -147,8 +147,8 @@ Some technical data of the selected program is passed through a callback functio
   
   4) the callback for handling the dynamic label or NULL if no sound output is required.
 
-Note that by creating a dab-library, you already selected and a device, so the handler software for the device is part of the library.
-The initialization function returns a non-NULL handle when the device could be opened for delivery input, otherwise it returns NULL.
+Note that by creating a dab-library, you already selected a device, so the handler software for the device is part of the library.
+The initialization function returns a non-NULL handle when the device could be opened for delivering input, otherwise it returns NULL.
  
 	void	*dab_initialize	(uint8_t,	// dab Mode
 	                         dabBand,	// Band
@@ -156,9 +156,9 @@ The initialization function returns a non-NULL handle when the device could be o
 	                         cb_data_t	// callback for dynamic labels
 	                         );
 	
-The return valie, i.e. the handle, is used to identify the library instance in the other functions defined in the API.
+The return value, i.e. the handle, is used to identify the library instance in the other functions defined in the API.
   
-The gain of the device can be set and changed to a value  in the range 0 .. 100 using the function dab_Gain. The parameter value is mapped upon an appropriate value for the device
+The gain of the device can be set and changed to a value in the range 0 .. 100 using the function dab_Gain. The parameter value is mapped upon an appropriate value for the device
   
 	void	dab_Gain	(void *handle, uint16_t);	
 
@@ -166,16 +166,22 @@ The gain of the device can be set and changed to a value  in the range 0 .. 100 
  If the software was already running for another channel, then the thread running the software will be halted first.
  
      bool	dab_Channel	(void *handle, std::string);
+ 
+ The function returns - pretty obvious - true if the string for the channel could be recognized and the device could be set to the associated frequency, if not the function returns false (e.g. "23C" is a non-existent channel in Band III.
 
-The function dab_run will start a separate thread, running the dab decoding software at the selected channel. If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble. If no data was found, the boolean parameter is set to false, and the list is empty. 
+The function dab_run will start a separate thread, running the dab decoding software at the selected channel. Behaviour is undefined if no channel was selected. If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble. If no data was found, the boolean parameter is set to false, and the list is empty. 
  
  Note that the thread executing the dab decoding will continue to run.
  
      void	dab_run		(void *handle, cb_ensemble_t);
 
- With dab_Service, the user may - finally - select a program to be decoded. This - obviously only makes sense when there are programs and "dab_run" is still active. The name of the program may be a prefix of the real name, however, letter case is important.
+ With dab_Service, the user may - finally - select a program to be decoded. This - obviously only makes sense when there are programs and "dab_run" is still active. The name of the program may be a prefix of the real name, however, letter case is important. 
  
      bool	dab_Service	(void *handle, std::string, cb_programdata_t);
+     
+To allow selecting a program using the serviceId, a function as the one above is available where the std::string is replaced by the value of the serviceId.
+
+     bool	dab_Service	(void *handle, int32_t, cb_programdata_t);
 
 The function stop will stop the running of the thread that is executing the dab decoding software
 
@@ -192,7 +198,7 @@ The function stop will stop the running of the thread that is executing the dab 
 	
 An experiment is being done to interface the library to Python 3. A wrapper for the API is to be found in the file dab-python.cpp and a simple Python program (not included, available on request) was written to control the library through this interface and to process the resulting sound samples.
 
-Default the Python interface is not included in the library. In order to include the wrapper in the library, one has to uncomment
+By default the Python interface wrapper is not included in the library. In order to include the wrapper in the library, one has to uncomment
 
 	set (PYTHON true) 
 
@@ -201,7 +207,7 @@ in the CMakeLists.txt file (and adapt the path name(s) in the CMakeLists.txt fil
 The results of the experiment are as yet not completely satisfactory: the current experiment uses the soundDevice.py software,
 and while there is sound, there is too much stuttering to enjoy the result. The stuttering is probably due to the pretty large amounts of callbacks that are to be executed and the in-between buffering that is done between the callback from the dab-library and the callback from the soundDevice software.
 
-===========================================================================
+=================================================================================================
 
 	Copyright (C)  2016, 2017
 	Jan van Katwijk (J.vanKatwijk@gmail.com)
