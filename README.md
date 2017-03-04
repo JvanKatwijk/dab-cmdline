@@ -136,6 +136,7 @@ Some technical data of the selected program is passed through a callback functio
  if a NULL is provided, no data will be transferred.
 
 	A P I - F U N C T I O N S
+	
 ---------------------------------------------------------------------
  The initialization function takes as parameters the immutable values for
  
@@ -167,7 +168,7 @@ The gain of the device can be set and changed to a value in the range 0 .. 100 u
  
      bool	dab_Channel	(void *handle, std::string);
  
- The function returns - pretty obvious - true if the string for the channel could be recognized and the device could be set to the associated frequency, if not the function returns false (e.g. "23C" is a non-existent channel in Band III.
+ The function returns - pretty obvious - true if the string for the channel could be recognized and the device could be set to the associated frequency, if not the function returns false (e.g. "23C" is a non-existent channel in Band III).
 
 The function dab_run will start a separate thread, running the dab decoding software at the selected channel. Behaviour is undefined if no channel was selected. If after some time, DAB data, i.e. an ensemble, is found, then the function passed as callback is called with the boolean parameter set to true, and the std::list of strings, representing the names of the programs in that ensemble. If no data was found, the boolean parameter is set to false, and the list is empty. 
  
