@@ -193,9 +193,9 @@ The exit function will close down the library software and will set the handle, 
 
 
 The use of Python for the GUI
-=============================================================================================
+===============================================================================
 	
-An experiment is being done to interface the library to Python 3. A wrapper for the API is to be found in the file `dab-python.cpp` and a simple Python program (not included, available on request) was written to control the library through this interface and to process the resulting sound samples.
+An experiment is being done to interface the library to Python 3. A wrapper for the API is to be found in the file `dab-python.cpp` and a simple Python program was written to control the library through this interface and to process the resulting sound samples. 
 
 By default the Python interface wrapper is not included in the library. In order to include the wrapper in the library, one has to uncomment
 
@@ -207,7 +207,7 @@ The results of the experiment are as yet not completely satisfactory: the curren
 and while there is sound, there is too much stuttering to enjoy the result. The stuttering is probably due to the pretty large amounts of callbacks that are to be executed and the in-between buffering that is done between the callback from the dab-library and the callback from the soundDevice software.
 
 
-=================================================================================================
+===============================================================================
 	
 	Copyright (C)  2016, 2017
 	Jan van Katwijk (J.vanKatwijk@gmail.com)

@@ -1,0 +1,4 @@
+
+cmdline.py  is a simple command line interface for use with the dab library.
+Rename the library "dablib.so" and add it to this folder.
+

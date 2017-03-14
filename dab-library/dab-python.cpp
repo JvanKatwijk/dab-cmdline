@@ -46,8 +46,8 @@ PyObject *PyInit_dablib		(void);
 //	We need to define 'C' callback functions, whose purpose
 //	is to call the appropriate Python function
 //
-//	We do not know (yet) how to handle a list of strings,
-//	so for the time being, we'll skip that one
+//	The list of strings - if any - is packed ito a tuple
+//	and passed as parameter.
 //	typedef void (*cb_ensemble_t)(std::list<std::string>, bool);
 static
 PyObject *callbackEnsemble	= NULL;
@@ -146,6 +146,9 @@ PyObject	*result;
 //
 //	Here the real API starts
 //
+//	waiting time i an undocumented parameter, indicating the
+//	time we will wait before deciding we have an ensemble
+//
 //	void	*dab_initialize	(uint8_t,	// dab Mode
 //	                         dabBand,	// Band
 //	                         cb_audio_t,	// callback for sound output
@@ -155,8 +158,8 @@ PyObject	*result;
 PyObject *dab_initialize_p (PyObject *self, PyObject *args) {
 int	theMode	= 127;
 int	theBand	= 127;
-PyObject * cba;
-PyObject * cbd;
+PyObject *cba;
+PyObject *cbd;
 int16_t	delayTime;
 void	*result;
 int	r;
