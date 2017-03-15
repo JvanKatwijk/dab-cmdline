@@ -111,7 +111,7 @@ PyGILState_STATE gstate;
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("(z)", str. c_str ());
 	result  = PyEval_CallObject (callbackData, arglist);
-	Py_DECREF (arglist);
+//	Py_DECREF (arglist);
 	PyGILState_Release (gstate);
 }
 
