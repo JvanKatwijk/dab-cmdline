@@ -81,19 +81,22 @@ PyObject *arglist;
 PyObject *result;
 PyObject *theArray;
 PyGILState_STATE gstate;
-npy_intp dims [1];
-float data [size];
+npy_intp dims [2];
+float data [size / 2][2];
 int	i;
 
-	dims [0] = size;
+	dims [0] = size / 2;
+	dims [1] =  2;
 	if (size == 0)
 	   return;
-	for (i = 0; i < size; i ++) 
-	   data [i] = b [i] / 32767.0;
+	for (i = 0; i < size / 2; i ++) {
+	   data [i] [0] = b [2 * i] / 32767.0;
+	   data [i] [1] = b [2 * i + 1] / 32767.0;
+	}
 	gstate	= PyGILState_Ensure ();
-	theArray = PyArray_SimpleNewFromData (1, dims,
+	theArray = PyArray_SimpleNewFromData (2, dims,
 	                            NPY_FLOAT, (void *)data);
-	arglist = Py_BuildValue ("Ohh", theArray, size, rate);
+	arglist = Py_BuildValue ("Ohh", theArray, size / 2, rate);
 	result  = PyEval_CallObject (callbackAudio, arglist);
 	Py_DECREF (arglist);
 	Py_DECREF (theArray);

@@ -13,8 +13,8 @@ run		= 0	# global flag
 
 #the simulated queue for passing data from the callback to the sounddevice
 #is large, it may contain to up to 10 seconds of sound
-bufSize		= 10 * 2 * 48000
-dataBuffer	= numpy. zeros ((1, bufSize), dtype=float);
+bufSize		= 10 * 48000
+dataBuffer	= numpy. zeros ((bufSize, 2), dtype=float);
 inp		= 0;
 outp		= 0;
 #
@@ -45,8 +45,9 @@ def	program_data (a, b, c, d, e):
    print ("bitrate      = ", e);
 
 #
-# callblockHandler is called whenever the library decided
-# that an ensemble is there or could not be found
+# callblockHandler is called when the library has decided
+# that either an ensemble is there or none could be found
+#The thing to be done is then to select a program
 def	callblockHandler (s, b):
     global run
     if (b):
@@ -77,16 +78,17 @@ def pcmHandler (buffer, size, rate):
     else:
        amount = size;
 #and just skip incoming samples if the queue is (almost) full
-    amount = int (amount / 2)
 #if the incoming buffer fits, we keep it simple
-    if (inp + 2 * amount < bufSize):
-       dataBuffer [0, inp : inp + 2 * amount] = buffer;
+    if (inp + amount < bufSize):
+       dataBuffer [inp : inp + amount, 0] = buffer [:,0];
+       dataBuffer [inp : inp + amount, 1] = buffer [:,1];
     else:
 #we need to split this up into two faster array assignments
-       for x in range (0, 2 * amount - 1):
-          dataBuffer [0, (inp + x) % bufSize] = buffer [x];
+       for x in range (0, amount - 1):
+          dataBuffer [(inp + x) % bufSize, 0] = buffer [x, 0];
+          dataBuffer [(inp + x) % bufSize, 1] = buffer [x, 1];
 #and of course we update the inp pointer
-    inp = (inp + 2 *  amount) % bufSize;
+    inp = (inp + amount) % bufSize;
     
 # callback is called by the sound software whenever that is ready to 
 # handle a new buffer (the client better be prepared to have data available)
@@ -99,16 +101,17 @@ def sound_callback (outdata, frames, time, status):
     else:
        avail = bufSize - outp + inp - 1;
 
-    if (avail < 2 * frames):
-       amount = int (avail / 2);
+    if (avail < frames):
+       amount = avail;
     else:
        amount = frames;
+#
+# we then copy the data from the queue to the array that was passed
+# as parameter.
 
-#we cannot just do an array assignment, since the outdata is not
-#interleaved as the incoming data
     for x in range (0, amount - 1):
-       outdata [x, 0] = dataBuffer [0, (outp + 2 * x) % bufSize];
-       outdata [x, 1] = dataBuffer [0, (outp + 2 * x + 1) % bufSize];
+       outdata [x, 0] = dataBuffer [(outp + x) % bufSize, 0];
+       outdata [x, 1] = dataBuffer [(outp + x) % bufSize, 1];
 
 # if we did not have enough data in the buffer, adjust with zeros
     if (amount < frames):
@@ -116,7 +119,7 @@ def sound_callback (outdata, frames, time, status):
           outdata [x, 0] = 0;
           outdata [x, 1] = 0;
 # and at last, increment the outp pointer in the data buffer
-    outp = (outp + 2 * amount) % bufSize;
+    outp = (outp + amount) % bufSize;
 
 #
 # real work, initialize the library
