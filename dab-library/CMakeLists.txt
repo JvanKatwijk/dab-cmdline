@@ -31,7 +31,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 #	set(DABSTICK true)
 #
 #######################################################################
-	set(PYTHON true)
+#	set(PYTHON true)
 ########################################################################
 	find_package (PkgConfig)
 
