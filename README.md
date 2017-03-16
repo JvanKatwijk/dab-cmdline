@@ -3,10 +3,10 @@ DAB-CMDLINE in C++ and Python
 ========================================================================
 
 DAB-CMDLINE is a DAB decoding program completely controlled through the command line.
-The program is derived from the DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
+The program is derived from the (obsolete)  DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
 It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors, the  DAB-rpi and sdr-j-DAB programs.  
 
-There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library. 
+There is an obvious need - at least felt by me - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library. 
 
 The library provides entries for the functionality through some simple calls, while a few callback functions provide the communication back from the library to the gui.
 
@@ -66,7 +66,7 @@ Note again, that the choice for the input device was fixed when creating the dab
 An example of a full specification of the command line is
 
 	./linux/dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
-The program - when started - will try to identify a DAB datastream in the selected channel. If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt.
+The program - when started - will try to identify a DAB datastream in the selected channel (here channel 12C). If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded.
 	
 Command line parameters for the Python3 version
 ---------------------------------------------------------------------------------------------------
@@ -83,13 +83,13 @@ An example of a full specfification of the command line is
 
 	python3 cmdline.py -M 1 -C 12C -p "Radio 4" -G 80 -A default
 	
-The program - when started - will try to identify a DAB datastream in the selected channel. If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt.
+The program - when started - will try to identify a DAB datastream in the selected channel. If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded..
 
 
 Creating the library
 -----------------------------------------------------------------------------------------------
 
-The library can be created by adapting the `CMakeLists.txt` file in the dab-library directory and running
+The library can be created by - if needed - adapting the `CMakeLists.txt` file in the dab-library directory and running
 
 	mkdir build 
 	cd build 
