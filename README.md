@@ -73,8 +73,9 @@ An example of a full specfification of the command line is
 
 	python3 cmdline.py -M 1 -C 12C -p "Radio 4" -G 80 -A default
 
-	
-==============================================================================
+
+Creating the library
+-----------------------------------------------------------------------------------------------
 
 The library can be created by adapting the `CMakeLists.txt` file in the dab-library directory and running
 
