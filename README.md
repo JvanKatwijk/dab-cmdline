@@ -66,6 +66,7 @@ Note again, that the choice for the input device was fixed when creating the dab
 An example of a full specification of the command line is
 
 	./linux/dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
+The program - when started - will try to identify a DAB datastream in the selected channel. If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt.
 	
 Command line parameters for the Python3 version
 ---------------------------------------------------------------------------------------------------
@@ -81,6 +82,8 @@ is given, the assumptions on the parameters are as given above.
 An example of a full specfification of the command line is
 
 	python3 cmdline.py -M 1 -C 12C -p "Radio 4" -G 80 -A default
+	
+The program - when started - will try to identify a DAB datastream in the selected channel. If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt.
 
 
 Creating the library
