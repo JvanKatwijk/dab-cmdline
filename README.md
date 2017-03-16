@@ -8,15 +8,23 @@ It can be considered the GUI-less equivalent to the Qt-DAB program, that was als
 
 There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library. 
 
-The library provides entries for the functionality through through some simple calls, while a few callback functions provide the communication back from the library.
+The library provides entries for the functionality through some simple calls, while a few callback functions provide the communication back from the library to the gui.
 
-To show the use of the library, two - functioning - command-line handlers are included in this repository, one written in C++, the second one in Python.
+To show the use of the library, two - functioning - command-line handlers are included in this repository, one written in C++, the second one in Python. The sources can be found in the directory "example" resp. "python".
 
 
 Command-line Parameters for the C++ version
 -----------------------------------------------------------------------
 
-An example of the use of the library are the two command line based programs, the sources of which are given in the directory "example" and "python". The C++ program, when compiled and linked (a `CMakeLists.txt` file for use with cmake is available) supports the following Command line parameters:
+The C++ command line program can be compiled using cmake. Of course, the dab library (see a next section) should have been installed. Libraries needed are libsamplerate and portaudio.
+The sequence to create the executable then is
+
+	mkdir build
+	cd build
+	cmake ..
+	make
+
+The program accepts the following command line parameters:
 
 	-B Band
 selects the DAB band (default Band III),
@@ -62,7 +70,8 @@ An example of a full specification of the command line is
 Command line parameters for the Python3 version
 ---------------------------------------------------------------------------------------------------
 
-The Python version supports the same set of parameters, apart from setting the band.
+The Python version supports the same set of parameters, apart from setting the band. The Python program is located in the directory "Python". Execution assumes the availability of the packages numpy and sounddevice and - obviously - the library.
+Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and renamed "dablib.so".
 
 For each of the parameters, there is a default, i.e. if the command
 
