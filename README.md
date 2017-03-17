@@ -17,7 +17,7 @@ Command-line Parameters for the C++ version
 -----------------------------------------------------------------------
 
 The C++ command line program can be compiled using cmake. Of course, the dab library (see a next section) should have been installed. Libraries needed are libsamplerate and portaudio.
-The sequence to create the executable then is
+The sequence to create the executable then is (after changing the directory to the directory "example")
 
 	mkdir build
 	cd build
@@ -72,7 +72,7 @@ Command line parameters for the Python3 version
 ---------------------------------------------------------------------------------------------------
 
 The Python version supports the same set of parameters, apart from setting the band. The Python program is located in the directory "Python". Execution assumes the availability of the packages numpy and sounddevice and - obviously - the library.
-Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and renamed "dablib.so".
+Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and copying a renamed version, "dablib.so" to the Python directory.
 
 For each of the parameters, there is a default, i.e. if the command
 
@@ -96,10 +96,12 @@ The library can be created by - if needed - adapting the `CMakeLists.txt` file i
 	cmake .. 
 	make 
 	sudo make install
+	
+from within the dab-library directory.
 
 IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
 
-Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the `CMakeLists.txt` file before running the sequence mentioned above.
+Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the `CMakeLists.txt` file before running the sequence mentioned above, since I am experimenting with all three, it might happen that your choice is not the selected one.
 
 ============================================================================
 Libraries (together with the "development" or ".h" files) needed for creating the library are
