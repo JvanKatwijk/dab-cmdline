@@ -17,7 +17,7 @@ Command-line Parameters for the C++ version
 -----------------------------------------------------------------------
 
 The C++ command line program can be compiled using cmake. Of course, the dab library (see a next section) should have been installed. Libraries needed are libsamplerate and portaudio.
-The sequence to create the executable then is (after changing the directory to the directory "example")
+The sequence to create the executable then is (after changing the working directory to the directory "example")
 
 	mkdir build
 	cd build
