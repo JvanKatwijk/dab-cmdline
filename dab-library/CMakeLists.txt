@@ -27,11 +27,12 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 #	Choose one of
 #	set(SDRPLAY true)
-	set(AIRSPY true)
+#	set(AIRSPY true)
 #	set(DABSTICK true)
 #
-#######################################################################
-	set(PYTHON true)
+########################################################################
+# if you are compiling the wrapper for Python in, uncomment
+#	set(PYTHON true)
 ########################################################################
 	find_package (PkgConfig)
 

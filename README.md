@@ -1,20 +1,30 @@
 
-DAB-CMDLINE
+DAB-CMDLINE in C++ and Python
 ========================================================================
 
 DAB-CMDLINE is a DAB decoding program completely controlled through the command line.
-The program is derived from the DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
-It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors, the  DAB-rpi and sdr-j-DAB programs.
+The program is derived from the (obsolete)  DAB-rpi and the sdr-j-DAB programs, however, no use is made of any GUI package.
+It can be considered the GUI-less equivalent to the Qt-DAB program, that was also derived from its predecessors, the  DAB-rpi and sdr-j-DAB programs.  
 
-There is an obvious need - at least one that I have - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library.
+There is an obvious need - at least felt by me - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library. 
 
-The library provides entries for the functionality through through some simple calls, while a few callback functions provide the communication back from the library.
+The library provides entries for the functionality through some simple calls, while a few callback functions provide the communication back from the library to the gui.
+
+To show the use of the library, two - functioning - command-line handlers are included in this repository, one written in C++, the second one in Python. The sources can be found in the directory "example" resp. "python".
 
 
-Commandline Parameters
+Command-line Parameters for the C++ version
 -----------------------------------------------------------------------
 
-An example of the use of the library is a simple command line based program, the sources of which are given in the directory "example". This program, when compiled and linked (a `CMakeLists.txt` file for use with cmake is available) supports the following Command line parameters:
+The C++ command line program can be compiled using cmake. Of course, the dab library (see a next section) should have been installed. Libraries that are further needed are libsamplerate and portaudio.
+The sequence to create the executable then is (after changing the working directory to the directory "example")
+
+	mkdir build
+	cd build
+	cmake ..
+	make
+
+The program accepts the following command line parameters:
 
 	-B Band
 selects the DAB band (default Band III),
@@ -56,19 +66,46 @@ Note again, that the choice for the input device was fixed when creating the dab
 An example of a full specification of the command line is
 
 	./linux/dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
+The program - when started - will try to identify a DAB datastream in the selected channel (here channel 12C). If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded.
 	
-============================================================================
-The library can be created by adapting the `CMakeLists.txt` file in the dab-library directory and running
+Command line parameters for the Python3 version
+---------------------------------------------------------------------------------------------------
+
+The Python version supports the same set of parameters, apart from setting the band. The Python program is located in the directory "Python". Execution assumes the availability of the packages numpy and sounddevice and - obviously - the library.
+Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and copying a renamed version, 
+
+	"dablib.so" 
+	
+to the Python directory.
+
+For each of the parameters, there is a default, i.e. if the command
+
+	python3 cmdline.py
+	
+is given, the assumptions on the parameters are as given above.
+An example of a full specfification of the command line is
+
+	python3 cmdline.py -M 1 -C 12C -p "Radio 4" -G 80 -A default
+	
+The program - when started - will try to identify a DAB datastream in the selected channel. If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded..
+
+
+Creating the library
+-----------------------------------------------------------------------------------------------
+
+The library can be created by - if needed - adapting the `CMakeLists.txt` file in the dab-library directory and running
 
 	mkdir build 
 	cd build 
 	cmake .. 
 	make 
 	sudo make install
+	
+from within the dab-library directory.
 
 IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
 
-Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the `CMakeLists.txt` file before running the sequence mentioned above.
+Note that - to keep things simple - the supported device, i.e. one of dabstick, airspy or sdrplay, is "compiled in" the library, so do not forget to select the device by adapting the `CMakeLists.txt` file before running the sequence mentioned above, since I am experimenting with all three, it might happen that your choice is not the selected one.
 
 ============================================================================
 Libraries (together with the "development" or ".h" files) needed for creating the library are
@@ -192,10 +229,10 @@ The exit function will close down the library software and will set the handle, 
      void	dab_exit	(void **handle);
 
 
-The use of Python for the GUI
+Creating the library for use with Python for the GUI
 ===============================================================================
 	
-An experiment is being done to interface the library to Python 3. A wrapper for the API is to be found in the file `dab-python.cpp`.
+A wrapper for the API is to be found in the file `dab-python.cpp`.
 
 By default the Python interface wrapper is not automatically included in the library. In order to include the wrapper in the library, one has to uncomment
 
@@ -203,9 +240,6 @@ By default the Python interface wrapper is not automatically included in the lib
 
 in the `CMakeLists.txt` file (and adapt the path name(s) in the `CMakeLists.txt` file).
 
-
-A simple Python program was written to control the library through this interface and to process the resulting sound samples. While it is highly experimental,
-it seems to work fine.
 
 ===============================================================================
 	
