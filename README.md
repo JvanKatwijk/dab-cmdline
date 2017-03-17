@@ -72,7 +72,11 @@ Command line parameters for the Python3 version
 ---------------------------------------------------------------------------------------------------
 
 The Python version supports the same set of parameters, apart from setting the band. The Python program is located in the directory "Python". Execution assumes the availability of the packages numpy and sounddevice and - obviously - the library.
-Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and copying a renamed version, "dablib.so" to the Python directory.
+Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and copying a renamed version, 
+
+	"dablib.so" 
+	
+to the Python directory.
 
 For each of the parameters, there is a default, i.e. if the command
 
