@@ -24,6 +24,7 @@
 #include	"msc-handler.h"
 #include	"fic-handler.h"
 #include	"fft.h"
+#include	"dab-api.h"
 //
 
 /**
@@ -40,6 +41,7 @@
 
 	ofdmProcessor::ofdmProcessor	(virtualInput	*inputDevice,
 	                                 DabParams	*params,
+	                                 cb_system_data_t systemData,
 	                                 mscHandler 	*msc,
 	                                 ficHandler 	*fic,
 	                                 int16_t	threshold,
@@ -52,6 +54,7 @@
 int32_t	i;
 	this	-> inputDevice		= inputDevice;
 	this	-> params		= params;
+	this	-> systemData		= systemData;
 	this	-> freqsyncMethod	= freqsyncMethod;
 	this	-> T_null		= params	-> T_null;
 	this	-> T_s			= params 	-> T_s;
@@ -90,6 +93,7 @@ int32_t	i;
 	for (i = 0; i < CORRELATION_LENGTH; i ++)  {
 	   refArg [i] = arg (phaseSynchronizer. refTable [(T_u + i) % T_u] *
 	              conj (phaseSynchronizer. refTable [(T_u + i + 1) % T_u]));
+	isSynced	= false;
 	}
 }
 
@@ -121,7 +125,7 @@ void	ofdmProcessor::start	(void) {
   *	and getting a vector full of samples
   */
 
-DSPCOMPLEX ofdmProcessor::getSample (int32_t phase) {
+DSPCOMPLEX ofdmProcessor::getSample (int32_t freqOffset) {
 DSPCOMPLEX temp;
 	
 	if (!running. load ())
@@ -144,21 +148,23 @@ DSPCOMPLEX temp;
 //
 //	OK, we have a sample!!
 //	first: adjust frequency. We need Hz accuracy
-	localPhase	-= phase;
+	localPhase	-= freqOffset;
 	localPhase	= (localPhase + INPUT_RATE) % INPUT_RATE;
 	temp		*= oscillatorTable [localPhase];
 	sLevel		= 0.00001 * jan_abs (temp) + (1 - 0.00001) * sLevel;
 #define	N	5
 	sampleCnt	++;
 	if (++ sampleCnt > INPUT_RATE / N) {
-//	may be we add here something
+	   call_systemData (isSynced,
+	                    my_ofdmDecoder. get_snr (),
+	                    freqOffset);
 	   sampleCnt = 0;
 	}
 	return temp;
 }
 //
 
-void	ofdmProcessor::getSamples (DSPCOMPLEX *v, int16_t n, int32_t phase) {
+void	ofdmProcessor::getSamples (DSPCOMPLEX *v, int16_t n, int32_t freqOffset) {
 int32_t		i;
 
 	if (!running. load ())
@@ -180,7 +186,7 @@ int32_t		i;
 //	OK, we have samples!!
 //	first: adjust frequency. We need Hz accuracy
 	for (i = 0; i < n; i ++) {
-	   localPhase	-= phase;
+	   localPhase	-= freqOffset;
 	   localPhase	= (localPhase + INPUT_RATE) % INPUT_RATE;
 	   v [i]	*= oscillatorTable [localPhase];
 	   sLevel	= 0.00001 * jan_abs (v [i]) + (1 - 0.00001) * sLevel;
@@ -188,6 +194,9 @@ int32_t		i;
 
 	sampleCnt	+= n;
 	if (sampleCnt > INPUT_RATE / N) {
+	   systemData (isSynced,
+	               my_ofdmDecoder. get_snr (),
+	               freqOffset);
 	   sampleCnt = 0;
 	}
 }
@@ -224,6 +233,7 @@ Initing:
 notSynced:
 	   syncBufferIndex	= 0;
 	   currentStrength	= 0;
+	   isSynced		= false;
 
 //	read in T_s samples for a next attempt;
 	   syncBufferIndex = 0;
@@ -306,6 +316,8 @@ SyncOnPhase:
   */
 	      goto notSynced;
 	   }
+
+	   isSynced	= true;
 /**
   *	Once here, we are synchronized, we need to copy the data we
   *	used for synchronization for block 0
@@ -538,3 +550,9 @@ DSPFLOAT	oldMax	= 0;
 	}
 	return maxIndex - (T_u - params -> K) / 2;
 }
+
+void	ofdmProcessor::call_systemData (bool f, int16_t snr, int32_t freq) {
+	if (systemData != NULL)
+	   systemData (f, snr, freq);
+}
+

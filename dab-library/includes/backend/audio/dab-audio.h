@@ -44,7 +44,8 @@ public:
 	                 bool	shortForm,
 	                 int16_t protLevel,
 	                 cb_audio_t,
-	                 cb_data_t);
+	                 cb_data_t,
+	                 cb_msc_quality_t);
 	~dabAudio	(void);
 int32_t	process		(int16_t *, int16_t);
 void	stopRunning	(void);

@@ -217,8 +217,9 @@ struct quantizer_spec quantizer_table [17] = {
 //	(J van Katwijk)
 ////////////////////////////////////////////////////////////////////////////////
 
-	mp2Processor::mp2Processor (int16_t bitRate,
-	                            cb_audio_t soundOut) {
+	mp2Processor::mp2Processor (int16_t		bitRate,
+	                            cb_audio_t		soundOut,
+	                            cb_msc_quality_t	mscQuality) {
 int16_t	i, j;
 int16_t *nPtr = &N [0][0];
 
@@ -367,7 +368,7 @@ int32_t table_idx;
 
 	numberofFrames ++;
 	if (numberofFrames >= 50) {
-//	   show_successRate (100 - 2 * errorFrames);
+	   mscQuality (2 * (50 - errorFrames), 0, 0);
 	   numberofFrames	= 0;
 	   errorFrames		= 0;
 	}

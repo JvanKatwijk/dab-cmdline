@@ -22,29 +22,31 @@
  *	This charset handling was kindly added by Przemyslaw Wegrzyn	
  *	all rights acknowledged
  */
-#ifndef __CHARSETS_H
-#define __CHARSETS_H
+#ifndef __CHARSETS_H__
+#define __CHARSETS_H__
 
+#include	<cstring>
 #include	<string>
 /*
  * Codes assigned to character sets, as defined
  * in ETSI TS 101 756 v1.6.1, section 5.2.
  */
 typedef enum {
-    EbuLatin = 0x00, // Complete EBU Latin based repertoire - see annex C
+    EbuLatin	= 0x00, // Complete EBU Latin based repertoire - see annex C
     UnicodeUcs2 = 0x06,
     UnicodeUtf8 = 0x0F
 } CharacterSet;
 
 /**
- * Converts the null-terminated character string to QString, using a given character set.
+ * Converts the null-terminated character string to std::string,
+ * using a given character set.
  *
  * @param buffer    null-terminated buffer to convert
  * @param charset   character set used in buffer
  * @return converted QString
  */
-std::string toQStringUsingCharset(const char* buffer,
-	                          CharacterSet charset, int size = -1);
+std::string toStringUsingCharset(const char* buffer,
+	                         CharacterSet charset, int size = -1);
 
 #endif // CHARSETS_H
 

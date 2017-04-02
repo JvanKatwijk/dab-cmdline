@@ -47,10 +47,12 @@ uint8_t PI_X [24] = {
   * 	puncturing.
   *	The data is sent through to the fic processor
   */
-		ficHandler::ficHandler (ensembleHandler *eh):
+		ficHandler::ficHandler (ensembleHandler *eh,
+	                                cb_fib_quality_t fq):
 	                                             viterbi (768),
 	                                             fibProcessor (eh) {
 int16_t	i, j;
+	fibQuality	= fq;
 	bitBuffer_out	= new uint8_t [768];
 	ofdm_input 	= new int16_t [2304];
 	index		= 0;
@@ -215,9 +217,10 @@ int16_t	viterbiBlock [3072 + 24];
 	for (i = ficno * 3; i < ficno * 3 + 3; i ++) {
 	   uint8_t *p = &bitBuffer_out [(i % 3) * 256];
 	   if (!check_CRC_bits (p, 256)) {
-//	      show_ficCRC (false);
+	      show_ficCRC (false);
 	      continue;
 	   }
+	   show_ficCRC (true);
 	   fibProtector. lock ();
 	   fibProcessor. process_FIB (p, ficno);
 	   fibProtector. unlock ();
@@ -261,3 +264,17 @@ bool	ficHandler::syncReached	(void) {
 std::string ficHandler::nameFor (int32_t serviceId) {
 	return fibProcessor. nameFor (serviceId);
 }
+
+static	int 	pos	= 0;
+static	int	amount = 0;
+void	ficHandler::show_ficCRC (bool b) {
+	if (b) 
+	   pos ++;
+	if ((++amount > 100) && (fibQuality != NULL)) {
+	   fibQuality (pos);
+	   pos	= 0;
+	   amount	= 0;
+	}
+}
+
+	

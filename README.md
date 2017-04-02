@@ -69,7 +69,7 @@ An example of a full specification of the command line is
 The program - when started - will try to identify a DAB datastream in the selected channel (here channel 12C). If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded.
 	
 Command line parameters for the Python3 version
----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------
 
 The Python version supports the same set of parameters, apart from setting the band. The Python program is located in the directory "Python". Execution assumes the availability of the packages numpy and sounddevice and - obviously - the library.
 Note that Python binds to C functions by dynamically loading a shared library - in this case the dab library, built with the Python wrapper functions, and copying a renamed version, 

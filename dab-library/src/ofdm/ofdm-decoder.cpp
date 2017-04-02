@@ -55,8 +55,7 @@ int16_t	i;
 	fft_buffer			= fft_handler -> getVector ();
 	phaseReference			= new DSPCOMPLEX [T_u];
 //
-	snrCount		= 0;
-	snr			= 0;	
+	current_snr		= 0;	
 
 /**
   *	When implemented in a thread, the thread controls the
@@ -183,11 +182,7 @@ void	ofdmDecoder::processBlock_0 (void) {
   *	within the signal region and bits outside.
   *	It is just an indication
   */
-	snr		= 0.7 * snr + 0.3 * get_snr (fft_buffer);
-	if (++snrCount > 10) {
-//	   show_snr (snr);
-	   snrCount = 0;
-	}
+	current_snr	= 0.7 * current_snr + 0.3 * get_snr (fft_buffer);
 /**
   *	we are now in the frequency domain, and we keep the carriers
   *	as coming from the FFT as phase reference.
@@ -298,5 +293,9 @@ int16_t	high	= low + carriers;
 	for (i = T_u / 2 - carriers / 4;  i < T_u / 2 + carriers / 4; i ++)
 	   signal += abs (v [(T_u / 2 + i) % T_u]);
 	return get_db (signal / (carriers / 2)) - get_db (noise);
+}
+
+int16_t	ofdmDecoder::get_snr	(void) {
+	return current_snr;
 }
 

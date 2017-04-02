@@ -33,10 +33,10 @@
 #include	<stdint.h>
 #include	"virtual-input.h"
 #ifdef	HAVE_DABSTICK
-#include	"dabstick.h"
+#include	"rtlsdr-handler.h"
 #endif
 #ifdef	HAVE_SDRPLAY
-#include	"sdrplay.h"
+#include	"sdrplay-handler.h"
 #endif
 #ifdef	HAVE_AIRSPY
 #include	"airspy-handler.h"
@@ -52,7 +52,10 @@ void	*dab_initialize	(uint8_t	dabMode,  // dab Mode
 	                 dabBand	band,	  // Band
 	                 cb_audio_t	soundOut, // callback for sound output
 	                 cb_data_t	dataOut,  // callback for sound output
-	                 int16_t	waitingTime 
+	                 int16_t	waitingTime,
+	                 cb_system_data_t sysdata,
+	                 cb_fib_quality_t fibQuality,
+	                 cb_msc_quality_t mscQuality
 	                 ) {
 virtualInput *inputDevice;
 
@@ -65,7 +68,10 @@ virtualInput *inputDevice;
 	                              band,
 	                              waitingTime,
 	                              soundOut,
-	                              dataOut));
+	                              dataOut,
+	                              sysdata,
+	                              fibQuality,
+	                              mscQuality));
 }
 	   
 void	dab_Gain	(void *handle, uint16_t g) {
@@ -146,7 +152,7 @@ virtualInput	*inputDevice;
 	else 
 	   return inputDevice;
 #elif defined (HAVE_SDRPLAY)
-	inputDevice	= new sdrplay (&success, 60, Mhz (220));
+	inputDevice	= new sdrplayHandler (&success, 60, Mhz (220));
 	if (!success) {
 	   delete inputDevice;
 	   return NULL;
@@ -154,7 +160,7 @@ virtualInput	*inputDevice;
 	else 
 	   return inputDevice;
 #elif defined (HAVE_DABSTICK)
-	inputDevice	= new dabStick (&success, 75, KHz (220000));
+	inputDevice	= new rtlsdrHandler (&success, 75, KHz (220000));
 	if (!success) {
 	   delete inputDevice;
 	   return NULL;

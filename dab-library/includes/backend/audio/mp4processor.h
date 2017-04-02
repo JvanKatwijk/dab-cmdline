@@ -43,13 +43,15 @@ class	mp4Processor : public dabProcessor {
 public:
 			mp4Processor	(int16_t,
 	                                 cb_audio_t,
-	                                 cb_data_t);
+	                                 cb_data_t,
+	                                 cb_msc_quality_t);
 			~mp4Processor	(void);
 	void		addtoFrame	(uint8_t *);
 private:
 	bool		processSuperframe (uint8_t [], int16_t);
 	cb_audio_t	soundOut;
 	cb_data_t	dataOut;
+	cb_msc_quality_t	mscQuality;
 	padHandler	my_padHandler;
 	void            handle_aacFrame (uint8_t *,
                                          int16_t,
@@ -82,6 +84,11 @@ private:
 	int16_t		rsErrors;
 	int16_t		aacErrors;
 	int16_t		aacFrames;
+
+	int16_t		frame_quality;
+	int16_t		rs_quality;
+	int16_t		aac_quality;
+
 	int16_t		charSet;
 	void            show_frameErrors        (int);
         void            show_rsErrors           (int);

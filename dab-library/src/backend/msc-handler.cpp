@@ -36,9 +36,11 @@
 //
 		mscHandler::mscHandler	(DabParams	*p,
 	                                 cb_audio_t	soundOut,
-	                                 cb_data_t	dataOut) {
+	                                 cb_data_t	dataOut,
+	                                 cb_msc_quality_t mscQuality) {
 	this	-> soundOut	= soundOut;
 	this	-> dataOut	= dataOut;
+	this	-> mscQuality	= mscQuality;
 
 	cifVector		= new int16_t [55296];
 	cifCount		= 0;	// msc blocks in CIF
@@ -121,7 +123,8 @@ int16_t	*myBegin;
 	                                 new_shortForm,
 	                                 new_protLevel,
 	                                 soundOut,
-	                                 dataOut);
+	                                 dataOut,
+	                                 mscQuality);
 
 	   }
 //

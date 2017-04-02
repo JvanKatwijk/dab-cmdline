@@ -45,10 +45,11 @@ public:
 	void	processBlock_0		(DSPCOMPLEX *);
 	void	decodeFICblock		(DSPCOMPLEX *, int32_t n);
 	void	decodeMscblock		(DSPCOMPLEX *, int32_t n);
-	int16_t	get_snr			(DSPCOMPLEX *);
+	int16_t	get_snr			(void);
 	void	stop			(void);
 	void	start			(void);
 private:
+	int16_t		get_snr		(DSPCOMPLEX *);
 	DabParams	*params;
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscHandler;
@@ -77,8 +78,7 @@ private:
 	phaseTable	*phasetable;
 	int32_t		blockIndex;
 	int16_t		*ibits;
-	int16_t		snrCount;
-	int16_t		snr;
+	int16_t		current_snr;
 };
 
 #endif

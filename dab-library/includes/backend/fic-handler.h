@@ -24,8 +24,8 @@
 /*
  * 	FIC data
  */
-#ifndef	__FIC_HANDLER
-#define	__FIC_HANDLER
+#ifndef	__FIC_HANDLER__
+#define	__FIC_HANDLER__
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -33,12 +33,13 @@
 #include	"fib-processor.h"
 #include	<mutex>
 #include	<string>
+#include	"dab-api.h"
 
 class	ensembleHandler;
 
 class ficHandler: public viterbi {
 public:
-		ficHandler		(ensembleHandler *);
+		ficHandler		(ensembleHandler *, cb_fib_quality_t);
 		~ficHandler		(void);
 	void	process_ficBlock	(int16_t *, int16_t);
 	void	setBitsperBlock		(int16_t);
@@ -67,6 +68,8 @@ private:
 	fib_processor	fibProcessor;
 	uint8_t		PRBS [768];
 	uint8_t		shiftRegister [9];
+	cb_fib_quality_t	fibQuality;
+	void		show_ficCRC	(bool);
 };
 
 #endif

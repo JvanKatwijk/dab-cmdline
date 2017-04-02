@@ -25,8 +25,8 @@
  * 	MSC data
  */
 #
-#ifndef	MSC_HANDLER
-#define	MSC_HANDLER
+#ifndef	__MSC_HANDLER__
+#define	__MSC_HANDLER__
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -43,7 +43,8 @@ class mscHandler {
 public:
 		mscHandler		(DabParams	*,
 	                                 cb_audio_t,
-	                                 cb_data_t);
+	                                 cb_data_t,
+	                                 cb_msc_quality_t);
 		~mscHandler		(void);
 	void	process_mscBlock	(int16_t *, int16_t);
 	void	set_audioChannel	(audiodata	*);
@@ -52,6 +53,7 @@ public:
 private:
 	cb_audio_t	soundOut;
 	cb_data_t	dataOut;
+	cb_msc_quality_t mscQuality;
 	bool		audioService;
 	std::mutex	mutexer;
 	dabVirtual	*dabHandler;

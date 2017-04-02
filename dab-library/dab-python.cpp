@@ -5,10 +5,6 @@
  *    Lazy Chair Programming
  *
  *    This file is the python wrapper for the DAB-library.
- *    Many of the ideas as implemented in the DAB-library are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are acknowledged.
- *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -156,7 +152,10 @@ PyObject	*result;
 //	                         dabBand,	// Band
 //	                         cb_audio_t,	// callback for sound output
 //	                         cb_data_t,	// callback for dynamic labels
-//	                         int16_t	waitingTime = 10,
+//	                         int16_t, 	// waitingTime = 10,
+//	                         cb_systemdata_t,
+//	                         cb_fib_quality_t,
+//	                         cb_msc_quality_t
 //	                         );
 PyObject *dab_initialize_p (PyObject *self, PyObject *args) {
 int	theMode	= 127;
@@ -168,12 +167,13 @@ void	*result;
 int	r;
 	fprintf (stderr, "bij het begin\n");
 	r = PyArg_ParseTuple (args,
-	                  "hhOOh",
-	                  &theMode,
-	                  &theBand,
-	                  &cba,
-	                  &cbd,
-	                  &delayTime);
+	                      "hhOOh",
+	                       &theMode,
+	                       &theBand,
+	                       &cba,
+	                       &cbd,
+	                       &delayTime
+	                  );
 //
 //	The callbacks should be callable
 
@@ -187,7 +187,6 @@ int	r;
 	   Py_RETURN_NONE;
 	}
 
-	fprintf (stderr, "we gaan inc en dec\n");
 	Py_XINCREF (cba);
 	if (callbackAudio != NULL)
 	   Py_XDECREF (callbackAudio);
@@ -196,10 +195,8 @@ int	r;
 	if (callbackData != NULL)
 	   Py_XDECREF (callbackData);
 	callbackData	= cbd;
-	fprintf (stderr, "we zijn hier\n");
 	result = dab_initialize (theMode,  (dabBand)theBand,
-	                &callback_audio, &callback_data, delayTime);
-	fprintf (stderr, "en nu hier\n");
+	                &callback_audio, &callback_data, delayTime, NULL, NULL, NULL);
 	if (result == NULL) {
 	   fprintf (stderr, "lukte toch niet\n");
 	   Py_RETURN_NONE;

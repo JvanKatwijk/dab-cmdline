@@ -32,13 +32,15 @@
 #include	"dab-constants.h"
 #include	"dab-class.h"
 
-
 	dabClass::dabClass (virtualInput	*inputDevice,
 	                    DabParams		*dabModeParameters,
 	                    dabBand		theBand,
 	                    int16_t		waitingTime,
 	                    cb_audio_t		soundOut,
-	                    cb_data_t		dataOut) {
+	                    cb_data_t		dataOut,
+	                    cb_system_data_t	systemData,
+	                    cb_fib_quality_t	fibQuality,
+	                    cb_msc_quality_t	mscQuality) {
 
 	this	-> inputDevice		= inputDevice;
 	this	-> dabModeParameters	= dabModeParameters;
@@ -49,13 +51,15 @@
 
 	deviceGain			= 50;
 	theEnsemble. clearEnsemble ();
-	my_ficHandler	= new ficHandler (&theEnsemble);
+	my_ficHandler	= new ficHandler (&theEnsemble, fibQuality);
 	my_mscHandler	= new mscHandler (dabModeParameters,
                                           soundOut,
-	                                  dataOut);
+	                                  dataOut,
+	                                  mscQuality);
 
 	my_ofdmProcessor = new ofdmProcessor   (inputDevice,
 	                                        dabModeParameters,
+	                                        systemData,
 	                                        my_mscHandler,
 	                                        my_ficHandler,
 	                                        3, 2);
@@ -81,7 +85,6 @@ void	dabClass::dab_gain	(uint16_t g) {
 bool	dabClass::dab_running	(void) {
 	return run. load ();
 }
-
 
 struct dabFrequencies {
 	const char	*key;

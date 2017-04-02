@@ -89,7 +89,7 @@ def pcmHandler (buffer, size, rate):
           dataBuffer [(inp + x) % bufSize, 1] = buffer [x, 1];
 #and of course we update the inp pointer
     inp = (inp + amount) % bufSize;
-    
+
 # callback is called by the sound software whenever that is ready to 
 # handle a new buffer (the client better be prepared to have data available)
 def sound_callback (outdata, frames, time, status):

@@ -42,7 +42,8 @@
 	                         bool		shortForm,
 	                         int16_t 	protLevel,
 	                         cb_audio_t	soundOut,
-	                         cb_data_t	dataOut) {
+	                         cb_data_t	dataOut,
+	                         cb_msc_quality_t mscQuality) {
 int32_t i;
 
 	this	-> dabModus		= dabModus;
@@ -68,12 +69,14 @@ int32_t i;
 	
 	if (dabModus == DAB) 
 	   our_dabProcessor = new mp2Processor (bitRate,
-	                                        soundOut);
+	                                        soundOut,
+	                                        mscQuality);
 	else
 	if (dabModus == DAB_PLUS) 
 	   our_dabProcessor = new mp4Processor (bitRate,
 	                                        soundOut,
-	                                        dataOut);
+	                                        dataOut,
+	                                        mscQuality);
 	else		// cannot happen
 	   our_dabProcessor = new dabProcessor ();
 

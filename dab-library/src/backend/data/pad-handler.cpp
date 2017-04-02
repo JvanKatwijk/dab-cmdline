@@ -199,7 +199,7 @@ int16_t  dataLength                = 0;
 	      }
 
 //	convert dynamic label
-	      std::string segmentText = toQStringUsingCharset (
+	      std::string segmentText = toStringUsingCharset (
 	                                          (const char *)&data [2],
 	                                          (CharacterSet) charSet,
 	                                          dataLength);
@@ -232,7 +232,7 @@ int16_t  dataLength                = 0;
 	      moreXPad   = false;
 	   }
 	   
-	   std::string segmentText = toQStringUsingCharset (
+	   std::string segmentText = toStringUsingCharset (
 	                                      (const char *) data,
 	                                      (CharacterSet) charSet,
 	                                      dataLength);

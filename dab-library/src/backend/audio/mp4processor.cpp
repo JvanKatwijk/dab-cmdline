@@ -43,14 +43,15 @@
 
 	mp4Processor::mp4Processor (int16_t		bitRate,
 	                            cb_audio_t		soundOut,
-	                            cb_data_t		dataOut):
+	                            cb_data_t		dataOut,
+	                            cb_msc_quality_t	mscQuality):
 	                                  my_padHandler (dataOut),
 	                                  my_rsDecoder (8, 0435, 0, 1, 10),
 	                                  aacDecoder (soundOut) {
 int16_t	i;
 
 	this	-> bitRate	= bitRate;	// input rate
-
+	this	-> mscQuality	= mscQuality;	//
 	superFramesize		= 110 * (bitRate / 8);
 	RSDims			= bitRate / 8;
 	frameBytes		= new uint8_t [RSDims * 120];	// input
@@ -66,6 +67,10 @@ int16_t	i;
         aacFrames       = 0;
         successFrames   = 0;
         rsErrors        = 0;
+
+	frame_quality	= 0;
+	rs_quality	= 0;
+	aac_quality	= 0;
 }
 
 	mp4Processor::~mp4Processor (void) {
@@ -94,9 +99,11 @@ int16_t	nbits	= 24 * bitRate;
 //
 //	we take the last five blocks to look at
 	if (blocksInBuffer >= 5) {
-	   if (++frameCount >= 25) {
+	   if (++frameCount >= 50) {
 	      frameCount = 0;
-//	      show_frameErrors (frameErrors);
+	      frame_quality	= 2 * (50 - frameErrors);
+	      if (mscQuality != NULL)
+	         mscQuality (frame_quality, rs_quality, aac_quality);
 	      frameErrors = 0;
 	   }
 
@@ -108,7 +115,7 @@ int16_t	nbits	= 24 * bitRate;
 //	new sequence, beginning with block blockFillIndex
 	      blocksInBuffer	= 0;
 	      if (++successFrames > 25) {
-                 show_rsErrors (rsErrors);
+	         rs_quality	= 4 * (25 - rsErrors);
                  successFrames  = 0;
                  rsErrors       = 0;
               }
@@ -233,7 +240,7 @@ int32_t		tmp		= 0;
 	      if (err) 
 	         aacErrors ++;
 	      if (++aacFrames > 25) {
-	         show_aacErrors (aacErrors);
+	         aac_quality	= 4 * (25 - aacErrors);
 	         aacErrors	= 0;
 	         aacFrames	= 0;
 	      }

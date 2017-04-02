@@ -4,23 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are recognized.
- *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    This file is part of the DAB kibrary
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
@@ -32,7 +28,7 @@
 
 
 #include	"rtl-sdr.h"
-#include	"dabstick.h"
+#include	"rtlsdr-handler.h"
 
 #ifdef	__MINGW32__
 #define	GETPROCADDRESS	GetProcAddress
@@ -49,7 +45,7 @@
 //	ctx is the calling task
 static
 void	RTLSDRCallBack (uint8_t *buf, uint32_t len, void *ctx) {
-dabStick	*theStick	= (dabStick *)ctx;
+rtlsdrHandler	*theStick	= (rtlsdrHandler *)ctx;
 
 	if ((theStick == NULL) || (len != READLEN_DEFAULT))
 	   return;
@@ -60,7 +56,7 @@ dabStick	*theStick	= (dabStick *)ctx;
 //	for handling the events in libusb, we need a controlthread
 //	whose sole purpose is to process the rtlsdr_read_async function
 //	from the lib.
-void	controlThread (dabStick *theStick) {
+void	controlThread (rtlsdrHandler *theStick) {
 	(theStick -> rtlsdr_read_async) (theStick -> device,
 	                          (rtlsdr_read_async_cb_t)&RTLSDRCallBack,
 	                          (void *)theStick,
@@ -69,7 +65,8 @@ void	controlThread (dabStick *theStick) {
 }
 //
 //	Our wrapper is a simple classs
-	dabStick::dabStick (bool *success, int gain, int frequency) {
+	rtlsdrHandler::rtlsdrHandler (bool *success,
+	                              int gain, int frequency) {
 int16_t	deviceCount;
 int32_t	r;
 int16_t	deviceIndex;
@@ -115,7 +112,7 @@ int16_t	deviceIndex;
 //	OK, now open the hardware
 	r			= this -> rtlsdr_open (&device, deviceIndex);
 	if (r < 0) {
-	   fprintf (stderr, "Opening dabstick failed\n");
+	   fprintf (stderr, "Opening rtlsdr failed\n");
 	   *success = false;
 	   return;
 	}
@@ -157,7 +154,7 @@ err:
 	return;
 }
 
-	dabStick::~dabStick	(void) {
+	rtlsdrHandler::~rtlsdrHandler	(void) {
 	if (running) { // we are running
 	   this -> rtlsdr_cancel_async (device);
 	   workerHandle. join ();
@@ -178,17 +175,17 @@ err:
 	open = false;
 }
 
-void	dabStick::setVFOFrequency	(int32_t f) {
+void	rtlsdrHandler::setVFOFrequency	(int32_t f) {
 	frequency	= f;
 	(void)(this -> rtlsdr_set_center_freq (device, f + vfoOffset));
 }
 
-void	dabStick::getVFOFrequency	(int32_t *f) {
+void	rtlsdrHandler::getVFOFrequency	(int32_t *f) {
 	*f = (int32_t)(this -> rtlsdr_get_center_freq (device)) - vfoOffset;
 }
 //
 //
-bool	dabStick::restartReader	(void) {
+bool	rtlsdrHandler::restartReader	(void) {
 int32_t	r;
 
 	if (running)
@@ -206,7 +203,7 @@ int32_t	r;
 	return true;
 }
 
-void	dabStick::stopReader		(void) {
+void	rtlsdrHandler::stopReader	(void) {
 	if (!running)
 	   return;
 
@@ -217,12 +214,12 @@ void	dabStick::stopReader		(void) {
 //
 //	when selecting with an integer in the range 0 .. 100
 //	first find the table value
-void	dabStick::setGain	(int32_t g) {
+void	rtlsdrHandler::setGain	(int32_t g) {
 	theGain	= gains [g * gainsCount / 100];
 	rtlsdr_set_tuner_gain (device, theGain);
 }
 	
-void	dabStick::setAgc		(bool b) {
+void	rtlsdrHandler::setAgc		(bool b) {
 	rtlsdr_set_tuner_gain_mode (device, b);
 }
 
@@ -230,7 +227,7 @@ void	dabStick::setAgc		(bool b) {
 //	The brave old getSamples. For the dab stick, we get
 //	size samples: still in I/Q pairs, but we have to convert the data from
 //	uint8_t to DSPCOMPLEX *
-int32_t	dabStick::getSamples (DSPCOMPLEX *V, int32_t size) { 
+int32_t	rtlsdrHandler::getSamples (DSPCOMPLEX *V, int32_t size) { 
 int32_t	amount, i;
 uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 //
@@ -241,11 +238,11 @@ uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 	return amount / 2;
 }
 
-int32_t	dabStick::Samples	(void) {
+int32_t	rtlsdrHandler::Samples	(void) {
 	return _I_Buffer	-> GetRingBufferReadAvailable () / 2;
 }
 //
-bool	dabStick::load_rtlFunctions (void) {
+bool	rtlsdrHandler::load_rtlFunctions (void) {
 //
 //	link the required procedures
 	rtlsdr_open	= (pfnrtlsdr_open)
@@ -370,15 +367,15 @@ bool	dabStick::load_rtlFunctions (void) {
 	return true;
 }
 
-void	dabStick::resetBuffer (void) {
+void	rtlsdrHandler::resetBuffer (void) {
 	_I_Buffer -> FlushRingBuffer ();
 }
 
-int16_t	dabStick::maxGain	(void) {
+int16_t	rtlsdrHandler::maxGain	(void) {
 	return gainsCount;
 }
 
-int16_t	dabStick::bitDepth	(void) {
+int16_t	rtlsdrHandler::bitDepth	(void) {
 	return 8;
 }
 

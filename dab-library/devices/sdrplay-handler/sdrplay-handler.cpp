@@ -4,31 +4,29 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are recognized.
+ *    This file is part of the DAB library
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include	"sdrplay.h"
+#include	"sdrplay-handler.h"
 
 #define	DEFAULT_GAIN	40
 
-	sdrplay::sdrplay  (bool *success, int gain, int frequency) {
+	sdrplayHandler::sdrplayHandler  (bool *success,
+	                                 int gain, int frequency) {
 int	err;
 float	ver;
 
@@ -106,7 +104,7 @@ ULONG APIkeyValue_length = 255;
 	*success	= true;
 }
 
-	sdrplay::~sdrplay	(void) {
+	sdrplayHandler::~sdrplayHandler	(void) {
 	stopReader ();
 	if (_I_Buffer != NULL)
 	   delete _I_Buffer;
@@ -135,7 +133,7 @@ int16_t	bankFor_sdr (int32_t freq) {
 	return -1;
 }
 
-void	sdrplay::setVFOFrequency	(int32_t newFrequency) {
+void	sdrplayHandler::setVFOFrequency	(int32_t newFrequency) {
 mir_sdr_ErrT	err;
 int32_t	realFreq = newFrequency;
 int	gRdBSystem;
@@ -158,22 +156,22 @@ int	samplesPerPacket;
 	restartReader	();
 }
 
-int32_t	sdrplay::getVFOFrequency	(void) {
+int32_t	sdrplayHandler::getVFOFrequency	(void) {
 	return vfoFrequency - vfoOffset;
 }
 
-int16_t	sdrplay::maxGain	(void) {
+int16_t	sdrplayHandler::maxGain	(void) {
 	return 101;
 }
 //
 //	For the setting of gain, not using a widget, we map the
 //	gain value upon an attenation value and set setexternal Gain
-void	sdrplay::setGain		(int32_t g) {
+void	sdrplayHandler::setGain		(int32_t g) {
 	currentGain		= 101 - g;
 	my_mir_sdr_SetGr (currentGain, 1, 0);
 }
 
-void	sdrplay::setAgc			(bool b) {
+void	sdrplayHandler::setAgc			(bool b) {
 	my_mir_sdr_AgcControl (b, -currentGain, 0, 0, 0, 0, 0);
 	if (!b)
 	   my_mir_sdr_SetGr (currentGain, 1, 0);
@@ -190,7 +188,7 @@ void myStreamCallback (int16_t		*xi,
 	               uint32_t		reset,
 	               void		*cbContext) {
 int16_t	i;
-sdrplay	*p	= static_cast<sdrplay *> (cbContext);
+sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
 DSPCOMPLEX *localBuf = (DSPCOMPLEX *)alloca (numSamples * sizeof (DSPCOMPLEX));
 
 	for (i = 0; i <  (int)numSamples; i ++)
@@ -212,7 +210,7 @@ void	myGainChangeCallback (uint32_t	gRdB,
 	(void)cbContext;
 }
 
-bool	sdrplay::restartReader	(void) {
+bool	sdrplayHandler::restartReader	(void) {
 int	gRdBSystem;
 int	samplesPerPacket;
 mir_sdr_ErrT	err;
@@ -249,7 +247,7 @@ mir_sdr_ErrT	err;
 	return true;
 }
 
-void	sdrplay::stopReader	(void) {
+void	sdrplayHandler::stopReader	(void) {
 	if (!running)
 	   return;
 
@@ -261,24 +259,23 @@ void	sdrplay::stopReader	(void) {
 //	The brave old getSamples. For the mirics stick, we get
 //	size still in I/Q pairs
 //	Note that the sdrPlay returns 10 bit values
-int32_t	sdrplay::getSamples (DSPCOMPLEX *V, int32_t size) { 
-//
+int32_t	sdrplayHandler::getSamples (DSPCOMPLEX *V, int32_t size) { 
 	return _I_Buffer	-> getDataFromBuffer (V, size);
 }
 
-int32_t	sdrplay::Samples	(void) {
+int32_t	sdrplayHandler::Samples	(void) {
 	return _I_Buffer	-> GetRingBufferReadAvailable ();
 }
 
-void	sdrplay::resetBuffer	(void) {
+void	sdrplayHandler::resetBuffer	(void) {
 	_I_Buffer	-> FlushRingBuffer ();
 }
 
-int16_t	sdrplay::bitDepth	(void) {
-	return 14;
+int16_t	sdrplayHandler::bitDepth	(void) {
+	return 12;
 }
 
-bool	sdrplay::loadFunctions	(void) {
+bool	sdrplayHandler::loadFunctions	(void) {
 
 	my_mir_sdr_StreamInit	= (pfn_mir_sdr_StreamInit)
 	                    GETPROCADDRESS (this -> Handle,

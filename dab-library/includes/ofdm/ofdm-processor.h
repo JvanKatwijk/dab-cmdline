@@ -35,6 +35,8 @@
 
 #include	"virtual-input.h"
 #include	"ringbuffer.h"
+#include	"dab-api.h"
+
 //
 class	common_fft;
 class	ofdmDecoder;
@@ -48,6 +50,7 @@ class ofdmProcessor {
 public:
 		ofdmProcessor  	(virtualInput *,
 	                         DabParams	*,
+	                         cb_system_data_t,
 	                         mscHandler *,
 	                         ficHandler *,
 	                         int16_t,
@@ -58,16 +61,19 @@ public:
 	void	setOffset		(int32_t);
 	void	start			(void);
 private:
+	DabParams	*params;
+	cb_system_data_t	systemData;
+	void		call_systemData (bool, int16_t, int32_t);
 	std::thread	threadHandle;
 	int32_t		syncBufferIndex;
 	std::atomic<bool>	running;
 	virtualInput	*inputDevice;
-	DabParams	*params;
 	int32_t		T_null;
 	int32_t		T_u;
 	int32_t		T_s;
 	int32_t		T_g;
 	int32_t		T_F;
+	bool		isSynced;
 	float		sLevel;
 	DSPCOMPLEX	*dataBuffer;
 	int32_t		FreqOffset;

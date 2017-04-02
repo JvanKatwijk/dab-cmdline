@@ -5,9 +5,6 @@
  *    Lazy Chair Programming
  *
  *    This file is the API description of the DAB-library.
- *    Many of the ideas as implemented in the DAB-library are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are acknowledged.
  *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -32,7 +29,7 @@
 
 //	Experimental API for controlling the dab software library
 //
-//	Version 0.5
+//	Version 0.6
 //	An example of the use of the library - using this API -
 //	is enclosed in the directory "example" in this distribution
 
@@ -80,6 +77,40 @@ extern "C" {
 //
 //	if a NULL is provided, no data will be transferred.
 //
+//	Values, such as the SNR, the computed frequency offset,
+//	and the quality of the FIB and MP2/AAC decoding is passed
+//	through some additional callback functions with profile
+	typedef void (*cb_system_data_t)(bool,		// timesync,
+	                                 int16_t,	// signal noise ratio
+	                                 int32_t	// frequency offset
+	                                );
+//	This function is called app once per second
+//	If NULL is provides, no data will be passed
+//
+//	and for the quality of the FIB decoding (where the parameter
+//	is a value in the range 0 .. 100)
+	typedef void (*cb_fib_quality_t) (int16_t);
+
+//	This function is called app once per second, but only after
+//	time synchronization. If NULL is provided, no data will be passed
+
+//	and for the quality of the audio frames (where the parameters
+//	are values in the range 0 .. 100);
+	typedef void (*cb_msc_quality_t)(int16_t,	// accepted frames
+	                                 int16_t,	// 2
+	                                 int16_t	// 3
+	                                );
+
+//	In case DAB is received, the first value indicates the accepted
+//	frames.
+//
+//	In case DAB+ is received, the accepted frames relate to the
+//	accepted amount of DAB+ superframes, the value indicated by (2)
+//	denotes the quality of the Reed Solomon decoding, the value 3
+//	the successrate of the AAC decoding.
+//	if NULL is provided, no data will be passed.
+	                                
+	                          
 ////////////////////// A P I - F U N C T I O N S ///////////////////////
 //	The initialization function takes as parameters the 
 //	immutable system parameters,
@@ -99,7 +130,10 @@ extern "C" {
 	                         dabBand,	// Band
 	                         cb_audio_t,	// callback for sound output
 	                         cb_data_t,	// callback for dynamic labels
-	                         int16_t	waitingTime = 10
+	                         int16_t,	// waitingTime,
+	                         cb_system_data_t,  // systemData,
+	                         cb_fib_quality_t,  // fibQuality,
+	                         cb_msc_quality_t // mscQuality
 	                         );
 //
 //	The gain of the device can be set and changed to a value

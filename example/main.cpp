@@ -92,6 +92,20 @@ static bool isStarted	= false;
 	soundOut	-> audioOut (buffer, size, rate);
 }
 
+static
+void	systemData (bool flag, int16_t snr, int32_t freqOff) {
+}
+
+static
+void	fibQuality	(int16_t q) {
+//	fprintf (stderr, "fic quality = %d\n", q);
+}
+
+static
+void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE) {
+//	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
+}
+
 	
 int	main (int argc, char **argv) {
 // Default values
@@ -171,7 +185,12 @@ struct sigaction sigact;
 	}
 
 	theRadio	= dab_initialize (theMode, theBand,
-		                                   pcmHandler, labelHandler, del);
+		                          pcmHandler,
+	                                  labelHandler,
+	                                  del,
+	                                  systemData,
+	                                  fibQuality,
+	                                  mscQuality);
 	if (theRadio == NULL) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
 	   exit (4);

@@ -814,7 +814,7 @@ char		label [17];
 	         }
 //	         fprintf (stderr, "Ensemblename: %16s\n", label);
 	         if (!oe) {
-	            std::string name = toQStringUsingCharset (
+	            std::string name = toStringUsingCharset (
 	                                      (const char *) label,
 	                                      (CharacterSet) charSet);
 	            if (firstTime)
@@ -836,9 +836,9 @@ char		label [17];
 	            label [i] = getBits_8 (d, offset + 8 * i);
 	         }
 	         myIndex -> serviceLabel. label. append (
-	                       toQStringUsingCharset (
-	                        (const char *) label,
-	                           (CharacterSet) charSet));
+	                       toStringUsingCharset (
+	                                (const char *) label,
+	                                (CharacterSet) charSet));
 //	         fprintf (stderr, "FIG1/1: SId = %4x\t%s\n", SId, label);
 	         addtoEnsemble (myIndex -> serviceLabel. label, SId);
 	         myIndex -> serviceLabel. hasName = true;
@@ -883,15 +883,15 @@ char		label [17];
                  for (i = 0; i < 16; i ++) {
                     label [i] = getBits_8 (d, offset + 8 * i);
                  }
-                 myIndex -> serviceLabel. label. append (
-                               toQStringUsingCharset (
-                                (const char *) label,
-                                   (CharacterSet) charSet));
-	         myIndex -> serviceLabel. label. append (
-                               toQStringUsingCharset (
-	                           " (data)",
-                                   (CharacterSet) charSet));
 #ifdef	MSC_DATA__
+                 myIndex -> serviceLabel. label. append (
+                               toStringUsingCharset (
+                                         (const char *) label,
+                                         (CharacterSet) charSet));
+	         myIndex -> serviceLabel. label. append (
+                               toStringUsingCharset (
+	                                 " (data)",
+                                         (CharacterSet) charSet));
 	         addtoEnsemble (myIndex -> serviceLabel. label, SId);
 #endif
                  myIndex -> serviceLabel. hasName = true;

@@ -54,7 +54,11 @@ public:
 	                         	dabBand,
 	                                int16_t,		// waiting time
 	                         	cb_audio_t,
-	                                cb_data_t);
+	                                cb_data_t,
+	                                cb_system_data_t,
+	                                cb_fib_quality_t,
+	                                cb_msc_quality_t
+	                                );
 			~dabClass	(void);
 	void		dab_gain	(uint16_t);
 	bool		dab_running	(void);

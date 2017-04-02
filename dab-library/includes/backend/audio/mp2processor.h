@@ -25,8 +25,8 @@
 //	Rewriting in the form of a class
 //	for use in the sdr-j DAB/DAB+ receiver
 //	all rights remain where they belong
-#ifndef 	__MP2PROCESSOR
-#define		__MP2PROCESSOR
+#ifndef 	__MP2PROCESSOR__
+#define		__MP2PROCESSOR__
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -49,7 +49,8 @@ struct quantizer_spec {
 class	mp2Processor: public dabProcessor {
 public:
 			mp2Processor	(int16_t,
-	                                 cb_audio_t);
+	                                 cb_audio_t,
+	                                 cb_msc_quality_t);
 			~mp2Processor	(void);
 	void		addtoFrame	(uint8_t *);
 	
@@ -58,6 +59,7 @@ private:
 	int32_t		mp2sampleRate	(uint8_t *);
 	int32_t		mp2decodeFrame	(uint8_t *, int16_t *);
 	cb_audio_t	soundOut;
+	cb_msc_quality_t	mscQuality;
 	int32_t		baudRate;
 	void		setSamplerate		(int32_t);
 	struct quantizer_spec *read_allocation (int, int);
