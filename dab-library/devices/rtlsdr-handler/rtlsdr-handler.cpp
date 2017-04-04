@@ -221,6 +221,8 @@ void	rtlsdrHandler::setGain	(int32_t g) {
 	
 void	rtlsdrHandler::setAgc		(bool b) {
 	rtlsdr_set_tuner_gain_mode (device, b);
+	if (!b) {
+	   rtlsdr_set_tuner_gain (device, theGain);
 }
 
 //

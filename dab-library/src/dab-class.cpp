@@ -50,6 +50,7 @@
 	this	-> dataOut		= dataOut;
 
 	deviceGain			= 50;
+	autoGain			= false;
 	theEnsemble. clearEnsemble ();
 	my_ficHandler	= new ficHandler (&theEnsemble, fibQuality);
 	my_mscHandler	= new mscHandler (dabModeParameters,
@@ -80,6 +81,11 @@
 void	dabClass::dab_gain	(uint16_t g) {
 	deviceGain	= g;
 	inputDevice	-> setGain (g);
+}
+
+void	dabClass::dab_autogain 	(bool b) {
+	autoGain	= b;
+	inputDevice	-> setAgc (b);
 }
 
 bool	dabClass::dab_running	(void) {
@@ -199,6 +205,7 @@ void	dabClass::run_dab	(cb_ensemble_t h) {
 //	Note: the ofdmProcessor will restart the inputDevice
 	my_ofdmProcessor	-> start ();
 	inputDevice		-> setGain (deviceGain);
+	inputDevice		-> setAgc (autoGain);
 	run. store (true);
 	sleep (waitingTime);	// give everyone the opportunity to do domething
 

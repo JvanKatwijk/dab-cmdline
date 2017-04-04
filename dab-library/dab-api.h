@@ -141,6 +141,9 @@ extern "C" {
 //	value for the device
 	void	dab_Gain	(void *handle, uint16_t);	
 //
+//	If the device supports an "autogain" mode, then that is set by
+	void	dab_autoGain	(void *handle, bool);
+//
 //	The function setupChannel maps the name of the channel
 //	onto a frequency for the device and prepares the device
 //	for action

@@ -61,6 +61,7 @@ public:
 	                                );
 			~dabClass	(void);
 	void		dab_gain	(uint16_t);
+	void		dab_autogain	(bool);
 	bool		dab_running	(void);
 	bool		dab_channel	(std::string s);
 	void		dab_run		(cb_ensemble_t);
@@ -82,6 +83,7 @@ private:
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscHandler;
 	int16_t		deviceGain;
+	bool		autoGain;
 //
 
 	std::string	requestedProgram;

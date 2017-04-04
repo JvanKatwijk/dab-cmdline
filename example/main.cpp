@@ -116,11 +116,12 @@ dabBand		theBand		= BAND_III;
 int		theGain		= 80;	// scale = 0 .. 100
 std::string	soundChannel	= "default";
 int16_t		latency		= 4;
+bool		autogain	= false;
 int	opt;
 struct sigaction sigact;
 
 //
-	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:S:")) != -1) {
+	while ((opt = getopt (argc, argv, "i:D:M:B:C:P:G:A:L:S:Q")) != -1) {
 	   switch (opt) {
 
 	      case 'D':
@@ -165,6 +166,10 @@ struct sigaction sigact;
                  break;
               }
 
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
 	      default:
 	         break;
 	   }
@@ -197,6 +202,8 @@ struct sigaction sigact;
 	}
 
 	dab_Gain	(theRadio, theGain);
+	if (autogain)
+	   dab_autoGain	(theRadio, true);
 	dab_Channel	(theRadio, theChannel);
 	dab_run		(theRadio, callblockHandler);
 //

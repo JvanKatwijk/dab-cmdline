@@ -79,6 +79,11 @@ void	dab_Gain	(void *handle, uint16_t g) {
 	   ((dabClass *)handle) -> dab_gain (g);
 }
 
+void	dab_autoGain	(void *handle, bool b) {
+	if (((dabClass *)handle) != NULL)
+	   ((dabClass *)handle) -> dab_autogain (b);
+}
+
 bool	dab_Channel	(void *handle, std::string name) {
 	if (((dabClass *)handle) == NULL)
 	   return false;
