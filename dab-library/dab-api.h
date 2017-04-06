@@ -106,7 +106,7 @@ extern "C" {
 //
 //	In case DAB+ is received, the accepted frames relate to the
 //	accepted amount of DAB+ superframes, the value indicated by (2)
-//	denotes the quality of the Reed Solomon decoding, the value 3
+//	denotes the quality of the Reed Solomon decoding, the value (3)
 //	the successrate of the AAC decoding.
 //	if NULL is provided, no data will be passed.
 	                                

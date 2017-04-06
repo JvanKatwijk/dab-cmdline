@@ -49,7 +49,7 @@
 	this	-> soundOut		= soundOut;
 	this	-> dataOut		= dataOut;
 
-	deviceGain			= 50;
+	deviceGain			= 50;	// just default
 	autoGain			= false;
 	theEnsemble. clearEnsemble ();
 	my_ficHandler	= new ficHandler (&theEnsemble, fibQuality);
@@ -199,19 +199,22 @@ void	dabClass::dab_run	(cb_ensemble_t f) {
 
 void	dabClass::run_dab	(cb_ensemble_t h) {
 
-	if (run. load ())
+	if (run. load ())	// running already
 	   return;
 
 //	Note: the ofdmProcessor will restart the inputDevice
 	my_ofdmProcessor	-> start ();
 	inputDevice		-> setGain (deviceGain);
-	inputDevice		-> setAgc (autoGain);
+	if (autoGain)
+	   inputDevice		-> setAgc (true);
 	run. store (true);
 	sleep (waitingTime);	// give everyone the opportunity to do domething
 
-	fprintf (stderr, "going to tell the world\n");
+	fprintf (stderr, "waited for an ensemble, an ensemble is %s\n",
+	                        theEnsemble. ensembleExists () ? "found" :
+	                                                         "not found");
 	h (theEnsemble. data (), theEnsemble. ensembleExists ());
-	fprintf (stderr, "we told the world\n");
+	
 	while (run. load ())
 	   usleep (10000);
 //
