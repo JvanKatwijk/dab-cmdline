@@ -44,7 +44,7 @@ endif ()
 #
 ########################################################################
 # if you are compiling the wrapper for Python in, uncomment
-	set(PYTHON true)
+#	set(PYTHON true)
 ########################################################################
 	find_package (PkgConfig)
 
