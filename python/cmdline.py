@@ -2,7 +2,7 @@ import numpy
 import time
 import sounddevice as sd
 import argparse
-from dablib import *
+from libdab_lib import *
 import sys
 
 #default values
@@ -51,6 +51,7 @@ def	program_data (a, b, c, d, e):
 def	callblockHandler (s, b):
     global run
     if (b):
+       print ("an ensemble was found");
        print (s)
        print ("selected program is " + args. programName)
        dab_Service (theRadio, args. programName, program_data);
@@ -122,7 +123,8 @@ def sound_callback (outdata, frames, time, status):
     outp = (outp + amount) % bufSize;
 
 #
-# real work, initialize the library
+# real work, initialize the library, note that the dab_initialize
+# function could have more callback functions with it.
 theRadio	= dab_initialize (args. theMode,
 	                          theBand,
 	                          pcmHandler,

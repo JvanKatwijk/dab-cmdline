@@ -4,19 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J (JSDR).
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    This file is part of the DAB library
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
@@ -45,6 +45,48 @@ int16_t	i, j;
 
 	 	motHandler::~motHandler (void) {
 }
+
+
+void	motHandler::process_mscGroup (uint8_t	*data,
+	                              uint8_t	groupType,
+	                              bool	lastSegment,
+	                              int16_t	segmentNumber,
+	                              uint16_t	transportId) {
+uint16_t segmentSize	= ((data [0] & 0x1F) << 8) | data [1];
+
+	if ((segmentNumber == 0) && (groupType == 3))  // header
+	   processHeader (transportId,
+	                  &data [2],
+	                  segmentSize,
+	                  lastSegment);
+	else
+	if ((segmentNumber == 0) && (groupType == 6)) 	// MOT directory
+	    processDirectory (transportId,
+	                      &data [2],
+	                      segmentSize,
+	                      lastSegment);
+	else
+	if (groupType == 6) 	// fields for MOT directory
+	   directorySegment (transportId,
+	                     &data [2],
+	                     segmentNumber,
+	                     segmentSize,
+	                     lastSegment);
+	else
+	if (groupType == 4) {
+//	   fprintf (stderr, "grouptype = %d, Ti = %d, sn = %d, ss = %d\n",
+//	                     groupType, transportId, segmentNumber, segmentSize);
+
+	   processSegment  (transportId,
+	                    &data [2],
+	                    segmentNumber,
+	                    segmentSize,
+	                    lastSegment);
+	}
+//	else
+//	   fprintf (stderr, "grouptype = %d, Ti = %d, sn = %d, ss = %d\n",
+//	                     groupType, transportId, segmentNumber, segmentSize);
+}
 //
 //	Process a regular header, i.e. a type 3
 //	This strongly resembles the newEntry method that
@@ -52,38 +94,36 @@ int16_t	i, j;
 void	motHandler::processHeader (int16_t	transportId,
 	                           uint8_t	*segment,
 	                           int16_t	segmentSize,
-	                           int16_t	headerSize,
-	                           int32_t	bodySize,
 	                           bool		lastFlag) {
+uint32_t headerSize     =
+             ((segment [3] & 0x0F) << 9) | (segment [4]) | (segment [5] >> 7);
+uint32_t bodySize       =
+              (segment [0] << 20) | (segment [1] << 12) |
+	         (segment [2] << 4 ) | ((segment [3] & 0xF0) >> 4);
+
 uint8_t contentType	= ((segment [5] >> 1) & 0x3F);
 uint16_t contentsubType = ((segment [5] & 0x01) << 8) | segment [6];
 int16_t	pointer	= 7;
 std::string	name 	= std::string ("");
 
+//      If we had a header with that transportId, do not do anything
+        if (getHandle (transportId) != NULL) {
+           return;
+        }
+
 	while (pointer < headerSize) {
 	   uint8_t PLI = (segment [pointer] & 0300) >> 6;
 	   uint8_t paramId = (segment [pointer] & 077);
 	   uint16_t	length;
-//	   fprintf (stderr, "PLI = %d, paramId = %d\n", PLI, paramId);
 	   switch (PLI) {
 	      case 00:
 	         pointer += 1;
 	         break;
 	      case 01:
-//	         if (paramId == 10)
-//	            fprintf (stderr, "priority = %d\n",
-//	                              segment [pointer + 1]);
-	      
 	         pointer += 2;
 	         break;
 
 	      case 02:
-//	         if (paramId == 5) 
-//	            fprintf (stderr, "triggertime = %d\n",
-//	                             segment [pointer + 1] << 24 |
-//	                             segment [pointer + 2] << 16 |
-//	                             segment [pointer + 3] <<  8 |
-//	                             segment [pointer + 4]);
 	         pointer += 5;
 	         break;
 
@@ -105,27 +145,108 @@ std::string	name 	= std::string ("");
 	         pointer += length;
 	   } 
 	}
-	if (getHandle (transportId) != NULL)
-	   return;
-	if (lastFlag)	{ // single header
-	   newEntry (transportId, bodySize,
-	             contentType, contentsubType, name);
-	   return;
-	}
-//	header segment contains header + segment data
-//	fprintf (stderr, "combined %d\n", bodySize);
-	newEntry (transportId,
-	          bodySize,
-	          contentType,
-	          contentsubType,
-	          name);
-	processSegment (transportId, 
-	                &segment [headerSize],
-	                0,
-	                segmentSize - headerSize,
-	                false);
+
+        newEntry (transportId, bodySize, contentType, contentsubType, name);
 }
 
+void	motHandler::processSegment	(int16_t	transportId,
+	                                 uint8_t	*bodySegment,
+	                                 int16_t	segmentNumber,
+	                                 int16_t	segmentSize,
+	                                 bool		lastFlag) {
+int16_t	i;
+
+	motElement *handle = getHandle (transportId);
+	if (handle == NULL)
+	   return;
+
+	if (handle -> marked [segmentNumber])
+	   return;
+
+//      Note that the last segment may have a different size
+        if (!lastFlag && (handle -> segmentSize == -1))
+           handle -> segmentSize = segmentSize;
+
+//	If we only have a "last" segment, we do not need to register
+//	the segment size
+//	sanity check
+	if (segmentNumber * handle -> segmentSize + segmentSize >
+	                                                handle -> bodySize)
+	   return;
+
+	handle -> segments [segmentNumber]. resize (segmentSize);
+	for (i = 0; i < segmentSize; i ++) 
+	   handle -> segments [segmentNumber][i] = bodySegment [i];
+	
+	handle -> marked [segmentNumber] = true;
+	if (lastFlag) 
+	   handle -> numofSegments = segmentNumber + 1;
+
+	if (isComplete (handle)) 
+	   handleComplete (handle);
+}
+
+bool	motHandler::isComplete (motElement *p) {
+int16_t	i;
+
+	if (p -> numofSegments == -1)
+	   return false;
+	for (i = 0; i < p ->  numofSegments; i ++)
+	   if (!(p -> marked [i]))
+	      return false;
+
+	return true;
+}
+
+//	we have data for all directory entries
+void	motHandler::handleComplete (motElement *p) {
+int16_t i;
+
+std::vector<uint8_t> result;
+	for (i = 0; i < p -> numofSegments; i ++)
+	   result. insert (std::end (result),
+	                   std::begin (p -> segments [i]),
+	                   std::end (p -> segments [i]));
+
+	if (p -> contentType == 7) {
+#ifdef  TRY_EPG
+	   epgHandler. decode (result, p -> name);
+#endif
+	   return;
+	}
+
+	if (p -> contentType != 2) {
+           if (p -> name != std::string ("")) {
+	      fprintf (stderr, "going to write file %s\n",
+	                           (p ->  name). c_str ());
+	      checkDir (p -> name);
+	      FILE *x = fopen ((p -> name). c_str (), "w+b");
+	      if (x == NULL)
+	         fprintf (stderr, "cannot write file %s\n",
+	                            (p -> name). c_str ());
+	      else {
+	         (void)fwrite (result. data (), 1, p -> bodySize, x);
+	         fclose (x);
+	      }
+	   }
+	   return;
+	}
+
+	if (old_slide != NULL)
+	   for (i = 0; i < p ->  numofSegments; i ++) {
+	      p -> marked [i] = false;
+	      p -> segments [i]. clear ();
+	   }
+	fprintf (stderr, "going to show picture %s\n",
+	                                   (p -> name). c_str ());
+	checkDir (p -> name);
+//	the_picture (result, p -> contentsubType, p -> name);
+	old_slide	= p;
+}
+
+void	motHandler::checkDir (std::string &s) {
+}
+	
 void	motHandler::processDirectory (int16_t	transportId,
                                       uint8_t	*segment,
                                       int16_t	segmentSize,
@@ -269,90 +390,6 @@ uint16_t theEnd		= currentBase + 2 + headerSize;
 	return currentBase;
 }
 
-void	motHandler::processSegment	(int16_t	transportId,
-	                                 uint8_t	*segment,
-	                                 int16_t	segmentNumber,
-	                                 int16_t	segmentSize,
-	                                 bool		lastFlag) {
-int16_t	i;
-
-	motElement *handle = getHandle (transportId);
-	if (handle == NULL)
-	   return;
-	if (handle -> marked [segmentNumber])
-	   return;
-
-//	Note that the last segment may have a different size
-	if (!lastFlag && (handle -> segmentSize == -1))
-	   handle -> segmentSize = segmentSize;
-
-	if (handle -> segmentSize == -1)
-	   return;
-
-//	sanity check
-	if (segmentNumber * handle -> segmentSize + segmentSize >
-	                                                handle -> bodySize)
-	   return;
-
-	for (i = 0; i < segmentSize; i ++)
-	   handle -> body [segmentNumber *
-	                         handle -> segmentSize + i] = segment [i];
-	handle -> marked [segmentNumber] = true;
-	if (lastFlag) 
-	   handle -> numofSegments = segmentNumber + 1;
-
-	if (isComplete (handle)) 
-	   handleComplete (handle);
-}
-//
-//	we have data for all directory entries
-void	motHandler::handleComplete (motElement *p) {
-int16_t i;
-	
-	if (p -> contentType != 2) {
-#ifndef GUI_3
-       if (p -> name != std::string ("")) {
-	      fprintf (stderr, "going to write file %s\n",
-	                           (p ->  name). c_str ());
-	      checkDir (p -> name);
-	      FILE *x = fopen ((p -> name). c_str (), "w+b");
-	      if (x == NULL)
-	         fprintf (stderr, "cannot write file %s\n",
-	                            (p -> name). c_str ());
-	      else {
-	         (void)fwrite ((p -> body). data (), 1, p -> bodySize, x);
-	         fclose (x);
-	      }
-       }
-#endif
-	   return;
-	}
-
-	if (old_slide != NULL)
-	   for (i = 0; i < p ->  numofSegments; i ++)
-	      p -> marked [i] = false;
-	fprintf (stderr, "going to show picture %s\n",
-	                                   (p -> name). c_str ());
-	checkDir (p -> name);
-//	the_picture (p -> body, p -> contentsubType, p -> name);
-	old_slide	= p;
-}
-
-void	motHandler::checkDir (std::string &s) {
-}
-
-	
-bool	motHandler::isComplete (motElement *p) {
-int16_t	i;
-
-	if (p -> numofSegments == -1)
-	   return false;
-	for (i = 0; i < p ->  numofSegments; i ++)
-	   if (!(p -> marked [i]))
-	      return false;
-
-	return true;
-}
 
 motElement	*motHandler::getHandle (uint16_t transportId) {
 int16_t	i;
@@ -442,56 +479,6 @@ motElement	*currEntry = &(theDirectory -> dir_proper [index]);
 	currEntry -> name		= name;
 }
 
-void	motHandler::process_mscGroup (uint8_t	*data,
-	                              uint8_t	groupType,
-	                              bool	lastSegment,
-	                              int16_t	segmentNumber,
-	                              uint16_t	transportId) {
-uint16_t segmentSize	= ((data [0] & 0x1F) << 8) | data [1];
-
-	if ((segmentNumber == 0) && (groupType == 3)) { // header
-	   uint32_t headerSize	= ((data [5] & 0x0F) << 9) |
-	                           (data [6])              |
-	                           (data [7] >> 7);
-	   uint32_t bodySize	= (data [2] << 20) |
-	                          (data [3] << 12) |
-	                          (data [4] << 4 ) |
-	                          ((data [5] & 0xF0) >> 4);
-	   processHeader (transportId,
-	                  &data [2],
-	                  segmentSize,
-	                  headerSize,
-	                  bodySize,
-	                  lastSegment);
-	}
-	else
-	if ((segmentNumber == 0) && (groupType == 6)) 	// MOT directory
-	    processDirectory (transportId,
-	                      &data [2],
-	                      segmentSize,
-	                      lastSegment);
-	else
-	if (groupType == 6) 	// fields for MOT directory
-	   directorySegment (transportId,
-	                     &data [2],
-	                     segmentNumber,
-	                     segmentSize,
-	                     lastSegment);
-	else
-	if (groupType == 4) {
-//	   fprintf (stderr, "grouptype = %d, Ti = %d, sn = %d, ss = %d\n",
-//	                     groupType, transportId, segmentNumber, segmentSize);
-
-	   processSegment  (transportId,
-	                    &data [2],
-	                    segmentNumber,
-	                    segmentSize,
-	                    lastSegment);
-	}
-//	else
-//	   fprintf (stderr, "grouptype = %d, Ti = %d, sn = %d, ss = %d\n",
-//	                     groupType, transportId, segmentNumber, segmentSize);
-}
 
 void	motHandler::the_picture     (std::vector<uint8_t>, int, std::string) {
 }

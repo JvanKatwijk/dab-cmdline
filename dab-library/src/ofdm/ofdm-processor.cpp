@@ -25,7 +25,7 @@
 #include	"fic-handler.h"
 #include	"fft.h"
 #include	"dab-api.h"
-//
+#include	"dab-params.h"
 
 /**
   *	\brief ofdmProcessor
@@ -40,7 +40,7 @@
   */
 
 	ofdmProcessor::ofdmProcessor	(virtualInput	*inputDevice,
-	                                 DabParams	*params,
+	                                 dabParams	*params,
 	                                 cb_system_data_t systemData,
 	                                 mscHandler 	*msc,
 	                                 ficHandler 	*fic,
@@ -56,11 +56,13 @@ int32_t	i;
 	this	-> params		= params;
 	this	-> systemData		= systemData;
 	this	-> freqsyncMethod	= freqsyncMethod;
-	this	-> T_null		= params	-> T_null;
-	this	-> T_s			= params 	-> T_s;
-	this	-> T_u			= params	-> T_u;
-	this	-> T_g			= T_s - T_u;
-	this	-> T_F			= params	-> T_F;
+	this	-> T_null		= params -> get_T_null ();
+	this	-> T_s			= params -> get_T_s ();
+	this	-> T_u			= params -> get_T_u ();
+	this	-> T_F			= params -> get_T_F ();
+	this	-> nrBlocks		= params -> get_L ();
+	this	-> carriers		= params -> get_carriers ();
+	this	-> carrierDiff		= params -> get_carrierDiff ();
 	this	-> my_ficHandler	= fic;
 	fft_handler			= new common_fft (T_u);
 	fft_buffer			= fft_handler -> getVector ();
@@ -194,9 +196,10 @@ int32_t		i;
 
 	sampleCnt	+= n;
 	if (sampleCnt > INPUT_RATE / N) {
-	   systemData (isSynced,
-	               my_ofdmDecoder. get_snr (),
-	               freqOffset);
+	   if (systemData != NULL)
+	      systemData (isSynced,
+	                  my_ofdmDecoder. get_snr (),
+	                  freqOffset);
 	   sampleCnt = 0;
 	}
 }
@@ -302,7 +305,7 @@ SyncOnPhase:
   *	as long as we can be sure that the first sample to be identified
   *	is part of the samples read.
   */
-	   for (i = 0; i <  params -> T_u; i ++) 
+	   for (i = 0; i <  T_u; i ++) 
 	      ofdmBuffer [i] = getSample (coarseCorrector + fineCorrector);
 //
 ///	and then, call upon the phase synchronizer to verify/compute
@@ -323,8 +326,8 @@ SyncOnPhase:
   *	used for synchronization for block 0
   */
 	   memmove (ofdmBuffer, &ofdmBuffer [startIndex],
-	                  (params -> T_u - startIndex) * sizeof (DSPCOMPLEX));
-	   ofdmBufferIndex	= params -> T_u - startIndex;
+	                  (T_u - startIndex) * sizeof (DSPCOMPLEX));
+	   ofdmBufferIndex	= T_u - startIndex;
 
 Block_0:
 /**
@@ -334,7 +337,7 @@ Block_0:
   *	We read the missing samples in the ofdm buffer
   */
 	   getSamples (&ofdmBuffer [ofdmBufferIndex],
-	               params -> T_u - ofdmBufferIndex,
+	               T_u - ofdmBufferIndex,
 	               coarseCorrector + fineCorrector);
 	   my_ofdmDecoder. processBlock_0 (ofdmBuffer);
 //
@@ -346,7 +349,7 @@ Block_0:
 	      int correction		= processBlock_0 (ofdmBuffer);
 //	      fprintf (stderr, "corrector = %d\n", correction);
 	      if (correction != 100) {
-	         coarseCorrector	+= correction * params -> carrierDiff;
+	         coarseCorrector	+= correction * carrierDiff;
 	         if (coarseCorrector > Khz (35))
 	            coarseCorrector = Khz (34);
 	         if (coarseCorrector <= - Khz (35))
@@ -375,7 +378,7 @@ Data_blocks:
 
 ///	and similar for the (params -> L - 4) MSC blocks
 	   for (ofdmSymbolCount = 4;
-	        ofdmSymbolCount <  (uint16_t)params -> L;
+	        ofdmSymbolCount <  (uint16_t)nrBlocks;
 	        ofdmSymbolCount ++) {
 	      getSamples (ofdmBuffer, T_s, coarseCorrector + fineCorrector);
 	      for (i = (int32_t)T_u; i < (int32_t)T_s; i ++) 
@@ -387,8 +390,7 @@ Data_blocks:
 NewOffset:
 ///	we integrate the newly found frequency error with the
 ///	existing frequency error.
-	   fineCorrector += 0.1 * arg (FreqCorr) / M_PI *
-	                        (params -> carrierDiff / 2);
+	   fineCorrector += 0.1 * arg (FreqCorr) / M_PI * (carrierDiff / 2);
 //
 /**
   *	OK,  here we are at the end of the frame
@@ -404,14 +406,14 @@ NewOffset:
   */
 	   counter	= 0;
 //
-	   if (fineCorrector > params -> carrierDiff / 2) {
-	      coarseCorrector += params -> carrierDiff;
-	      fineCorrector -= params -> carrierDiff;
+	   if (fineCorrector > carrierDiff / 2) {
+	      coarseCorrector += carrierDiff;
+	      fineCorrector -= carrierDiff;
 	   }
 	   else
-	   if (fineCorrector < -params -> carrierDiff / 2) {
-	      coarseCorrector -= params -> carrierDiff;
-	      fineCorrector += params -> carrierDiff;
+	   if (fineCorrector < - carrierDiff / 2) {
+	      coarseCorrector -= carrierDiff;
+	      fineCorrector += carrierDiff;
 	   }
 ReadyForNewFrame:
 ///	and off we go, up to the next frame
@@ -535,20 +537,20 @@ DSPFLOAT	oldMax	= 0;
 //	The range in which the carrier should be is
 //	T_u / 2 - K / 2 .. T_u / 2 + K / 2
 //	We first determine an initial sum over params -> K carriers
-	for (i = 40; i < params -> K + 40; i ++)
+	for (i = 40; i < carriers + 40; i ++)
 	   sum += abs (v [(T_u / 2 + i) % T_u]);
 //
 //	Now a moving sum, look for a maximum within a reasonable
 //	range (around (T_u - K) / 2, the start of the useful frequencies)
-	for (i = 40; i < T_u - (params -> K - 40); i ++) {
+	for (i = 40; i < T_u - (carriers - 40); i ++) {
 	   sum -= abs (v [(T_u / 2 + i) % T_u]);
-	   sum += abs (v [(T_u / 2 + i + params -> K) % T_u]);
+	   sum += abs (v [(T_u / 2 + i + carriers) % T_u]);
 	   if (sum > oldMax) {
 	      sum = oldMax;
 	      maxIndex = i;
 	   }
 	}
-	return maxIndex - (T_u - params -> K) / 2;
+	return maxIndex - (T_u - carriers) / 2;
 }
 
 void	ofdmProcessor::call_systemData (bool f, int16_t snr, int32_t freq) {

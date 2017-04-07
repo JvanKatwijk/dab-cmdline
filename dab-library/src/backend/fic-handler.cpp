@@ -265,6 +265,10 @@ std::string ficHandler::nameFor (int32_t serviceId) {
 	return fibProcessor. nameFor (serviceId);
 }
 
+int32_t	ficHandler::SIdFor	(std::string &name) {
+	return fibProcessor. SIdFor (name);
+}
+
 static	int 	pos	= 0;
 static	int	amount = 0;
 void	ficHandler::show_ficCRC (bool b) {

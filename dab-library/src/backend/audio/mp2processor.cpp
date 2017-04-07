@@ -219,7 +219,9 @@ struct quantizer_spec quantizer_table [17] = {
 
 	mp2Processor::mp2Processor (int16_t		bitRate,
 	                            cb_audio_t		soundOut,
-	                            cb_msc_quality_t	mscQuality) {
+	                            cb_data_t		dataOut,
+	                            cb_msc_quality_t	mscQuality):
+	                                       my_padHandler (dataOut) {
 int16_t	i, j;
 int16_t *nPtr = &N [0][0];
 
@@ -236,6 +238,7 @@ int16_t *nPtr = &N [0][0];
 	      V [i][j] = 0;
 
 	this	-> soundOut	= soundOut;
+	this	-> bitRate	= bitRate;
 	Voffs		= 0;
 	baudRate	= 48000;	// default for DAB
 	MP2framesize	= 24 * bitRate;	// may be changed
@@ -568,6 +571,21 @@ void	mp2Processor::addtoFrame (uint8_t *v) {
 int16_t	i, j;
 int16_t	lf	= baudRate == 48000 ? MP2framesize : 2 * MP2framesize;
 int16_t	amount	= MP2framesize;
+uint8_t help [24 * bitRate / 8];
+int16_t vLength = 24 * bitRate / 8;
+
+        for (i = 0; i < 24 * bitRate / 8; i ++) {
+           help [i] = 0;
+           for (j = 0; j < 8; j ++) {
+              help [i] <<= 1;
+              help [i] |= v [8 * i + j] & 01;
+           }
+        }
+        { uint8_t L0    = help [vLength - 1];
+          uint8_t L1    = help [vLength - 2];
+          int16_t down  = bitRate * 1000 >= 56000 ? 4 : 2;
+          my_padHandler. processPAD (help, vLength - 2 - down - 1, L1, L0);
+        }
 
 	for (i = 0; i < amount; i ++) {
 	   if (MP2Header_OK == 2) {

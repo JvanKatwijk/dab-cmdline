@@ -73,12 +73,12 @@ uint16_t length = 0;
 uint16_t i;
 
 	return buffer;
-//	if (size == -1)
-//	   length = strlen (buffer);
-//	else
-//	   length = size;
-//
-//	switch (charset) {
+	if (size == -1)
+	   length = strlen (buffer);
+	else
+	   length = size;
+
+	switch (charset) {
 //	   case UnicodeUcs2:
 //	      s = std::string::fromUtf16 ((const ushort*) buffer, length);
 //	      break;
@@ -87,13 +87,13 @@ uint16_t i;
 //	      s = std::string::fromUtf8 (buffer, length);
 //	      break;
 //
-//	   case EbuLatin:
-//	   default:
-//	      s = "";
-//	      for (i = 0; i < length; i++) {
-//	         s [i] = char (ebuLatinToUcs2 [((uint8_t*) buffer)[i]]);
-//	      }
-//	}
+	   case EbuLatin:
+	   default:
+	      s = "";
+	      for (i = 0; i < length; i++) {
+	         s [i] = char (ebuLatinToUcs2 [((uint8_t*) buffer)[i]]);
+	      }
+	}
 
 	return s;
 }

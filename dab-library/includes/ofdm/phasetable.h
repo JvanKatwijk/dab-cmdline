@@ -21,8 +21,8 @@
  *
  */
 #
-#ifndef	__PHASE_TABLE
-#define	__PHASE_TABLE
+#ifndef	__PHASE_TABLE__
+#define	__PHASE_TABLE__
 
 #include	<stdio.h>
 #include	<stdint.h>

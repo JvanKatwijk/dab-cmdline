@@ -30,36 +30,38 @@
 #include	<sys/select.h>
 #include	<atomic>
 #include	"dab-constants.h"
+#include	"dab-params.h"
 #include	"dab-class.h"
 
 	dabClass::dabClass (virtualInput	*inputDevice,
-	                    DabParams		*dabModeParameters,
+	                    uint8_t		Mode,
 	                    dabBand		theBand,
 	                    int16_t		waitingTime,
 	                    cb_audio_t		soundOut,
 	                    cb_data_t		dataOut,
 	                    cb_system_data_t	systemData,
 	                    cb_fib_quality_t	fibQuality,
-	                    cb_msc_quality_t	mscQuality) {
+	                    cb_msc_quality_t	mscQuality):
+	                                   dabMode (Mode) {
 
 	this	-> inputDevice		= inputDevice;
-	this	-> dabModeParameters	= dabModeParameters;
 	this	-> theBand		= theBand;
 	this	-> waitingTime		= waitingTime;
 	this	-> soundOut		= soundOut;
 	this	-> dataOut		= dataOut;
 
+	tunedFrequency			= 220000000;	// just default
 	deviceGain			= 50;	// just default
 	autoGain			= false;
 	theEnsemble. clearEnsemble ();
 	my_ficHandler	= new ficHandler (&theEnsemble, fibQuality);
-	my_mscHandler	= new mscHandler (dabModeParameters,
+	my_mscHandler	= new mscHandler (&dabMode,
                                           soundOut,
 	                                  dataOut,
 	                                  mscQuality);
 
 	my_ofdmProcessor = new ofdmProcessor   (inputDevice,
-	                                        dabModeParameters,
+	                                        &dabMode,
 	                                        systemData,
 	                                        my_mscHandler,
 	                                        my_ficHandler,
@@ -163,9 +165,8 @@ struct dabFrequencies Lband_frequencies [] = {
 bool	dabClass::dab_channel (std::string s) {
 int16_t	i;
 struct dabFrequencies *finger;
-int32_t	tunedFrequency;
+int32_t	tunedTo	= 0;
 
-	tunedFrequency		= 0;
 	if (theBand == BAND_III)
 	   finger = bandIII_frequencies;
 	else
@@ -173,17 +174,18 @@ int32_t	tunedFrequency;
 
 	for (i = 0; finger [i]. key != NULL; i ++) {
 	   if (std::string (finger [i]. key) == s) {
-	      tunedFrequency	= KHz (finger [i]. fKHz);
+	      tunedTo	= KHz (finger [i]. fKHz);
 	      break;
 	   }
 	}
 
-	if (tunedFrequency == 0) {
+	if (tunedTo == 0) {
 	   fprintf (stderr, "could not find a legal frequency for channel %s\n",
 	                                     s. c_str ());
 	   return false;
 	}
 
+	tunedFrequency		= tunedTo;
 	inputDevice		-> setVFOFrequency (tunedFrequency);
 	return true;
 }
@@ -202,7 +204,8 @@ void	dabClass::run_dab	(cb_ensemble_t h) {
 	if (run. load ())	// running already
 	   return;
 
-//	Note: the ofdmProcessor will restart the inputDevice
+	inputDevice		-> setVFOFrequency (tunedFrequency);
+	inputDevice		-> restartReader ();
 	my_ofdmProcessor	-> start ();
 	inputDevice		-> setGain (deviceGain);
 	if (autoGain)
@@ -219,6 +222,7 @@ void	dabClass::run_dab	(cb_ensemble_t h) {
 	   usleep (10000);
 //
 //	we started the ofdmprocessor, so we also stop it here
+	inputDevice		-> stopReader ();
 	my_ofdmProcessor	-> stop ();
 }
 
@@ -266,6 +270,10 @@ void	dabClass::dab_stop (void) {
 	   run. store (false);
 	   threadHandle. join ();
 	}
+}
+
+int32_t	dabClass::dab_getSId	(std::string name) {
+	return my_ficHandler	-> SIdFor (name);
 }
 
 bool	dabClass::ensembleArrived (void) {

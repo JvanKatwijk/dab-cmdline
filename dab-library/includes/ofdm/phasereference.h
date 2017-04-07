@@ -21,8 +21,8 @@
  *
  */
 #
-#ifndef	__PHASEREFERENCE
-#define	__PHASEREFERENCE
+#ifndef	__PHASEREFERENCE__
+#define	__PHASEREFERENCE__
 
 #include	"fft.h"
 #include	<stdio.h>
@@ -30,15 +30,16 @@
 #include	"phasetable.h"
 #include	"dab-constants.h"
 
+class	dabParams;
 
 class phaseReference : public phaseTable {
 public:
-		phaseReference (DabParams *, int16_t);
+		phaseReference (dabParams *, int16_t);
 		~phaseReference	(void);
 	int32_t	findIndex	(DSPCOMPLEX *);
 	DSPCOMPLEX	*refTable;
 private:
-	int32_t		Tu;
+	int32_t		T_u;
 	int16_t		threshold;
 
 	common_fft	*fft_processor;

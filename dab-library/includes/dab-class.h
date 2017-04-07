@@ -41,7 +41,7 @@
 #include	"msc-handler.h"
 #include	"ringbuffer.h"
 #include	"ensemble-handler.h"
-
+#include	"dab-params.h"
 #include	<mutex>
 #include	<condition_variable>
 
@@ -50,14 +50,14 @@ class	virtualInput;
 class dabClass {
 public:
         		dabClass	(virtualInput	*,
-	                         	DabParams	*,
-	                         	dabBand,
-	                                int16_t,		// waiting time
-	                         	cb_audio_t,
-	                                cb_data_t,
-	                                cb_system_data_t,
-	                                cb_fib_quality_t,
-	                                cb_msc_quality_t
+	                                 uint8_t	,
+	                         	 dabBand,
+	                                 int16_t,		// waiting time
+	                         	 cb_audio_t,
+	                                 cb_data_t,
+	                                 cb_system_data_t,
+	                                 cb_fib_quality_t,
+	                                 cb_msc_quality_t
 	                                );
 			~dabClass	(void);
 	void		dab_gain	(uint16_t);
@@ -68,11 +68,13 @@ public:
 	void		dab_stop	(void);
 	bool		dab_service	(std::string, cb_programdata_t);
 	bool		dab_service	(int32_t, cb_programdata_t);
+	int32_t		dab_getSId	(std::string);
 	bool		ensembleArrived	(void);
 private:
 	virtualInput	*inputDevice;
-	DabParams	*dabModeParameters;
 	dabBand		theBand;
+	int32_t		tunedFrequency;
+	dabParams	dabMode;
 	int16_t		waitingTime;
 	cb_audio_t	soundOut;
 	cb_data_t	dataOut;

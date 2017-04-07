@@ -33,22 +33,26 @@ class	padHandler {
 public:
 		padHandler	(cb_data_t);
 		~padHandler	(void);
-	void	processPAD	(uint8_t *);
+	void	processPAD	(uint8_t *, int16_t, uint8_t, uint8_t);
 private:
 	cb_data_t	dataOut;
-	void	handle_variablePAD	(uint8_t *, int16_t, uint8_t);
-	void	handle_shortPAD		(uint8_t *, int16_t);
-	void	dynamicLabel		(uint8_t *, int16_t, uint8_t);
-	void	add_MSC_element		(uint8_t *, int16_t);
-	void	build_MSC_segment	(uint8_t *, int16_t);
-	bool	pad_crc			(uint8_t *, int16_t);
+	void		handle_variablePAD	(uint8_t *, int16_t, uint8_t);
+	void		handle_shortPAD		(uint8_t *, int16_t);
+	void		dynamicLabel		(uint8_t *, int16_t, uint8_t);
+	void		add_MSC_element		(uint8_t *, int16_t);
+	void		build_MSC_segment	(uint8_t *, int16_t);
+	void		new_MSC_element 	(uint8_t *, int16_t, int16_t);
+
+	bool		pad_crc			(uint8_t *, int16_t);
 	std::string	dynamicLabelText;
-	int16_t	charSet;
+	int16_t		charSet;
 	motHandler	*my_motHandler;
-	int16_t	msc_dataGroupLength;
-	int16_t msc_dataGroupIndex;
-	uint8_t	msc_dataGroupBuffer	[8192];
-	uint8_t	last_appType;
+	int16_t		msc_dataGroupLength;
+	int16_t		msc_dataGroupCurrentLength;
+	uint8_t		msc_dataGroupBuffer	[8192];
+	uint8_t		last_appType;
+	bool		msc_GroupElement;
+	int16_t		xpadLength;
 };
 
 #endif

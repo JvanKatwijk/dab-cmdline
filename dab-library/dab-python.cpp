@@ -36,7 +36,7 @@ PyObject *dab_Service_p		(PyObject *self, PyObject *args);
 PyObject *dab_run_p		(PyObject *self, PyObject *args);
 PyObject *dab_exit_p		(PyObject *self, PyObject *args);
 PyObject *dab_stop_p		(PyObject *self, PyObject *args);
-PyObject *PyInit_dablib		(void);
+PyObject *PyInit_libdab_lib	(void);
 }
 //
 //	We need to define 'C' callback functions, whose purpose
@@ -347,7 +347,7 @@ static struct PyModuleDef dablib = {
 };
 
 
-PyObject *PyInit_dablib (void) {
+PyObject *PyInit_libdab_lib (void) {
 	if (!PyEval_ThreadsInitialized ())
 	   PyEval_InitThreads ();
 	import_array ();

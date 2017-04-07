@@ -58,12 +58,19 @@ static void sighandler (int signum) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	callblockHandler (std::list<std::string> ensemble, bool b) {
+void	callblockHandler (std::list<std::string> stationList, bool b) {
 	if (!b) {
 	   fprintf (stderr, "no ensemble, quitting");
 	   run. store (false);
 	   return;
 	}
+	for (std::list<std::string>::iterator list_iter = stationList. begin ();
+             list_iter != stationList. end (); list_iter ++) {
+	      fprintf (stderr, "%s - with SId %X - in ensemble\n",
+	                           (*list_iter). c_str (),
+	                            dab_getSId (theRadio, *list_iter));
+           }
+
 	if (serviceId == -1)
 	   dab_Service (theRadio, programName, NULL);
 	else
@@ -94,6 +101,7 @@ static bool isStarted	= false;
 
 static
 void	systemData (bool flag, int16_t snr, int32_t freqOff) {
+//
 }
 
 static

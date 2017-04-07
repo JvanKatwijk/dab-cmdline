@@ -96,9 +96,10 @@ public:
 	void	clearEnsemble		(void);
 	bool	syncReached		(void);
 	std::string nameFor		(int32_t);
+	int32_t	SIdFor			(std::string &);
 	uint8_t	kindofService		(std::string &);
-	void	dataforAudioService	(std::string&, audiodata *);
-	void	dataforDataService	(std::string&, packetdata *);
+	void	dataforAudioService	(std::string &, audiodata *);
+	void	dataforDataService	(std::string &, packetdata *);
 private:
 	ensembleHandler *ensemble;
 	serviceId	*findServiceId (int32_t);

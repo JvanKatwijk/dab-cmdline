@@ -18,12 +18,12 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 #
 #include	<stdint.h>
 #include	<stdio.h>
 #include	"freq-interleaver.h"
+#include	"dab-params.h"
 
 /**
   *	\brief createMapper
@@ -56,31 +56,32 @@ int16_t	i;
 	return v;
 }
 
-	interLeaver::interLeaver (DabParams *p) {
+	interLeaver::interLeaver (dabParams *p) {
 
-	switch (p -> dabMode) {
+	switch (p -> get_dabMode ()) {
 	   case 1:
 	   default:		// shouldn't happen
-	      permTable	= createMapper (p -> T_u,
-	                                511, 256, 256 + p -> K,
-	                                new int16_t [p -> T_u]);
+	      permTable	= createMapper (p -> get_T_u (),
+	                                511, 256, 256 + p -> get_carriers (),
+	                                new int16_t [p -> get_T_u ()]);
 	      break;
+
 	   case 2:
-	      permTable = createMapper (p -> T_u,
-	                                127, 64, 64 + p -> K,
-	                                new int16_t [p -> T_u]);
+	      permTable = createMapper (p -> get_T_u (),
+	                                127, 64, 64 + p -> get_carriers (),
+	                                new int16_t [p -> get_T_u ()]);
 	      break;
 
 	   case 3:
-	      permTable = createMapper (p -> T_u,
-	                                63, 32, 32 + p -> K,
-	                                new int16_t [p -> T_u]);
+	      permTable = createMapper (p -> get_T_u (),
+	                                63, 32, 32 + p -> get_carriers (),
+	                                new int16_t [p -> get_T_u ()]);
 	      break;
 
 	   case 4:
-	      permTable = createMapper (p -> T_u,
-	                                255, 128, 128 + p -> K,
-	                                new int16_t [p -> T_u]);
+	      permTable = createMapper (p -> get_T_u (),
+	                                255, 128, 128 + p -> get_carriers (),
+	                                new int16_t [p -> get_T_u ()]);
 	      break;
 	}
 }

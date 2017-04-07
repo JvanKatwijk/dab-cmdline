@@ -27,8 +27,8 @@
  *	want the interface with different devices (including  filehandling)
  *	to be transparent
  */
-#ifndef	__VIRTUAL_INPUT
-#define	__VIRTUAL_INPUT
+#ifndef	__VIRTUAL_INPUT__
+#define	__VIRTUAL_INPUT__
 
 #include	<stdint.h>
 #include	"dab-constants.h"

@@ -19,8 +19,8 @@
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__OFDM_DECODER
-#define	__OFDM_DECODER
+#ifndef	__OFDM_DECODER__
+#define	__OFDM_DECODER__
 
 #include	"dab-constants.h"
 #include	"fft.h"
@@ -35,10 +35,11 @@
 
 class	ficHandler;
 class	mscHandler;
+class	dabParams;
 
 class	ofdmDecoder {
 public:
-		ofdmDecoder		(DabParams *,
+		ofdmDecoder		(dabParams *,
 	                                 ficHandler	*,
 	                                 mscHandler	*);
 		~ofdmDecoder		(void);
@@ -50,7 +51,7 @@ public:
 	void	start			(void);
 private:
 	int16_t		get_snr		(DSPCOMPLEX *);
-	DabParams	*params;
+	dabParams	*params;
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscHandler;
 	Semaphore	bufferSpace;
@@ -70,6 +71,7 @@ private:
 	int32_t		T_u;
 	int32_t		T_g;
 	int32_t		carriers;
+	int32_t		nrBlocks;
 	int16_t		getMiddle	(void);
 	DSPCOMPLEX	*phaseReference;
 	common_fft	*fft_handler;

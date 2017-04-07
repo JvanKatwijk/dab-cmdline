@@ -70,6 +70,7 @@ int32_t i;
 	if (dabModus == DAB) 
 	   our_dabProcessor = new mp2Processor (bitRate,
 	                                        soundOut,
+	                                        dataOut,
 	                                        mscQuality);
 	else
 	if (dabModus == DAB_PLUS) 

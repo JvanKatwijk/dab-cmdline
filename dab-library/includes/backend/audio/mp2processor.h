@@ -32,6 +32,7 @@
 #include	<stdint.h>
 #include	<math.h>
 #include	"dab-processor.h"
+#include	"pad-handler.h"
 #include	<stdio.h>
 #include	"ringbuffer.h"
 #include	"dab-api.h"
@@ -50,16 +51,19 @@ class	mp2Processor: public dabProcessor {
 public:
 			mp2Processor	(int16_t,
 	                                 cb_audio_t,
+	                                 cb_data_t,
 	                                 cb_msc_quality_t);
 			~mp2Processor	(void);
 	void		addtoFrame	(uint8_t *);
 	
 private:
+	cb_audio_t	soundOut;
+	cb_msc_quality_t	mscQuality;
+	int16_t		bitRate;
+	padHandler	my_padHandler;
 	void		output		(int16_t *, int, int);
 	int32_t		mp2sampleRate	(uint8_t *);
 	int32_t		mp2decodeFrame	(uint8_t *, int16_t *);
-	cb_audio_t	soundOut;
-	cb_msc_quality_t	mscQuality;
 	int32_t		baudRate;
 	void		setSamplerate		(int32_t);
 	struct quantizer_spec *read_allocation (int, int);

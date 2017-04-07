@@ -42,6 +42,7 @@ class	common_fft;
 class	ofdmDecoder;
 class	mscHandler;
 class	ficHandler;
+class	dabParams;
 
 #define SEARCH_RANGE            (2 * 36)
 #define CORRELATION_LENGTH      24
@@ -49,7 +50,7 @@ class	ficHandler;
 class ofdmProcessor {
 public:
 		ofdmProcessor  	(virtualInput *,
-	                         DabParams	*,
+	                         dabParams	*,
 	                         cb_system_data_t,
 	                         mscHandler *,
 	                         ficHandler *,
@@ -61,7 +62,7 @@ public:
 	void	setOffset		(int32_t);
 	void	start			(void);
 private:
-	DabParams	*params;
+	dabParams	*params;
 	cb_system_data_t	systemData;
 	void		call_systemData (bool, int16_t, int32_t);
 	std::thread	threadHandle;
@@ -73,6 +74,9 @@ private:
 	int32_t		T_s;
 	int32_t		T_g;
 	int32_t		T_F;
+	int32_t		nrBlocks;
+	int32_t		carriers;
+	int32_t		carrierDiff;
 	bool		isSynced;
 	float		sLevel;
 	DSPCOMPLEX	*dataBuffer;

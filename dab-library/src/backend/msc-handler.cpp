@@ -24,6 +24,7 @@
 #include	"msc-handler.h"
 #include	"dab-virtual.h"
 #include	"dab-audio.h"
+#include	"dab-params.h"
 //
 //	Interface program for processing the MSC.
 //	Merely a dispatcher for the selected service
@@ -34,7 +35,7 @@
 #define	CUSize	(4 * 16)
 //	Note CIF counts from 0 .. 3
 //
-		mscHandler::mscHandler	(DabParams	*p,
+		mscHandler::mscHandler	(dabParams	*p,
 	                                 cb_audio_t	soundOut,
 	                                 cb_data_t	dataOut,
 	                                 cb_msc_quality_t mscQuality) {
@@ -49,14 +50,14 @@
 	newChannel		= false;
 	work_to_be_done		= false;
 	dabModus		= 0;
-	BitsperBlock		= 2 * p -> K;
-	if (p -> dabMode == 4)	// 2 CIFS per 76 blocks
+	BitsperBlock		= 2 * p -> get_carriers ();
+	if (p -> get_dabMode () == 4)	// 2 CIFS per 76 blocks
 	   numberofblocksperCIF	= 36;
 	else
-	if (p -> dabMode == 1)	// 4 CIFS per 76 blocks
+	if (p -> get_dabMode () == 1)	// 4 CIFS per 76 blocks
 	   numberofblocksperCIF	= 18;
 	else
-	if (p -> dabMode == 2)	// 1 CIF per 76 blocks
+	if (p -> get_dabMode () == 2)	// 1 CIF per 76 blocks
 	   numberofblocksperCIF	= 72;
 	else			// shouldnot/cannot happen
 	   numberofblocksperCIF	= 18;

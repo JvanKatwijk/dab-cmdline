@@ -29,7 +29,7 @@
 
 //	Experimental API for controlling the dab software library
 //
-//	Version 0.6
+//	Version 0.7
 //	An example of the use of the library - using this API -
 //	is enclosed in the directory "example" in this distribution
 
@@ -84,14 +84,14 @@ extern "C" {
 	                                 int16_t,	// signal noise ratio
 	                                 int32_t	// frequency offset
 	                                );
-//	This function is called app once per second
+//	This function is called approximately once a second
 //	If NULL is provides, no data will be passed
 //
 //	and for the quality of the FIB decoding (where the parameter
 //	is a value in the range 0 .. 100)
 	typedef void (*cb_fib_quality_t) (int16_t);
 
-//	This function is called app once per second, but only after
+//	This function is called approximately once per second, but only after
 //	time synchronization. If NULL is provided, no data will be passed
 
 //	and for the quality of the audio frames (where the parameters
@@ -126,14 +126,14 @@ extern "C" {
 //	The function returns a non-NULL handle when the device
 //	could be opened for delivery input.
 //	Otherwise it return NULL.
-	void	*dab_initialize	(uint8_t,	// dab Mode
-	                         dabBand,	// Band
-	                         cb_audio_t,	// callback for sound output
-	                         cb_data_t,	// callback for dynamic labels
-	                         int16_t,	// waitingTime,
-	                         cb_system_data_t,  // systemData,
-	                         cb_fib_quality_t,  // fibQuality,
-	                         cb_msc_quality_t // mscQuality
+	void	*dab_initialize	(uint8_t,		// dab Mode
+	                         dabBand,		// Band
+	                         cb_audio_t,		// callback for sound output
+	                         cb_data_t,		// callback for dynamic labels
+	                         int16_t,		// waitingTime,
+	                         cb_system_data_t,	// systemData,
+	                         cb_fib_quality_t,	// fibQuality,
+	                         cb_msc_quality_t	// mscQuality
 	                         );
 //
 //	The gain of the device can be set and changed to a value
@@ -148,10 +148,10 @@ extern "C" {
 //	onto a frequency for the device and prepares the device
 //	for action
 //	If the software was already running for another channel,
-//	then the thread running the software will be halter first
+//	then the thread running the software will be halted first
 	bool	dab_Channel	(void *handle, std::string);
 
-//	the function runDAB will start a separate thread, running the
+//	the function dab_run will start a separate thread, running the
 //	dab decoding software at the selected channel.
 //	If DAB data, i.e. an ensemble, is found, then the function
 //	passed as callback is called with as parameter the std::list
@@ -163,7 +163,7 @@ extern "C" {
 //
 //	with dab_Service, the user may - finally - select a program
 //	to be decoded. This - obviously only makes sense when
-//	there are programs and "runDAB" is still active.
+//	there are programs and "dab_run" is still active.
 //	The name of the program may be a prefix of the real name,
 //	however, letter case is important.
 	bool	dab_Service	(void *handle, std::string, cb_programdata_t);
@@ -178,6 +178,10 @@ extern "C" {
 //	the exit function will close down the library software
 	void	dab_exit	(void **handle);
 //
+//	a conventience function maps the program name in the
+//	current ensemble to the ServiceIdentifer
+	int32_t	dab_getSId 		(void *handle, std::string);
+//
 //
 ////////////////// G E N E R A T I N G  T H E  L I B R A R Y //////////////
 //
@@ -186,6 +190,13 @@ extern "C" {
 //
 //	You will need a few libraries to be installed, and
 //	you have to make a choice for the device you want
+//	In general, one would create a "build" directory into the
+//	dab-directory, then
+//	cd build
+//	cmake .. -DXXX=ON,
+//	where XXX is either SDRPLAY, AIRSPY or DABSTICK,
+//	make
+//	sudo make install
 }
 #endif
 

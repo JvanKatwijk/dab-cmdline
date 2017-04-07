@@ -47,6 +47,7 @@ public:
 	bool	syncReached		(void);
 	int16_t	get_ficRatio		(void);
 	std::string nameFor		(int32_t);
+	int32_t	SIdFor			(std::string &);
 	uint8_t	kindofService		(std::string &);
 	void	dataforDataService	(std::string &, packetdata *);
 	void	dataforAudioService	(std::string &, audiodata *);

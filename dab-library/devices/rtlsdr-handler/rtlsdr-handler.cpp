@@ -70,6 +70,7 @@ void	controlThread (rtlsdrHandler *theStick) {
 int16_t	deviceCount;
 int32_t	r;
 int16_t	deviceIndex;
+int16_t	i;
 
 	*success		= false;	// just the default
 	this	-> gain		= gain;
@@ -135,7 +136,9 @@ int16_t	deviceIndex;
 	gainsCount	= rtlsdr_get_tuner_gains (device, gains);
 	gain		= gain * gainsCount / 100;
 	rtlsdr_set_tuner_gain (device, gain);
-
+	for (i = 0; i < gainsCount; i ++)
+	   fprintf (stderr, "%d.%d ", gains [i] / 10, gains [i] % 10);
+	fprintf (stderr, "\n");
 	_I_Buffer		= new RingBuffer<uint8_t>(1024 * 1024);
 	*success 		= true;
 	return;
@@ -190,15 +193,12 @@ int32_t	r;
 
 	if (running)
 	   return true;
-
 	_I_Buffer	-> FlushRingBuffer ();
 	r = this -> rtlsdr_reset_buffer (device);
-	if (r < 0)
-	   return false;
+        if (r < 0)
+           return false;
 
-	this -> rtlsdr_set_center_freq (device, frequency + vfoOffset);
 	workerHandle = std::thread (controlThread, this);
-	rtlsdr_set_tuner_gain (device, gain);
 	running	= true;
 	return true;
 }

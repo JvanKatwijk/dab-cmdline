@@ -264,8 +264,14 @@ uint8_t theAudioUnit [2 * 960 + 10];	// sure, large enough
 	memcpy (theAudioUnit, v, frame_length);
 	memset (&theAudioUnit [frame_length], 0, 10);
 
-	if (((theAudioUnit [0] >> 5) & 07) == 4)
-	   my_padHandler. processPAD (theAudioUnit);
+	if (((theAudioUnit [0] >> 5) & 07) == 4) {
+	   int16_t count = theAudioUnit [1];
+           uint8_t buffer [count];
+           memcpy (buffer, &theAudioUnit [2], count);
+           uint8_t L0   = buffer [count - 1];
+           uint8_t L1   = buffer [count - 2];
+           my_padHandler. processPAD (buffer, count - 3, L1, L0);
+        }
 
 	int tmp = aacDecoder. MP42PCM (dacRate,
 	                               sbrFlag,

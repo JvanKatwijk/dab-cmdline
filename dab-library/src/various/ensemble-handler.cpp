@@ -57,10 +57,10 @@ uint16_t i;
 	}
 	stationList.insert (stationList. cend (), s);
 	locker. unlock ();
-	fprintf (stderr, "program (%d): %X %s in the list\n",
-	                                     stationList. size (),
-	                                     SId,
-	                                     s. c_str ());
+//	fprintf (stderr, "program (%d): %X %s in the list\n",
+//	                                     stationList. size (),
+//	                                     SId,
+//	                                     s. c_str ());
 }
 
 ///	a slot, called by the fib processor

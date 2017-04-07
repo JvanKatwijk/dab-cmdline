@@ -37,11 +37,12 @@
 #include	"dab-api.h"
 
 class	dabVirtual;
+class	dabParams;
 
 using namespace std;
 class mscHandler {
 public:
-		mscHandler		(DabParams	*,
+		mscHandler		(dabParams	*,
 	                                 cb_audio_t,
 	                                 cb_data_t,
 	                                 cb_msc_quality_t);

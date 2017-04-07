@@ -44,7 +44,7 @@ endif ()
 #
 ########################################################################
 # if you are compiling the wrapper for Python in, uncomment
-#	set(PYTHON true)
+	set(PYTHON true)
 ########################################################################
 	find_package (PkgConfig)
 
@@ -127,6 +127,7 @@ endif ()
 	     ./includes/backend/data/data-processor.h
 	     ./includes/various/ringbuffer.h
 	     ./includes/various/fft.h
+	     ./includes/various/dab-params.h
 	     ./includes/various/ensemble-handler.h
 	     ./devices/virtual-input.h
 	)
@@ -171,6 +172,7 @@ endif ()
 	     ./src/backend/data/dab-data.cpp
 	     ./src/backend/data/data-processor.cpp
 	     ./src/various/fft.cpp
+	     ./src/various/dab-params.cpp
 	     ./src/various/ensemble-handler.cpp
 	     ./devices/virtual-input.cpp
 	)

@@ -29,6 +29,7 @@
 #include	"fic-handler.h"
 #include	"msc-handler.h"
 #include	"freq-interleaver.h"
+#include	"dab-params.h"
 /**
   *	\brief ofdmDecoder
   *	The class ofdmDecoder is - when implemented in a separate thread -
@@ -36,19 +37,20 @@
   *	will extract the Tu samples, do an FFT and extract the
   *	carriers and map them on (soft) bits
   */
-	ofdmDecoder::ofdmDecoder	(DabParams	*params,
+	ofdmDecoder::ofdmDecoder	(dabParams	*params,
 	                                 ficHandler	*my_ficHandler,
 	                                 mscHandler	*my_mscHandler):
-		                          bufferSpace (params -> L),
+		                          bufferSpace (params ->  get_L ()),
 	                                  myMapper        (params) {
 int16_t	i;
 	this	-> params		= params;
 	this	-> my_ficHandler	= my_ficHandler;
 	this	-> my_mscHandler	= my_mscHandler;
-	this	-> T_s			= params	-> T_s;
-	this	-> T_u			= params	-> T_u;
-	this	-> carriers		= params	-> K;
-	ibits				= new int16_t [2 * this -> carriers];
+	this	-> T_s			= params -> get_T_s ();
+	this	-> T_u			= params -> get_T_u ();
+	this	-> nrBlocks		= params -> get_L ();
+	this	-> carriers		= params -> get_carriers ();
+	ibits				= new int16_t [2 * carriers];
 
 	this	-> T_g			= T_s - T_u;
 	fft_handler			= new common_fft (T_u);
@@ -65,8 +67,8 @@ int16_t	i;
   *	We just create a large buffer where index i refers to block i.
   *
   */
-	command			= new DSPCOMPLEX * [params -> L];
-	for (i = 0; i < params -> L; i ++)
+	command			= new DSPCOMPLEX * [nrBlocks];
+	for (i = 0; i < nrBlocks; i ++)
 	   command [i] = new DSPCOMPLEX [T_u];
 	amount		= 0;
 //
@@ -85,7 +87,7 @@ int16_t	i;
 
 	delete		fft_handler;
 	delete[]	phaseReference;
-	for (i = 0; i < params -> L; i ++)
+	for (i = 0; i < nrBlocks; i ++)
 	   delete[] command [i];
 	delete[] command;
 }
@@ -130,7 +132,7 @@ std::unique_lock<std::mutex> lck (ourMutex);
 	         decodeFICblock (currentBlock);
 	      else
 	         decodeMscblock (currentBlock);
-	      currentBlock = (currentBlock + 1) % (params -> L);
+	      currentBlock = (currentBlock + 1) % nrBlocks;
 	      myMutex. lock ();
 	      amount -= 1;
 	      myMutex. unlock ();

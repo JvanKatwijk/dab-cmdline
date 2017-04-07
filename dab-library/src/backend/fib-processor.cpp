@@ -1066,6 +1066,22 @@ int16_t i;
 	}
 	return "no service found";
 }
+
+int32_t	fib_processor::SIdFor (std::string &name) {
+int16_t i;
+
+	for (i = 0; i < 64; i ++) {
+	   if (!listofServices [i]. inUse)
+	      continue;
+
+	   if (!listofServices [i]. serviceLabel. hasName)
+              continue;
+
+	   if (listofServices [i]. serviceLabel. label == name)
+	      return listofServices [i]. serviceId;
+	}
+	return -1;
+}
 	
 uint8_t	fib_processor::kindofService (std::string &s) {
 int16_t	i, j;
