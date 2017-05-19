@@ -32,6 +32,9 @@ endif ()
 ########################################################################
 #
 #########################################################################
+# if you are compiling the wrapper for Python in, uncomment
+#	set(PYTHON true) (does not work right now)
+########################################################################
 	find_package (PkgConfig)
 
         find_package(FFTW3f)
