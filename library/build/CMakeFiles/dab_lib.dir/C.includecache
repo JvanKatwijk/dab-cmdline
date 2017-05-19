@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jan/dab-library/library/src/backend/viterbi_768/spiral-no-sse.c
+spiral-no-sse.h
+/home/jan/dab-library/library/src/backend/viterbi_768/spiral-no-sse.h
+
+/home/jan/dab-library/library/src/backend/viterbi_768/spiral-no-sse.h
+

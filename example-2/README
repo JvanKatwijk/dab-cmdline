@@ -1,0 +1,7 @@
+
+This is a simple program, not using the library, but binding directly
+to the functions implementing the dab decoding.
+All callbacks are defined, most of them with an empty body.
+
+Feel free to improve the program
+

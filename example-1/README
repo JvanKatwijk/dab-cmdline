@@ -1,0 +1,6 @@
+
+This is a simple example of using the DAB library. As you can see in
+the main program, all callbacks are defined, most of them with an empty body.
+
+Feel free to improve the program
+
