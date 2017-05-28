@@ -160,14 +160,14 @@ void	*dabInit   (deviceHandler       *,
 	            void                *userData);
 
 //	dabExit cleans up the library on termination
-void	dabExit    (void *);
+void	dabExit		(void *);
 //
 //	the actual processing starts with calling startProcessing,
 //	note that the input device needs to be started separately
-void	startProcessing (void *);
+void	dabStartProcessing (void *);
 //
-void	reset           (void *);
-void	stop		(void *);
+void	dabReset	(void *);
+void	dabStop		(void *);
 //	reset is as the name suggests for resetting the state of the library
 //
 //	after selecting a name for a program, the service can be started
@@ -178,7 +178,7 @@ void	stop		(void *);
 //	return -2 if the type of service is not recognized
 //	return -3 if the type of service is not audio
 //	return -4 if the service is insufficiently defined
-int16_t	dab_service     (std::string, void *);
+int16_t	dabService     (std::string, void *);
 //
 //	mapping from a name to a Service identifier is done 
 int32_t dab_getSId      (std::string, void *);

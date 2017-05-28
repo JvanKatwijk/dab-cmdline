@@ -37,7 +37,7 @@
 #ifdef	HAVE_SPECTRUM
 #include	"spectrum-handler.h"
 #endif
-#include	"airspy-handler.h"
+#include	"sdrplay-handler.h"
 
 std::vector<size_t> get_cpu_times() {
 	std::ifstream proc_stat("/proc/stat");
@@ -149,9 +149,10 @@ const char	**t;
 	frequency	= dabBand. Frequency (theBand, 
                                               std::string (currentChannel. toLatin1 (). data ()));
 	try {
-	   theDevice	= new airspyHandler (frequency,
-	                                      0,
-	                                      gainSlider -> value ());
+	   theDevice	= new sdrplayHandler (frequency,
+	                                      3,
+	                                      gainSlider -> value (),
+	                                      true, 0, 0);
 	}
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed, fatal\n");
@@ -263,7 +264,7 @@ std::string ss;
 void	simpleDab::selectService (QModelIndex s) {
 QString a = ensemble. data (s, Qt::DisplayRole). toString ();
 std::string ss = std::string (a. toLatin1 (). data ());
-	dab_service (ss, theLibrary);
+	dabService (ss, theLibrary);
 	techData. programName  -> setText (a);
 }
 
@@ -285,7 +286,7 @@ void	simpleDab::setStart		(void) {
 	if (theLibrary == NULL)
 	   return;
 	theDevice	-> restartReader ();
-	startProcessing (theLibrary);
+	dabStartProcessing (theLibrary);
 }
 //
 //
@@ -294,7 +295,7 @@ void	simpleDab::terminateProcess	(void) {
 	   return;
 	theDevice	-> stopReader ();
 	fprintf (stderr, "the device is stopped\n");
-	stop (theLibrary);
+	dabStop (theLibrary);
 	fprintf (stderr, "the library stopped\n");
 	dabSettings	->
 	           setValue ("channel", channelSelector -> currentText ());
@@ -320,7 +321,7 @@ void	simpleDab::do_reset		(void) {
 	if (theLibrary == NULL)
 	   return;
 	cleanup_GUI ();
-	reset (theLibrary);
+	dabReset (theLibrary);
 }
 
 void    simpleDab:: set_streamSelector (int k) {

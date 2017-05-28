@@ -85,6 +85,7 @@
 }
 
 void	dabClass::startProcessing	(void) {
+	fprintf (stdout, "ofdm word gestart\n");
 	the_ofdmProcessor	-> start ();
 }
 
@@ -104,6 +105,7 @@ void	dabClass::stop		(void) {
 int16_t	dabClass::dab_service (std::string name) {
 audiodata d1;
 packetdata d2;
+	fprintf (stdout, "searching for %s\n", name. c_str ());
 	switch (the_ficHandler. kindofService (name)) {
 	   case AUDIO_SERVICE:
 	     the_ficHandler. dataforAudioService (name, &d1);

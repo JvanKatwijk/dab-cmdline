@@ -1,0 +1,32 @@
+
+cmdline.py  is a simple command line interface for use with the dab library.
+Since we need an interface file between the DAB library and the python
+program, a CMakeLists.txt file is include with which a library can be
+generated that includes the interface file.
+
+Normal way of creating such a library is
+   mkdir build
+   cd build
+   cmake .. -DSDRPLAY=ON
+   make
+   cp ./libdab_lib.so ..
+   cd ..
+   python3 cmdline.py -g 80 -c 11C -p "Classic FM"
+
+Replace -DSDRPLAY=ON by -DAIRSPY=ON or -DRTLSDR=ON
+
+Command line parameters (there is a default one for each)
+
+	-d to specify the delay allowing the system to look for an ensemble
+	-m the DAB mode, default Mode 1
+	-g the gain, default 50 (on a scale 1 .. 100
+	-a the soundchannel, default "default"
+	-c the channel, default "11C"
+	-p the program name, default "Classic FM"
+	-l the latency, to be used in the portaudio handler, default 0.1
+
+To keep things a little simple, the Python version of the command line
+implementation of DAB does not use all callbacks, see the python file.
+The callbacks that are supported are all included in the cmdline.py file,
+most of them with an empty (or almost empty) body.
+

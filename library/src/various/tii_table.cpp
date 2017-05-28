@@ -51,7 +51,7 @@ void	tii_table::add_main	(int16_t mainId, float latitude, float longitude) {
 }
 
 void	tii_table::add_element (tii_element *t) {
-int16_t i;
+uint16_t i;
 
 	for (i = 0; i < offsets. size (); i ++)
 	   if (offsets [i]. subId == t -> subId)
@@ -62,7 +62,7 @@ int16_t i;
 
 std::complex<float> tii_table::get_coordinates (int16_t mainId,
 	                               int16_t subId, bool *success) {
-int16_t i;
+uint16_t i;
 float x, y;
 
 	*success	= false;
@@ -83,7 +83,7 @@ float x, y;
 }
 
 void	tii_table::print_coordinates	(void) {
-int16_t	i;
+uint16_t	i;
 	if (mainId < 0)
 	   return;
 

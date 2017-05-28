@@ -84,7 +84,7 @@ private:
 	phaseTable	*phasetable;
 	int32_t		blockIndex;
 	int16_t		*ibits;
-	int16_t		current_snr;
+	float		current_snr;
 };
 
 #endif

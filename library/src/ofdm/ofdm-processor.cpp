@@ -114,6 +114,7 @@ int32_t	i;
 	              conj (phaseSynchronizer. refTable [(T_u + i + 1) % T_u]));
 	isSynced	= false;
 	}
+	running. store (false);
 }
 
 	ofdmProcessor::~ofdmProcessor	(void) {
@@ -179,10 +180,9 @@ std::complex<float> temp;
 	   if (spectrumBuffer != NULL)
               spectrumBuffer -> putDataIntoBuffer (localBuffer, localCounter);
            localCounter = 0;
-	   systemdataHandler (isSynced,
-	                      my_ofdmDecoder. get_snr (),
-	                      freqOffset,
-	                      userData);
+	   call_systemData (isSynced,
+	                    my_ofdmDecoder. get_snr (),
+	                    freqOffset);
 	   sampleCnt = 0;
 
 	}
@@ -225,10 +225,9 @@ int32_t		i;
 	   if (spectrumBuffer != NULL)
               spectrumBuffer -> putDataIntoBuffer (localBuffer, bufferSize);
            localCounter = 0;
-	   systemdataHandler (isSynced,
-	                      my_ofdmDecoder. get_snr (),
-	                      freqOffset,
-	                      userData);
+	   call_systemData (isSynced,
+	                    my_ofdmDecoder. get_snr (),
+	                    freqOffset);
 	   sampleCnt = 0;
 	}
 }
@@ -479,7 +478,6 @@ ReadyForNewFrame:
 	catch (int e) {
 	   ;
 	}
-	fprintf (stderr, "now waiting for ofdm decoder\n");
 	my_ofdmDecoder. stop ();
 	fprintf (stderr, "ofdmProcessor is shutting down\n");
 }

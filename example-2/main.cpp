@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2015, 2016
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
  *
@@ -161,8 +161,8 @@ struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
 
-	fprintf (stderr, "dab_cmdline, \
-	                  Copyright 2017 J van Katwijk, Lazy Chair Computing");
+	fprintf (stderr, "dab_cmdline,\n \
+	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);

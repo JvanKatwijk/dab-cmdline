@@ -20,8 +20,7 @@ DEPENDPATH += . \
 	      .. \
 	      ./includes \
 	      ./output \
-	      ../devices \
-	      ../devices/airspy-handler
+	      ../devices 
 	     
 
 INCLUDEPATH += . \ 
@@ -29,14 +28,14 @@ INCLUDEPATH += . \
 	       ./includes \
 	       ./output \
 	       ../devices \
-	       ../devices/airspy-handler
+	       ../devices/sdrplay-handler
 
 # Input
 FORMS += ./forms/dabradio.ui ./forms/technical_data.ui
 
 HEADERS += ./simple-dab.h \
-	   ./device-handler.h \
-	   ./devices/airspy-handler/airspy-handler.h \
+	   ../device-handler.h \
+	   ../devices/sdrplay-handler/sdrplay-handler.h \
 	   ./band-handler.h \
 	   ./includes/ringbuffer.h \
 	   ./output/audio-base.h \
@@ -47,7 +46,7 @@ SOURCES += ./main.cpp \
 	   ./simple-dab.cpp \
 	   ./band-handler.cpp \
 	   ../devices/device-handler.cpp \
-	   ../devices/airspy-handler/airspy-handler.cpp \
+	   ../devices/sdrplay-handler/sdrplay-handler.cpp \
 	   ./output/audio-base.cpp \
 	   ./output/newconverter.cpp \
 	   ./output/audiosink.cpp

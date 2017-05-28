@@ -23,18 +23,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ######################################################################
 #
 ########################################################################
-#
-# if you want the library interface for Python, define
-if(DEFINED PYTHON)
-   set(PYTHON true)
-endif ()
-#
-########################################################################
-#
-#########################################################################
-# if you are compiling the wrapper for Python in, uncomment
-#	set(PYTHON true) (does not work right now)
-########################################################################
 	find_package (PkgConfig)
 
         find_package(FFTW3f)
@@ -91,10 +79,6 @@ endif ()
 	   add_definitions (-DTII_SUPPORT)
 	endif (TII_SUPPORT)
 
-	if (PYTHON)
-	   include_directories (/usr/include/python3.5m)
-	endif (PYTHON)
-
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ../dab-api.h
@@ -132,13 +116,6 @@ endif ()
 	     ./includes/various/dab-params.h
 	     ./includes/various/tii_table.h
 	)
-
-	if (PYTHON)
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ./dab-python.cpp
-           )
-	endif (PYTHON)
 
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
@@ -260,9 +237,6 @@ endif ()
 	          ${SNDFILES_INCLUDE_DIRS}
 	)
 
-	if (PYTHON)
-	   list(APPEND extraLibs -lpython3.5m)
-	endif (PYTHON)
 #####################################################################
 
 	add_library (${objectName} SHARED

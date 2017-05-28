@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2015, 2016
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
  *

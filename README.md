@@ -4,8 +4,6 @@ DAB library and dab_cmdline
 ======================================================================
 T H I S  I S  W O R K  I N  P R O G R E S S 
 
-a. rebuilding the Python interface
-b. handling charactersets, i.e. utf 8 etc
 =======================================================================
 
 DAB library is - as the name suggests - a library for decoding
@@ -17,13 +15,16 @@ The library provides entries for the functionality through some simple calls, wh
 
 To show the use of the library, several example programs were developed.
 
-example-1 and example-2 are command line DAB programs. While example-1
-uses the functionality implemented as separate library, example-2
-binds directly to the functionality.
-simpleDab shows the use of the library when handled from with a Qt GUI.
+	- example-1 and example-2 are command line DAB programs.
+	  While example-1 uses the functionality implemented as
+	  separate library, example-2 uses the sources directly.
 
-Different from previous versions is that the device is now NOT part of the
-library, as the examples show.
+	- simpleDab shows the use of the library when handled
+	  from with a Qt GUI.
+
+	- python-example contains an example program in python to use (an
+	  extended form of) the library
+
 ========================================================================
 
 Creating the library
@@ -61,7 +62,7 @@ Libraries for the example program are further:
 	library for the selected devices
 
 ============================================================================
-Building the command line versions
+Building the example programs
 ----------------------------------------------------------------------------
 
 For both example-1 and example-2 program, there is a CMakeLists.txt file
@@ -69,7 +70,11 @@ For both example-1 and example-2 program, there is a CMakeLists.txt file
 example-1 is - obviously - the simplest one, since it expects a
 library to be available to which it links
 
-example-2 has the same look and the same functionality.
+example-2 has the same look and the same functionality. 
+
+For "simpleDab" one uses qt-make, there is a ".pro" file
+
+For python-example read the README file in the python-example directory
 
 =============================================================================
 

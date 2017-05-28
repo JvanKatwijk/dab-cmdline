@@ -43,7 +43,6 @@ uint32_t samplerate_count;
 
 	this	-> frequency	= frequency;
 	this	-> ppmCorrection = ppmCorrection;
-	this	-> gain		= gain;
 //
 	device			= 0;
 	serialNumber		= 0;
@@ -159,8 +158,8 @@ uint32_t samplerate_count;
 //	Here we set the gain and frequency
 
 	(void)my_airspy_set_freq (device, frequency);
-	int16_t tmp	= theGain * 21 / 100;
-	(void) my_airspy_set_sensitivity_gain (device, tmp);
+	gain		= theGain * 21 / 100;
+	(void) my_airspy_set_sensitivity_gain (device, gain);
 }
 
 	airspyHandler::~airspyHandler (void) {

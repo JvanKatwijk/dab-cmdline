@@ -61,21 +61,21 @@ void	dabExit		(void *Handle) {
 	delete (dabClass *)Handle;
 }
 
-void	startProcessing (void *Handle) {
+void	dabStartProcessing (void *Handle) {
 	((dabClass *)Handle) -> startProcessing ();
 }
 
-void	reset           (void *Handle) {
+void	dabReset           (void *Handle) {
 	((dabClass *)Handle) -> reset ();
 }
 
 
-void	stop           (void *Handle) {
+void	dabStop           (void *Handle) {
 	((dabClass *)Handle) -> stop ();
 }
 
 
-int16_t	dab_service     (std::string s, void *Handle) {
+int16_t	dabService     (std::string s, void *Handle) {
 	return ((dabClass *)Handle) -> dab_service (s);
 }
 	

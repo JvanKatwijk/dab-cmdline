@@ -323,6 +323,6 @@ int16_t	high	= low + carriers;
 }
 
 int16_t	ofdmDecoder::get_snr	(void) {
-	return current_snr;
+	return (int16_t)current_snr;
 }
 

@@ -1,8 +1,8 @@
 cmake_minimum_required( VERSION 2.8.11 )
-set (objectName dab_cmdline)
+set (objectName dab_lib)
 add_definitions ( -Wall -g -std=c++11 -O3)
 #	modify if you want
-set (CMAKE_INSTALL_PREFIX /usr/local/)
+set (CMAKE_INSTALL_PREFIX .)
 
 if(MINGW)
     add_definitions ( -municode)
@@ -21,8 +21,6 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 ######################################################################
-#
-########################################################################
 if(DEFINED AIRSPY)
    set(AIRSPY true)
 endif ()
@@ -35,50 +33,9 @@ if(DEFINED RTLSDR)
    set(RTLSDR true)
 endif ()
 
-#
-#########################################################################
+########################################################################
 	find_package (PkgConfig)
-
-        find_package(FFTW3f)
-        if (NOT FFTW3F_FOUND)
-            message(FATAL_ERROR "please install FFTW3")
-        endif ()
-
-        find_package(Faad)
-        if (NOT FAAD_FOUND )
-            message(FATAL_ERROR "please install libfaad")
-        endif ()
-
-        find_package(zlib)
-	if (NOT ZLIB_FOUND)
-            message(FATAL_ERROR "please install libz")
-        endif ()
-	list(APPEND extraLibs ${ZLIB_LIBRARY})
-
-
-	find_library (PTHREADS pthread)
-	if (NOT(PTHREADS))
-	   message (FATAL_ERROR "please install libpthread")
-	else (NOT(PTHREADS))
-	   set (extraLibs ${extraLibs} ${PTHREADS})
-	endif (NOT(PTHREADS))
-
-
-        find_package(LibSampleRate)
-        if (NOT LIBSAMPLERATE_FOUND)
-            message(FATAL_ERROR "please install libsamplerate")
-        endif ()
-        list(APPEND extraLibs ${LIBSAMPLERATE_LIBRARY})
-
-        find_package(Portaudio)
-        if (NOT PORTAUDIO_FOUND)
-            message(FATAL_ERROR "please install portaudio V19")
-        endif ()
-        list(APPEND extraLibs ${PORTAUDIO_LIBRARIES})
-#########################################################################
-        find_package (PkgConfig)
-
-##########################################################################
+########################################################################
 #	The devices
 #
 	if (SDRPLAY)
@@ -154,6 +111,31 @@ endif ()
 
 	   add_definitions (-DHAVE_RTLSDR)
 	endif()
+
+#######################################################################
+        find_package(FFTW3f)
+        if (NOT FFTW3F_FOUND)
+            message(FATAL_ERROR "please install FFTW3")
+        endif ()
+
+        find_package(Faad)
+        if (NOT FAAD_FOUND )
+            message(FATAL_ERROR "please install libfaad")
+        endif ()
+
+        find_package(zlib)
+	if (NOT ZLIB_FOUND)
+            message(FATAL_ERROR "please install libz")
+        endif ()
+	list(APPEND extraLibs ${ZLIB_LIBRARY})
+
+	find_library (PTHREADS pthread)
+	if (NOT(PTHREADS))
+	   message (FATAL_ERROR "please install libpthread")
+	else (NOT(PTHREADS))
+	   set (extraLibs ${extraLibs} ${PTHREADS})
+	endif (NOT(PTHREADS))
+
 #######################################################################
 #
 #	Here we really start
@@ -163,7 +145,7 @@ endif ()
 	           .
 	           ./
 	           ../
-	           ../library
+	           ../library/
 	           ../library/includes
 	           ../library/includes/ofdm
 	           ../library/includes/backend
@@ -175,14 +157,14 @@ endif ()
 	           /usr/include/
 	)
 
+	include_directories (/usr/include/python3.5m)
+
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
-	     ./ringbuffer.h
 	     ./band-handler.h
-	     ./audio-base.h
-	     ./audiosink.h
-	     ./newconverter.h
-	     ../devices/device-handler.h
+	     ../dab-api.h
+	     ../device-handler.h
+	     ../ringbuffer.h
 	     ../library/includes/dab-class.h
 	     ../library/includes/dab-constants.h
 	     ../library/includes/ofdm/ofdm-processor.h
@@ -206,9 +188,9 @@ endif ()
 	     ../library/includes/backend/audio/mp2processor.h 
 	     ../library/includes/backend/data/mot-databuilder.h 
 	     ../library/includes/backend/data/virtual-datahandler.h 
-	     ../library/includes/backend/data/tdc-datahandler.h 
 	     ../library/includes/backend/data/pad-handler.h 
 	     ../library/includes/backend/data/mot-data.h 
+	     ../library/includes/backend/data/tdc-datahandler.h 
 	     ../library/includes/backend/data/dab-data.h
 	     ../library/includes/backend/data/data-processor.h
 	     ../library/includes/various/fft.h
@@ -218,12 +200,14 @@ endif ()
 
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
-	     ./main.cpp
-	     ./audio-base.cpp
-	     ./audiosink.cpp
-	     ./newconverter.cpp
+	     ./dab-python.cpp
+	)
+
+	set (${objectName}_SRCS
+	     ${${objectName}_SRCS}
 	     ./band-handler.cpp
 	     ../devices/device-handler.cpp
+	     ../library/dab-api.cpp
 	     ../library/src/dab-class.cpp
 	     ../library/src/ofdm/ofdm-processor.cpp
 	     ../library/src/ofdm/ofdm-decoder.cpp
@@ -250,7 +234,7 @@ endif ()
 	     ../library/src/backend/audio/mp2processor.cpp 
 	     ../library/src/backend/data/mot-databuilder.cpp 
 	     ../library/src/backend/data/virtual-datahandler.cpp 
-	     ../library/src/backend/data/tdc-datahandler.cpp 
+	     ../library/src/backend/data/tdc-datahandler.cpp
 	     ../library/src/backend/data/pad-handler.cpp 
 	     ../library/src/backend/data/mot-data.cpp 
 	     ../library/src/backend/data/dab-data.cpp
@@ -260,17 +244,18 @@ endif ()
 	     ../library/src/various/tii_table.cpp
 	)
 
-#
 	include_directories (
+	          ${SDRPLAY_INCLUDES}
 	          ${FFTW_INCLUDE_DIRS}
 	          ${PORTAUDIO_INCLUDE_DIRS}
 	          ${FAAD_INCLUDE_DIRS}
 	          ${SNDFILES_INCLUDE_DIRS}
 	)
 
+	list(APPEND extraLibs -lpython3.5m)
 #####################################################################
 
-	add_executable (${objectName} 
+	add_library (${objectName} SHARED
 	                ${${objectName}_SRCS}
 	)
 
@@ -281,7 +266,7 @@ endif ()
 	                       ${CMAKE_DL_LIBS}
 	)
 
-	INSTALL (TARGETS ${objectName} DESTINATION ./bin)
+	INSTALL (TARGETS ${objectName} DESTINATION ./lib)
 
 ########################################################################
 # Create uninstall target

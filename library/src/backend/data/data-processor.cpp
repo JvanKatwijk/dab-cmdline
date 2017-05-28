@@ -36,7 +36,7 @@
 	                                 uint8_t	DGflag,
 	                         	 int16_t	FEC_scheme,
 	                                 bool		show_crcErrors) {
-int32_t i, j;
+
 	this	-> bitRate		= bitRate;
 	this	-> DSCTy		= DSCTy;
 	this	-> appType		= appType;
@@ -65,7 +65,6 @@ int32_t i, j;
 }
 
 	dataProcessor::~dataProcessor	(void) {
-int16_t	i;
 	delete		my_dataHandler;
 }
 
@@ -107,7 +106,7 @@ int16_t	firstLast	= getBits_2 (data, 4);
 int16_t	address		= getBits   (data, 6, 10);
 uint16_t command	= getBits_1 (data, 16);
 int16_t	usefulLength	= getBits_7 (data, 17);
-int16_t	i;
+uint16_t	i;
 //	if (usefulLength > 0)
 //	fprintf (stderr, "CI = %d, address = %d, usefulLength = %d\n",
 //	                 continuityIndex, address, usefulLength);
