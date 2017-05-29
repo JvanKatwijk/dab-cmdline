@@ -2,6 +2,7 @@
 DAB library and dab_cmdline
 
 ======================================================================
+
 T H I S  I S  W O R K  I N  P R O G R E S S 
 
 =======================================================================
@@ -15,15 +16,16 @@ The library provides entries for the functionality through some simple calls, wh
 
 To show the use of the library, several example programs were developed.
 
-	- example-1 and example-2 are command line DAB programs.
-	  While example-1 uses the functionality implemented as
-	  separate library, example-2 uses the sources directly.
-
-	- simpleDab shows the use of the library when handled
-	  from with a Qt GUI.
+	- example-1 and example-2 are command line DAB programs written in C++.
+	  While example-1 is a small program linking to a precompiled dab library,
+	  example-2 is a C++ program using the sources of the library.
+	  
+	- simpleDab is a Qt based GUI program, linking to the library. It shows the
+	  use of the library when handled from with a Qt GUI.
 
 	- python-example contains an example program in python to use (an
-	  extended form of) the library
+	  extended form of) the library. An additional file, dab-python.cpp, contains
+	  the sources for binding C and Python for this linbrary.
 
 ========================================================================
 
@@ -44,8 +46,10 @@ from within the dab-library directory.
 IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
 
 Note that contrary to earlier versions, the "device" is NOT part of the library,
-the user program provides some functions to the library for getting samples.
-============================================================================
+the user program has to provide some functions to the library for getting samples.
+The interface can be found in the file "device-handler.h"
+===================================================================================
+
 Libraries (together with the "development" or ".h" files) needed for creating the library are
 
 	libfaad
@@ -59,7 +63,10 @@ Libraries for the example program are further:
 	portaudio, version 19.xxx rather than 18.xxx that is installed default on some debian based systems;
 	libsamplerate
 
-	library for the selected devices
+	library or libraries for the selected devices. Supported devices are
+	- the SDRPlay (both RSP1 and RSP2)
+	- the AIRSpy
+	- RTLSDR based dabsticks
 
 ============================================================================
 Building the example programs
@@ -68,13 +75,14 @@ Building the example programs
 For both example-1 and example-2 program, there is a CMakeLists.txt file
 
 example-1 is - obviously - the simplest one, since it expects a
-library to be available to which it links
+library to be available to which it links.
 
 example-2 has the same look and the same functionality. 
 
 For "simpleDab" one uses qt-make, there is a ".pro" file
 
-For python-example read the README file in the python-example directory
+For python-example read the README file in the python-example directory. Before running
+the example one has to create the adapted library. 
 
 =============================================================================
 
