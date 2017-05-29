@@ -13,7 +13,8 @@ Normal way of creating such a library is
    cd ..
    python3 cmdline.py -g 80 -c 11C -p "Classic FM"
 
-Replace -DSDRPLAY=ON by -DAIRSPY=ON or -DRTLSDR=ON
+Replace SDRPLAY in -DSDRPLAY=ON by AIRSPY or RTLSDR if you prefer any of thee
+devices.
 
 Command line parameters (there is a default one for each)
 

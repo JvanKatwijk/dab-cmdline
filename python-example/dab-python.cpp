@@ -255,6 +255,31 @@ PyGILState_STATE gstate;
 	(void)result;
 }
 
+//	typedef	void (*programdata_t)	(audiodata *, void *ctx);
+PyObject *callbackProgramData	= NULL;
+static
+void	callback_programdata (audiodata *d, void *ctx) {
+PyObject *arglist;
+PyObject *result;
+PyGILState_STATE gstate;
+
+	if (!d -> defined) 
+	   return;
+	gstate	= PyGILState_Ensure ();
+	arglist = Py_BuildValue ("hhhhh", d -> subchId,
+	                                  d -> startAddr,
+	                                  d -> length,
+	                                  d -> bitRate,
+	                                  d -> ASCTy);
+	result  = PyEval_CallObject (callbackProgramData, arglist);
+	if (arglist != NULL)
+	   Py_DECREF (arglist);
+	if (result != NULL)
+	   Py_DECREF (result);
+	PyGILState_Release (gstate);
+	(void)result;
+}
+
 /////////////////////////////////////////////////////////////////////////
 //	Here the real API starts
 //
@@ -295,7 +320,7 @@ bandHandler	dabBand;
 void	*result;
 
 	(void)PyArg_ParseTuple (args,
-	                        "shhOOOOOOOO",
+	                        "shhOOOOOOOOO",
 	                         &theChannel,
 	                         &theGain,
 	                         &theMode,
@@ -306,6 +331,7 @@ void	*result;
 	                         &cbfQ,
 	                         &cbaO,
 	                         &cbdO,
+	                         &cbpD,
 	                         &cbpQ
 	                       );
 //
@@ -342,6 +368,11 @@ void	*result;
 	}
 
 	if (!PyCallable_Check (cbdO)) {
+	   PyErr_SetString(PyExc_TypeError, "parameter for ensemble must be callable");
+	   goto err;
+	}
+
+	if (!PyCallable_Check (cbpD)) {
 	   PyErr_SetString(PyExc_TypeError, "parameter for ensemble must be callable");
 	   goto err;
 	}
@@ -386,6 +417,11 @@ void	*result;
 	   Py_XDECREF (callbackDataOut);
 	callbackDataOut	= cbdO;
 
+	Py_XINCREF (cbpD);
+	if (callbackProgramData != NULL)
+	   Py_XDECREF (callbackProgramData);
+	callbackProgramData = cbpD;
+
 	Py_XINCREF (cbpQ);
 	if (callbackProgramQuality != NULL)
 	   Py_XDECREF (callbackProgramQuality);
@@ -429,7 +465,7 @@ void	*result;
 	                  (fib_quality_t)	&callback_fibQuality,
 	                  (audioOut_t)		&callback_audioOut,
 	                  (dataOut_t)		&callback_dataOut,
-	                  NULL,
+	                  (programdata_t)	&callback_programdata,
 	                  (programQuality_t)	&callback_programQuality,
 	                  NULL
 	                 );

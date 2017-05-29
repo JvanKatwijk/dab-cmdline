@@ -1,7 +1,7 @@
 #
 #    Copyright (C) 2017
 #    Jan van Katwijk (J.vanKatwijk@gmail.com)
-#    Lazy Chair Programming
+#    Lazy Chair Computing
 #
 #    This file is the python wrapper for the DAB-library.
 #    DAB-library is free software; you can redistribute it and/or modify
@@ -111,12 +111,24 @@ def	programnameHandler (p, d):
 #	the function fib_qualityHandler is called regularly, its parameter
 #	shows the percentage of ficBlocks that passed the CRC test
 def	fib_qualityHandler (q):
-   print (" fib " , q , "\r");
+   if (q != 100):
+      print (" fib " , q , "\r");
 
 #	the function dataoutHandler is called whenever the inputstream contains
 #	data to be displayed as label
 def	dataoutHandler (d):
    dummy = d
+
+def	programdataHandler (q0, q1, q2, q3, q4):
+   print ("selected program ")
+   print ("   subchannel   ", q0);
+   print ("   start address", q1);
+   print ("   length       ", q2);
+   print ("   bitRate      ", q3);
+   if (q4 == 63):
+      print ("   DAB+")
+   else: 
+      print  ("   DAB")
 
 #	the function program_qualityHandler is called on a regular basis
 #	and shows the result of the various checks that are done on the
@@ -195,6 +207,7 @@ theLibrary	= dabInit   (args. theChannel,
 	                     fib_qualityHandler,
 	                     audioOutHandler,
 	                     dataoutHandler,
+	                     programdataHandler,
 	                     program_qualityHandler
 	                    );
 
