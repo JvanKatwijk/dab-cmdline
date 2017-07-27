@@ -83,7 +83,8 @@ int16_t	i;
 	if (running. load ()) {
 	   running. store (false);
 //	signal to unlock - if required
-	   bufferSpace. notify ();
+	   if (!bufferSpace. tryAcquire (10))
+	      bufferSpace. Release ();
 	   Locker. notify_all ();
 	   threadHandle. join ();
 	}
@@ -139,7 +140,7 @@ std::unique_lock<std::mutex> lck (ourMutex);
 	      myMutex. lock ();
 	      amount -= 1;
 	      myMutex. unlock ();
-	      bufferSpace. notify ();
+	      bufferSpace. Release ();
 	   }
 	}
 }
@@ -148,7 +149,7 @@ std::unique_lock<std::mutex> lck (ourMutex);
   *	in the buffer.
   */
 void	ofdmDecoder::processBlock_0 (std::complex<float> *vi) {
-	bufferSpace. wait ();
+	bufferSpace. acquire ();
 	memcpy (command [0], vi, sizeof (std::complex<float>) * T_u);
 	myMutex. lock ();
 	amount ++;
@@ -157,7 +158,7 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *vi) {
 }
 
 void	ofdmDecoder::decodeFICblock (std::complex<float> *vi, int32_t blkno) {
-	bufferSpace. wait ();
+	bufferSpace. acquire ();
 	memcpy (command [blkno], &vi [T_g], sizeof (std::complex<float>) * T_u);
 	myMutex. lock ();
 	amount ++;
@@ -166,7 +167,7 @@ void	ofdmDecoder::decodeFICblock (std::complex<float> *vi, int32_t blkno) {
 }
 
 void	ofdmDecoder::decodeMscblock (std::complex<float> *vi, int32_t blkno) {
-	bufferSpace. wait ();
+	bufferSpace. acquire ();
 	memcpy (command [blkno], &vi [T_g], sizeof (std::complex<float>) * T_u);
 	myMutex. lock ();
 	amount ++;

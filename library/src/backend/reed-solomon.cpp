@@ -22,11 +22,11 @@
 #define	min(a,b)	((a) < (b) ? (a) : (b))
 
 /* Initialize a Reed-Solomon codec
- * symsize = symbol size, bits (1-8)
- * gfpoly = Field generator polynomial coefficients
- * fcr = first root of RS code generator polynomial, index form, 0
- * prim = primitive element to generate polynomial roots
- * nroots = RS code generator polynomial degree (number of roots)
+ * symsize	= symbol size, bits (1-8)
+ * gfpoly	= Field generator polynomial coefficients
+ * fcr		= first root of RS code generator polynomial, index form, 0
+ * prim		= primitive element to generate polynomial roots
+ * nroots	= RS code generator polynomial degree (number of roots)
  */
 
 	reedSolomon::reedSolomon (uint16_t symsize,
@@ -144,11 +144,11 @@ int16_t	ret;
 
 int16_t	reedSolomon::decode_rs (uint8_t *data) {
 uint8_t syndromes [nroots];
-uint8_t Lambda	  [nroots + 1];
+uint8_t Lambda	  [nroots];
 uint16_t lambda_degree, omega_degree;
 uint8_t	rootTable [nroots];
 uint8_t	locTable  [nroots];
-uint8_t	omega	  [nroots + 1];
+uint8_t	omega	  [nroots];
 int16_t	rootCount;
 int16_t	i;
 //
@@ -252,7 +252,7 @@ int16_t j;
 //	use Horner to compute the syndromes
 bool	reedSolomon::computeSyndromes (uint8_t *data, uint8_t *syndromes) {
 int16_t i;
-uint16_t syn_error = 0;
+uint16_t syn_error;
 
 /* form the syndromes; i.e., evaluate data (x) at roots of g(x) */
 
@@ -266,13 +266,14 @@ uint16_t syn_error = 0;
 //
 //	compute Lambda with Berlekamp-Massey
 //	syndromes in poly-form in, Lambda in power form out
+//	
 uint16_t reedSolomon::computeLambda (uint8_t *syndromes, uint8_t *Lambda) {
 uint16_t K = 1, L = 0;
-uint8_t Corrector	[nroots + 1];
+uint8_t Corrector	[nroots];
 int16_t  i;
-int16_t	deg_lambda	= 0;
+int16_t	deg_lambda;
 
-	for (i = 0; i < nroots + 1; i ++)
+	for (i = 0; i < nroots; i ++)
 	   Corrector [i] = Lambda [i] = 0;
 
 	uint8_t	error	= syndromes [0];
@@ -282,22 +283,22 @@ int16_t	deg_lambda	= 0;
 	Corrector [1]	= 1;
 //
 	while (K <= nroots) {
-	   uint8_t oldLambda [nroots + 1];
-	   memcpy (oldLambda, Lambda, (nroots + 1) * sizeof (Lambda [0]));
+	   uint8_t oldLambda [nroots];
+	   memcpy (oldLambda, Lambda, nroots * sizeof (Lambda [0]));
 //
 //	Compute new lambda
-	   for (i = 0; i < nroots + 1; i ++)
+	   for (i = 0; i < nroots; i ++) 
 	      Lambda [i] = myGalois. add_poly (Lambda [i],
 	                             myGalois. multiply_poly (error, 
 	                                                      Corrector [i]));
 	   if ((2 * L < K) && (error != 0)) {
 	      L = K - L;
-	      for (i = 0; i < nroots + 1; i ++) 
+	      for (i = 0; i < nroots; i ++) 
 	         Corrector [i] = myGalois. divide_poly (oldLambda [i], error);
 	   }
 //
 //	multiply x * C (x), i.e. shift to the right, the 0-th order term is left
-	   for (i = nroots; i >= 1; i --)
+	   for (i = nroots - 1; i >= 1; i --)
 	      Corrector [i] = Corrector [i - 1];
 	   Corrector [0] = 0;
 
@@ -311,7 +312,7 @@ int16_t	deg_lambda	= 0;
 	   K += 1;
  	} // end of Berlekamp loop
 
-	for (i = 0; i < nroots + 1; i ++) {
+	for (i = 0; i < nroots; i ++) {
 	   if (Lambda [i] != 0)
 	      deg_lambda = i;
 	   Lambda [i] = myGalois. poly2power (Lambda [i]);

@@ -293,7 +293,7 @@ deviceHandler	*theDevice;
 
 	timesyncSet.		store (false);
 	ensembleRecognized.	store (false);
-	startProcessing (theRadio);
+	dabStartProcessing (theRadio);
 
 	int	timeOut	= 0;
 	while (!timesyncSet. load () && (++timeOut < 5))
@@ -330,7 +330,7 @@ deviceHandler	*theDevice;
 	run. store (true);
 	if (serviceId != -1) 
 	   programName = dab_getserviceName (serviceId, theRadio);
-	if (dab_service (programName, theRadio) < 0) {
+	if (dabService (programName, theRadio) < 0) {
 	   fprintf (stderr, "sorry  we cannot handle service %s\n", 
 	                                             programName. c_str ());
 	   run. store (false);
