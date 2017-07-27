@@ -67,7 +67,7 @@ uint16_t        crc;
 //      we skip the crc in the incoming data and take the frametype
            checkVector [4] = getBits (data, offset + 6 * 8, 8);
 
-   int size = length < 11 ? length : 11;
+	   int size = length < 11 ? length : 11;
            for (i = 0; i < size; i ++)
               checkVector [5 + i] = getBits (data,  offset + 7 * 8 + i * 8, 8);
            checkVector [5 + length] = getBits (data, offset + 4 * 8, 8);
@@ -170,6 +170,5 @@ uint16_t        crc;
 	testVector [3 + size + 1] = getBits (data, offset + 32, 8);
         return check_crc_bytes (testVector, 5 + size) == 0;
 }
-
 
 

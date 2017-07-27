@@ -165,17 +165,17 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
            include_directories (${SDRPLAYLIB_INCLUDE_DIR})
 
 	   include_directories (
-	     ./devices/sdrplay-handler
+	     ../devices/sdrplay-handler
 	   )
 
 	   set ($(objectName)_HDRS
 	        ${${objectName}_HDRS}
-	        ./devices/sdrplay-handler/sdrplay-handler.h
+	        ../devices/sdrplay-handler/sdrplay-handler.h
            )
 
 	   set (${objectName}_SRCS
 	        ${${objectName}_SRCS}
-	        ./devices/sdrplay-handler/sdrplay-handler.cpp
+	        ../devices/sdrplay-handler/sdrplay-handler.cpp
 	   )
 
 	 add_definitions (-DHAVE_SDRPLAY)
@@ -189,17 +189,17 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	   ### include_directories (${AIRSPYLIB_INCLUDE_DIR})
 
 	   include_directories (
-	     ./devices/airspy-handler
+	     ../devices/airspy-handler
 	   )
 
 	   set ($(objectName)_HDRS
 	        ${${objectName}_HDRS}
-	        ./devices/input/airspy-handler/airspy-handler.h
+	        ../devices/input/airspy-handler/airspy-handler.h
 	   )
 
 	   set (${objectName}_SRCS
 	        ${${objectName}_SRCS}
-	        ./devices/airspy-handler/airspy-handler.cpp
+	        ../devices/airspy-handler/airspy-handler.cpp
 	   )
 
 	   add_definitions (-DHAVE_AIRSPY)
@@ -213,17 +213,17 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	   ###include_directories (${RTLSDR_INCLUDE_DIR})
 
 	   include_directories (
-	      ./devices/rtlsdr-handler/
+	      ../devices/rtlsdr-handler/
 	   )
 
 	   set (${objectName}_HDRS
 	        ${${objectName}_HDRS}
-	        ./devices/rtlsdr-handler/rtlsdr-handler.h 
+	        ../devices/rtlsdr-handler/rtlsdr-handler.h 
 	   )
 
 	   set (${objectName}_SRCS
 	        ${${objectName}_SRCS}
-	        ./devices/rtlsdr-handler/rtlsdr-handler.cpp
+	        ../devices/rtlsdr-handler/rtlsdr-handler.cpp
 	   )
 
 	   add_definitions (-DHAVE_DABSTICK)
