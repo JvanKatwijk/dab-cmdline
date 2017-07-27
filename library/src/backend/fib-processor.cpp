@@ -1177,7 +1177,8 @@ int32_t	selectedService;
 
 	   if (!listofServices [i]. serviceLabel. hasName)
 	      continue;
-	   if (listofServices [i]. serviceLabel. label != s)
+
+	   if (!compareNames (s, listofServices [i]. serviceLabel. label))
 	      continue;
 
 	   selectedService = listofServices [i]. serviceId;
