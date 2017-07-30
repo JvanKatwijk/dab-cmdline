@@ -146,7 +146,7 @@ int16_t	i;
 
 	r			= this -> rtlsdr_get_sample_rate (device);
 	fprintf (stderr, "samplerate set to %d\n", r);
-	rtlsdr_set_tuner_gain_mode (device, 0);
+	rtlsdr_set_tuner_gain_mode (device, 1);
 
 	gainsCount	= rtlsdr_get_tuner_gains (device, NULL);
 	fprintf (stderr, "Supported gain values (%d): ", gainsCount);
@@ -159,7 +159,7 @@ int16_t	i;
 	if (ppmCorrection != 0)
 	   rtlsdr_set_freq_correction (device, ppmCorrection);
 	if (autogain)
-	   rtlsdr_set_tuner_gain_mode (device, true);
+	   rtlsdr_set_agc_mode (device, 1);
 	rtlsdr_set_tuner_gain (device, gains [gain]);
 	_I_Buffer		= new RingBuffer<uint8_t>(1024 * 1024);
 }
@@ -298,6 +298,13 @@ bool	rtlsdrHandler::load_rtlFunctions (void) {
 	                     GETPROCADDRESS (Handle, "rtlsdr_set_tuner_gain_mode");
 	if (rtlsdr_set_tuner_gain_mode == NULL) {
 	   fprintf (stderr, "Could not find rtlsdr_set_tuner_gain_mode\n");
+	   return false;
+	}
+
+	rtlsdr_set_agc_mode	= (pfnrtlsdr_set_agc_mode)
+	                     GETPROCADDRESS (Handle, "rtlsdr_set_agc_mode");
+	if (rtlsdr_set_agc_mode == NULL) {
+	   fprintf (stderr, "Could not find rtlsdr_set_agc_mode\n");
 	   return false;
 	}
 
