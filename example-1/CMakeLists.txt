@@ -184,7 +184,7 @@ endif ()
 
 	)
 
-	INSTALL (TARGETS ${objectName} DESTINATION ./linux-bin)
+	INSTALL (TARGETS ${objectName} DESTINATION .)
 
 ########################################################################
 # Create uninstall target

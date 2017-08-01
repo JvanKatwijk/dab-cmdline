@@ -1,8 +1,12 @@
 cmake_minimum_required( VERSION 2.8.11 )
 set (objectName dab_cmdline)
-add_definitions ( -Wall -g -std=c++11 -O3)
-#	modify if you want
-set (CMAKE_INSTALL_PREFIX /usr/local/)
+set (CMAKE_CXX_FLAGS "${CMAKE_XCC_FLAGS} -Wall -std=c++11 -flto")
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set (CMAKE_INSTALL_PREFIX "/usr/local/bin" CACHE PATH "default install path" FORCE )
+endif()
+#set (CMAKE_INSTALL_PREFIX /usr/local/bin)
+
 
 if(MINGW)
     add_definitions ( -municode)
@@ -25,14 +29,17 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ########################################################################
 if(DEFINED AIRSPY)
    set(AIRSPY true)
+   set(objectName dab-airspy-2)
 endif ()
 
 if(DEFINED SDRPLAY)
    set(SDRPLAY true)
+   set(objectName dab-sdrplay-2)
 endif ()
 
 if(DEFINED RTLSDR)
    set(RTLSDR true)
+   set(objectName dab-rtlsdr-2)
 endif ()
 
 #
@@ -281,7 +288,7 @@ endif ()
 	                       ${CMAKE_DL_LIBS}
 	)
 
-	INSTALL (TARGETS ${objectName} DESTINATION ./bin)
+	INSTALL (TARGETS ${objectName} DESTINATION .)
 
 ########################################################################
 # Create uninstall target

@@ -79,6 +79,19 @@ library to be available to which it links.
 
 example-2 has the same look and the same functionality. 
 
+Both example-1 and example-2 executables are simply made by
+
+	mkdir build
+	cd build
+	cmake .. -DXXX=ON (where XXX is one of AIRSPY, SDRplay or RTLSDR)
+	make
+	sudo make install
+
+The executable created is named dab-XXX for executables made in example-1
+and dab-XXX-2 for executables made in example-2. Again, XXX is the name
+of the device chosen.
+The executable will be installed in /usr/local/bin
+
 For "simpleDab" one uses qt-make, there is a ".pro" file
 
 For python-example read the README file in the python-example directory. Before running
