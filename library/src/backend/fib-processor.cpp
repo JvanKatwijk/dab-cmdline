@@ -1195,6 +1195,7 @@ int32_t	selectedService;
 	         return;
 	      }
 
+	     d -> defined	= true;
 	     subchId	= components [j]. subchannelId;
 	      d	-> subchId	= subchId;
 	      d	-> startAddr	= ficList [subchId]. StartAddr;
