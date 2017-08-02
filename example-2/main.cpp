@@ -37,6 +37,8 @@
 #include	"airspy-handler.h"
 #elif	HAVE_RTLSDR
 #include	"rtlsdr-handler.h"
+#elif	HAVE_WAVFILES
+#include	"wavfiles.h"
 #endif
 #include	<atomic>
 
@@ -160,6 +162,9 @@ int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
+#ifdef	HAVE_WAVFILES
+std::string	fileName;
+#endif
 
 	fprintf (stderr, "dab_cmdline,\n \
 	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
@@ -167,7 +172,11 @@ deviceHandler	*theDevice;
 	timesyncSet.	store (false);
 	run.		store (false);
 
+#ifndef	HAVE_WAVFILES
 	while ((opt = getopt (argc, argv, "M:B:C:P:G:A:L:S:Q")) != -1) {
+#else
+	while ((opt = getopt (argc, argv, "M:B:P:A:L:S:F:")) != -1) {
+#endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
 
@@ -182,9 +191,6 @@ deviceHandler	*theDevice;
 	                                     L_BAND : BAND_III;
 	         break;
 
-	      case 'C':
-	         theChannel	= std::string (optarg);
-	         break;
 
 	      case 'P':
 	         programName	= optarg;
@@ -192,6 +198,10 @@ deviceHandler	*theDevice;
 
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
+	         break;
+#ifndef	HAVE_WAVFILES
+	      case 'C':
+	         theChannel	= std::string (optarg);
 	         break;
 
 	      case 'G':
@@ -201,6 +211,11 @@ deviceHandler	*theDevice;
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#else
+	      case 'F':
+	         fileName	= std::string (optarg);
+	         break;
+#endif
 
 	      case 'A':
 	         soundChannel	= optarg;
@@ -248,6 +263,8 @@ deviceHandler	*theDevice;
 	                                     ppmCorrection,
 	                                     theGain,
 	                                     autogain);
+#elif	HAVE_WAVFILES
+	   theDevice	= new wavFiles (fileName);
 #endif
 	}
 	catch (int e) {

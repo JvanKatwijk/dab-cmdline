@@ -47,6 +47,8 @@ bool	deviceHandler::restartReader	(void) {
 void	deviceHandler::stopReader	(void) {
 }
 
+void	deviceHandler::run		(void) {
+}
 
 int32_t	deviceHandler::getSamples	(std::complex<float> *v,
 	                                              int32_t amount) {
