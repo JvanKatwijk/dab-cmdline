@@ -18,16 +18,18 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Qt-DAB; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 #ifndef		__TDC_DATAHANDLER__
 #define		__TDC_DATAHANDLER__
+
+#include	"dab-api.h"
 #include	"dab-constants.h"
 #include	"virtual-datahandler.h"
 
 class	tdc_dataHandler : public virtual_dataHandler {
 public:
-		tdc_dataHandler		(int16_t appType);
+		tdc_dataHandler		(int16_t appType,
+	                                 bytesOut_t bytesOut, void *ctx);
 		~tdc_dataHandler	(void);
 	void	add_mscDatagroup	(std::vector<uint8_t>);
 private:
@@ -36,7 +38,8 @@ private:
         int32_t handleFrame_type_1      (uint8_t *data,
                                          int32_t offset, int32_t length);
         bool    serviceComponentFrameheaderCRC (uint8_t *, int16_t, int16_t);
-
+	bytesOut_t	bytesOut;
+	void		*ctx;
 };
 #endif
 

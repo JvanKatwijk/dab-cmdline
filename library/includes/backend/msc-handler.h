@@ -44,6 +44,7 @@ public:
 		mscHandler		(uint8_t,
 	                                 audioOut_t,
 	                                 dataOut_t,
+	                                 bytesOut_t,
 	                                 programQuality_t,
 	                                 void		*);
 		~mscHandler		(void);
@@ -55,6 +56,7 @@ public:
 private:
 	audioOut_t	soundOut;
 	dataOut_t	dataOut;
+	bytesOut_t	bytesOut;
 	programQuality_t programQuality;
 	void		*userData;
 	dabParams	params;

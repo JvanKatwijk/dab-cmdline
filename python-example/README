@@ -4,6 +4,8 @@ Since we need an interface file between the DAB library and the python
 program, a CMakeLists.txt file is include with which a library can be
 generated that includes the interface file.
 
+Note: you need to have numpy and sounddevice installed
+
 Normal way of creating such a library is
    mkdir build
    cd build

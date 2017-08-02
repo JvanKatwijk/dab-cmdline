@@ -41,6 +41,7 @@
 	                    fib_quality_t	fib_qualityHandler,
 	                    audioOut_t		audioOut_Handler,
 	                    dataOut_t		dataOut_Handler,
+	                    bytesOut_t		bytesOut_Handler,
 	                    programdata_t	programdataHandler,
 	                    programQuality_t	program_qualityHandler,
 	                    void		*ctx):
@@ -51,6 +52,7 @@
 	                                   the_mscHandler (Mode,
 	                                                   audioOut_Handler,
 	                                                   dataOut_Handler,
+	                                                   bytesOut_Handler,
 	                                                   program_qualityHandler,
 	                                                   ctx) {
 	this	-> inputDevice		= inputDevice;

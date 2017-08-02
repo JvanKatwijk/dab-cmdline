@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is the python wrapper for the DAB-library.
  *    DAB-library is free software; you can redistribute it and/or modify
@@ -69,6 +69,9 @@ deviceHandler *theDevice;
 //	                                 bool,		// stereo
 //	                                 void *);	// context
 //	typedef	void (*dataOut_t)	(std::string,
+//	                                 void *);
+//	typedef void (*bytesOut_t)	(uint8_t *, 
+//	                                 int16_t,
 //	                                 void *);
 //	typedef	void (*systemdata_t)	(bool,
 //	                                 int16_t,
@@ -296,6 +299,7 @@ PyGILState_STATE gstate;
 //	                   fib_quality_t       fib_qualityHandler,
 //	                   audioOut_t          audioOut_Handler,
 //	                   dataOut_t           dataOut_Handler,
+//	                   bytesOut_t	       bytesOut_Handler,
 //	                   programdata_t       programdataHandler,
 //	                   programQuality_t    program_qualityHandler,
 //	                   void                *userData);
@@ -465,6 +469,7 @@ void	*result;
 	                  (fib_quality_t)	&callback_fibQuality,
 	                  (audioOut_t)		&callback_audioOut,
 	                  (dataOut_t)		&callback_dataOut,
+	                  (bytesOut_t)	        NULL,
 	                  (programdata_t)	&callback_programdata,
 	                  (programQuality_t)	&callback_programQuality,
 	                  NULL

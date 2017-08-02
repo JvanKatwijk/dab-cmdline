@@ -170,6 +170,17 @@ The API
 The API specification, in dab-api.h, contains a specification of the
 types for the callback functions and a specification for the real API functions.
 ===============================================================================
+E X P E R I M E N T A L
+
+One of the issues still to be resolved is the handling of data. As an
+experiment a callback fnction was added that is called from within the
+tdc handler. In example-2 a simple TCP server was added, one that just
+writes out packaged tdc frames.
+The package structure is : an 8 byte header followed by the frame data.
+The header starts with a -1 0 -1 0 pattern, followed by a two byte length,
+followed by a zero, followed by a 0 for frametype 0 and 0xFF for frametype 1.
+
+A simple "reader" (client), using qt is included in the sources.
 	
 	Copyright (C)  2016, 2017
 	Jan van Katwijk (J.vanKatwijk@gmail.com)

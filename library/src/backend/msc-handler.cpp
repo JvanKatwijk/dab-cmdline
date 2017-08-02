@@ -39,11 +39,13 @@
 		mscHandler::mscHandler	(uint8_t	Mode,
 	                                 audioOut_t	soundOut,
 	                                 dataOut_t	dataOut,
+	                                 bytesOut_t	bytesOut,
 	                                 programQuality_t mscQuality,
 	                                 void		*userData):
 	                                    params (Mode) {
 	this	-> soundOut	= soundOut;
 	this	-> dataOut	= dataOut;
+	this	-> bytesOut	= bytesOut;
 	this	-> programQuality	= mscQuality;
 	this	-> userData		= userData;
 
@@ -161,7 +163,8 @@ int16_t	*myBegin;
 	                                new_protLevel,
 	                                new_DGflag,
 	                                new_FEC_scheme,
-	                                false);
+	                                bytesOut,
+	                                userData);
 	   }
 //
 //	these we need for actual processing

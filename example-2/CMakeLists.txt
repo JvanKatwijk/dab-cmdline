@@ -42,7 +42,14 @@ if(DEFINED RTLSDR)
    set(objectName dab-rtlsdr-2)
 endif ()
 
-#
+if(DEFINED WAVFILES)
+   set(WAVFILES true)
+   set(objectName dab-files)
+endif ()
+
+#if (DEFINED_SERVER)
+    add_definitions(-DHAVE_SERVER)
+#endif
 #########################################################################
 	find_package (PkgConfig)
 
@@ -161,6 +168,29 @@ endif ()
 
 	   add_definitions (-DHAVE_RTLSDR)
 	endif()
+
+	if (WAVFILES)
+	   include_directories (
+	        ../devices/wavfiles/
+	   )
+
+	   set (${objectName}_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/wavfiles/wavfiles.h
+	   )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/wavfiles/wavfiles.cpp
+	   )
+	   find_package(LibSndFile)
+	   if (NOT LIBSNDFILE_FOUND)
+	      message(FATAL_ERROR "please install libsndfile")
+	   endif ()
+	   list(APPEND extraLibs ${LIBSNDFILE_LIBRARY})
+
+	   add_definitions (-DHAVE_WAVFILES)
+	endif()
 #######################################################################
 #
 #	Here we really start
@@ -169,6 +199,7 @@ endif ()
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
 	           ./
+	           ./server-thread
 	           ../
 	           ../library
 	           ../library/includes
@@ -189,6 +220,7 @@ endif ()
 	     ./audio-base.h
 	     ./audiosink.h
 	     ./newconverter.h
+	     ./server-thread/tcp-server.h
 	     ../devices/device-handler.h
 	     ../library/includes/dab-class.h
 	     ../library/includes/dab-constants.h
@@ -230,6 +262,7 @@ endif ()
 	     ./audiosink.cpp
 	     ./newconverter.cpp
 	     ./band-handler.cpp
+	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
 	     ../library/src/dab-class.cpp
 	     ../library/src/ofdm/ofdm-processor.cpp

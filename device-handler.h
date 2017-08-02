@@ -29,6 +29,7 @@
 
 #include	<stdint.h>
 #include	<complex>
+#include	<thread>
 using namespace std;
 
 class	deviceHandler {
@@ -53,6 +54,7 @@ protected:
 		int32_t	lastFrequency;
 	        int32_t	vfoOffset;
 	        int	theGain;
+virtual		void	run		(void);
 };
 #endif
 

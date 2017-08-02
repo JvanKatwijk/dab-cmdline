@@ -2,32 +2,33 @@
 /*
  *    Copyright (C) 2015
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J (JSDR).
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    This file is part of the DAB library of the SDR-J software
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__DATA_PROCESSOR
-#define	__DATA_PROCESSOR
+#ifndef	__DATA_PROCESSOR__
+#define	__DATA_PROCESSOR__
 
-#include	"dab-processor.h"
-#include	"dab-virtual.h"
 #include	<stdio.h>
 #include	<string.h>
 #include	<vector>
+#include	"dab-api.h"
+#include	"dab-processor.h"
+#include	"dab-virtual.h"
 
 class	virtual_dataHandler;
 
@@ -38,7 +39,8 @@ public:
 	                 int16_t	appType,
 	                 uint8_t	DGflag,
 	                 int16_t	FEC_scheme,
-	                 bool		show_crcErrors);
+	                 bytesOut_t	bytesOut,
+	                 void		*ctx);
 	~dataProcessor	(void);
 void	addtoFrame	(uint8_t *);
 private:
@@ -47,7 +49,8 @@ private:
 	int16_t		appType;
 	uint8_t		DGflag;
 	int16_t		FEC_scheme;
-	bool		show_crcErrors;
+	bytesOut_t	bytesOut;
+	void		*ctx;
 	int16_t		crcErrors;
 	int16_t		handledPackets;
 	std::vector<uint8_t> series;

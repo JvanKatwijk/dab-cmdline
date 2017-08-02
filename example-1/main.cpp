@@ -113,6 +113,13 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	(void)ctx;
 //	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
 }
+
+static
+void	bytesOut_Handler (uint8_t *data, int16_t amount, void *ctx) {
+	(void)data;
+	(void)amount;
+	(void)ctx;
+}
 //
 //	The function is called from within the library with
 //	a buffer full of PCM samples. We pass them on to the
@@ -274,6 +281,7 @@ deviceHandler	*theDevice;
 	                           fibQuality,
 	                           pcmHandler,
 	                           dataOut_Handler,
+	                           bytesOut_Handler,
 	                           programdataHandler,
 	                           mscQuality,
 	                           NULL

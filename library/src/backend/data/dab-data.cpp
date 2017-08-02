@@ -38,7 +38,8 @@
 	                         int16_t protLevel,
 	                         uint8_t DGflag,
 	                       	 int16_t FEC_scheme,
-	                         bool	show_crcErrors) {
+	                         bytesOut_t bytesOut,
+	                         void	*ctx) {
 int32_t i;
 	this	-> DSCTy		= DSCTy;
 	this	-> packetAddress	= packetAddress;
@@ -54,7 +55,8 @@ int32_t i;
 	                                             appType,
 	                                             DGflag,
 	                                             FEC_scheme,
-	                                             show_crcErrors);
+	                                             bytesOut,
+	                                             ctx);
 	outV			= new uint8_t [bitRate * 24];
 	interleaveData		= new int16_t *[16]; // the size
 	for (i = 0; i < 16; i ++) {

@@ -37,8 +37,13 @@
 #include	"airspy-handler.h"
 #elif	HAVE_RTLSDR
 #include	"rtlsdr-handler.h"
+#elif	HAVE_WAVFILES
+#include	"wavfiles.h"
 #endif
 #include	<atomic>
+#ifdef	DATA_STREAMER
+#include	"tcp-server.h"
+#endif
 
 using std::cerr;
 using std::endl;
@@ -62,6 +67,10 @@ std::atomic<bool>ensembleRecognized;
 
 static
 audioSink	*soundOut	= NULL;
+
+#ifdef	DATA_STREAMER
+tcpServer	tdcServer (8888);
+#endif
 
 std::string	programName		= "Classic FM";
 int32_t		serviceIdentifier	= -1;
@@ -113,6 +122,20 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	(void)ctx;
 //	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
 }
+
+static
+void	bytesOut_Handler (uint8_t *data, int16_t amount, void *ctx) {
+#ifdef DATA_STREAMER
+	fprintf (stderr, ">>>>>>>>>>>>>>%o %o %o (%d %d)\n",
+	                 data [4], data [5], data [7], 
+	                     (data [4] << 8) | data [5], amount);
+	tdcServer. sendData (data, amount);
+#else
+	(void)data;
+	(void)amount;
+#endif
+	(void)ctx;
+}
 //
 //	The function is called from within the library with
 //	a buffer full of PCM samples. We pass them on to the
@@ -145,7 +168,11 @@ static
 void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 //	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
-	
+
+static
+void	tdcData		(uint8_t *data, int16_t amount) {
+}
+
 int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
@@ -155,21 +182,35 @@ int16_t		ppmCorrection	= 0;
 int		theGain		= 35;	// scale = 0 .. 100
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
+int16_t		waitingTime	= 10;
 bool		autogain	= false;
 int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
+#ifdef	HAVE_WAVFILES
+std::string	fileName;
+#endif
 
 	fprintf (stderr, "dab_cmdline,\n \
 	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
-
-	while ((opt = getopt (argc, argv, "M:B:C:P:G:A:L:S:Q")) != -1) {
+//
+//	For file input we do not need options like Q, G and C,
+//	We do need an option to specify the filename
+#ifndef	HAVE_WAVFILES
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:Q")) != -1) {
+#else
+	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:")) != -1) {
+#endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
+
+	      case 'W':
+	         waitingTime	= atoi (optarg);
+	         break;
 
 	      case 'M':
 	         theMode	= atoi (optarg);
@@ -182,9 +223,6 @@ deviceHandler	*theDevice;
 	                                     L_BAND : BAND_III;
 	         break;
 
-	      case 'C':
-	         theChannel	= std::string (optarg);
-	         break;
 
 	      case 'P':
 	         programName	= optarg;
@@ -192,6 +230,10 @@ deviceHandler	*theDevice;
 
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
+	         break;
+#ifndef	HAVE_WAVFILES
+	      case 'C':
+	         theChannel	= std::string (optarg);
 	         break;
 
 	      case 'G':
@@ -201,6 +243,11 @@ deviceHandler	*theDevice;
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#else
+	      case 'F':
+	         fileName	= std::string (optarg);
+	         break;
+#endif
 
 	      case 'A':
 	         soundChannel	= optarg;
@@ -225,9 +272,6 @@ deviceHandler	*theDevice;
 	sigact.sa_handler = sighandler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
-//	sigaction(SIGINT, &sigact, NULL);
-//	sigaction(SIGTERM, &sigact, NULL);
-//	sigaction(SIGQUIT, &sigact, NULL);
 	bool	err;
 
 	int32_t frequency	= dabBand. Frequency (theBand, theChannel);
@@ -248,6 +292,8 @@ deviceHandler	*theDevice;
 	                                     ppmCorrection,
 	                                     theGain,
 	                                     autogain);
+#elif	HAVE_WAVFILES
+	   theDevice	= new wavFiles (fileName);
 #endif
 	}
 	catch (int e) {
@@ -255,14 +301,14 @@ deviceHandler	*theDevice;
 	   exit (32);
 	}
 //
-//	We have a device
+//	We have a device, so bind the audio out
 	soundOut	= new audioSink	(latency, soundChannel, &err);
 	if (err) {
 	   fprintf (stderr, "no valid sound channel, fatal\n");
 	   exit (33);
 	}
 //
-//	and a sound device
+//	and with a sound device we can create a "backend"
 	theRadio	= new dabClass (theDevice,
 	                                theMode,
 	                                NULL,		// no spectrum shown
@@ -274,6 +320,7 @@ deviceHandler	*theDevice;
 	                                fibQuality,
 	                                pcmHandler,
 	                                dataOut_Handler,
+	                                bytesOut_Handler,
 	                                programdataHandler,
 	                                mscQuality,
 	                                NULL
@@ -296,7 +343,8 @@ deviceHandler	*theDevice;
 	theRadio -> startProcessing ();
 
 	int	timeOut	= 0;
-	while (!timesyncSet. load () && (++timeOut < 5))
+//	while (!timesyncSet. load () && (++timeOut < 5))
+	while (++timeOut < waitingTime)
            sleep (1);
 
         if (!timeSynced. load ()) {

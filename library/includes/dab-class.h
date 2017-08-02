@@ -58,6 +58,7 @@ public:
 	                    fib_quality_t	fib_qualityHandler,
 	                    audioOut_t		audioOut_Handler,
 	                    dataOut_t		dataOut_Handler,
+	                    bytesOut_t		bytesOut_Handler,
 	                    programdata_t	programdataHandler,
 	                    programQuality_t	program_qualityHandler,
 	                    void		*ctx);

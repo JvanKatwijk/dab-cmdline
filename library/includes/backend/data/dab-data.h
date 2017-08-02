@@ -2,9 +2,9 @@
 /*
  *    Copyright (C) 2015
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J (JSDR).
+ *    This file is part of the DAB library of the SDR-J (JSDR).
  *    SDR-J is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -23,14 +23,14 @@
 #ifndef	__DAB_DATA__
 #define	__DAB_DATA__
 
-#include	"dab-virtual.h"
-#include	"ringbuffer.h"
 #include	<stdio.h>
 #include        <thread>
 #include        <mutex>
 #include	<atomic>
 #include        <condition_variable>
-
+#include	"dab-api.h"
+#include	"dab-virtual.h"
+#include	"ringbuffer.h"
 
 class	dabProcessor;
 class	protection;
@@ -46,7 +46,8 @@ public:
 	                 int16_t	protLevel,
 	                 uint8_t	DGflag,
 	                 int16_t	FEC_scheme,
-	                 bool		show_crcErrors);
+	                 bytesOut_t	bytesOut,
+	                 void		*userData);
 	~dabData	(void);
 	int32_t	process		(int16_t *, int16_t);
 	void	stopRunning	(void);

@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of simpleDab
  *    simpleDab is free software; you can redistribute it and/or modify
@@ -174,6 +174,7 @@ const char	**t;
 	                           fibQuality_Handler,
 	                           audioOut_Handler,
 	                           dataOut_Handler,
+	                           NULL,
 	                           programdata_Handler,
 	                           mscQuality_Handler,
 	                           this		// context, userData

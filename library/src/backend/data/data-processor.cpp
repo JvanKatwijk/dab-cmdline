@@ -35,21 +35,23 @@
 	                                 int16_t	appType,
 	                                 uint8_t	DGflag,
 	                         	 int16_t	FEC_scheme,
-	                                 bool		show_crcErrors) {
+	                                 bytesOut_t	bytesOut,
+	                                 void	        *ctx) {
 
 	this	-> bitRate		= bitRate;
 	this	-> DSCTy		= DSCTy;
 	this	-> appType		= appType;
 	this	-> DGflag		= DGflag;
 	this	-> FEC_scheme		= FEC_scheme;
-	this	-> show_crcErrors	= show_crcErrors;
+	this	-> bytesOut		= bytesOut;
+	this	-> ctx			= ctx;
 	switch (DSCTy) {
 	   default:
 	      my_dataHandler	= new virtual_dataHandler ();
 	      break;
 
 	   case 5:			// do know yet
-	      my_dataHandler	= new tdc_dataHandler (appType);
+	      my_dataHandler	= new tdc_dataHandler (appType, bytesOut, ctx);
 	      break;
 
 	   case 60:
@@ -59,9 +61,6 @@
 
 	packetState	= 0;
 	streamAddress	= -1;
-//
-	handledPackets	= 0;
-	crcErrors	= 0;
 }
 
 	dataProcessor::~dataProcessor	(void) {
@@ -110,11 +109,6 @@ uint16_t	i;
 //	if (usefulLength > 0)
 //	fprintf (stderr, "CI = %d, address = %d, usefulLength = %d\n",
 //	                 continuityIndex, address, usefulLength);
-	if (show_crcErrors && (++handledPackets >= 500)) {
-//	we could do something here
-	   crcErrors	= 0;
-	   handledPackets = 0;
-	}
 
 	(void)continuityIndex;
 	(void)command;

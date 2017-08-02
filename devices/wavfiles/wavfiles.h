@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013, 2014, 2015, 2016, 2017
+ *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -19,23 +19,37 @@
  *    along with Qt-DAB; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef	__WAV_FILES__
+#define	__WAV_FILES__
 
-#ifndef	__BANDHANDLER__
-#define	__BANDHANDLER__
-#include	<stdint.h>
-#include	<string>
-//
-//	a simple convenience class
-//
+#include	<sndfile.h>
+#include        "ringbuffer.h"
+#include        "device-handler.h"
+#include	<thread>
+#include	<atomic>
 
-#define	BAND_III	0100
-#define	L_BAND		0101
 
-class bandHandler {
+class	wavFiles: public deviceHandler {
 public:
-	bandHandler	(void);
-	~bandHandler	(void);
-int32_t Frequency	(uint8_t band, std::string Channel);
+			wavFiles	(std::string);
+	       		~wavFiles	(void);
+	int32_t		getSamples	(std::complex<float> *, int32_t);
+	uint8_t		myIdentity	(void);
+	int32_t		Samples		(void);
+	bool		restartReader	(void);
+	void		stopReader	(void);
+	
+private:
+	std::string	fileName;
+static	void		run		(wavFiles *);
+	int32_t		readBuffer	(std::complex<float> *, int32_t);
+	RingBuffer<std::complex<float>>	*_I_Buffer;
+	std::thread     workerHandle;
+	int32_t		bufferSize;
+	SNDFILE		*filePointer;
+	std::atomic<bool> running;
+	int64_t		currPos;
 };
+
 #endif
 
