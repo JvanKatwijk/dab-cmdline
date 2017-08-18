@@ -47,9 +47,13 @@ if(DEFINED WAVFILES)
    set(objectName dab-files)
 endif ()
 
+<<<<<<< HEAD
 #if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 #endif
+=======
+#
+>>>>>>> dc62680d34f55949bd7347ecb9087300f3efa478
 #########################################################################
 	find_package (PkgConfig)
 

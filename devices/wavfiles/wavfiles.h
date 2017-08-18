@@ -28,7 +28,6 @@
 #include	<thread>
 #include	<atomic>
 
-
 class	wavFiles: public deviceHandler {
 public:
 			wavFiles	(std::string);

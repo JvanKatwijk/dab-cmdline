@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Computing
+ *    Lazy Chair Programming
  *
  *    This file is part of the DAB library
  *    DAB library is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ SF_INFO *sf_info;
 
 bool	wavFiles::restartReader	(void) {
 	workerHandle = std::thread (wavFiles::run, this);
-	return true;
+	running. store (true);
 }
 
 void	wavFiles::stopReader	(void) {
@@ -82,14 +82,16 @@ void	wavFiles::stopReader	(void) {
 }
 //
 //	size is in I/Q pairs
-//	Note that the caller ensures that there are sufficient samples
-//	in the buffer
 int32_t	wavFiles::getSamples	(std::complex<float> *V, int32_t size) {
 int32_t	amount;
 	if (filePointer == NULL)
 	   return 0;
 	if (!running. load ())
 	   return 0;
+
+	while (_I_Buffer -> GetRingBufferReadAvailable () < (uint32_t)size)
+	   usleep (100);
+
 	amount = _I_Buffer	-> getDataFromBuffer (V, size);
 	return amount;
 }
@@ -99,6 +101,7 @@ int32_t	wavFiles::Samples (void) {
 }
 //
 //	The actual interface to the filereader is in a separate thread
+
 void	wavFiles::run (wavFiles *p) {
 int32_t	t, i;
 std::complex<float>	*bi;
