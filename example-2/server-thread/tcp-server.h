@@ -37,10 +37,10 @@
 
 class	tcpServer {
 public:
-		tcpServer	(std::string);
+		tcpServer	(int);
 		~tcpServer	(void);
 	void	sendData	(uint8_t *, int32_t);
-	void	run		(std::string port);
+	void	run		(int port);
 private:
 	std::thread	threadHandle;
 	RingBuffer<uint8_t> 	*buffer;

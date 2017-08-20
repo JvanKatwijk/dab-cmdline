@@ -36,6 +36,23 @@
 #include	"client.h"
 //
 
+
+#define swap(a) (((a) << 8) | ((a) >> 8))
+
+//---------------------------------------------------------------------------
+uint16_t usCalculCRC (uint8_t *buf, int lg) {
+uint16_t crc;
+uint    count;
+        crc = 0xFFFF;
+        for (count= 0; count < lg; count++) {
+           crc = (uint16_t) (swap (crc) ^ (uint16_t)buf [count]);
+           crc ^= ((uint8_t)crc) >> 4;
+           crc = (uint16_t)
+                 (crc ^ (swap((uint8_t)(crc)) << 4) ^ ((uint8_t)(crc) << 5));
+        }
+        return ((uint16_t)(crc ^ 0xFFFF));
+}
+
 	Client::Client (QWidget *parent):QDialog (parent) {
 int16_t	i;
 	setupUi (this);
@@ -124,8 +141,6 @@ int16_t	i;
 	}
 }
 
-
-
 #define	SEARCH_HEADER	0
 #define	HEADER_FOUND	1
 
@@ -137,15 +152,22 @@ int16_t i;
 	   headertester. shift (d);
 	   if (headertester. hasHeader ()) {
 	      toRead = headertester. length ();
+	      dataLength	= toRead;
+	      dataBuffer	= new uint8_t [toRead];
+	      dataIndex		= 0;
+	      frameType = headertester. frametype ();
 	      searchState = HEADER_FOUND;
 	      headertester. reset ();
 	   }
 	   return;
 	}
 	toRead --;
-//	handle the data element
-	if (toRead == 0)
+	dataBuffer [dataIndex ++] = d;
+	if (toRead == 0) {
 	   searchState = SEARCH_HEADER;
+	   handleFrame (frameType == 0 ? 0 : 1, dataBuffer, dataLength);
+	   delete[] dataBuffer;
+	}
 }
 
 void	Client::terminate	(void) {
@@ -162,4 +184,60 @@ void	Client::timerTick (void) {
 	   connectionTimer	-> stop ();
 	}
 }
-	   
+
+void	Client::handleFrame (uint8_t frameType,
+	                     uint8_t *dataBuffer, int16_t Length) {
+
+	if (frameType == 0)
+	   return;
+	fprintf (stderr, " frametype 1 met %o %o %o\n",
+	                                           dataBuffer [0], 
+	                                           dataBuffer [1],
+	                                           dataBuffer [2]);
+
+	fprintf (stderr, "encryption %d\n", dataBuffer [3]);
+	if (dataBuffer [3] == 0) {	// encryption 0
+	   int llength = Length - 5;
+	   int loffset = 4;
+	   do {
+	      int16_t i;
+	      fprintf (stderr, "component identifier = %d\n", dataBuffer [4]);
+	      fprintf (stderr, "fieldlength = %d\n",
+	                              (dataBuffer [5] << 8) | dataBuffer [6]);
+	      fprintf (stderr, "header crc = %o\n",
+	                              (dataBuffer [7] << 8) | dataBuffer [8]);
+	      if (serviceComponentFrameheaderCRC (dataBuffer, loffset, llength))
+	         fprintf (stderr, "ready to handle component frame\n");
+	      else
+	         fprintf (stderr, "crc check failed\n");
+	      int16_t fieldLength = (dataBuffer [loffset] << 8) | 
+	                                       dataBuffer [loffset + 1];
+	      llength -= fieldLength + 5;
+	      loffset += fieldLength + 5;
+	   } while (llength > 0);
+	}
+	else
+	   fprintf (stderr, "need to decompress\n");
+
+}
+
+bool	Client::serviceComponentFrameheaderCRC (uint8_t *data,
+	                                        int16_t offset,
+	                                        int16_t maxL) {
+uint8_t testVector [18];
+int16_t i;
+int16_t length  = (data [offset + 1] << 8) | data [offset + 2];
+int16_t size    = length < 13 ? length : 13;
+uint16_t        crc;
+        if (length < 0)
+           return false;                // assumed garbage
+        crc     = (data [offset + 3] << 8) | data [offset + 4];      // the crc
+        testVector [0]  = data [offset + 0];
+        testVector [1]  = data [offset + 1];
+        testVector [2]  = data [offset + 2];
+        for (i = 0; i < size; i ++)
+           testVector [3 + i] = data [offset + 5 + i];
+	return usCalculCRC (testVector, 3 + size) == crc;
+}
+
+

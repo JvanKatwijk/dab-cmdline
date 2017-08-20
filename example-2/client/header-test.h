@@ -89,6 +89,10 @@ bool	hasHeader (void) {
 	return counter == 8;
 }
 
+uint8_t	frametype (void) {
+	return b [7];
+}
+
 int16_t	length () {
 	return (b [4] << 8) | b [5];
 }

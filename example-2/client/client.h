@@ -56,10 +56,19 @@ private	slots:
 	void		terminate	(void);
 	void		timerTick	(void);
 private:
+	void		handleFrame	(uint8_t, uint8_t *, int16_t);
+	bool		serviceComponentFrameheaderCRC (uint8_t *data,
+	                                                int16_t offset,
+	                                                int16_t maxL);
+
 	QTcpSocket	streamer;
 	QTimer		*connectionTimer;
 	headerTest	headertester;
 	int16_t		toRead;
+	int16_t		dataLength;
+	uint8_t		*dataBuffer;
+	uint8_t		frameType;
+	int16_t		dataIndex;
 };
 #endif
 

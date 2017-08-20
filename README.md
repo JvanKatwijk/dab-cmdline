@@ -77,7 +77,8 @@ For both example-1 and example-2 program, there is a CMakeLists.txt file
 example-1 is - obviously - the simplest one, since it expects a
 library to be available to which it links.
 
-example-2 has the same look and the same functionality. 
+example-2 has the same look and the same functionality but is uses the
+sources of the library to create a single executable.
 
 Both example-1 and example-2 executables are simply made by
 
@@ -90,7 +91,8 @@ Both example-1 and example-2 executables are simply made by
 The executable created is named dab-XXX for executables made in example-1
 and dab-XXX-2 for executables made in example-2. Again, XXX is the name
 of the device chosen.
-The executable will be installed in /usr/local/bin
+The executable will be installed in /usr/local/bin, so yo need
+access rights.
 
 For "simpleDab" one uses qt-make, there is a ".pro" file
 
@@ -173,7 +175,7 @@ types for the callback functions and a specification for the real API functions.
 E X P E R I M E N T A L
 
 One of the issues still to be resolved is the handling of data. As an
-experiment a callback fnction was added that is called from within the
+experiment a callback function was added that is called from within the
 tdc handler. In example-2 a simple TCP server was added, one that just
 writes out packaged tdc frames.
 The package structure is : an 8 byte header followed by the frame data.

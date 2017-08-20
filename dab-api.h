@@ -116,7 +116,7 @@ typedef	struct {
 //
 //	byte oriented data, emitted by various dataHandlers, is sent
 //	as array of uint8_t values (packed bytes)
-	typedef void (*bytesOut_t)(uint8_t *, int16_t, void *);
+	typedef void (*bytesOut_t)(uint8_t *, int16_t, uint8_t, void *);
 
 //	the quality of the DAB data is reflected in 1 number in case
 //	of DAB, and 3 in case of DAB+,

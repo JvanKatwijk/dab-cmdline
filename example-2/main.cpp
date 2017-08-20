@@ -135,12 +135,22 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 //	Note that the callback function is executed in the thread
 //	that executes the tdcHandler code.
 static
-void	bytesOut_Handler (uint8_t *data, int16_t amount, void *ctx) {
+void	bytesOut_Handler (uint8_t *data, int16_t amount,
+	                  uint8_t type, void *ctx) {
 #ifdef DATA_STREAMER
-	fprintf (stderr, ">>>>>>>>>>>>>>%o %o %o (%d %d)\n",
-	                 data [4], data [5], data [7], 
-	                     (data [4] << 8) | data [5], amount);
-	tdcServer. sendData (data, amount);
+uint8_t localBuf [amount + 8];
+int16_t i;
+	localBuf [0] = 0xFF;
+	localBuf [1] = 0x00;
+	localBuf [2] = 0xFF;
+	localBuf [3] = 0x00;
+	localBuf [4] = (amount >> 8) & 0xFF;
+	localBuf [5] = amount & 0xFF;
+	localBuf [6] = 0x00;
+	localBuf [7] = type == 0 ? 0 : 0xFF;
+	for (i = 0; i < amount; i ++)
+	   localBuf [8 + i] = data;
+	tdcServer. sendData (localBuf, amount + 8);
 #else
 	(void)data;
 	(void)amount;
