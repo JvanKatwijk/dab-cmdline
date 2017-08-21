@@ -48,8 +48,10 @@
 //	Data is stored reverse, we pass the vector and the index of the
 //	last element of the XPad data.
 //	 L0 is the "top" byte of the L field, L1 the next to top one.
-void	padHandler::processPAD (uint8_t *buffer, int16_t last,
-	                        uint8_t L1, uint8_t L0) {
+void	padHandler::processPAD (uint8_t *buffer,
+	                        int16_t last,
+	                        uint8_t L1,
+	                        uint8_t L0) {
 uint8_t	fpadType	= (L1 >> 6) & 03;
 
 	if (fpadType != 00) 
@@ -186,8 +188,8 @@ void	padHandler::dynamicLabel (uint8_t *data, int16_t length, uint8_t CI) {
 static int16_t segmentno           = 0;
 static int16_t remainDataLength    = 0;
 static bool    isLastSegment       = false;
-static bool    moreXPad            = false;
-int16_t  dataLength                = 0;
+static bool moreXPad	= false;
+int16_t  dataLength	= 0;
 
 	if ((CI & 037) == 02) {	// start of segment
 	   uint16_t prefix = (data [0] << 8) | data [1];

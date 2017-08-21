@@ -2,21 +2,21 @@
 /*
  *    Copyright (C) 2014
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the Qt-DAB program
- *    Qt-DAB is free software; you can redistribute it and/or modify
+ *    This file is part of the DAB library
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    Qt-DAB is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Qt-DAB; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 //
@@ -35,9 +35,6 @@
 #include	<cstring>
 #include	<unistd.h>
 
-//#if defined QWT_VERSION && ((QWT_VERSION >> 8) > 0x0601)
-//#define	QT_STATIC_CONST
-//#endif
 
 #ifndef	__FREEBSD__
 #include	<malloc.h>
@@ -64,7 +61,7 @@ using namespace std;
 #define	MHz(x)		(KHz (x) * 1000)
 #define	mHz(x)		(kHz (x) * 1000)
 
-#define	CURRENT_VERSION	"0.999"
+#define	CURRENT_VERSION	"1.0alfa"
 
 #define		DAB		0100
 #define		DAB_PLUS	0101
@@ -104,23 +101,10 @@ float	get_db (float x) {
 	return 20 * log10 ((x + 1) / (float)(256));
 }
 //
-static	inline
-float	PI_Constrain (float val) {
-	if (0 <= val && val < 2 * M_PI)
-	   return val;
-	if (val >= 2 * M_PI)
-	   return fmod (val, 2 * M_PI);
-//	apparently val < 0
-	if (val > - 2 * M_PI)
-	   return val + 2 * M_PI;
-	return 2 * M_PI - fmod (- val, 2 * M_PI);
-}
-/*
- */
 
-#define	MINIMUM(x, y)	((x) < (y) ? x : y)
-#define	MAXIMUM(x, y)	((x) > (y) ? x : y)
-
+//
+//	A simple approximation of the abs value, just for checking
+//	values during time synchronization
 static inline
 float	jan_abs (std::complex<float> z) {
 float	re	= real (z);
@@ -129,9 +113,9 @@ float	im	= imag (z);
 	if (im < 0) im = - im;
 	return re + im;
 }
+//
 
-
-////
+//	These are defined elsewhere
 ////	for service handling we define
 //typedef struct {
 //	int16_t subchId;

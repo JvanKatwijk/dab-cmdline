@@ -125,8 +125,8 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 //
 //	Note: the function is called from the tdcHandler with a
 //	frame, either frame 0 or frame 1.
-//	The frames are packed bytes, with an additional header
-//	of 8 bytes:
+//	The frames are packed bytes, here an additional header
+//	is added, a header of 8 bytes:
 //	the first 4 bytes for a pattern 0xFF 0x00 0xFF 0x00 0xFF
 //	the length of the contents, i.e. framelength without header
 //	is stored in bytes 5 (high byte) and byte 6.
@@ -160,7 +160,8 @@ int16_t i;
 //
 //	The function is called from within the library with
 //	a buffer full of PCM samples. We pass them on to the
-//	audiohandler, based on portaudio.
+//	audiohandler, based on portaudio. Feel free to modify this
+//	and send the samples elsewhere
 static
 void	pcmHandler (int16_t *buffer, int size, int rate,
 	                              bool isStereo, void *ctx) {
@@ -213,7 +214,7 @@ deviceHandler	*theDevice;
 std::string	fileName;
 #endif
 
-	fprintf (stderr, "dab_cmdline,\n \
+	fprintf (stderr, "dab_cmdline V 1.0alfa,\n \
 	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);

@@ -53,6 +53,30 @@ uint    count;
         return ((uint16_t)(crc ^ 0xFFFF));
 }
 
+static inline
+bool    check_crc_bytes (uint8_t *msg, int16_t len) {
+int i, j;
+uint16_t        accumulator     = 0xFFFF;
+uint16_t        crc;
+uint16_t        genpoly         = 0x1021;
+
+        for (i = 0; i < len; i ++) {
+           int16_t data = msg [i] << 8;
+           for (j = 8; j > 0; j--) {
+              if ((data ^ accumulator) & 0x8000)
+                 accumulator = ((accumulator << 1) ^ genpoly) & 0xFFFF;
+              else
+                 accumulator = (accumulator << 1) & 0xFFFF;
+              data = (data << 1) & 0xFFFF;
+           }
+        }
+//
+//      ok, now check with the crc that is contained
+//      in the au
+        crc     = ~((msg [len] << 8) | msg [len + 1]) & 0xFFFF;
+        return (crc ^ accumulator) == 0;
+}
+
 	Client::Client (QWidget *parent):QDialog (parent) {
 int16_t	i;
 	setupUi (this);
@@ -165,7 +189,10 @@ int16_t i;
 	dataBuffer [dataIndex ++] = d;
 	if (toRead == 0) {
 	   searchState = SEARCH_HEADER;
-	   handleFrame (frameType == 0 ? 0 : 1, dataBuffer, dataLength);
+	   if (frameType == 0)
+	      handleFrameType_0 (dataBuffer, dataLength);
+	   else
+	      handleFrameType_1 (dataBuffer, dataLength);
 	   delete[] dataBuffer;
 	}
 }
@@ -185,40 +212,41 @@ void	Client::timerTick (void) {
 	}
 }
 
-void	Client::handleFrame (uint8_t frameType,
-	                     uint8_t *dataBuffer, int16_t Length) {
+void	Client::handleFrameType_0 (uint8_t *dataBuffer, int16_t Length) {
+	fprintf (stderr, "number of services %d\n", dataBuffer [0]);
+}
 
-	if (frameType == 0)
-	   return;
-	fprintf (stderr, " frametype 1 met %o %o %o\n",
-	                                           dataBuffer [0], 
-	                                           dataBuffer [1],
-	                                           dataBuffer [2]);
-
+void	Client::handleFrameType_1 (uint8_t *dataBuffer, int16_t Length) {
 	fprintf (stderr, "encryption %d\n", dataBuffer [3]);
 	if (dataBuffer [3] == 0) {	// encryption 0
-	   int llength = Length - 5;
-	   int loffset = 4;
-	   do {
+	   int16_t index   = 4;
+	   while (index < Length) {
 	      int16_t i;
-	      fprintf (stderr, "component identifier = %d\n", dataBuffer [4]);
-	      fprintf (stderr, "fieldlength = %d\n",
-	                              (dataBuffer [5] << 8) | dataBuffer [6]);
-	      fprintf (stderr, "header crc = %o\n",
-	                              (dataBuffer [7] << 8) | dataBuffer [8]);
-	      if (serviceComponentFrameheaderCRC (dataBuffer, loffset, llength))
-	         fprintf (stderr, "ready to handle component frame\n");
-	      else
-	         fprintf (stderr, "crc check failed\n");
-	      int16_t fieldLength = (dataBuffer [loffset] << 8) | 
-	                                       dataBuffer [loffset + 1];
-	      llength -= fieldLength + 5;
-	      loffset += fieldLength + 5;
-	   } while (llength > 0);
+	      uint8_t sCi     = dataBuffer [index];
+	      uint16_t segLen = (dataBuffer [index + 1] << 8) |
+	                         dataBuffer [index + 2];
+	      uint16_t crc    = (dataBuffer [index + 3] << 8) |
+	                         dataBuffer [index + 4];
+	      uint8_t testVector [18];
+	      testVector [0] = sCi;
+	      testVector [1] = dataBuffer [index + 1];
+	      testVector [2] = dataBuffer [index + 2];
+	      for (i = 0; i < 13; i ++)
+	         testVector [i + 3] = dataBuffer [index + i + 5];
+	      testVector [16] = dataBuffer [index + 3];
+	      testVector [17] = dataBuffer [index + 4];
+	      if (usCalculCRC (testVector, 16) == crc)
+	         fprintf (stderr,
+	                  "sCi = %o, segLen = %d (index = %d, Length = %d)\n",
+	                   sCi, segLen, index, Length);
+	      else {
+	         fprintf (stderr, "failing crc\n");
+	      }
+	      index += segLen + 5;
+	   }
 	}
 	else
-	   fprintf (stderr, "need to decompress\n");
-
+	   fprintf (stderr, "encryption not zero\n");
 }
 
 bool	Client::serviceComponentFrameheaderCRC (uint8_t *data,

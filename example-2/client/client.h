@@ -56,7 +56,8 @@ private	slots:
 	void		terminate	(void);
 	void		timerTick	(void);
 private:
-	void		handleFrame	(uint8_t, uint8_t *, int16_t);
+	void		handleFrameType_0 (uint8_t *, int16_t);
+	void		handleFrameType_1 (uint8_t *, int16_t);
 	bool		serviceComponentFrameheaderCRC (uint8_t *data,
 	                                                int16_t offset,
 	                                                int16_t maxL);

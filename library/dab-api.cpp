@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is the C/C++implementation of the DAB-API
  *
