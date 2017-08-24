@@ -120,7 +120,7 @@ void	programdataHandler (audiodata *d, void *ctx) {
 static
 void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	(void)ctx;
-//	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
+	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
 }
 //
 //	Note: the function is called from the tdcHandler with a

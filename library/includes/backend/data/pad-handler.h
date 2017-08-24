@@ -38,7 +38,7 @@ private:
 	dataOut_t	dataOut;
 	void		*ctx;
 	void		handle_variablePAD	(uint8_t *, int16_t, uint8_t);
-	void		handle_shortPAD		(uint8_t *, int16_t);
+	void		handle_shortPAD		(uint8_t *, int16_t, uint8_t);
 	void		dynamicLabel		(uint8_t *, int16_t, uint8_t);
 	void		add_MSC_element		(uint8_t *, int16_t);
 	void		build_MSC_segment	(uint8_t *, int16_t);

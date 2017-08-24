@@ -217,7 +217,10 @@ void	Client::handleFrameType_0 (uint8_t *dataBuffer, int16_t Length) {
 }
 
 void	Client::handleFrameType_1 (uint8_t *dataBuffer, int16_t Length) {
-	fprintf (stderr, "encryption %d\n", dataBuffer [3]);
+	fprintf (stderr, "type 1 %x %x %x %x\n",
+	         dataBuffer [0],
+	         dataBuffer [1], dataBuffer [2], dataBuffer [3]);
+
 	if (dataBuffer [3] == 0) {	// encryption 0
 	   int16_t index   = 4;
 	   while (index < Length) {
