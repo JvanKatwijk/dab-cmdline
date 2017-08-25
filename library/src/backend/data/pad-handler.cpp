@@ -39,6 +39,9 @@
 //	xpadLength tells - if mscGroupElement is "on" - the size of the
 //	xpadfields, needed for handling xpads without CI's
 	xpadLength	= -1;
+	still_to_go	= 0;
+	firstSegment	= false;
+	lastSegment	= false;
 }
 
 	padHandler::~padHandler	(void) {
@@ -93,31 +96,39 @@ int16_t	i;
 	         break;
 
 	      case 0:		// end marker
-	         if ((still_to_go <= 0) && (dynamicLabelText. size () > 0)) {
-	            dataOut (dynamicLabelText, ctx);
-	            dynamicLabelText. clear();
-	         }
+//	         if ((still_to_go <= 0) && (dynamicLabelText. size () > 0)) {
+//	            dataOut (dynamicLabelText, ctx);
+//	            dynamicLabelText. clear();
+//	         }
 	         break;
 
 	      case 2:   // start of new fragment, extract the length
-                 still_to_go = b [last - 1] & 0x0F;
+	         if ((b [last - 1] & 0xF0) == 0x40) {
+	            firstSegment = true;
+	            dynamicLabelText. clear ();
+	         }
+	         else
+	            firstSegment = false;
+	         if ((b [last - 1] & 0xF0) == 0x20) {
+	            lastSegment = true;
+	         }
+	         else
+	            lastSegment = false;
+	         still_to_go = b [last - 1] & 0x0F;
                  dynamicLabelText. append (1, char(b [last - 3]));
 	         break;
 	   }
 	}
 	else {	// No CI
-	   uint8_t len = 0;
-	   if (still_to_go > 0) { //     X-PAD field is all data
-              for (i = 0; (i < 4) && (still_to_go > 0); i ++) {
-                 data [i] = b [last - i] & 0x7F;
+           for (i = 0; (i < 4) && (still_to_go > 0); i ++) {
+                 dynamicLabelText. append (1, (char)(b [last - i] & 0x7F));
                  still_to_go --;
-	         len ++;
-              }
-              for (; i <= 4; i ++)
-                 data [i] = 0;
-
-               dynamicLabelText. append ((char *)data, len);
-            }
+           }
+	   if ((still_to_go <= 0) && (lastSegment)) {
+              if (dynamicLabelText. length () > 0)
+                 dataOut (dynamicLabelText, ctx);
+              dynamicLabelText. clear ();
+           }
 	}
 }
 ///////////////////////////////////////////////////////////////////////

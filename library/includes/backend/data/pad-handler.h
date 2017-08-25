@@ -54,6 +54,9 @@ private:
 	uint8_t		last_appType;
 	bool		msc_GroupElement;
 	int16_t		xpadLength;
+	int16_t		still_to_go;		// for short pad fragments
+	bool		firstSegment;
+	bool		lastSegment;
 };
 
 #endif
