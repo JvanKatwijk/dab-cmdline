@@ -82,38 +82,24 @@ uint8_t	fpadType	= (L1 >> 6) & 03;
 //	on the vector address and the offset of the last element
 //	in that vector
 void	padHandler::handle_shortPAD (uint8_t *b, int16_t last, uint8_t CIf) {
-uint8_t data [5];
-static
-int16_t	still_to_go	= 0;
 int16_t	i;
 
 	if (CIf) { // Has CI
 	   uint8_t CI = b [last];
+	   firstSegment = (b [last - 1] & 0x40) != 0;
+	   lastSegment  = (b [last - 1] & 0x20) != 0;
 	   uint8_t AcTy = CI & 037; // application type
 	   switch (AcTy) {
 	      default:
-	         fprintf(stderr, "AcTy: %d\n", AcTy);
+//	         fprintf(stderr, "AcTy: %d\n", AcTy);
 	         break;
 
 	      case 0:		// end marker
-//	         if ((still_to_go <= 0) && (dynamicLabelText. size () > 0)) {
-//	            dataOut (dynamicLabelText, ctx);
-//	            dynamicLabelText. clear();
-//	         }
 	         break;
 
 	      case 2:   // start of new fragment, extract the length
-	         if ((b [last - 1] & 0xF0) == 0x40) {
-	            firstSegment = true;
+	         if (firstSegment) 
 	            dynamicLabelText. clear ();
-	         }
-	         else
-	            firstSegment = false;
-	         if ((b [last - 1] & 0xF0) == 0x20) {
-	            lastSegment = true;
-	         }
-	         else
-	            lastSegment = false;
 	         still_to_go = b [last - 1] & 0x0F;
                  dynamicLabelText. append (1, char(b [last - 3]));
 	         break;
@@ -121,9 +107,11 @@ int16_t	i;
 	}
 	else {	// No CI
            for (i = 0; (i < 4) && (still_to_go > 0); i ++) {
-                 dynamicLabelText. append (1, (char)(b [last - i] & 0x7F));
-                 still_to_go --;
+               dynamicLabelText. append (1, (char)(b [last - i] & 0x7F));
+               still_to_go --;
            }
+//	iff we are at the end of the last segment, show the message
+//	(but only if there is something to show) and clear the message
 	   if ((still_to_go <= 0) && (lastSegment)) {
               if (dynamicLabelText. length () > 0)
                  dataOut (dynamicLabelText, ctx);
