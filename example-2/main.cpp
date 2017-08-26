@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2015, 2016
+ *    Copyright (C) 2015, 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -48,6 +48,7 @@
 using std::cerr;
 using std::endl;
 
+void    printOptions (void);	// forward declaration
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
@@ -219,7 +220,11 @@ std::string	fileName;
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
-//
+
+	if (argc == 1) {
+	   printOptions ();
+	   exit (1);
+	}
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #ifndef	HAVE_WAVFILES
@@ -287,7 +292,8 @@ std::string	fileName;
               }
 
 	      default:
-	         break;
+	         printOptions ();
+	         exit (1);
 	   }
 	}
 //
@@ -416,4 +422,22 @@ std::string	fileName;
 	delete theRadio;
 	delete theDevice;
 }
+
+void    printOptions (void) {
+        fprintf (stderr,
+"                          dab-cmdline options are\n\
+                          -W number   amount of time to look for an ensemble\n\
+                          -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
+                          -B Band     Band is either L_BAND or BAND_III (default)\n\
+                          -P name     program to be selected in the ensemble\n\
+                          -C channel  channel to be used\n\
+                          -G Gain     gain for device (range 1 .. 100)\n\
+                          -Q          if set, set autogain for device true\n\
+	                  -F filename in case the input is from file\n\
+                          -A name     select the audio channel (portaudio)\n\
+                          -L number   latency for audiobuffer\n\
+                          -S hexnumber use hexnumber to identify program\n\n");
+}
+
+                          
 

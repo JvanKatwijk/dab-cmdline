@@ -42,6 +42,7 @@
 	still_to_go	= 0;
 	firstSegment	= false;
 	lastSegment	= false;
+	segmentNumber	= -1;
 }
 
 	padHandler::~padHandler	(void) {
@@ -98,9 +99,18 @@ int16_t	i;
 	         break;
 
 	      case 2:   // start of new fragment, extract the length
-	         if (firstSegment) 
+	         if (firstSegment) {
 	            dynamicLabelText. clear ();
-	         still_to_go = b [last - 1] & 0x0F;
+	            segmentNumber = 0;
+	         }
+	         else {
+	            if ((b [last - 2] >> 4) != segmentNumber + 1) {
+	               segmentNumber = -1;
+	               return;
+	            }
+	         }
+                 segmentNumber   = b [last - 2] >> 4;
+	         still_to_go	 = b [last - 1] & 0x0F;
                  dynamicLabelText. append (1, char(b [last - 3]));
 	         break;
 	   }

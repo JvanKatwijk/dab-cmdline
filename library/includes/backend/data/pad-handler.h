@@ -57,6 +57,7 @@ private:
 	int16_t		still_to_go;		// for short pad fragments
 	bool		firstSegment;
 	bool		lastSegment;
+	int16_t		segmentNumber;
 };
 
 #endif
