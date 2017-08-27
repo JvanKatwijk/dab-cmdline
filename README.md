@@ -153,6 +153,13 @@ again as with the program name, a prefix of the name suffices. As with the progr
 some of them will just not work, a well known  issue with the combination portaudio/alsa under Linux. 
 Important: If a name is selected for a channel that cannot be opened the program will try to open the default output device.
 
+	-O filename or "-". 
+The PCM samples of the sound output are stored in the file <filename>. If "-"
+is specified as filename the output is just written to stdout.
+This output then can be made audible by e.g.
+	dab-xxxx -O - .... | aplay -r 48000 -f S16_LE -t raw -c 2
+
+
 For each of the parameters there is a default, i.e., if the command
 
 	./linux/dab-cmdline

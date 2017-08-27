@@ -1,10 +1,10 @@
 #
 /*
- *    Copyright (C) 2011, 2012, 2013
+ *    Copyright (C)  2009, 2010, 2011
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the main program of the DAB library
+ *    This file is part of the main program for the DAB library
  *
  *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -21,43 +21,24 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#ifndef	__NEW_CONVERTER__
-#define	__NEW_CONVERTER__
 
-#include	<math.h>
-#include	<complex>
-#include	<stdint.h>
-#include	<unistd.h>
-#include	<limits>
-#include	<samplerate.h>
+#ifndef __FILE_SINK__
+#define	__FILE_SINK__
+#include	<stdio.h>
+#include	"audio-base.h"
+#include	"ringbuffer.h"
+#include	<string>
 
-typedef float   DSPFLOAT;
-typedef std::complex<DSPFLOAT> DSPCOMPLEX;
-
-using namespace std;
-
-class	newConverter {
-private:
-	int32_t		inRate;
-	int32_t		outRate;
-	double		ratio;
-	int32_t		outputLimit;
-	int32_t		inputLimit;
-	SRC_STATE	*converter;
-	SRC_DATA	*src_data;
-	float		*inBuffer;
-	float		*outBuffer;
-	int32_t		inp;
+class	fileSink  : public audioBase {
 public:
-		newConverter (int32_t inRate, int32_t outRate, 
-	                      int32_t inSize);
-
-		~newConverter (void);
-
-	bool	convert (DSPCOMPLEX v,
-	                 DSPCOMPLEX *out, int32_t *amount);
-
-	int32_t	getOutputsize (void);
+	                fileSink		(std::string, bool *);
+			~fileSink		(void);
+	void		stop			(void);
+	void		restart			(void);
+private:
+	void		audioOutput		(float *, int32_t);
+	FILE		*outputFile;
+	bool		audioOK;
 };
 
 #endif

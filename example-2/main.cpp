@@ -29,6 +29,7 @@
 #include        <cstdio>
 #include        <iostream>
 #include	"audiosink.h"
+#include	"filesink.h"
 #include	"dab-class.h"
 #include	"band-handler.h"
 #ifdef	HAVE_SDRPLAY
@@ -67,7 +68,7 @@ static
 std::atomic<bool>ensembleRecognized;
 
 static
-audioSink	*soundOut	= NULL;
+audioBase	*soundOut	= NULL;
 
 #ifdef	DATA_STREAMER
 tcpServer	tdcServer (8888);
@@ -214,6 +215,7 @@ deviceHandler	*theDevice;
 #ifdef	HAVE_WAVFILES
 std::string	fileName;
 #endif
+bool	err;
 
 	fprintf (stderr, "dab_cmdline V 1.0alfa,\n \
 	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
@@ -228,9 +230,9 @@ std::string	fileName;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #ifndef	HAVE_WAVFILES
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:Q")) != -1) {
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
 #else
-	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:")) != -1) {
+	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:O:")) != -1) {
 #endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
@@ -276,6 +278,14 @@ std::string	fileName;
 	         break;
 #endif
 
+	      case 'O':
+	         soundOut	= new fileSink (std::string (optarg), &err);
+	         if (!err) {
+	            fprintf (stderr, "sorry, could not open file\n");
+	            exit (32);
+	         }
+	         break;
+
 	      case 'A':
 	         soundChannel	= optarg;
 	         break;
@@ -300,7 +310,6 @@ std::string	fileName;
 	sigact.sa_handler = sighandler;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
-	bool	err;
 
 	int32_t frequency	= dabBand. Frequency (theBand, theChannel);
 	try {
@@ -329,11 +338,12 @@ std::string	fileName;
 	   exit (32);
 	}
 //
-//	We have a device, so bind the audio out
-	soundOut	= new audioSink	(latency, soundChannel, &err);
-	if (err) {
-	   fprintf (stderr, "no valid sound channel, fatal\n");
-	   exit (33);
+	if (soundOut == NULL) {	// not bound to a file?
+	   soundOut	= new audioSink	(latency, soundChannel, &err);
+	   if (err) {
+	      fprintf (stderr, "no valid sound channel, fatal\n");
+	      exit (33);
+	   }
 	}
 //
 //	and with a sound device we can create a "backend"
@@ -420,7 +430,8 @@ std::string	fileName;
 	theDevice	-> stopReader ();
 	theRadio	-> reset ();
 	delete theRadio;
-	delete theDevice;
+	delete theDevice;	
+	delete soundOut;
 }
 
 void    printOptions (void) {
@@ -436,7 +447,8 @@ void    printOptions (void) {
 	                  -F filename in case the input is from file\n\
                           -A name     select the audio channel (portaudio)\n\
                           -L number   latency for audiobuffer\n\
-                          -S hexnumber use hexnumber to identify program\n\n");
+                          -S hexnumber use hexnumber to identify program\n\n\
+	                  -O filename put the output into a file rather than through portaudio\n");
 }
 
                           

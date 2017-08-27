@@ -220,6 +220,7 @@ endif ()
 	     ./band-handler.h
 	     ./audio-base.h
 	     ./audiosink.h
+	     ./filesink.h
 	     ./newconverter.h
 	     ./server-thread/tcp-server.h
 	     ../devices/device-handler.h
@@ -261,6 +262,7 @@ endif ()
 	     ./main.cpp
 	     ./audio-base.cpp
 	     ./audiosink.cpp
+	     ./filesink.cpp
 	     ./newconverter.cpp
 	     ./band-handler.cpp
 	     ./server-thread/tcp-server.cpp

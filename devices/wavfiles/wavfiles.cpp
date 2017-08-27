@@ -73,6 +73,7 @@ SF_INFO *sf_info;
 bool	wavFiles::restartReader	(void) {
 	workerHandle = std::thread (wavFiles::run, this);
 	running. store (true);
+	return true;
 }
 
 void	wavFiles::stopReader	(void) {
