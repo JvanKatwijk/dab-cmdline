@@ -20,6 +20,9 @@ To show the use of the library, several example programs were developed.
 	- example-1 and example-2 are command line DAB programs written in C++.
 	  While example-1 is a small program linking to a precompiled library,
 	  example-2 is a C++ program using the sources of that library.
+	  An example of a full specification of the command line is
+           ./linux/dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
+
 	  
 	- simpleDab is a Qt based GUI program, linking to the library.
 	  It shows the use of the library when handled from with a Qt GUI.
