@@ -191,6 +191,7 @@ The simpleDAB directory contains the files for a simplified Qt GUI.
 It binds to the dab-library, and can be created by qmake/make. No attempts
 is made to create a CmakeLists.txt file, since the program is merely
 an example to demonstrate the use of the library in a Qt context.
+
 ========================================================================
 
 The API
