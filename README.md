@@ -117,6 +117,7 @@ the example one has to create an ADAPTED library.
 The CMakeLists.txt file for creating such an adapted library is in the python
 directory.
 
+
 =============================================================================
 
 Command-line Parameters for the C++ versions
@@ -184,8 +185,9 @@ The program - when started - will try to identify a DAB datastream in the select
 =========================================================================
 
 simpleDAB
+-------------------------------------------------------------------------
 
-the simpleDAB directory contains the files for a simplified Qt GUI.
+The simpleDAB directory contains the files for a simplified Qt GUI.
 It binds to the dab-library, and can be created by qmake/make. No attempts
 is made to create a CmakeLists.txt file, since the program is merely
 an example to demonstrate the use of the library in a Qt context.
@@ -196,8 +198,11 @@ The API
 
 The API specification, in dab-api.h, contains a specification of the
 types for the callback functions and a specification for the real API functions.
+
 ===============================================================================
+
 E X P E R I M E N T A L
+--------------------------------------------------------------------------------
 
 One of the issues still to be resolved is the handling of data. As an
 experiment a callback function was added that is called from within the
