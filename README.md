@@ -111,11 +111,12 @@ access rights.
 
 For "simpleDab" one uses qt-make, there is a ".pro" file
 
-For python-example read the README file in the python-example directory.
+For the python-example read the README file in the python-example directory.
 HOWEVER: before running 
 the example one has to create an ADAPTED library. 
 The CMakeLists.txt file for creating such an adapted library is in the python
 directory.
+
 =============================================================================
 
 Command-line Parameters for the C++ versions
