@@ -49,7 +49,8 @@ IMPORTANT: YOU NEED C++11 SUPPORT FOR THIS
 
 Note that contrary to earlier versions, the "device" is NOT part of the library,
 the user program has to provide some functions to the library for getting samples.
-The interface can be found in the file "device-handler.h"
+The interface can be found in the file "device-handler.h". 
+
 ===================================================================================
 
 Libraries (together with the "development" or ".h" files) needed for creating the library are
