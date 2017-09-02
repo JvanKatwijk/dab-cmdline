@@ -215,13 +215,21 @@ writes out packaged tdc frames.
 The package structure is : an 8 byte header followed by the frame data.
 The header starts with a -1 0 -1 0 pattern, followed by a two byte length,
 followed by a zero, followed by a 0 for frametype 0 and 0xFF for frametype 1.
+Install the server by adding "-DSERVER" to the cmake command line.
 
 A simple "reader" (client), using qt is included in the sources.
+
+===================================================================================
+
+Copyrights
+
+-----------------------------------------------------------------------------------
 	
 	Copyright (C)  2016, 2017
 	Jan van Katwijk (J.vanKatwijk@gmail.com)
 	Lazy Chair Programming
 
-The dab-library software is made available under the GPL-2.0.
+The dab-library software is made available under the GPL-2.0. The dab-library uses a number of GPL-ed libraries, all
+rigfhts gratefully acknowledged.
 All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 	GNU General Public License for more details.
 
