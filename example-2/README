@@ -3,6 +3,11 @@ This is a simple program, not using the library, but binding directly
 to the functions implementing the dab decoding.
 All callbacks are defined, most of them with an empty body.
 
+See the file main.cpp for the command line options
+
+In the current version, there is experimental (i.e. hardly tested) support
+for connection to and rtl_tcp server.
+
 Feel free to improve the program
 
 Points to note:

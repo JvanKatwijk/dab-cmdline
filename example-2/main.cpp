@@ -40,7 +40,10 @@
 #include	"rtlsdr-handler.h"
 #elif	HAVE_WAVFILES
 #include	"wavfiles.h"
+#elif	HAVE_RTL_TCP
+#include	"rtl_tcp-client.h"
 #endif
+
 #include	<atomic>
 #ifdef	DATA_STREAMER
 #include	"tcp-server.h"
@@ -193,10 +196,6 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 //	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
 
-static
-void	tdcData		(uint8_t *data, int16_t amount) {
-}
-
 int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
@@ -214,6 +213,9 @@ bandHandler	dabBand;
 deviceHandler	*theDevice;
 #ifdef	HAVE_WAVFILES
 std::string	fileName;
+#elif HAVE_RTL_TCP
+std::string	hostname = "127.0.0.1";		// default
+int32_t		basePort = 1234;		// default
 #endif
 bool	err;
 
@@ -227,10 +229,13 @@ bool	err;
 	   printOptions ();
 	   exit (1);
 	}
+
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #ifndef	HAVE_WAVFILES
 	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
+#elif   HAVE_RTL_TCP
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #else
 	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:O:")) != -1) {
 #endif
@@ -252,7 +257,6 @@ bool	err;
 	                                     L_BAND : BAND_III;
 	         break;
 
-
 	      case 'P':
 	         programName	= optarg;
 	         break;
@@ -260,7 +264,11 @@ bool	err;
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
 	         break;
-#ifndef	HAVE_WAVFILES
+#ifdef	HAVE_WAVFILES
+	      case 'F':
+	         fileName	= std::string (optarg);
+	         break;
+#else
 	      case 'C':
 	         theChannel	= std::string (optarg);
 	         break;
@@ -272,10 +280,16 @@ bool	err;
 	      case 'Q':
 	         autogain	= true;
 	         break;
-#else
-	      case 'F':
-	         fileName	= std::string (optarg);
+
+#ifdef	HAVE_RTL_TCP
+	      case 'H':
+	         hostname	= std::string (optarg);
 	         break;
+
+	      case 'I':
+	         basePort	= atoi (optarg);
+	         break;
+#endif
 #endif
 
 	      case 'O':
@@ -331,7 +345,15 @@ bool	err;
 	                                     autogain);
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName);
+#elif	HAVE_RTL_TCP
+	   theDevice	= new rtl_tcp_client (hostname,
+	                                      basePort,
+	                                      frequency,
+	                                      theGain,
+	                                      autogain,
+	                                      ppmCorrection);
 #endif
+
 	}
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);

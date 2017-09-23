@@ -101,13 +101,22 @@ The executable created is named dab-XXX for executables made in example-1
 and dab-XXX-2 for executables made in example-2. Again, XXX is the name
 of the device chosen.
 
-Example-2 has as additional option to read from a file
+Example-2 has as additional options to read from a file, e.g.
 
 	mkdir build
 	cd build
 	cmake .. -DXXX=ON (where XXX is WAVFILES)
 	make
 	sudo make install
+
+or to be connected to an rtl_tcp server
+
+	mkdir build
+	cd build
+	cmake .. -DRTL_TCP=ON
+	make
+	sudo make install
+
 
 The executable will be installed in /usr/local/bin, so yo need to have
 access rights.

@@ -47,6 +47,11 @@ if(DEFINED WAVFILES)
    set(objectName dab-files)
 endif ()
 
+if(DEFINED RTL_TCP)
+   set(RTL_TCP true)
+   set(objectName dab-rtl_tcp)
+endif ()
+
 #if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 #endif
@@ -96,6 +101,24 @@ endif ()
 ##########################################################################
 #	The devices
 #
+
+	if (RTL_TCP)
+	   include_directories (
+	     ../devices/rtl_tcp
+	   )
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/rtl_tcp/rtl_tcp-client.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/rtl_tcp/rtl_tcp-client.cpp
+	   )
+
+	 add_definitions (-DHAVE_RTL_TCP)
+	endif (RTL_TCP)
+	
 	if (SDRPLAY)
 	   find_path (SDRPLAYLIB_INCLUDE_DIR
                       NAMES mirsdrapi-rsp.h
