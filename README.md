@@ -54,7 +54,7 @@ Note that contrary to earlier versions, the "device" is NOT part of the library,
 the user program has to provide some functions to the library for getting samples.
 The interface can be found in the file "device-handler.h". 
 
-===================================================================================
+===============================================================================
 
 Libraries (together with the "development" or ".h" files) needed for creating the library are
 
@@ -176,6 +176,15 @@ This output then can be made audible by e.g.
 	dab-xxxx -O - .... | aplay -r 48000 -f S16_LE -t raw -c 2
 
 
+	-H hostname
+If rtl_tcp is selected as input device, the -H option allows selection
+of a hostname. Default is "127.0.0.1".
+
+	-I port
+If rtl_tcp is selected as input device, the -I option allows selection
+of a port. Default is 1234.
+
+
 For each of the parameters there is a default, i.e., if the command
 
 	./linux/dab-cmdline
@@ -228,7 +237,7 @@ Install the server by adding "-DSERVER" to the cmake command line.
 
 A simple "reader" (client), using qt is included in the sources.
 
-===================================================================================
+===============================================================================
 
 Copyrights
 
