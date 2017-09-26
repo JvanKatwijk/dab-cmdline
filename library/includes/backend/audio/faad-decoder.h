@@ -26,6 +26,15 @@
 #include	"ringbuffer.h"
 #include	"dab-api.h"
 
+typedef struct {
+        int rfa;
+        int dacRate;
+        int sbrFlag;
+        int psFlag;
+        int aacChannelMode;
+        int mpegSurround;
+} stream_parms;
+
 class	faadDecoder {
 private:
 	bool			processorOK;
@@ -77,9 +86,7 @@ int get_aac_channel_configuration (int16_t m_mpeg_surround_config,
 	}
 }
 
-int16_t	MP42PCM (uint8_t dacRate, uint8_t sbrFlag,
-	         int16_t mpegSurround,
-	         uint8_t aacChannelMode,
+int16_t	MP42PCM (stream_parms *sp,
 	         uint8_t buffer [], int16_t bufferLength) {
 int16_t	samples;
 uint8_t	channels;
@@ -105,14 +112,15 @@ NeAACDecFrameInfo	hInfo;
  * support AudioObjectType 29 (PS)
  */
 	   int core_sr_index =
-	             dacRate ?
-	                        (sbrFlag ? 6 : 3) :
-	                        (sbrFlag ? 8 : 5);   // 24/48/16/32 kHz
-	   int core_ch_config = get_aac_channel_configuration (mpegSurround,
-	                                                       aacChannelMode);
+	             sp -> dacRate ?
+	                        (sp -> sbrFlag ? 6 : 3) :
+	                        (sp -> sbrFlag ? 8 : 5);   // 24/48/16/32 kHz
+	   int core_ch_config =
+	            get_aac_channel_configuration (sp -> mpegSurround,
+	                                           sp -> aacChannelMode);
 	   if (core_ch_config == -1) {
 	      printf ("Unrecognized mpeg surround config (ignored): %d\n",
-	                                       mpegSurround);
+	                                       sp -> mpegSurround);
 	      return false;
 	   }
 
@@ -158,7 +166,7 @@ NeAACDecFrameInfo	hInfo;
 	}
 	   
 	if (channels == 2) {
-	   output (outBuffer, samples, aacChannelMode, sample_rate);
+	   output (outBuffer, samples, sp -> aacChannelMode, sample_rate);
 	}
 	else
 	if (channels == 1) {
@@ -168,7 +176,7 @@ NeAACDecFrameInfo	hInfo;
 	      buffer [2 * i]	= ((int16_t *)outBuffer) [i];
 	      buffer [2 * i + 1] = buffer [2 * i];
 	   }
-	   output (buffer, 2 * samples, aacChannelMode, sample_rate);
+	   output (buffer, 2 * samples, sp -> aacChannelMode, sample_rate);
 	}
 	else
 	   fprintf (stderr, "Cannot handle these channels\n");

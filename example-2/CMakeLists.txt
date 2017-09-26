@@ -52,10 +52,14 @@ if(DEFINED RTL_TCP)
    set(objectName dab-rtl_tcp)
 endif ()
 
-#if (DEFINED_SERVER)
+if (DEFINED AAC_OUT)
+    add_definitions(-DAAC_OUT)
+endif ()
+
+if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
-#endif
-#
+endif ()
+
 #########################################################################
 	find_package (PkgConfig)
 

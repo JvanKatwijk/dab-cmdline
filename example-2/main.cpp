@@ -163,13 +163,18 @@ int16_t i;
 	(void)ctx;
 }
 //
-//	The function is called from within the library with
-//	a buffer full of PCM samples. We pass them on to the
+//	This function is overloaded. In the normal form it
+//	handles a buffer full of PCM samples. We pass them on to the
 //	audiohandler, based on portaudio. Feel free to modify this
 //	and send the samples elsewhere
+//
+//	However, in the "special mode", the aac frames are send out
+//	Obviously, the parameters "rate" and "isStereo" are meaningless
+//	then.
 static
 void	pcmHandler (int16_t *buffer, int size, int rate,
 	                              bool isStereo, void *ctx) {
+#ifndef	AAC_OUT
 static bool isStarted	= false;
 
 	(void)isStereo;
@@ -178,6 +183,13 @@ static bool isStarted	= false;
 	   isStarted	= true;
 	}
 	soundOut	-> audioOut (buffer, size, rate);
+#else
+//
+//	Now we know that we have been cheating, the int16_t * buffer
+//	is actually an uint8_t * buffer, however, the size
+//	gives the correct amount of elements
+	fwrite ((void *)buffer, size, 1, stdout);
+#endif
 }
 
 static

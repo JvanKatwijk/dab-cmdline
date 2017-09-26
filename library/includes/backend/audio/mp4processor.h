@@ -55,13 +55,12 @@ private:
 	void		*ctx;
 	padHandler	my_padHandler;
 	void            handle_aacFrame (uint8_t *,
-                                         int16_t,
-                                         uint8_t,
-                                         uint8_t,
-                                         uint8_t,
-                                         uint8_t,
-                                         bool*);
-
+	                                 int16_t frame_length,
+	                                 stream_parms *sp,
+	                                 bool*);
+	void		buildHeader (int16_t framelen,
+                                     stream_parms *sp,
+                                     uint8_t *header);
 	int16_t		superFramesize;
 	int16_t		blockFillIndex;
 	int16_t		blocksInBuffer;

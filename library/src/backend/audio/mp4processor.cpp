@@ -51,6 +51,7 @@
 	                                  aacDecoder (soundOut, ctx) {
 
 	this	-> bitRate	= bitRate;	// input rate
+	this	-> soundOut	= soundOut;
 	this	-> mscQuality	= mscQuality;	//
 	this	-> ctx		= ctx;
 	superFramesize		= 110 * (bitRate / 8);
@@ -134,11 +135,7 @@ uint8_t		num_aus;
 int16_t		i, j, k;
 uint8_t		rsIn	[120];
 uint8_t		rsOut	[110];
-uint8_t		dacRate;
-uint8_t		sbrFlag;
-uint8_t		aacChannelMode;
-//uint8_t	psFlag;
-uint16_t	mpegSurround;
+stream_parms	streamParameters;
 
 /**	apply reed-solomon error repar
   *	OK, what we now have is a vector with RSDims * 120 uint8_t's
@@ -159,13 +156,13 @@ uint16_t	mpegSurround;
 //	OK, the result is N * 110 * 8 bits 
 //	bits 0 .. 15 is firecode
 //	bit 16 is unused
-	dacRate		= (outVector [2] >> 6) & 01;	// bit 17
-	sbrFlag		= (outVector [2] >> 5) & 01;	// bit 18
-	aacChannelMode	= (outVector [2] >> 4) & 01;	// bit 19
-//	psFlag		= (outVector [2] >> 3) & 01;	// bit 20
-	mpegSurround	= (outVector [2] & 07);		// bits 21 .. 23
+	streamParameters. dacRate = (outVector [2] >> 6) & 01;	// bit 17
+	streamParameters. sbrFlag = (outVector [2] >> 5) & 01;	// bit 18
+	streamParameters. aacChannelMode = (outVector [2] >> 4) & 01;	// bit 19
+	streamParameters. psFlag   = (outVector [2] >> 3) & 01;	// bit 20
+	streamParameters. mpegSurround	= (outVector [2] & 07);	// bits 21 .. 23
 
-	switch (2 * dacRate + sbrFlag) {
+	switch (2 * streamParameters. dacRate + streamParameters. sbrFlag) {
 	   default:		// cannot happen
 	   case 0:
 	      num_aus = 4;
@@ -227,14 +224,21 @@ uint16_t	mpegSurround;
 	   if (check_crc_bytes (&outVector [au_start [i]],
 	                        aac_frame_length)) {
 	      bool err;
+#ifdef	AAC_OUT
+	      uint8_t fileBuffer [1024];
+	      buildHeader (aac_frame_length, &streamParameters, fileBuffer);
+	      memcpy (&fileBuffer [7], 
+	              &outVector [au_start [i]],
+	              aac_frame_length);
+	      if (soundOut != NULL) 
+	         (soundOut)((int16_t *)(&fileBuffer [0]),
+	                    aac_frame_length + 7, 0, false, NULL);
+#else
 	      handle_aacFrame (&outVector [au_start [i]],
-	                                   aac_frame_length,
-	                                   dacRate,
-	                                   sbrFlag,
-	                                   mpegSurround,
-	                                   aacChannelMode,
-	                                   &err);
-	      isStereo (aacChannelMode);
+	                       aac_frame_length,
+	                       &streamParameters,
+	                       &err);
+	      isStereo (streamParameters. aacChannelMode);
 	      if (err) 
 	         aacErrors ++;
 	      if (++aacFrames > 25) {
@@ -242,6 +246,7 @@ uint16_t	mpegSurround;
 	         aacErrors	= 0;
 	         aacFrames	= 0;
 	      }
+#endif
 	   }
 	   else {
 	      fprintf (stderr, "CRC failure with dab+ frame should not happen\n");
@@ -252,10 +257,7 @@ uint16_t	mpegSurround;
 
 void	mp4Processor::handle_aacFrame (uint8_t *v,
 	                               int16_t frame_length,
-	                               uint8_t	dacRate,
-	                               uint8_t	sbrFlag,
-	                               uint8_t	mpegSurround,
-	                               uint8_t	aacChannelMode,
+	                               stream_parms *sp,
 	                               bool	*error) {
 uint8_t theAudioUnit [2 * 960 + 10];	// sure, large enough
 
@@ -271,10 +273,7 @@ uint8_t theAudioUnit [2 * 960 + 10];	// sure, large enough
            my_padHandler. processPAD (buffer, count - 3, L1, L0);
         }
 
-	int tmp = aacDecoder. MP42PCM (dacRate,
-	                               sbrFlag,
-	                               mpegSurround,
-	                               aacChannelMode,
+	int tmp = aacDecoder. MP42PCM (sp,
 	                               theAudioUnit,
 	                               frame_length);
 	*error	= tmp == 0;
@@ -294,6 +293,87 @@ void	mp4Processor::show_aacErrors	(int s) {
 
 void	mp4Processor::isStereo		(bool b) {
 	(void)b;
+}
+
+
+void	mp4Processor::buildHeader (int16_t framelen,
+	                           stream_parms *sp,
+	                           uint8_t *header) {
+	struct adts_fixed_header {
+		unsigned                     : 4;
+		unsigned home                : 1;
+		unsigned orig                : 1;
+		unsigned channel_config      : 3;
+		unsigned private_bit         : 1;
+		unsigned sampling_freq_index : 4;
+		unsigned profile             : 2;
+		unsigned protection_absent   : 1;
+		unsigned layer               : 2;
+		unsigned id                  : 1;
+		unsigned syncword            : 12;
+	} fh;
+	struct adts_variable_header {
+		unsigned                            : 4;
+		unsigned num_raw_data_blks_in_frame : 2;
+		unsigned adts_buffer_fullness       : 11;
+		unsigned frame_length               : 13;
+		unsigned copyright_id_start         : 1;
+		unsigned copyright_id_bit           : 1;
+	} vh;
+	/* 32k 16k 48k 24k */
+	const unsigned short samptab[] = {0x5, 0x8, 0x3, 0x6};
+
+	fh. syncword = 0xfff;
+	fh. id = 0;
+	fh. layer = 0;
+	fh. protection_absent = 1;
+	fh. profile = 0;
+	fh. sampling_freq_index = samptab [sp -> dacRate << 1 | sp -> sbrFlag];
+
+	fh. private_bit = 0;
+	switch (sp -> mpegSurround) {
+	   default:
+	      fprintf (stderr, "Unrecognized mpeg_surround_config ignored\n");
+//	not nice, but deliberate: fall through
+	   case 0:
+	      if (sp -> sbrFlag && !sp -> aacChannelMode && sp -> psFlag)
+	         fh. channel_config = 2; /* Parametric stereo */
+	      else
+	         fh. channel_config = 1 << sp -> aacChannelMode ;
+	      break;
+
+	   case 1:
+	      fh. channel_config = 6;
+	      break;
+	}
+
+	fh. orig = 0;
+	fh. home = 0;
+	vh. copyright_id_bit = 0;
+	vh. copyright_id_start = 0;
+	vh. frame_length = framelen + 7;  /* Includes header length */
+	vh. adts_buffer_fullness = 1999;
+	vh. num_raw_data_blks_in_frame = 0;
+	header [0]	= fh. syncword >> 4;
+	header [1]	= (fh. syncword & 0xf) << 4;
+	header [1]	|= fh. id << 3;
+	header [1]	|= fh. layer << 1;
+	header [1]	|= fh. protection_absent;
+        header [2]	= fh. profile << 6;
+	header [2]	|= fh. sampling_freq_index << 2;
+	header [2]	|= fh. private_bit << 1;
+	header [2]	|= (fh. channel_config & 0x4);
+	header [3]	= (fh. channel_config & 0x3) << 6;
+	header [3]	|= fh. orig << 5;
+	header [3]	|= fh. home << 4;
+	header [3]	|= vh. copyright_id_bit << 3;
+	header [3]	|= vh. copyright_id_start << 2;
+	header [3]	|= (vh. frame_length >> 11) & 0x3;
+	header [4]	= (vh. frame_length >> 3) & 0xff;
+	header [5]	= (vh. frame_length & 0x7) << 5;
+	header [5]	|= vh. adts_buffer_fullness >> 6;
+	header [6]	= (vh. adts_buffer_fullness & 0x3f) << 2;
+	header [6]	|= vh. num_raw_data_blks_in_frame;
 }
 
 
