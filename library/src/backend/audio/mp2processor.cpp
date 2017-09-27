@@ -599,11 +599,16 @@ int16_t vLength = 24 * bitRate / 8;
 	      if (MP2bitCount >= lf) {
 	         bool stereo;
 	         int16_t sample_buf [KJMP2_SAMPLES_PER_FRAME * 2];
+#ifdef	AAC_OUT
+	         soundOut ((int16_t *)(&MP2frame [0]), MP2bitCount,
+	                               0, false, NULL);
+#else
 	         if (mp2decodeFrame (MP2frame, sample_buf, &stereo)) {
 	            output (sample_buf,
 	                    2 * (int32_t)KJMP2_SAMPLES_PER_FRAME,
 	                    baudRate, stereo);
 	         }
+#endif
 
 	         MP2Header_OK = 0;
 	         MP2headerCount = 0;

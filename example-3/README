@@ -1,14 +1,12 @@
 
-Example 2
+Example 3
 
-Example 2 is a simple command line version of the DAB software. The
-input device is fixed, depending on a setting in the CMakeLists.txt
-file. The output is just to the soundcard.
-
-Other than example 1, it binds directly to the functionality implementing
-the DAB decoding.
-
+Example 3 is an example program, not using the library, but binding directly
+to the functions implementing the dab decoding.
 All callbacks are defined, most of them with an empty body.
+
+In this version, we send the audio output directly to stdout rather than -
+using portaudio - sending it to the soundcard.
 
 See the file main.cpp for the command line options
 

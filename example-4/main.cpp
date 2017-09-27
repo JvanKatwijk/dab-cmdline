@@ -28,8 +28,6 @@
 #include	<getopt.h>
 #include        <cstdio>
 #include        <iostream>
-#include	"audiosink.h"
-#include	"filesink.h"
 #include	"dab-class.h"
 #include	"band-handler.h"
 #ifdef	HAVE_SDRPLAY
@@ -69,9 +67,6 @@ std::atomic<bool>timesyncSet;
 
 static
 std::atomic<bool>ensembleRecognized;
-
-static
-audioBase	*soundOut	= NULL;
 
 #ifdef	DATA_STREAMER
 tcpServer	tdcServer (8888);
@@ -125,7 +120,7 @@ void	programdataHandler (audiodata *d, void *ctx) {
 static
 void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	(void)ctx;
-	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
+	fprintf (stderr, "%s\r", dynamicLabel. c_str ());
 }
 //
 //	Note: the function is called from the tdcHandler with a
@@ -163,25 +158,17 @@ int16_t i;
 	(void)ctx;
 }
 //
-//	This function is overloaded. In the normal form it
-//	handles a buffer full of PCM samples. We pass them on to the
-//	audiohandler, based on portaudio. Feel free to modify this
-//	and send the samples elsewhere
-//
-//	However, in the "special mode", the aac frames are send out
-//	Obviously, the parameters "rate" and "isStereo" are meaningless
-//	then.
+//	However, in this "special mode", the mp2 and aac frames are send out
+//	through the same function that is used otherwise for the PCM
+//	samples
 static
-void	pcmHandler (int16_t *buffer, int size, int rate,
+void	frameHandler (int16_t *buffer, int size, int rate,
 	                              bool isStereo, void *ctx) {
-static bool isStarted	= false;
-
-	(void)isStereo;
-	if (!isStarted) {
-	   soundOut	-> restart ();
-	   isStarted	= true;
-	}
-	soundOut	-> audioOut (buffer, size, rate);
+//
+//	Now we know that we have been cheating, the int16_t * buffer
+//	is actually an uint8_t * buffer, however, the size
+//	gives the correct amount of elements
+	fwrite ((void *)buffer, size, 1, stdout);
 }
 
 static
@@ -207,8 +194,6 @@ std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
 int		theGain		= 35;	// scale = 0 .. 100
-std::string	soundChannel	= "default";
-int16_t		latency		= 10;
 int16_t		waitingTime	= 10;
 bool		autogain	= false;
 int	opt;
@@ -296,22 +281,6 @@ bool	err;
 #endif
 #endif
 
-	      case 'O':
-	         soundOut	= new fileSink (std::string (optarg), &err);
-	         if (!err) {
-	            fprintf (stderr, "sorry, could not open file\n");
-	            exit (32);
-	         }
-	         break;
-
-	      case 'A':
-	         soundChannel	= optarg;
-	         break;
-
-	      case 'L':
-	         latency	= atoi (optarg);
-	         break;
-
 	      case 'S': {
                  std::stringstream ss;
                  ss << std::hex << optarg;
@@ -364,14 +333,6 @@ bool	err;
 	   exit (32);
 	}
 //
-	if (soundOut == NULL) {	// not bound to a file?
-	   soundOut	= new audioSink	(latency, soundChannel, &err);
-	   if (err) {
-	      fprintf (stderr, "no valid sound channel, fatal\n");
-	      exit (33);
-	   }
-	}
-//
 //	and with a sound device we can create a "backend"
 	theRadio	= new dabClass (theDevice,
 	                                theMode,
@@ -382,7 +343,7 @@ bool	err;
 	                                ensemblenameHandler,
 	                                programnameHandler,
 	                                fibQuality,
-	                                pcmHandler,
+	                                frameHandler,
 	                                dataOut_Handler,
 	                                bytesOut_Handler,
 	                                programdataHandler,
@@ -457,7 +418,6 @@ bool	err;
 	theRadio	-> reset ();
 	delete theRadio;
 	delete theDevice;	
-	delete soundOut;
 }
 
 void    printOptions (void) {
@@ -471,10 +431,7 @@ void    printOptions (void) {
                           -G Gain     gain for device (range 1 .. 100)\n\
                           -Q          if set, set autogain for device true\n\
 	                  -F filename in case the input is from file\n\
-                          -A name     select the audio channel (portaudio)\n\
-                          -L number   latency for audiobuffer\n\
-                          -S hexnumber use hexnumber to identify program\n\n\
-	                  -O filename put the output into a file rather than through portaudio\n");
+                          -S hexnumber use hexnumber to identify program\n\n");
 }
 
                           

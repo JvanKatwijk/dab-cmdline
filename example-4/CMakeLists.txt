@@ -1,12 +1,11 @@
 cmake_minimum_required( VERSION 2.8.11 )
-set (objectName dab_cmdline-2)
+set (objectName dab_cmdline-4)
 set (CMAKE_CXX_FLAGS "${CMAKE_XCC_FLAGS} -Wall -std=c++11 -flto")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set (CMAKE_INSTALL_PREFIX "/usr/local/bin" CACHE PATH "default install path" FORCE )
 endif()
 #set (CMAKE_INSTALL_PREFIX /usr/local/bin)
-
 
 if(MINGW)
     add_definitions ( -municode)
@@ -29,33 +28,36 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ########################################################################
 if(DEFINED AIRSPY)
    set(AIRSPY true)
-   set(objectName dab-airspy-2)
+   set(objectName dab-airspy-4)
 endif ()
 
 if(DEFINED SDRPLAY)
    set(SDRPLAY true)
-   set(objectName dab-sdrplay-2)
+   set(objectName dab-sdrplay-4)
 endif ()
 
 if(DEFINED RTLSDR)
    set(RTLSDR true)
-   set(objectName dab-rtlsdr-2)
+   set(objectName dab-rtlsdr-4)
 endif ()
 
 if(DEFINED WAVFILES)
    set(WAVFILES true)
-   set(objectName dab-files-2)
+   set(objectName dab-files-4)
 endif ()
 
 if(DEFINED RTL_TCP)
    set(RTL_TCP true)
-   set(objectName dab-rtl_tcp-2)
+   set(objectName dab-rtl_tcp-4)
 endif ()
+
 
 if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 endif ()
+#for this version we need to define
 
+    add_definitions(-DAAC_OUT)
 #########################################################################
 	find_package (PkgConfig)
 
@@ -83,18 +85,6 @@ endif ()
 	   set (extraLibs ${extraLibs} ${PTHREADS})
 	endif (NOT(PTHREADS))
 
-
-        find_package(LibSampleRate)
-        if (NOT LIBSAMPLERATE_FOUND)
-            message(FATAL_ERROR "please install libsamplerate")
-        endif ()
-        list(APPEND extraLibs ${LIBSAMPLERATE_LIBRARY})
-
-        find_package(Portaudio)
-        if (NOT PORTAUDIO_FOUND)
-            message(FATAL_ERROR "please install portaudio V19")
-        endif ()
-        list(APPEND extraLibs ${PORTAUDIO_LIBRARIES})
 #########################################################################
         find_package (PkgConfig)
 
@@ -241,10 +231,6 @@ endif ()
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
 	     ./band-handler.h
-	     ./audio-base.h
-	     ./audiosink.h
-	     ./filesink.h
-	     ./newconverter.h
 	     ./server-thread/tcp-server.h
 	     ../devices/device-handler.h
 	     ../library/includes/dab-class.h
@@ -283,10 +269,6 @@ endif ()
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	     ./main.cpp
-	     ./audio-base.cpp
-	     ./audiosink.cpp
-	     ./filesink.cpp
-	     ./newconverter.cpp
 	     ./band-handler.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
@@ -329,7 +311,6 @@ endif ()
 #
 	include_directories (
 	          ${FFTW_INCLUDE_DIRS}
-	          ${PORTAUDIO_INCLUDE_DIRS}
 	          ${FAAD_INCLUDE_DIRS}
 	          ${SNDFILES_INCLUDE_DIRS}
 	)
