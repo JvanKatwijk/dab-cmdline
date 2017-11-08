@@ -450,7 +450,7 @@ void	*result;
 	                                     false,
 	                                     0);
 #else
-	   theDevice	= new devicehandler ();
+	   theDevice	= new deviceHandler ();
 #endif
 
 	}

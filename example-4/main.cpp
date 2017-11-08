@@ -402,10 +402,10 @@ bool	err;
 	   exit (22);
 	}
 
-	fprintf (stderr, "going to start program %s\n", programName. c_str ());
 	run. store (true);
 	if (serviceIdentifier != -1) 
 	   programName = theRadio -> dab_getserviceName (serviceIdentifier);
+	fprintf (stderr, "we try to start program %s\n", programName. c_str ());
 	if (theRadio -> dab_service (programName) < 0) {
 	   fprintf (stderr, "sorry  we cannot handle service %s\n", 
 	                                             programName. c_str ());

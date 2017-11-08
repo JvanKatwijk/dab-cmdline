@@ -143,6 +143,7 @@ endif ()
 	include_directories (
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
+	           /usr/lib64/python3.5/site-packages/numpy/core/include/
 	           ./
 	           ../
 	           ../library/
