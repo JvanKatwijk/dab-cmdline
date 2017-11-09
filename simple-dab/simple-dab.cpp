@@ -116,7 +116,6 @@ const char	**t;
 #else
 	spectrumBuffer	= NULL;
 	iqBuffer	= NULL;
-	spectrumHandler	= NULL;
 #endif
 //	main function: to create the library with the right settings
 //	and the callbacks to provide status info on the screen

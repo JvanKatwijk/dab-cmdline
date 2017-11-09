@@ -54,7 +54,7 @@ SOURCES += ./main.cpp \
 unix { 
 DESTDIR		= ./linux-bin
 INCLUDEPATH	+= /usr/local/include
-CONFIG		+= spectrum
+#CONFIG		+= spectrum
 LIBS		+= -ldab_lib
 LIBS		+= -lsndfile
 LIBS		+= -lsamplerate
