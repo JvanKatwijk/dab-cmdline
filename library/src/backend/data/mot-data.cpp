@@ -237,9 +237,9 @@ std::vector<uint8_t> result;
 	      p -> marked [i] = false;
 	      p -> segments [i]. clear ();
 	   }
-	fprintf (stderr, "going to show picture %s\n",
-	                                   (p -> name). c_str ());
-	checkDir (p -> name);
+//	fprintf (stderr, "going to show picture %s\n",
+//	                                   (p -> name). c_str ());
+//	checkDir (p -> name);
 //	the_picture (result, p -> contentsubType, p -> name);
 	old_slide	= p;
 }

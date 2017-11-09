@@ -90,9 +90,20 @@ void	ensemblenameHandler (std::string name, int Id, void *userData) {
 	ensembleRecognized. store (true);
 }
 
+
+std::vector<std::string> programNames;
+std::vector<int> programSIds;
+
 static
-void	programnameHandler (std::string s, int SId, void * userdata) {
-	fprintf (stderr, "%s (%X) is part of the ensemble\n", s. c_str (), SId);
+void	programnameHandler (std::string s, int SId, void *userdata) {
+int16_t i;
+	for (std::vector<std::string>::iterator it = programNames.begin();
+	             it != programNames. end(); ++it)
+	   if (*it == s)
+	      return;
+	programNames. push_back (s);
+	programSIds . push_back (SId);
+	fprintf (stderr, "program %s is part of the ensemble\n", s. c_str ());
 }
 
 static

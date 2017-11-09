@@ -3,7 +3,8 @@ Example 2
 
 Example 2 is a simple command line version of the DAB software. The
 input device is fixed, depending on a setting in the CMakeLists.txt
-file. The output is just to the soundcard.
+file. The output is either to the soundcard (default) or to a file
+(-O option).
 
 Other than example 1, it binds directly to the functionality implementing
 the DAB decoding.
