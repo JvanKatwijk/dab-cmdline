@@ -188,7 +188,7 @@ int16_t	dabService     (std::string, void *);
 //	mapping from a name to a Service identifier is done 
 int32_t dab_getSId      (std::string, void *);
 //
-//	and the other wway around, mapping the service identifier to a name
+//	and the other way around, mapping the service identifier to a name
 std::string dab_getserviceName (int32_t, void *);
 }
 

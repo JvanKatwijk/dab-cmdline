@@ -101,12 +101,31 @@ void	dabClass::stop		(void) {
 	the_ficHandler. clearEnsemble ();
 }
 //
-//
 //	The return value > 0, then success, 
 //	otherwise error
+
+bool	dabClass::is_audioService (std::string name) {
+	switch (the_ficHandler. kindofService (name)) {
+	   case AUDIO_SERVICE:
+	      return true;
+	   default:
+	      return false;
+	}
+}
+
+bool	dabClass::is_dataService (std::string name) {
+	switch (the_ficHandler. kindofService (name)) {
+	   case PACKET_SERVICE:
+	      return true;
+	   default:
+	      return false;
+	}
+}
+
 int16_t	dabClass::dab_service (std::string name) {
 audiodata d1;
 packetdata d2;
+
 	switch (the_ficHandler. kindofService (name)) {
 	   case AUDIO_SERVICE:
 	     the_ficHandler. dataforAudioService (name, &d1);

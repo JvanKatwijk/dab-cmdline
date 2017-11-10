@@ -14,8 +14,8 @@ The library interface is given in dab-api.h
 
 To show the use of the library, several example programs are included:
 
-	- The example programs example-1, example-2, example-3 and example-4
-	  are regular C (C++) programs. 
+	- The example programs example-1, example-2, example-3, example-4
+	  and example-5 are regular C (C++) programs. 
 	  
 	- simpleDab is a Qt based GUI program, linking to the library.
 	  It shows the use of the library when handled from with a Qt GUI.
@@ -30,14 +30,17 @@ To show the use of the library, several example programs are included:
 The C (C++) example programs
 ------------------------------------------------------------------------
 
-As said, there are 4 versions of an example dab command line program,
+As said, there are 5 versions of an example dab command line program,
 they are written in C, communicate with the library functions through callbacks.
+The programs are all more or less the same, with some differences in
+the functionality provided.
 
 For each of the programs, a CMakeLists.txt file exists with which a
 Makefile can be generated using Cmake.
 
 The standard way to create an executable is
 
+	cd example-X   (replace X by the appropriate digit)
 	mkdir build
         cd build
         cmake .. -DXXX=ON
@@ -89,6 +92,11 @@ The example programs are different though:
 	  no sound decoding takes place. The MP2 frames (in case of DAB)
 	  or the AAC frames (in case of DAB+) are just emitted through stdout.
 	  (Note that the AAC frames have 960 rather than 1024 samples)
+
+	- example 5 is a small experimental extension to example 2,
+	  It contains a simple "keyboard listener", that will react
+	  on entering a stroke on the return key. It will cause the
+	  "next" (audio) service to be selected.
 
 =======================================================================
 

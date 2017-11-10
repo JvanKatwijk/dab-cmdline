@@ -69,6 +69,8 @@ public:
 	std::string	dab_getserviceName (int32_t);
 	int16_t		dab_service	(std::string);
 	int32_t		dab_getSId	(std::string);
+	bool		is_audioService	(std::string);
+	bool		is_dataService	(std::string);
 private:
 	ficHandler	the_ficHandler;
 	mscHandler	the_mscHandler;
