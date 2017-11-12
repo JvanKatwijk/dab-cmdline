@@ -107,13 +107,7 @@ int32_t	i;
 	                                     sin (2.0 * M_PI * i / INPUT_RATE));
 
 	bufferContent	= 0;
-//
-//	and for the correlation 
-	for (i = 0; i < CORRELATION_LENGTH; i ++)  {
-	   refArg [i] = arg (phaseSynchronizer. refTable [(T_u + i) % T_u] *
-	              conj (phaseSynchronizer. refTable [(T_u + i + 1) % T_u]));
 	isSynced	= false;
-	}
 	running. store (false);
 }
 
@@ -377,8 +371,7 @@ Block_0:
 //	The width is limited to 2 * 35 Khz (i.e. positive and negative)
 	   f2Correction = !my_ficHandler -> syncReached ();
 	   if (f2Correction) {
-	      int correction		= processBlock_0 (ofdmBuffer);
-//	      fprintf (stderr, "corrector = %d\n", correction);
+	      int correction  = phaseSynchronizer. estimateOffset (ofdmBuffer);
 	      if (correction != 100) {
 	         coarseCorrector	+= correction * carrierDiff;
 	         if (coarseCorrector > Khz (35))
@@ -496,47 +489,6 @@ void	ofdmProcessor::stop	(void) {
 	   running. store (false);
 	   sleep (1);
 	   threadHandle. join ();
-	}
-}
-
-#define	RANGE	36
-int16_t	ofdmProcessor::processBlock_0 (std::complex<float> *v) {
-int16_t	i, j, index = 100;
-
-	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-	fft_handler	-> do_FFT ();
-	if (freqsyncMethod == 0)
-	   return getMiddle (fft_buffer);
-	else {
-//	An alternative way is to look at a special pattern consisting
-//	of zeros in the row of args between successive carriers.
-	   float Mmin	= 1000;
-	   for (i = T_u - SEARCH_RANGE / 2; i < T_u + SEARCH_RANGE / 2; i ++) {
-                 float a1  =  abs (abs (arg (fft_buffer [(i + 1) % T_u] *
-                                conj (fft_buffer [(i + 2) % T_u])) / M_PI) - 1);
-                 float a2  =  abs (abs (arg (fft_buffer [(i + 2) % T_u] *
-                                conj (fft_buffer [(i + 3) % T_u])) / M_PI) - 1);
-	         float a3	= abs (arg (fft_buffer [(i + 3) % T_u] *
-	         	                    conj (fft_buffer [(i + 4) % T_u])));
-	         float a4	= abs (arg (fft_buffer [(i + 4) % T_u] *
-	         	                    conj (fft_buffer [(i + 5) % T_u])));
-	         float a5	= abs (arg (fft_buffer [(i + 5) % T_u] *
-	         	                    conj (fft_buffer [(i + 6) % T_u])));
-	         float b1	= abs (abs (arg (fft_buffer [(i + 16 + 1) % T_u] *
-	         	                    conj (fft_buffer [(i + 16 + 3) % T_u])) / M_PI) - 1);
-	         float b2	= abs (arg (fft_buffer [(i + 16 + 3) % T_u] *
-	         	                    conj (fft_buffer [(i + 16 + 4) % T_u])));
-	         float b3	= abs (arg (fft_buffer [(i + 16 + 4) % T_u] *
-	         	                    conj (fft_buffer [(i + 16 + 5) % T_u])));
-	         float b4	= abs (arg (fft_buffer [(i + 16 + 5) % T_u] *
-	         	                    conj (fft_buffer [(i + 16 + 6) % T_u])));
-	         float sum = a1 + a2 + a3 + a4 + a5 + b1 + b2 + b3 + b4;
-	         if (sum < Mmin) {
-	            Mmin = sum;
-	            index = i;
-	         }
-	   }
-	   return index - T_u;
 	}
 }
 

@@ -43,9 +43,6 @@ class	ficHandler;
 class	dabParams;
 class	deviceHandler;
 
-#define SEARCH_RANGE            (2 * 36)
-#define CORRELATION_LENGTH      24
-
 class ofdmProcessor {
 public:
 		ofdmProcessor  	(deviceHandler *,
@@ -103,8 +100,6 @@ private:
 	mscHandler	*my_mscBuffer;
 	bool		tiiSwitch;
 
-	float		correlationVector [CORRELATION_LENGTH + SEARCH_RANGE];
-	float		refArg [CORRELATION_LENGTH];
 	int32_t		sampleCnt;
 	int32_t		inputSize;
 	int32_t		inputPointer;
@@ -113,7 +108,6 @@ private:
 virtual	void		run		(void);
 	int32_t		bufferContent;
 	bool		isReset;
-	int16_t		processBlock_0	(std::complex<float> *);
 	int16_t		getMiddle	(std::complex<float> *);
 	common_fft	*fft_handler;
 	std::complex<float>	*fft_buffer;

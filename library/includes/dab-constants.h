@@ -76,6 +76,7 @@ using namespace std;
 #define		SYNCED		01
 #define		UNSYNCED	04
 
+#define		DIFF_LENGTH	42
 static inline
 bool	isIndeterminate (float x) {
 	return x != x;

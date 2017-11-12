@@ -29,6 +29,8 @@
   *	the first non-null block of a frame
   *	The class inherits from the phaseTable.
   */
+static float phasedifferences [DIFF_LENGTH];
+
 	phaseReference::phaseReference (dabParams	*p,
 	                                int16_t		threshold):
 	                                     phaseTable (p -> get_dabMode ()) {
@@ -54,6 +56,16 @@ float	Phi_k;
 	   Phi_k = get_Phi (-i);
 	   refTable [T_u - i] = std::complex<float> (cos (Phi_k), sin (Phi_k));
 	}
+//
+//      prepare a table for the coarse frequency synchronization
+//      can be a static one
+        for (i = 1; i <= DIFF_LENGTH; i ++)
+           phasedifferences [i - 1] = abs (arg (refTable [(T_u + i) % T_u] *
+                                        conj (refTable [(T_u + i + 1) % T_u])));
+
+//      for (i = 0; i < DIFF_LENGTH; i ++)
+//         fprintf (stderr, "%f ", phasedifferences [i]);
+//      fprintf (stderr, "\n");
 }
 
 	phaseReference::~phaseReference (void) {
@@ -105,4 +117,35 @@ float	sum		= 0;
 	else
 	   return maxIndex;	
 }
-//
+
+#define SEARCH_RANGE    (2 * 35)
+int16_t phaseReference::estimateOffset (std::complex<float> *v) {
+int16_t i, j, index = 100;
+
+        memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
+        fft_processor   -> do_FFT ();
+
+//      We investigate a sequence of phasedifferences that should
+//      are known around carrier 0. In previous versions we looked
+//      at the "weight" of the positive and negative carriers in the
+//      fft, but that did not work too well.
+//      Note that due to phases being in a modulo system,
+//      plain correlation does not work well, so we just compute
+//      the difference.
+        int Mmin        = 1000;
+        for (i = T_u - SEARCH_RANGE / 2; i < T_u + SEARCH_RANGE / 2; i ++) {
+           float diff = 0;
+           for (j = 0; j < DIFF_LENGTH; j ++) {
+              int16_t ind1 = (i + j + 1) % T_u;
+              int16_t ind2 = (i + j + 2) % T_u;
+              float pd = arg (fft_buffer [ind1] * conj (fft_buffer [ind2]));
+              diff += abs (abs (pd)  - phasedifferences [j]);
+           }
+           if (diff < Mmin) {
+              Mmin = diff;
+              index = i;
+           }
+        }
+        return index - T_u;
+}
+

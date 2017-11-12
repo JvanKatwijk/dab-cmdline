@@ -37,6 +37,7 @@ public:
 		phaseReference (dabParams *, int16_t);
 		~phaseReference	(void);
 	int32_t	findIndex	(std::complex<float> *);
+	int16_t	estimateOffset	(std::complex<float> *);
 	std::complex<float>	*refTable;
 private:
 	int32_t		T_u;
