@@ -29,23 +29,24 @@
   *	the first non-null block of a frame
   *	The class inherits from the phaseTable.
   */
-static float phasedifferences [DIFF_LENGTH];
-
 	phaseReference::phaseReference (dabParams	*p,
-	                                int16_t		threshold):
+	                                int16_t		threshold,	
+	                                int16_t		diff_length):
 	                                     phaseTable (p -> get_dabMode ()) {
 int32_t	i;
 float	Phi_k;
 
 	this	-> T_u		= p -> get_T_u ();
 	this	-> threshold	= threshold;
-
+	this	-> diff_length	= diff_length;
 	Max			= 0.0;
 	refTable		= new std::complex<float> 	[T_u];	//
 	fft_processor		= new common_fft 	(T_u);
 	fft_buffer		= fft_processor		-> getVector ();
 	res_processor		= new common_ifft 	(T_u);
 	res_buffer		= res_processor		-> getVector ();
+
+	phasedifferences	= new std::complex<float> [diff_length];
 	fft_counter		= 0;
 
 	memset (refTable, 0, sizeof (std::complex<float>) * T_u);
@@ -58,19 +59,19 @@ float	Phi_k;
 	}
 //
 //      prepare a table for the coarse frequency synchronization
-//      can be a static one
-        for (i = 1; i <= DIFF_LENGTH; i ++)
-           phasedifferences [i - 1] = abs (arg (refTable [(T_u + i) % T_u] *
-                                        conj (refTable [(T_u + i + 1) % T_u])));
+        for (i = 1; i <= diff_length; i ++)
+           phasedifferences [i - 1] = refTable [(T_u + i) % T_u] *
+                                      conj (refTable [(T_u + i + 1) % T_u]);
 
-//      for (i = 0; i < DIFF_LENGTH; i ++)
-//         fprintf (stderr, "%f ", phasedifferences [i]);
+//      for (i = 0; i < diff_length; i ++)
+//         fprintf (stderr, "%f ", abs (arg (phasedifferences [i])));
 //      fprintf (stderr, "\n");
 }
 
 	phaseReference::~phaseReference (void) {
-	delete	refTable;
-	delete	fft_processor;
+	delete		fft_processor;
+	delete[]	refTable;
+	delete[]	phasedifferences;
 }
 
 /**
@@ -132,14 +133,15 @@ int16_t i, j, index = 100;
 //      Note that due to phases being in a modulo system,
 //      plain correlation does not work well, so we just compute
 //      the difference.
-        int Mmin        = 1000;
+        int Mmin        = 100;
         for (i = T_u - SEARCH_RANGE / 2; i < T_u + SEARCH_RANGE / 2; i ++) {
            float diff = 0;
-           for (j = 0; j < DIFF_LENGTH; j ++) {
-              int16_t ind1 = (i + j + 1) % T_u;
-              int16_t ind2 = (i + j + 2) % T_u;
-              float pd = arg (fft_buffer [ind1] * conj (fft_buffer [ind2]));
-              diff += abs (abs (pd)  - phasedifferences [j]);
+	   for (j = 0; j < diff_length; j ++) {
+	      int16_t ind1 = (i + j + 1) % T_u;
+	      int16_t ind2 = (i + j + 2) % T_u;
+	      std::complex<float> pd = fft_buffer [ind1] *
+	                                      conj (fft_buffer [ind2]);
+	      diff += abs (arg (pd *  conj (phasedifferences [j])));
            }
            if (diff < Mmin) {
               Mmin = diff;

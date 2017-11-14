@@ -52,7 +52,8 @@
 	                                 void		*userData):
 	                                    params (Mode),
 	                                    phaseSynchronizer (&params,
-	                                                       threshold),
+	                                                       threshold,
+	                                                       DIFF_LENGTH),
 	                                    my_ofdmDecoder (&params,
 	                                                    iqBuffer,
 	                                                    fic,

@@ -18,7 +18,6 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 #
 #ifndef	__PHASEREFERENCE__
@@ -34,7 +33,7 @@ class	dabParams;
 
 class phaseReference : public phaseTable {
 public:
-		phaseReference (dabParams *, int16_t);
+		phaseReference (dabParams *, int16_t, int16_t);
 		~phaseReference	(void);
 	int32_t	findIndex	(std::complex<float> *);
 	int16_t	estimateOffset	(std::complex<float> *);
@@ -42,11 +41,13 @@ public:
 private:
 	int32_t		T_u;
 	int16_t		threshold;
+	int16_t		diff_length;
 
 	common_fft	*fft_processor;
 	std::complex<float>	*fft_buffer;
 	common_ifft	*res_processor;
 	std::complex<float>	*res_buffer;
+	std::complex<float>	*phasedifferences;
 	int32_t		fft_counter;
 	float	Max;
 };
