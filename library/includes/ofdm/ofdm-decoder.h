@@ -28,7 +28,6 @@
 #include	<condition_variable>
 #include	<atomic>
 #include	"dab-constants.h"
-#include	"fft.h"
 #include	"ringbuffer.h"
 #include	"phasetable.h"
 #include	"freq-interleaver.h"
@@ -37,21 +36,23 @@
 class	ficHandler;
 class	mscHandler;
 class	dabParams;
+class	fft_handler;
 
 class	ofdmDecoder {
 public:
-		ofdmDecoder		(dabParams *,
+		ofdmDecoder		(dabParams	*,
+	                                 fft_handler	*,
                                          RingBuffer<std::complex<float>> *,
 	                                 ficHandler	*,
 	                                 mscHandler	*);
 		~ofdmDecoder		(void);
 	void	processBlock_0		(std::complex<float> *);
-	void	decodeFICblock		(std::complex<float> *, int32_t n);
-	void	decodeMscblock		(std::complex<float> *, int32_t n);
+	void	decodeblock		(std::complex<float> *, int32_t n);
 	int16_t	get_snr			(void);
 	void	stop			(void);
 	void	start			(void);
 private:
+	fft_handler	*my_fftHandler;
 	int16_t		get_snr		(std::complex<float> *);
 	dabParams	*params;
         RingBuffer<std::complex<float>> *iqBuffer;
@@ -78,10 +79,8 @@ private:
 	int32_t		nrBlocks;
 	int16_t		getMiddle	(void);
 	std::complex<float>	*phaseReference;
-	common_fft	*fft_handler;
 	std::complex<float>	*fft_buffer;
 	interLeaver	myMapper;
-	phaseTable	*phasetable;
 	int32_t		blockIndex;
 	int16_t		*ibits;
 	float		current_snr;

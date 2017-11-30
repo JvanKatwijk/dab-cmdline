@@ -22,6 +22,7 @@
 #include	"phasereference.h" 
 #include	"string.h"
 #include	"dab-params.h"
+#include	"fft_handler.h"
 /**
   *	\class phaseReference
   *	Implements the correlation that is used to identify
@@ -30,21 +31,19 @@
   *	The class inherits from the phaseTable.
   */
 	phaseReference::phaseReference (dabParams	*p,
+	                                fft_handler	*my_fftHandler,
 	                                int16_t		threshold,	
 	                                int16_t		diff_length):
 	                                     phaseTable (p -> get_dabMode ()) {
 int32_t	i;
 float	Phi_k;
-
+	this	-> my_fftHandler	= my_fftHandler;
 	this	-> T_u		= p -> get_T_u ();
 	this	-> threshold	= threshold;
 	this	-> diff_length	= diff_length;
 	Max			= 0.0;
 	refTable		= new std::complex<float> 	[T_u];	//
-	fft_processor		= new common_fft 	(T_u);
-	fft_buffer		= fft_processor		-> getVector ();
-	res_processor		= new common_ifft 	(T_u);
-	res_buffer		= res_processor		-> getVector ();
+	fft_buffer		= my_fftHandler -> getVector ();
 
 	phasedifferences	= new std::complex<float> [diff_length];
 	fft_counter		= 0;
@@ -69,7 +68,6 @@ float	Phi_k;
 }
 
 	phaseReference::~phaseReference (void) {
-	delete		fft_processor;
 	delete[]	refTable;
 	delete[]	phasedifferences;
 }
@@ -90,25 +88,24 @@ float	sum		= 0;
 
 	Max	= 1.0;
 	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-
-	fft_processor -> do_FFT ();
-//
-//	back into the frequency domain, now correlate
+	my_fftHandler -> do_FFT (fft_handler::fftForward);
+//	 into the frequency domain, now correlate
 	for (i = 0; i < T_u; i ++) 
-	   res_buffer [i] = fft_buffer [i] * conj (refTable [i]);
+	   fft_buffer [i] *= conj (refTable [i]);
 //	and, again, back into the time domain
-	res_processor	-> do_IFFT ();
+	my_fftHandler -> do_FFT (fft_handler::fftBackwards);
 /**
   *	We compute the average signal value ...
   */
-	for (i = 0; i < T_u; i ++)
-	   sum	+= abs (res_buffer [i]);
 	Max	= -10000;
-	for (i = 0; i < T_u; i ++)
-	   if (abs (res_buffer [i]) > Max) {
+	for (i = 0; i < T_u; i ++) {
+	   float absValue = abs (fft_buffer [i]);
+	   sum	+= absValue;
+	   if (absValue > Max) {
 	      maxIndex = i;
-	      Max = abs (res_buffer [i]);
+	      Max = absValue;
 	   }
+	}
 /**
   *	that gives us a basis for defining the threshold
   */
@@ -124,7 +121,7 @@ int16_t phaseReference::estimateOffset (std::complex<float> *v) {
 int16_t i, j, index = 100;
 
         memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-        fft_processor   -> do_FFT ();
+        my_fftHandler -> do_FFT (fft_handler::fftForward);
 
 //      We investigate a sequence of phasedifferences that should
 //      are known around carrier 0. In previous versions we looked

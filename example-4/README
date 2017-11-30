@@ -5,8 +5,9 @@ This is example 4, a simple program, not using the library, but binding directly
 to the functions implementing the dab decoding.
 All callbacks are defined, most of them with an empty body.
 
-In this version the aac or mp2 decosing is NOT done in the library,
-rather, the MP2 resp. AAC frames are emitted through stdout.
+In this version the aac or mp2 decoding is NOT done in the library,
+rather, the MP2 resp. AAC frames are emitted through stdout,
+using the function frameHandler.
 
 See the file main.cpp for the command line options
 

@@ -69,16 +69,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	           /usr/include/
 	)
 
-	if (TII_SUPPORT)
-	   include_directories (/usr/shared/sdr-j-development/systems/janSpul)
-	   set (${objectName}_HDRS 
-	         /usr/shared/sdr-j-development/systems/janSpul/tii_detector.h)
-
-	   set (${objectName}_SRCS
-	         /usr/shared/sdr-j-development/systems/janSpul/tii_detector.cpp)
-	   add_definitions (-DTII_SUPPORT)
-	endif (TII_SUPPORT)
-
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ../dab-api.h
@@ -87,6 +77,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/dab-class.h
 	     ./includes/dab-constants.h
 	     ./includes/ofdm/ofdm-processor.h
+	     ./includes/ofdm/sample-reader.h
 	     ./includes/ofdm/phasereference.h
 	     ./includes/ofdm/phasetable.h
 	     ./includes/ofdm/freq-interleaver.h
@@ -112,7 +103,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/backend/data/tdc-datahandler.h 
 	     ./includes/backend/data/dab-data.h
 	     ./includes/backend/data/data-processor.h
-	     ./includes/various/fft.h
+	     ./includes/various/fft_handler.h
 	     ./includes/various/dab-params.h
 	     ./includes/various/tii_table.h
 	)
@@ -122,6 +113,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./dab-api.cpp
 	     ./src/dab-class.cpp
 	     ./src/ofdm/ofdm-processor.cpp
+	     ./src/ofdm/sample-reader.cpp
 	     ./src/ofdm/ofdm-decoder.cpp
 	     ./src/ofdm/phasereference.cpp
 	     ./src/ofdm/phasetable.cpp
@@ -151,86 +143,13 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/backend/data/mot-data.cpp 
 	     ./src/backend/data/dab-data.cpp
 	     ./src/backend/data/data-processor.cpp
-	     ./src/various/fft.cpp
+	     ./src/various/fft_handler.cpp
 	     ./src/various/dab-params.cpp
 	     ./src/various/tii_table.cpp
 	)
 
-	if (SDRPLAY)
-	   find_path (SDRPLAYLIB_INCLUDE_DIR
-                      NAMES mirsdrapi-rsp.h
-                      PATHS
-                      /usr/local/include/
-	   )
-           include_directories (${SDRPLAYLIB_INCLUDE_DIR})
-
-	   include_directories (
-	     ../devices/sdrplay-handler
-	   )
-
-	   set ($(objectName)_HDRS
-	        ${${objectName}_HDRS}
-	        ../devices/sdrplay-handler/sdrplay-handler.h
-           )
-
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ../devices/sdrplay-handler/sdrplay-handler.cpp
-	   )
-
-	 add_definitions (-DHAVE_SDRPLAY)
-	endif (SDRPLAY)
- 
-	if (AIRSPY)
-           find_package(LibAIRSPY)
-           if (NOT LIBAIRSPY_FOUND)
-               message(FATAL_ERROR "please install airspy library")
-           endif ()
-	   ### include_directories (${AIRSPYLIB_INCLUDE_DIR})
-
-	   include_directories (
-	     ../devices/airspy-handler
-	   )
-
-	   set ($(objectName)_HDRS
-	        ${${objectName}_HDRS}
-	        ../devices/input/airspy-handler/airspy-handler.h
-	   )
-
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ../devices/airspy-handler/airspy-handler.cpp
-	   )
-
-	   add_definitions (-DHAVE_AIRSPY)
-	endif (AIRSPY)
-#
-	if (DABSTICK)
-           find_package(LibRTLSDR)
-           if (NOT LIBRTLSDR_FOUND)
-               message(FATAL_ERROR "please install librtlsdr")
-           endif ()
-	   ###include_directories (${RTLSDR_INCLUDE_DIR})
-
-	   include_directories (
-	      ../devices/rtlsdr-handler/
-	   )
-
-	   set (${objectName}_HDRS
-	        ${${objectName}_HDRS}
-	        ../devices/rtlsdr-handler/rtlsdr-handler.h 
-	   )
-
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ../devices/rtlsdr-handler/rtlsdr-handler.cpp
-	   )
-
-	   add_definitions (-DHAVE_DABSTICK)
-	endif()
 #
 	include_directories (
-	          ${SDRPLAY_INCLUDES}
 	          ${FFTW_INCLUDE_DIRS}
 	          ${PORTAUDIO_INCLUDE_DIRS}
 	          ${FAAD_INCLUDE_DIRS}

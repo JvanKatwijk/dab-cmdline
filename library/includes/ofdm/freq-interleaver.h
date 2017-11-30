@@ -34,11 +34,12 @@ class	dabParams;
   */
 class	interLeaver {
 public:
-	interLeaver	(dabParams *);
-	~interLeaver	(void);
-int16_t	mapIn		(int16_t);
+		interLeaver	(dabParams *);
+		~interLeaver	(void);
+	int16_t	mapIn		(int16_t);
 private:
-
+	void	createMapper	(int16_t, int16_t,
+                                 int16_t, int16_t, int16_t *);
 	int16_t	*permTable;
 };
 

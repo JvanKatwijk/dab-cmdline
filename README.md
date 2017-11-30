@@ -48,7 +48,7 @@ The standard way to create an executable is
         sudo make install
 
 where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY,
-DABSTICK, WAVFILES, or RTL_TCP. The name of the generated executable
+RTLSDR, WAVFILES, or RTL_TCP. The name of the generated executable
 is dab-xxx-y, where xxx is the device name, and y the number
 of the example to which the executable belongs.
 

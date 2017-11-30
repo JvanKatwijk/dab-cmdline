@@ -83,10 +83,13 @@ def	syncsignalHandler (b):
       return;
    if (b):
        print ("possible DAB signal detected");
+       noData = 0;
+       signalSet = 1;
    else:
-       print ("no DAB signal detected, giving up");
-       noData = 1
-   signalSet = 1
+       noData = noData + 1;
+       if noData >= 5.0:
+          print ("no DAB signal detected, giving up");
+          signalSet = 1;
 
 #	the function systemdatahandler is called (once a second) to show 
 #	whether we are in sync, the snr and the current frequency offset

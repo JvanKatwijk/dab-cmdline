@@ -34,9 +34,9 @@
 #include	"dab-params.h"
 #include	"ringbuffer.h"
 #include	"dab-api.h"
+#include	"fft_handler.h"
 
 //
-class	common_fft;
 class	ofdmDecoder;
 class	mscHandler;
 class	ficHandler;
@@ -52,7 +52,6 @@ public:
 	                         mscHandler *,
 	                         ficHandler *,
 	                         int16_t,
-	                         uint8_t,
 	                         RingBuffer<std::complex<float>> *,
                                  RingBuffer<std::complex<float>> *,
 	                         void	*);
@@ -65,6 +64,7 @@ public:
 private:
 	deviceHandler	*inputDevice;
 	dabParams	params;
+	fft_handler	my_fftHandler;
 	syncsignal_t	syncsignalHandler;
 	systemdata_t	systemdataHandler;
 	void		call_systemData (bool, int16_t, int32_t);
@@ -72,6 +72,8 @@ private:
 	int32_t		syncBufferIndex;
 	void		*userData;
 	std::atomic<bool>	running;
+	bool		isSynced;
+	int32_t		localPhase;
 	int32_t		T_null;
 	int32_t		T_u;
 	int32_t		T_s;
@@ -80,20 +82,8 @@ private:
 	int32_t		nrBlocks;
 	int32_t		carriers;
 	int32_t		carrierDiff;
-	bool		isSynced;
 	float		sLevel;
-	std::complex<float>	*dataBuffer;
-	int32_t		FreqOffset;
 	std::complex<float>	*oscillatorTable;
-	int32_t		localPhase;
-	int16_t		fineCorrector;
-	int32_t		coarseCorrector;
-
-	uint8_t		freqsyncMethod;
-	bool		f2Correction;
-	std::complex<float>	*ofdmBuffer;
-	uint32_t	ofdmBufferIndex;
-	uint32_t	ofdmSymbolCount;
 	phaseReference	phaseSynchronizer;
 	ofdmDecoder	my_ofdmDecoder;
 	ficHandler	*my_ficHandler;
@@ -101,16 +91,12 @@ private:
 	bool		tiiSwitch;
 
 	int32_t		sampleCnt;
-	int32_t		inputSize;
-	int32_t		inputPointer;
 	std::complex<float>	getSample	(int32_t);
-	void		getSamples	(std::complex<float> *, int16_t, int32_t);
+	void		getSamples		(std::complex<float> *,
+	                                         int16_t, int32_t);
 virtual	void		run		(void);
 	int32_t		bufferContent;
 	bool		isReset;
-	int16_t		getMiddle	(std::complex<float> *);
-	common_fft	*fft_handler;
-	std::complex<float>	*fft_buffer;
         RingBuffer<std::complex<float>> *spectrumBuffer;
         int32_t         bufferSize;
         int32_t         localCounter;

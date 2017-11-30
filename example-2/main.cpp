@@ -110,7 +110,6 @@ std::vector<int> programSIds;
 
 static
 void	programnameHandler (std::string s, int SId, void *userdata) {
-int16_t i;
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
 	   if (*it == s)

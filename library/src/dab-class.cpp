@@ -75,7 +75,6 @@
 	                                        &the_mscHandler,
 	                                        &the_ficHandler,
 	                                        3,
-	                                        2,
 	                                        spectrumBuffer,
 	                                        iqBuffer,
 	                                        userData);

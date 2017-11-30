@@ -30,6 +30,8 @@
 #include	"msc-handler.h"
 #include	"freq-interleaver.h"
 #include	"dab-params.h"
+#include	"fft_handler.h"
+
 /**
   *	\brief ofdmDecoder
   *	The class ofdmDecoder is - when implemented in a separate thread -
@@ -37,14 +39,16 @@
   *	will extract the Tu samples, do an FFT and extract the
   *	carriers and map them on (soft) bits
   */
-	ofdmDecoder::ofdmDecoder	(dabParams	*params,
+	ofdmDecoder::ofdmDecoder	(dabParams	*p,
+	                                 fft_handler	*my_fftHandler,
                                          RingBuffer<std::complex<float>> *iqBuffer,
 	                                 ficHandler	*my_ficHandler,
 	                                 mscHandler	*my_mscHandler):
-		                          bufferSpace (params ->  get_L ()),
-	                                  myMapper        (params) {
+		                             bufferSpace (p ->  get_L ()),
+	                                     myMapper    (p) {
 int16_t	i;
-	this	-> params		= params;
+	this	-> params		= p;
+	this	-> my_fftHandler	= my_fftHandler;
         this    -> iqBuffer             = iqBuffer;
 	this	-> my_ficHandler	= my_ficHandler;
 	this	-> my_mscHandler	= my_mscHandler;
@@ -55,8 +59,7 @@ int16_t	i;
 	ibits				= new int16_t [2 * carriers];
 
 	this	-> T_g			= T_s - T_u;
-	fft_handler			= new common_fft (T_u);
-	fft_buffer			= fft_handler -> getVector ();
+	fft_buffer			= my_fftHandler -> getVector ();
 	phaseReference			= new std::complex<float> [T_u];
 //
 	current_snr			= 0;	
@@ -89,7 +92,6 @@ int16_t	i;
 	   threadHandle. join ();
 	}
 
-	delete		fft_handler;
 	delete[]	phaseReference;
 	for (i = 0; i < nrBlocks; i ++)
 	   delete[] command [i];
@@ -157,16 +159,7 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *vi) {
 	Locker. notify_one ();
 }
 
-void	ofdmDecoder::decodeFICblock (std::complex<float> *vi, int32_t blkno) {
-	bufferSpace. acquire ();
-	memcpy (command [blkno], &vi [T_g], sizeof (std::complex<float>) * T_u);
-	myMutex. lock ();
-	amount ++;
-	myMutex. unlock ();
-	Locker. notify_one ();
-}
-
-void	ofdmDecoder::decodeMscblock (std::complex<float> *vi, int32_t blkno) {
+void	ofdmDecoder::decodeblock (std::complex<float> *vi, int32_t blkno) {
 	bufferSpace. acquire ();
 	memcpy (command [blkno], &vi [T_g], sizeof (std::complex<float>) * T_u);
 	myMutex. lock ();
@@ -182,7 +175,7 @@ void	ofdmDecoder::decodeMscblock (std::complex<float> *vi, int32_t blkno) {
 void	ofdmDecoder::processBlock_0 (void) {
 
 	memcpy (fft_buffer, command [0], T_u * sizeof (std::complex<float>));
-	fft_handler	-> do_FFT ();
+	my_fftHandler -> do_FFT (fft_handler::fftForward);
 /**
   *	The SNR is determined by looking at a segment of bins
   *	within the signal region and bits outside.
@@ -213,7 +206,7 @@ fftlabel:
 /**
   *	first step: do the FFT
   */
-	fft_handler -> do_FFT ();
+	my_fftHandler -> do_FFT (fft_handler::fftForward);
 /**
   *	a little optimization: we do not interchange the
   *	positive/negative frequencies to their right positions.
@@ -235,14 +228,15 @@ toBitsLabel:
   *	on the same position in the next block
   */
 	   std::complex<float>	r1 = fft_buffer [index] * conj (phaseReference [index]);
-	   phaseReference [index] = fft_buffer [index];
            conjVector [index] = r1;
-	   float ab1	= jan_abs (r1);
 //	The viterbi decoder expects values in the range 0 .. 255,
 //	we present values -127 .. 127 (easy with depuncturing)
+	   float ab1		= jan_abs (r1);
 	   ibits [i]		= - real (r1) / ab1 * 127.0;
 	   ibits [carriers + i] = - imag (r1) / ab1 * 127.0;
 	}
+
+	memcpy (phaseReference, fft_buffer, T_u * sizeof (std::complex<float>));
 handlerLabel:
 	my_ficHandler -> process_ficBlock (ibits, blkno);
 
@@ -274,7 +268,7 @@ int16_t	i;
 
 	memcpy (fft_buffer, command [blkno], T_u * sizeof (std::complex<float>));
 fftLabel:
-	fft_handler -> do_FFT ();
+	my_fftHandler -> do_FFT (fft_handler::fftForward);
 //
 //	Note that "mapIn" maps to -carriers / 2 .. carriers / 2
 //	we did not set the fft output to low .. high
@@ -284,19 +278,19 @@ toBitsLabel:
 	   if (index < 0) 
 	      index += T_u;
 	      
-	   std::complex<float>	r1 = fft_buffer [index] * conj (phaseReference [index]);
-	   phaseReference [index] = fft_buffer [index];
-	   float ab1	= jan_abs (r1);
+	   std::complex<float>	r1 = fft_buffer [index] *
+	                                   conj (phaseReference [index]);
 //
 //	The viterbi decoder expects values in the range 0 .. 255
+	   float ab1		= jan_abs (r1);
 	   ibits [i]		= - real (r1) / ab1 * 127.0;
 	   ibits [carriers + i] = - imag (r1) / ab1 * 127.0;
 	}
+
+	memcpy (phaseReference, fft_buffer, T_u * sizeof (std::complex<float>));
 handlerLabel:
 	my_mscHandler -> process_mscBlock (ibits, blkno);
 }
-
-//
 //
 /**
   *	for the snr we have a full T_u wide vector, with in the middle

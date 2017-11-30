@@ -32,8 +32,8 @@
   *	of the DAB standard
   */
 
-int16_t	*createMapper (int16_t T_u, int16_t V1, 
-	               int16_t lwb, int16_t upb, int16_t *v) {
+void	interLeaver::createMapper (int16_t T_u, int16_t V1, 
+	                           int16_t lwb, int16_t upb, int16_t *v) {
 int16_t	*tmp	= (int16_t *)alloca (T_u * sizeof (int16_t));
 int16_t	index	= 0;
 int16_t	i;
@@ -52,36 +52,31 @@ int16_t	i;
 	   v [index ++] = tmp [i] - T_u / 2;
 //	we now have a table with values from lwb - T_u / 2 .. lwb + T_u / 2
 	}
-
-	return v;
 }
 
 	interLeaver::interLeaver (dabParams *p) {
 
+	permTable	= new int16_t [p -> get_T_u ()];
 	switch (p -> get_dabMode ()) {
 	   case 1:
 	   default:		// shouldn't happen
-	      permTable	= createMapper (p -> get_T_u (),
-	                                511, 256, 256 + p -> get_carriers (),
-	                                new int16_t [p -> get_T_u ()]);
+	      createMapper (p -> get_T_u (), 511,
+	                    256, 256 + p -> get_carriers (), permTable);
 	      break;
 
 	   case 2:
-	      permTable = createMapper (p -> get_T_u (),
-	                                127, 64, 64 + p -> get_carriers (),
-	                                new int16_t [p -> get_T_u ()]);
+	      createMapper (p -> get_T_u (), 127,
+	                    64, 64 + p -> get_carriers (), permTable);
 	      break;
 
 	   case 3:
-	      permTable = createMapper (p -> get_T_u (),
-	                                63, 32, 32 + p -> get_carriers (),
-	                                new int16_t [p -> get_T_u ()]);
+	      createMapper (p -> get_T_u (), 63,
+	                    32, 32 + p -> get_carriers (), permTable);
 	      break;
 
 	   case 4:
-	      permTable = createMapper (p -> get_T_u (),
-	                                255, 128, 128 + p -> get_carriers (),
-	                                new int16_t [p -> get_T_u ()]);
+	      createMapper (p -> get_T_u (), 255,
+	                    128, 128 + p -> get_carriers (), permTable);
 	      break;
 	}
 }

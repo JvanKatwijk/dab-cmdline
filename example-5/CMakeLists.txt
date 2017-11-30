@@ -275,7 +275,7 @@ endif ()
 	     ../library/includes/backend/data/mot-data.h 
 	     ../library/includes/backend/data/dab-data.h
 	     ../library/includes/backend/data/data-processor.h
-	     ../library/includes/various/fft.h
+	     ../library/includes/various/fft_handler.h
 	     ../library/includes/various/dab-params.h
 	     ../library/includes/various/tii_table.h
 	)
@@ -321,11 +321,10 @@ endif ()
 	     ../library/src/backend/data/mot-data.cpp 
 	     ../library/src/backend/data/dab-data.cpp
 	     ../library/src/backend/data/data-processor.cpp
-	     ../library/src/various/fft.cpp
+	     ../library/src/various/fft_handler.cpp
 	     ../library/src/various/dab-params.cpp
 	     ../library/src/various/tii_table.cpp
 	)
-
 #
 	include_directories (
 	          ${FFTW_INCLUDE_DIRS}

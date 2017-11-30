@@ -23,30 +23,30 @@
 #ifndef	__PHASEREFERENCE__
 #define	__PHASEREFERENCE__
 
-#include	"fft.h"
 #include	<stdio.h>
 #include	<stdint.h>
 #include	"phasetable.h"
 #include	"dab-constants.h"
 
 class	dabParams;
+class	fft_handler;
 
 class phaseReference : public phaseTable {
 public:
-		phaseReference (dabParams *, int16_t, int16_t);
+		phaseReference (dabParams	*,
+	                        fft_handler	*,
+	                        int16_t, int16_t);
 		~phaseReference	(void);
 	int32_t	findIndex	(std::complex<float> *);
 	int16_t	estimateOffset	(std::complex<float> *);
-	std::complex<float>	*refTable;
 private:
+	std::complex<float>	*refTable;
 	int32_t		T_u;
 	int16_t		threshold;
 	int16_t		diff_length;
 
-	common_fft	*fft_processor;
+	fft_handler	*my_fftHandler;
 	std::complex<float>	*fft_buffer;
-	common_ifft	*res_processor;
-	std::complex<float>	*res_buffer;
 	std::complex<float>	*phasedifferences;
 	int32_t		fft_counter;
 	float	Max;
