@@ -433,8 +433,6 @@ void	*result;
 
 	frequency	= dabBand. Frequency (BAND_III, theChannel);
 	try {
-	   fprintf (stdout, "starting device with gain (%d) %d\n",
-	                                  theGain, frequency);
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      3,
@@ -447,8 +445,6 @@ void	*result;
 	                                     0,
 	                                     theGain);
 #elif	HAVE_RTLSDR
-	   fprintf (stdout, "rtlhandler aan het laden, met freq %d\n",
-	                                   frequency);
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     0,		// ppm offset
 	                                     theGain,	// the gain
