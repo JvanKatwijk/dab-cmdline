@@ -77,7 +77,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/dab-class.h
 	     ./includes/dab-constants.h
 	     ./includes/ofdm/ofdm-processor.h
-	     ./includes/ofdm/sample-reader.h
 	     ./includes/ofdm/phasereference.h
 	     ./includes/ofdm/phasetable.h
 	     ./includes/ofdm/freq-interleaver.h
@@ -113,7 +112,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./dab-api.cpp
 	     ./src/dab-class.cpp
 	     ./src/ofdm/ofdm-processor.cpp
-	     ./src/ofdm/sample-reader.cpp
 	     ./src/ofdm/ofdm-decoder.cpp
 	     ./src/ofdm/phasereference.cpp
 	     ./src/ofdm/phasetable.cpp

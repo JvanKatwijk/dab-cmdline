@@ -433,26 +433,30 @@ void	*result;
 
 	frequency	= dabBand. Frequency (BAND_III, theChannel);
 	try {
+	   fprintf (stdout, "starting device with gain (%d) %d\n",
+	                                  theGain, frequency);
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      3,
 	                                      theGain,
 	                                      true,
-	                                      0, 0);
+	                                      0,
+	                                      0);
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     0,
 	                                     theGain);
 #elif	HAVE_RTLSDR
+	   fprintf (stdout, "rtlhandler aan het laden, met freq %d\n",
+	                                   frequency);
 	   theDevice	= new rtlsdrHandler (frequency,
-	                                     0,
-	                                     theGain,
-	                                     false,
-	                                     0);
+	                                     0,		// ppm offset
+	                                     theGain,	// the gain
+	                                     false);	// autogain
 #else
 	   theDevice	= new deviceHandler ();
 #endif
-
+	fprintf (stderr, "device installed\n");
 	}
 	catch (int e) {
 	   fprintf (stdout, "allocating device failed\n");
@@ -460,8 +464,8 @@ void	*result;
 	}
 	result = dabInit (theDevice,
 	                  theMode,
-	                  NULL,
-	                  NULL,
+	                  NULL,			// no spectrum shown
+	                  NULL,			// no constellation
 	                  (syncsignal_t)	&callback_syncSignal,
 	                  (systemdata_t)	&callback_systemData,
 	                  (ensemblename_t)	&callback_ensembleName,
@@ -478,6 +482,14 @@ void	*result;
 	   fprintf (stdout, "Sorry, did not work\n");
 	   goto err;
 	}
+
+	theDevice       -> setGain (theGain);
+//	if (autogain)
+//	   theDevice    -> set_autogain (autogain);
+        theDevice       -> setVFOFrequency (frequency);
+        theDevice       -> restartReader ();
+//
+
 	return PyCapsule_New (result, "library_object", NULL);
 
 err:

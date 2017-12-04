@@ -28,6 +28,7 @@
 #include	<getopt.h>
 #include        <cstdio>
 #include        <iostream>
+#include	<vector>
 #include	"audiosink.h"
 #include	"dab-api.h"
 #include	"band-handler.h"
@@ -126,7 +127,7 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 }
 
 static
-void	bytesOut_Handler (uint8_t *data, int16_t amount, void *ctx) {
+void	bytesOut_Handler (uint8_t *data, int16_t amount, uint8_t k, void *ctx) {
 	(void)data;
 	(void)amount;
 	(void)ctx;

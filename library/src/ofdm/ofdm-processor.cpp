@@ -235,7 +235,8 @@ int32_t		syncBufferMask	= syncBufferSize - 1;
 float		envBuffer	[syncBufferSize];
 std::complex<float>	ofdmBuffer [T_s];
 int		ofdmSymbolCount		= 0;
-int		attempts	= 0;
+int		dip_attempts		= 0;
+int		index_attempts		= 0;
 
 	my_ofdmDecoder. start ();
 	this	-> my_ficHandler -> clearEnsemble ();
@@ -271,14 +272,17 @@ int		attempts	= 0;
 	            syncBufferIndex = (syncBufferIndex + 1) & syncBufferMask;
 	            counter ++;
 	
-	            if (counter > T_F) { // hopeless
+	            if (counter > 2 * T_F) { // hopeless
 	               break;
 	            }
 	         }
 //	if we have 5 successive attempts are failing, signal our bosses
-	         if (counter > T_F) {
-                    if (++attempts > 5)
+	         if (counter > 2 * T_F) {
+                    if (++dip_attempts > 10) {
+	               fprintf (stdout, "no dab yet\n");
+	               dip_attempts = 0;
 	               syncsignalHandler (false, userData);
+	            }
 	            continue;
 	         }
               }
@@ -299,7 +303,7 @@ int		attempts	= 0;
 	      }
 	      if (counter > T_null + 50)
 	         continue;
-
+	      dip_attempts	= 0;
 //      We arrive here when time synchronized, either from above
 //      or after having processed a frame
 //      We now have to find the exact first sample of the non-null period.
@@ -313,12 +317,14 @@ int		attempts	= 0;
 	      startIndex = phaseSynchronizer. findIndex (ofdmBuffer);
 	      if (startIndex < 0) { // no sync, try again
 	         isSynced	= false;
-	         if (++attempts > 5)
+	         if (++index_attempts > 10) {
+	            fprintf (stdout, "no index yet\n");
 	            syncsignalHandler (false, userData);
+	         }
 	         continue;
 	      }
 
-	      attempts	= 0;
+	      index_attempts	= 0;
 	      syncsignalHandler (true, userData);
 	      isSynced	= true;
 //	Once here, we are synchronized, we need to copy the data we

@@ -44,7 +44,7 @@ outp		= 0;
 #
 #
 parser		= argparse. ArgumentParser (description=__doc__)
-parser.add_argument ('-d', '--theDelay', type=int, default=10,
+parser.add_argument ('-d', '--theDelay', type=int, default=15,
                      help=' a number to specify the time to find an ensemble')
 parser.add_argument ('-m', '--theMode', type=int, default=1,
                      help='1, 2 or 4 for the DAB mode')
@@ -54,7 +54,7 @@ parser.add_argument ('-a', '--soundChannel', type=str, default='default',
 	                                help='the sound channel')
 parser.add_argument ('-c', '--theChannel', type=str, default = "11C",
 	                                help='the Channel')
-parser.add_argument ('-p', '--programName', type=str, default="Classic FM",
+parser.add_argument ('-p', '--programName', type=str, default="538",
 	                                help='name of the program')
 parser.add_argument ('-l', '--latency', type=float, default = 0.1,
 	                                help='latency in seconds')
@@ -87,7 +87,7 @@ def	syncsignalHandler (b):
        signalSet = 1;
    else:
        noData = noData + 1;
-       if noData >= 5.0:
+       if noData > 40:
           print ("no DAB signal detected, giving up");
           signalSet = 1;
 
@@ -95,7 +95,7 @@ def	syncsignalHandler (b):
 #	whether we are in sync, the snr and the current frequency offset
 def	systemdataHandler (b, snr, offs):
 #   print (b , " ", snr, "  ", offs);
-    dummy = b
+	dummy = b;
 
 #	the function ensemblenameHandler is called as soon as the name
 #	of the ensemble is extracted from the datastream. The second
@@ -219,7 +219,7 @@ if (not dabProcessing (theLibrary)):
    exit (3);
 
 count = args. theDelay;
-while (count > 0 and not ensembleFound and not noData):
+while (count > 0 and not ensembleFound and noData < 5):
    time. sleep (1);
    count = count - 1;
 
