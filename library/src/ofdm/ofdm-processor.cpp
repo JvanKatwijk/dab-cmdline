@@ -279,7 +279,6 @@ int		index_attempts		= 0;
 //	if we have 5 successive attempts are failing, signal our bosses
 	         if (counter > 2 * T_F) {
                     if (++dip_attempts > 10) {
-	               fprintf (stdout, "no dab yet\n");
 	               dip_attempts = 0;
 	               syncsignalHandler (false, userData);
 	            }

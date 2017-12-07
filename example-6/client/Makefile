@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtNetwork -isystem /usr/include/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib64/qt5/mkspecs/linux-g++
+INCPATH       = -I. -I. -I.. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtNetwork -isystem /usr/include/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib64/qt5/mkspecs/linux-g++
 QMAKE         = /usr/bin/qmake-qt5
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -35,7 +35,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = Client1.0.0
-DISTDIR = /usr/shared/sdr-j-development/systems/dab-cmdline/example-2/client/.tmp/Client1.0.0
+DISTDIR = /usr/shared/sdr-j-development/systems/dab-cmdline/example-6/client/.tmp/Client1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
 LIBS          = $(SUBLIBS) -lQt5Widgets -lQt5Gui -lQt5Network -lQt5Core -lGL -lpthread 
@@ -214,7 +214,7 @@ DIST          = /usr/lib64/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib64/qt5/mkspecs/features/yacc.prf \
 		/usr/lib64/qt5/mkspecs/features/lex.prf \
 		client.pro client.h \
-		constants.h client.cpp \
+		../protocol.h client.cpp \
 		main.cpp
 QMAKE_TARGET  = Client
 DESTDIR       = 
@@ -569,7 +569,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib64/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents client.h constants.h $(DISTDIR)/
+	$(COPY_FILE) --parents client.h ../protocol.h $(DISTDIR)/
 	$(COPY_FILE) --parents client.cpp main.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents widget.ui $(DISTDIR)/
 
@@ -609,10 +609,11 @@ compiler_moc_header_clean:
 moc_client.cpp: constants.h \
 		ui_widget.h \
 		header-test.h \
+		ringbuffer.h \
 		client.h \
 		moc_predefs.h \
 		/usr/lib64/qt5/bin/moc
-	/usr/lib64/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib64/qt5/mkspecs/linux-g++ -I/usr/shared/sdr-j-development/systems/dab-cmdline/example-2/client -I/usr/shared/sdr-j-development/systems/dab-cmdline/example-2/client -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtNetwork -I/usr/include/qt5/QtCore -I/usr/include/c++/6.4.1 -I/usr/include/c++/6.4.1/x86_64-redhat-linux -I/usr/include/c++/6.4.1/backward -I/usr/lib/gcc/x86_64-redhat-linux/6.4.1/include -I/usr/local/include -I/usr/include -I/usr/include/c++/7 -I/usr/include/c++/7/x86_64-redhat-linux -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-redhat-linux/7/include -I/usr/local/include -I/usr/include client.h -o moc_client.cpp
+	/usr/lib64/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib64/qt5/mkspecs/linux-g++ -I/usr/shared/sdr-j-development/systems/dab-cmdline/example-6/client -I/usr/shared/sdr-j-development/systems/dab-cmdline/example-6/client -I/usr/shared/sdr-j-development/systems/dab-cmdline/example-6 -I/usr/include/qt5 -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtNetwork -I/usr/include/qt5/QtCore -I/usr/include/c++/7 -I/usr/include/c++/7/x86_64-redhat-linux -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-redhat-linux/7/include -I/usr/local/include -I/usr/include client.h -o moc_client.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -636,13 +637,16 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 client.o: client.cpp client.h \
 		constants.h \
 		ui_widget.h \
-		header-test.h
+		header-test.h \
+		ringbuffer.h \
+		../protocol.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o client.o client.cpp
 
 main.o: main.cpp client.h \
 		constants.h \
 		ui_widget.h \
-		header-test.h
+		header-test.h \
+		ringbuffer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 moc_client.o: moc_client.cpp 
