@@ -25,6 +25,7 @@
 
 #include	<stdio.h>
 #include	<stdint.h>
+#include	<vector>
 #include	"phasetable.h"
 #include	"dab-constants.h"
 
@@ -40,16 +41,15 @@ public:
 	int32_t	findIndex	(std::complex<float> *);
 	int16_t	estimateOffset	(std::complex<float> *);
 private:
-	std::complex<float>	*refTable;
-	int32_t		T_u;
-	int16_t		threshold;
-	int16_t		diff_length;
+	std::vector<std::complex<float>>        refTable;
+	std::vector<float>      phaseDifferences;
+	int32_t         T_u;
+	int16_t         threshold;
+	int16_t         diff_length;
 
-	fft_handler	*my_fftHandler;
-	std::complex<float>	*fft_buffer;
-	std::complex<float>	*phasedifferences;
-	int32_t		fft_counter;
-	float	Max;
+	fft_handler     *my_fftHandler;
+	std::complex<float>     *fft_buffer;
+
 };
 #endif
 
