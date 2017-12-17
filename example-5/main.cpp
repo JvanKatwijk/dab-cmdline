@@ -39,6 +39,8 @@
 #include	"rtlsdr-handler.h"
 #elif	HAVE_WAVFILES
 #include	"wavfiles.h"
+#elif	HAVE_RAWFILES
+#include	"rawfiles.h"
 #elif	HAVE_RTL_TCP
 #include	"rtl_tcp-client.h"
 #endif
@@ -228,6 +230,8 @@ bandHandler	dabBand;
 deviceHandler	*theDevice;
 #ifdef	HAVE_WAVFILES
 std::string	fileName;
+#elif	HAVE_RAWFILES
+std::string	fileName;
 #elif HAVE_RTL_TCP
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
@@ -247,7 +251,7 @@ bool	err;
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-#ifndef	HAVE_WAVFILES
+#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
 	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
@@ -279,7 +283,7 @@ bool	err;
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
 	         break;
-#ifdef	HAVE_WAVFILES
+#if defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
 	      case 'F':
 	         fileName	= std::string (optarg);
 	         break;
@@ -359,6 +363,8 @@ bool	err;
 	                                     theGain,
 	                                     autogain);
 #elif	HAVE_WAVFILES
+	   theDevice	= new wavFiles (fileName);
+#elif	HAVE_RAWFILES
 	   theDevice	= new wavFiles (fileName);
 #elif	HAVE_RTL_TCP
 	   theDevice	= new rtl_tcp_client (hostname,

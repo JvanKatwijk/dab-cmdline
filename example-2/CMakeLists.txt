@@ -47,6 +47,11 @@ if(DEFINED WAVFILES)
    set(objectName dab-files-2)
 endif ()
 
+if(DEFINED RAWFILES)
+   set(RAWFILES true)
+   set(objectName dab-raw-2)
+endif ()
+
 if(DEFINED RTL_TCP)
    set(RTL_TCP true)
    set(objectName dab-rtl_tcp-2)
@@ -74,7 +79,6 @@ endif ()
             message(FATAL_ERROR "please install libz")
         endif ()
 	list(APPEND extraLibs ${ZLIB_LIBRARY})
-
 
 	find_library (PTHREADS pthread)
 	if (NOT(PTHREADS))
@@ -214,6 +218,24 @@ endif ()
 	   list(APPEND extraLibs ${LIBSNDFILE_LIBRARY})
 
 	   add_definitions (-DHAVE_WAVFILES)
+	endif()
+
+	if (RAWFILES)
+	   include_directories (
+	        ../devices/rawfiles/
+	   )
+
+	   set (${objectName}_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/rawfiles/rawfiles.h
+	   )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/rawfiles/rawfiles.cpp
+	   )
+
+	   add_definitions (-DHAVE_RAWFILES)
 	endif()
 #######################################################################
 #

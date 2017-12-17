@@ -203,11 +203,13 @@ int32_t	viterbiCounter	= 0;
 	   }
 	}
 
-	for (i = 0; i < L4; i ++) {
-	   for (j = 0; j < 128; j ++) {
-	      if (PI4 [j % 32] != 0) 
-	         viterbiBlock [viterbiCounter] = v [inputCounter ++];
-	      viterbiCounter ++;	
+	if (PI4 != NULL) {
+	   for (i = 0; i < L4; i ++) {
+	      for (j = 0; j < 128; j ++) {
+	         if (PI4 [j % 32] != 0) 
+	            viterbiBlock [viterbiCounter] = v [inputCounter ++];
+	         viterbiCounter ++;	
+	      }
 	   }
 	}
 
