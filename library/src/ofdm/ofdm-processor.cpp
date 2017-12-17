@@ -317,7 +317,7 @@ int		index_attempts		= 0;
 	      if (startIndex < 0) { // no sync, try again
 	         isSynced	= false;
 	         if (++index_attempts > 10) {
-	            fprintf (stdout, "no index yet\n");
+	            fprintf (stderr, "no index yet\n");
 	            syncsignalHandler (false, userData);
 	         }
 	         continue;

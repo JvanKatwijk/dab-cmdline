@@ -46,6 +46,11 @@ if(DEFINED WAVFILES)
    set(objectName dab-files-3)
 endif ()
 
+if(DEFINED RAWFILES)
+   set(RAWFILES true)
+   set(objectName dab-raw-3)
+endif ()
+
 if(DEFINED RTL_TCP)
    set(RTL_TCP true)
    set(objectName dab-rtl_tcp-3)
@@ -203,6 +208,25 @@ endif ()
 
 	   add_definitions (-DHAVE_WAVFILES)
 	endif()
+
+	if (RAWFILES)
+           include_directories (
+                ../devices/rawfiles/
+           )
+
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+                ../devices/rawfiles/rawfiles.h
+           )
+
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+                ../devices/rawfiles/rawfiles.cpp
+           )
+
+           add_definitions (-DHAVE_RAWFILES)
+        endif()
+
 #######################################################################
 #
 #	Here we really start

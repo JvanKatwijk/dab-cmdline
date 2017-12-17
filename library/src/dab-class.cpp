@@ -86,7 +86,7 @@
 }
 
 void	dabClass::startProcessing	(void) {
-	fprintf (stdout, "ofdm word gestart\n");
+	fprintf (stderr, "ofdm word gestart\n");
 	the_ofdmProcessor	-> start ();
 }
 
