@@ -22,7 +22,6 @@
 #ifndef	__RAW_FILES__
 #define	__RAW_FILES__
 
-#include        <sndfile.h>
 #include        "ringbuffer.h"
 #include        "device-handler.h"
 #include        <thread>
