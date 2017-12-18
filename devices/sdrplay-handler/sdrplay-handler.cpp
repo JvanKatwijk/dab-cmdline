@@ -121,7 +121,7 @@ ULONG APIkeyValue_length = 255;
 	if (deviceIndex >= numofDevs)
 	   this -> deviceIndex = 0;
 	hwVersion = devDesc [deviceIndex]. hwVer;
-	fprintf (stdout, "sdrdevice found = %s, hw Version = %d\n",
+	fprintf (stderr, "sdrdevice found = %s, hw Version = %d\n",
 	                              devDesc [deviceIndex]. SerNo, hwVersion);
 	my_mir_sdr_SetDeviceIdx (deviceIndex);
 
@@ -136,7 +136,7 @@ ULONG APIkeyValue_length = 255;
 //
 	my_mir_sdr_SetGr (102 - theGain, 1, 0);
 	running		= false;
-	fprintf (stdout, "Loading sdrplay ging goed\n");
+	fprintf (stderr, "Loading sdrplay ging goed\n");
 }
 
 	sdrplayHandler::~sdrplayHandler	(void) {
@@ -269,7 +269,7 @@ int	localGain	= 102 - theGain;
 	if (running)
 	   return true;
 	autogain	= false;
-	fprintf (stdout, "begin met restart %d %d %d\n",
+	fprintf (stderr, "begin met restart %d %d %d\n",
 	                         frequency, localGain, autogain);
 	err	= my_mir_sdr_StreamInit (&localGain,
 	                                 double (inputRate) / MHz_1,
@@ -284,7 +284,7 @@ int	localGain	= 102 - theGain;
 	                                 (mir_sdr_GainChangeCallback_t)myGainChangeCallback,
 	                                 this);
 	if (err != mir_sdr_Success) {
-	   fprintf (stdout, "Error %d on streamInit\n", err);
+	   fprintf (stderr, "Error %d on streamInit\n", err);
 	   return false;
 	}
 
