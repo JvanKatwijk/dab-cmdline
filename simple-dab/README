@@ -3,3 +3,10 @@ simpleDab is a Qt interface to the DAB library.
 It is just an example program. Feel free to adapt (and
 improve) it.
 
+In the current version, one may select ONE device in the
+configuration: just uncomment ONE of the lines
+#CONFIG          += dabstick
+CONFIG          += sdrplay
+#CONFIG          += airspy
+
+

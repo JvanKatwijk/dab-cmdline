@@ -27,15 +27,13 @@ INCLUDEPATH += . \
 	       .. \
 	       ./includes \
 	       ./output \
-	       ../devices \
-	       ../devices/sdrplay-handler
+	       ../devices 
 
 # Input
 FORMS += ./forms/dabradio.ui ./forms/technical_data.ui
 
 HEADERS += ./simple-dab.h \
 	   ../device-handler.h \
-	   ../devices/sdrplay-handler/sdrplay-handler.h \
 	   ./band-handler.h \
 	   ./includes/ringbuffer.h \
 	   ./output/audio-base.h \
@@ -46,7 +44,6 @@ SOURCES += ./main.cpp \
 	   ./simple-dab.cpp \
 	   ./band-handler.cpp \
 	   ../devices/device-handler.cpp \
-	   ../devices/sdrplay-handler/sdrplay-handler.cpp \
 	   ./output/audio-base.cpp \
 	   ./output/newconverter.cpp \
 	   ./output/audiosink.cpp
@@ -55,6 +52,10 @@ unix {
 DESTDIR		= ./linux-bin
 INCLUDEPATH	+= /usr/local/include
 #CONFIG		+= spectrum
+#select ONE of
+#CONFIG          += dabstick
+CONFIG          += sdrplay
+#CONFIG          += airspy
 LIBS		+= -ldab_lib
 LIBS		+= -lsndfile
 LIBS		+= -lsamplerate
@@ -79,4 +80,35 @@ spectrum {
         LIBS            += -lqwt-qt5
 }
 
+#	devices
+#
+#	dabstick
+dabstick {
+	DEFINES		+= HAVE_RTLSDR
+	DEPENDPATH	+= ../devices/rtlsdr-handler
+	INCLUDEPATH	+= ../devices/rtlsdr-handler
+	HEADERS		+= ../devices/rtlsdr-handler/rtlsdr-handler.h 
+	SOURCES		+= ../devices/rtlsdr-handler/rtlsdr-handler.cpp 
+}
+#
+#	the SDRplay
+#
+sdrplay {
+	DEFINES		+= HAVE_SDRPLAY
+	DEPENDPATH	+= ../devices/sdrplay-handler 
+	INCLUDEPATH	+= ../devices/sdrplay-handler 
+	HEADERS		+= ../devices/sdrplay-handler/sdrplay-handler.h 
+	SOURCES		+= ../devices/sdrplay-handler/sdrplay-handler.cpp 
+}
+#
+#
+# airspy support
+#
+airspy {
+	DEFINES		+= HAVE_AIRSPY
+	DEPENDPATH	+= ../devices/airspy 
+	INCLUDEPATH	+= ../devices/airspy-handler 
+	HEADERS		+= ../devices/airspy-handler/airspy-handler.h 
+	SOURCES		+= ../devices/airspy-handler/airspy-handler.cpp 
+}
 

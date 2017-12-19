@@ -25,6 +25,12 @@ To show the use of the library, several example programs are included:
 	  An additional file, dab-python.cpp, contains
 	  the sources for binding C and Python for this linbrary.
 
+Note that the basic idea of providing these example is to provide
+examples of how to use the library and/or the sources of the library. 
+They are not intended to be full solutions, but merely to give some ideas
+of how to use the library.
+
+Feel free to adapt each (all) of these programs to your own ideas.
 =======================================================================
 
 The C (C++) example programs

@@ -37,7 +37,13 @@
 #ifdef	HAVE_SPECTRUM
 #include	"spectrum-handler.h"
 #endif
+#ifdef	HAVE_RTLSDR
+#include	"rtlsdr-handler.h"
+#elif	HAVE_AIRSPY
+#include	"airspy-handler.h"
+#else
 #include	"sdrplay-handler.h"
+#endif
 
 std::vector<size_t> get_cpu_times() {
 	std::ifstream proc_stat("/proc/stat");
@@ -148,10 +154,21 @@ const char	**t;
 	frequency	= dabBand. Frequency (theBand, 
                                               std::string (currentChannel. toLatin1 (). data ()));
 	try {
+#ifdef	HAVE_RTLSDR
+	   theDevice	= new rtlsdrHandler (frequency,
+	                                     0,
+	                                     gainSlider -> value (),
+	                                     true, 0);
+#elif	HAVE_AIRSPY
+	   theDevice	= new airspyHandler (frequency,
+	                                     3,
+	                                     gainSlider -> value ());
+#else
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      3,
 	                                      gainSlider -> value (),
 	                                      true, 0, 0);
+#endif
 	}
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed, fatal\n");
