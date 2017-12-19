@@ -74,7 +74,7 @@ int16_t	deviceCount;
 int32_t	r;
 int16_t	i;
 
-	fprintf (stdout, "going for rtlsdr %d %d\n", frequency, gain);
+	fprintf (stderr, "going for rtlsdr %d %d\n", frequency, gain);
 	this	-> frequency	= frequency;
 	this	-> ppmCorrection	= ppmCorrection;
 	this	-> gain		= gain;
@@ -146,22 +146,22 @@ int16_t	i;
 	}
 
 	r			= this -> rtlsdr_get_sample_rate (device);
-	fprintf (stdout, "samplerate set to %d\n", r);
+	fprintf (stderr, "samplerate set to %d\n", r);
 	rtlsdr_set_tuner_gain_mode (device, 1);
 
 	gainsCount	= rtlsdr_get_tuner_gains (device, NULL);
-	fprintf (stdout, "Supported gain values (%d): ", gainsCount);
+	fprintf (stderr, "Supported gain values (%d): ", gainsCount);
 	gains		= new int [gainsCount];
 	gainsCount	= rtlsdr_get_tuner_gains (device, gains);
 	for (i = 0; i < gainsCount; i ++)
-	   fprintf (stdout, "%d.%d ", gains [i] / 10, gains [i] % 10);
-	fprintf (stdout, "\n");
+	   fprintf (stderr, "%d.%d ", gains [i] / 10, gains [i] % 10);
+	fprintf (stderr, "\n");
 	gain		= gain * gainsCount / 100;
 	if (ppmCorrection != 0)
 	   rtlsdr_set_freq_correction (device, ppmCorrection);
 	if (autogain)
 	   rtlsdr_set_agc_mode (device, 1);
-	fprintf (stdout, "effective gain: index %d, gain %d\n",
+	fprintf (stderr, "effective gain: index %d, gain %d\n",
 	                                   gain, gains [gain]);
 	rtlsdr_set_tuner_gain (device, gains [gain]);
 	_I_Buffer		= new RingBuffer<uint8_t>(1024 * 1024);
