@@ -29,19 +29,11 @@
 #include	"viterbi-768.h"
 
 
-	class eep_protection: public protection, public viterbi_768 {
+	class eep_protection: public protection {
 public:
 		eep_protection		(int16_t, int16_t);
 		~eep_protection		(void);
 bool		deconvolve		(int16_t *, int32_t, uint8_t *);
-private:
-	int16_t		L1;
-	int16_t		L2;
-	int8_t		*PI1;
-	int8_t		*PI2;
-	int16_t		bitRate;
-	int32_t		outSize;
-	int16_t		*viterbiBlock;
 };
 
 #endif

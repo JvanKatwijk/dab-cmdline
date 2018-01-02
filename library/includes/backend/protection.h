@@ -26,15 +26,19 @@
 #define	__PROTECTION
 
 #include	<stdint.h>
+#include	<vector>
+#include	"viterbi-768.h"
 
-extern
-uint8_t	PI_X [];
-
-class	protection {
+class	protection: public viterbi_768 {
 public:
-		protection  	(void);
+		protection  	(int16_t, int16_t);
 virtual		~protection	(void);
 virtual	bool	deconvolve	(int16_t *, int32_t, uint8_t *);
+protected:
+        int16_t         bitRate;
+        int32_t         outSize;
+        std::vector<int16_t> viterbiBlock;
+        std::vector<int16_t> indexTable;
 };
 #endif
 

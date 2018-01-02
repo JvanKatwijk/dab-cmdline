@@ -817,7 +817,7 @@ char		label [17];
 	charSet		= getBits_4 (d, 8);
 	oe		= getBits_1 (d, 8 + 4);
 	extension	= getBits_3 (d, 8 + 5); 
-	label [16]	= 0x00;
+	label [16] = 0;
 	if (oe == 01)
 	   return;
 	switch (extension) {
@@ -829,6 +829,7 @@ char		label [17];
 	      SId	= getBits (d, 16, 16);
 	      offset	= 32;
 	      if ((charSet <= 16)) { // EBU Latin based repertoire
+
 	         for (i = 0; i < 16; i ++) {
 	            label [i] = getBits_8 (d, offset + 8 * i);
 	         }
@@ -855,6 +856,7 @@ char		label [17];
 	         for (i = 0; i < 16; i ++) {
 	            label [i] = getBits_8 (d, offset + 8 * i);
 	         }
+
 	         myIndex -> serviceLabel. label. append (
 	                       toStringUsingCharset (
 	                                (const char *) label,

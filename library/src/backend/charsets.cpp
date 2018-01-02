@@ -24,6 +24,9 @@
  */
 #include	"charsets.h"
 #include	<stdint.h>
+#include        <cstdio>
+#include        <iostream>
+
 /**
  * This table maps "EBU Latin" charset to corresponding
  * Unicode (UCS2-encoded) characters.
@@ -66,63 +69,6 @@ static const unsigned short ebuLatinToUcs2[] = {
 /* 0xf8 - 0xff */ 0xfe,   0x014b, 0x0155, 0x0107, 0x015b, 0x017a, 0x0167, 0xff
 };
 
-static
-int	GetUtf8CharacterLength (uint8_t utf8Char ) {
-
-	if (utf8Char < 0x80)
-	   return 1;
-	else
-	if ((utf8Char & 0x20) == 0)
-	   return 2;
-	else
-	if ((utf8Char & 0x10) == 0)
-	   return 3;
-	else
-	if ((utf8Char & 0x08) == 0)
-	   return 4;
-	else
-	if ((utf8Char & 0x04) == 0)
-	   return 5;
-	return 6;
-}
-
-static
-char	Utf8toLatin1Character (const char *s, int16_t *index) {
-int16_t len = GetUtf8CharacterLength (s [*index]);
-
-	if (len == 1) {
-	   char c = s [*index];
-	   (*index) ++;
-	   return c;
-	}
-	uint32_t v = (s [*index] & (0xff >> (len + 1))) <<
-	                               ((len - 1) * 6);
-	(*index) ++;
-	for (len --; len > 0; len --) {
-	   v |= (s [*index] -0x80) << ((len - 1) * 6);
-	   (*index) ++;
-	}
-
-	return (v > 0xff) ? 0 : (char)v;
-}
-
-static
-std::string fromUtf8 (const char *buffer, int16_t length) {
-int16_t readIndex;
-std::string result;
-
-	for (readIndex = 0; readIndex < length; ) {
-	   if (buffer [readIndex] == 0)
-	      return result;
-
-	   char c = Utf8toLatin1Character (buffer, &readIndex);
-	   if (c == 0)
-	      c = '_';
-	   result += c;
-	}
-	return result;
-}
-
 std::string toStringUsingCharset (const char* buffer,
 	                          CharacterSet charset, int size) {
 std::string  s;
@@ -140,15 +86,19 @@ uint16_t i;
 //	      break;
 
 	   case UnicodeUtf8:
-	      s = fromUtf8 (buffer, length);
 	      break;
 
 	   case EbuLatin:
 	   default:
-	      for (i = 0; i < length; i++) {
-	         s	+= buffer [i];
-//	         s [i] = char (ebuLatinToUcs2 [((uint8_t*) buffer)[i]]);
-	      }
+	      for (i = 0; i < length; i++) 
+	         if (buffer [i] & 0x80) {
+	            uint8_t c0 =  (0xc0 | (((uint8_t)buffer [i]) >> 6));
+	            uint8_t c1 =  ((buffer [i] & 0x3f) | 0x80);
+	            s. push_back (c0);
+	            s. push_back (c1);
+	         }
+	         else
+	            s. push_back (buffer [i]);
 	}
 
 	return s;

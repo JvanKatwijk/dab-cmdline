@@ -57,11 +57,11 @@ private:
 	fib_quality_t	fib_qualityHandler;
 	void		*userData;
 	void		process_ficInput	(int16_t *, int16_t);
-	int8_t		*PI_15;
-	int8_t		*PI_16;
-	uint8_t		*bitBuffer_in;
-	uint8_t		*bitBuffer_out;
-	int16_t		*ofdm_input;
+	uint8_t		bitBuffer_out [768];
+        int16_t		ofdm_input    [2304];
+        int16_t		indexTable    [4 * 768 + 24];
+        int16_t		viterbiBlock  [4 * 768 + 24];
+
 	int16_t		index;
 	int16_t		BitsperBlock;
 	int16_t		ficno;

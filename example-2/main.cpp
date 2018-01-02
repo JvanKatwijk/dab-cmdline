@@ -45,12 +45,13 @@
 #elif	HAVE_RTL_TCP
 #include	"rtl_tcp-client.h"
 #endif
-
+#include	<locale>
+#include	<codecvt>
 #include	<atomic>
 #ifdef	DATA_STREAMER
 #include	"tcp-server.h"
 #endif
-
+#include	<string>
 using std::cerr;
 using std::endl;
 
@@ -118,17 +119,17 @@ void	programnameHandler (std::string s, int SId, void *userdata) {
 	      return;
 	programNames. push_back (s);
 	programSIds . push_back (SId);
-	fprintf (stderr, "program %s is part of the ensemble\n", s. c_str ());
+	std::cerr << "program " << s << " is part of the ensemble\n";
 }
 
 static
 void	programdataHandler (audiodata *d, void *ctx) {
 	(void)ctx;
-	fprintf (stderr, "\tstartaddress\t= %d\n", d -> startAddr);
-	fprintf (stderr, "\tlength\t\t= %d\n",     d -> length);
-	fprintf (stderr, "\tsubChId\t\t= %d\n",    d -> subchId);
-	fprintf (stderr, "\tprotection\t= %d\n",   d -> protLevel);
-	fprintf (stderr, "\tbitrate\t\t= %d\n",    d -> bitRate);
+	std::cerr << "\tstartaddress\t= " << d -> startAddr << "\n";
+	std::cerr << "\tlength\t\t= "     << d -> length << "\n";
+	std::cerr << "\tsubChId\t\t= "    << d -> subchId << "\n";
+	std::cerr << "\tprotection\t= "   << d -> protLevel << "\n";
+	std::cerr << "\tbitrate\t\t= "    << d -> bitRate << "\n";
 }
 
 //
@@ -137,7 +138,7 @@ void	programdataHandler (audiodata *d, void *ctx) {
 static
 void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	(void)ctx;
-	fprintf (stderr, "%s\r", dynamicLabel. c_str ());
+	std::cerr << dynamicLabel << "\r";
 }
 //
 //	Note: the function is called from the tdcHandler with a
@@ -223,7 +224,7 @@ std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 int16_t		waitingTime	= 10;
 bool		autogain	= false;
-int	opt;
+int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
@@ -237,16 +238,18 @@ int32_t		basePort = 1234;		// default
 #endif
 bool	err;
 
-	fprintf (stderr, "dab_cmdline V 1.0alfa,\n \
-	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
+	std::cerr << "dab_cmdline V 1.0alfa,\n \
+	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
-
+	std::wcout.imbue(std::locale("de_DE.utf8"));
 	if (argc == 1) {
 	   printOptions ();
 	   exit (1);
 	}
+
+	std::setlocale (LC_ALL, "de_DE.utf8");
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
@@ -257,7 +260,6 @@ bool	err;
 #else
 	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:O:")) != -1) {
 #endif
-	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
 
 	      case 'W':
@@ -317,7 +319,7 @@ bool	err;
 	      case 'O':
 	         soundOut	= new fileSink (std::string (optarg), &err);
 	         if (!err) {
-	            fprintf (stderr, "sorry, could not open file\n");
+	            std::cerr << "sorry, could not open file\n";
 	            exit (32);
 	         }
 	         break;
@@ -380,14 +382,14 @@ bool	err;
 
 	}
 	catch (int e) {
-	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
+	   std::cerr << "allocating device failed (" << e << "), fatal\n";
 	   exit (32);
 	}
 //
 	if (soundOut == NULL) {	// not bound to a file?
 	   soundOut	= new audioSink	(latency, soundChannel, &err);
 	   if (err) {
-	      fprintf (stderr, "no valid sound channel, fatal\n");
+	      std::cerr << "no valid sound channel, fatal\n";
 	      exit (33);
 	   }
 	}
@@ -410,7 +412,7 @@ bool	err;
 	                                NULL
 	                               );
 	if (theRadio == NULL) {
-	   fprintf (stderr, "sorry, no radio available, fatal\n");
+	   std::cerr << "sorry, no radio available, fatal\n";
 	   exit (4);
 	}
 
@@ -442,17 +444,17 @@ bool	err;
 
 	}
         else
-	   cerr << "there might be a DAB signal here" << endl;
+	   std::cerr << "there might be a DAB signal here" << endl;
 
 	if (!ensembleRecognized. load ())
 	   while (!ensembleRecognized. load () && (++timeOut < waitingTime)) {
-	      fprintf (stderr, "%d\r", waitingTime - timeOut);
+	      std::cerr << waitingTime - timeOut << "\r";
 	      sleep (1);
 	   }
-	fprintf (stderr, "\n");
+	std::cerr << "\n";
 
 	if (!ensembleRecognized. load ()) {
-	   fprintf (stderr, "no ensemble data found, fatal\n");
+	   std::cerr << "no ensemble data found, fatal\n";
 	   theDevice -> stopReader ();
 	   sleep (1);
 	   theRadio	-> reset ();
@@ -464,11 +466,11 @@ bool	err;
 	run. store (true);
 	if (serviceIdentifier != -1) 
 	   programName = theRadio -> dab_getserviceName (serviceIdentifier);
-	fprintf (stderr, "we try to start program %s\n",
-                                                 programName. c_str ());
+	std::cerr << "we try to start program " <<
+                                                 programName << "\n";
 	if (theRadio -> dab_service (programName) < 0) {
-	   fprintf (stderr, "sorry  we cannot handle service %s\n", 
-	                                             programName. c_str ());
+	   std::cerr << "sorry  we cannot handle service " << 
+	                                         programName << "\n";
 	   run. store (false);
 	}
 
@@ -482,7 +484,7 @@ bool	err;
 }
 
 void    printOptions (void) {
-        fprintf (stderr,
+        std::cerr << 
 "                          dab-cmdline options are\n\
                           -W number   amount of time to look for an ensemble\n\
                           -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
@@ -495,8 +497,6 @@ void    printOptions (void) {
                           -A name     select the audio channel (portaudio)\n\
                           -L number   latency for audiobuffer\n\
                           -S hexnumber use hexnumber to identify program\n\n\
-	                  -O filename put the output into a file rather than through portaudio\n");
+	                  -O filename put the output into a file rather than through portaudio\n";
 }
-
-                          
 
