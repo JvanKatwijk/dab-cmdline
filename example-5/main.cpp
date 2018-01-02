@@ -267,7 +267,7 @@ bool	err;
 
 	      case 'M':
 	         theMode	= atoi (optarg);
-	         if (!(theMode == 1) || (theMode == 2) || (theMode == 4))
+	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
 	            theMode = 1; 
 	         break;
 
