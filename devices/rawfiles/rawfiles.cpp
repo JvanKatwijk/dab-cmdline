@@ -47,9 +47,10 @@ struct timeval  tv;
 	rawFiles::rawFiles (std::string f) {
 	fileName	= f;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
-	filePointer	= fopen (f. c_str (), "r+b");
+	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
 	   fprintf (stderr, "file %s cannot open\n", f. c_str ());
+	   perror ("file ?");
 	   delete _I_Buffer;
 	   throw (31);
 	}
