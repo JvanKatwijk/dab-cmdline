@@ -110,10 +110,8 @@ uint16_t i;
 	   case EbuLatin:
 	   default:
 	      for (i = 0; i < length; i++) 
-	         if (buffer [i] & 0x80) {
-	            if (buffer [i] & 0xff) {
-	               s. append (utf8_encoded_EBU_Latin [buffer[i] & 0xff]);
-	            }
+	         if (buffer [i] & 0x80) {	// extended char
+	            s. append (utf8_encoded_EBU_Latin [buffer[i] & 0xff]);
 	         }
 	         else
 	            s. push_back (buffer [i]);
