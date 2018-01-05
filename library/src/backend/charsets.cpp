@@ -26,6 +26,7 @@
 #include	<stdint.h>
 #include        <cstdio>
 #include        <iostream>
+#include        <stdexcept>
 
 /**
  * This table maps "EBU Latin" charset to corresponding
@@ -101,11 +102,11 @@ uint16_t i;
 
 	switch (charset) {
 	   case UnicodeUcs2:
-	      throw std::logic_error("UnicodeUcs2 to Utf8 not yet implemented")
+	      throw std::logic_error("UnicodeUcs2 to Utf8 not yet implemented");
 	      break;
 
 	   case UnicodeUtf8:
-	   case IsoLatin1:
+	   case IsoLatin:
 	   default:
 	      for (i = 0; i < length; i ++)
 	         s. push_back (buffer [i]);
