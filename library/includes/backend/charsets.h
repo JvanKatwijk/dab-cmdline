@@ -33,6 +33,7 @@
  */
 typedef enum {
     EbuLatin	= 0x00, // Complete EBU Latin based repertoire - see annex C
+    IsoLatin	= 0x04,
     UnicodeUcs2 = 0x06,
     UnicodeUtf8 = 0x0F
 } CharacterSet;

@@ -100,23 +100,21 @@ uint16_t i;
 	   length = size;
 
 	switch (charset) {
-//	   case UnicodeUcs2:
-//	      s = std::string::fromUtf16 ((const ushort*) buffer, length);
-//	      break;
+	   case UnicodeUcs2:
+	      throw std::logic_error("UnicodeUcs2 to Utf8 not yet implemented")
+	      break;
 
 	   case UnicodeUtf8:
+	   case IsoLatin1:
+	   default:
+	      for (i = 0; i < length; i ++)
+	         s. push_back (buffer [i]);
 	      break;
 
 	   case EbuLatin:
-	   default:
 	      for (i = 0; i < length; i++) 
-	         if (buffer [i] & 0x80) {
-	            if (buffer [i] & 0xff) {
-	               s. append (utf8_encoded_EBU_Latin [buffer[i] & 0xff]);
-	            }
-	         }
-	         else
-	            s. push_back (buffer [i]);
+	         s. append (utf8_encoded_EBU_Latin [buffer[i] & 0xff]);
+	      break;
 	}
 
 	return s;
