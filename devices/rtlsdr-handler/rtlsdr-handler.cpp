@@ -210,6 +210,9 @@ int32_t	r;
            return false;
 
 	workerHandle = std::thread (controlThread, this);
+	rtlsdr_set_tuner_gain (device, theGain);
+	if (autogain)
+	   rtlsdr_set_agc_mode (device, 1);
 	running	= true;
 	return true;
 }
@@ -269,8 +272,10 @@ uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 	amount = _I_Buffer	-> getDataFromBuffer (tempBuffer, 2 * size);
 	for (i = 0; i < amount / 2; i ++)
 	    V [i] = std::complex<float>
-	                    ((float (tempBuffer [2 * i] - 128)) / 128.0,
-	                     (float (tempBuffer [2 * i + 1] - 128)) / 128.0);
+	                    (convTable [tempBuffer [2 * i]],
+	                     convTable [tempBuffer [2 * i + 1]]);;
+//	                    ((float (tempBuffer [2 * i] - 128)) / 128.0,
+//	                     (float (tempBuffer [2 * i + 1] - 128)) / 128.0);
 	return amount / 2;
 }
 
