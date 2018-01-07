@@ -350,7 +350,7 @@ deviceHandler	*theDevice;
 	if (serviceId != -1) 
 	   programName = dab_getserviceName (serviceId, theRadio);
 	fprintf (stderr, "we try to start program %s\n", programName. c_str ());
-	if (dabService (programName, theRadio) < 0) {
+	if (dabService (programName.c_str(), theRadio) < 0) {
 	   fprintf (stderr, "sorry  we cannot handle service %s\n", 
 	                                             programName. c_str ());
 	   run. store (false);

@@ -76,11 +76,13 @@ void	dabStop           (void *Handle) {
 }
 
 
-int16_t	dabService     (std::string s, void *Handle) {
+int16_t	dabService     (const char* c_s, void *Handle) {
+	std::string s(c_s);
 	return ((dabClass *)Handle) -> dab_service (s);
 }
 	
-int32_t dab_getSId      (std::string s, void * Handle) {
+int32_t dab_getSId      (const char* c_s, void * Handle) {
+	std::string s(c_s);
 	return ((dabClass *)Handle) -> dab_getSId (s);
 }
 
