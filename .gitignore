@@ -1,2 +1,9 @@
 # Ignore temporary files
 *.swp
+# Ignore build folders
+/example-*/build/
+/library/build/
+/simple-dab/build/
+/python-example/build/
+# Ignore vscode data directory
+/.vscode/
