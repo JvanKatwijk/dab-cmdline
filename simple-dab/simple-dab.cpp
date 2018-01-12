@@ -282,7 +282,7 @@ std::string ss;
 void	simpleDab::selectService (QModelIndex s) {
 QString a = ensemble. data (s, Qt::DisplayRole). toString ();
 std::string ss = std::string (a. toLatin1 (). data ());
-	dabService (ss, theLibrary);
+	dabService (ss.c_str(), theLibrary);
 	techData. programName  -> setText (a);
 }
 

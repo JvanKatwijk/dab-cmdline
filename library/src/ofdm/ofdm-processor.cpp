@@ -353,10 +353,8 @@ int		index_attempts		= 0;
 	                                  estimateOffset (ofdmBuffer);
 	         if (correction != 100) {
 	            coarseCorrector += correction * carrierDiff;
-	            if (coarseCorrector > Khz (35))
-	               coarseCorrector = Khz (34);
-	            if (coarseCorrector <= - Khz (35))
-	               coarseCorrector = - Khz (34);
+	            if (abs (coarseCorrector) > Khz (35))
+	               coarseCorrector = 0;
 	         }
 	      }
 //

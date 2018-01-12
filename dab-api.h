@@ -191,10 +191,10 @@ void	dabStop		(void *);
 //	return -2 if the type of service is not recognized
 //	return -3 if the type of service is not audio
 //	return -4 if the service is insufficiently defined
-int16_t	dabService     (std::string, void *);
+int16_t	dabService     (const char*, void *);
 //
 //	mapping from a name to a Service identifier is done 
-int32_t dab_getSId      (std::string, void *);
+int32_t dab_getSId      (const char*, void *);
 //
 //	and the other way around, mapping the service identifier to a name
 std::string dab_getserviceName (int32_t, void *);

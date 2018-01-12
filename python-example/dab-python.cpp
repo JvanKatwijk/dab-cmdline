@@ -554,13 +554,11 @@ PyObject *dabService_p (PyObject *self, PyObject *args) {
 PyObject	*handle_capsule;
 void		*handle;
 char		*s;
-std::string	ss;
 
 	PyArg_ParseTuple (args, "sO", &s, &handle_capsule);
 	fprintf (stdout, "%s zou moeten worden gestart\n", s);
-	ss	= std::string (s);
 	handle = PyCapsule_GetPointer (handle_capsule, "library_object");
-	dabService (ss, handle);
+	dabService (s, handle);
 	Py_RETURN_NONE;
 }
 
