@@ -46,9 +46,7 @@
 	                                                           programnameHandler,
 	                                                           userData) {
 int16_t	i, j, k;
-int16_t	viterbiCounter	= 0;
-int16_t	inputCounter	= 0;
-int8_t	*PI_15, *PI_16, *PI_X;
+int16_t	local	= 0;
 
 	this	-> fib_qualityHandler	= fib_qualityHandler;
 	this	-> userData		= userData;
@@ -58,9 +56,6 @@ int8_t	*PI_15, *PI_16, *PI_X;
 	ficBlocks	= 0;
 	ficMissed	= 0;
 	ficRatio	= 0;
-	PI_15		= get_PCodes (15 - 1);
-	PI_16		= get_PCodes (16 - 1);
-	PI_X		= get_PCodes (8  - 1);
 	memset (shiftRegister, 1, 9);
 
 	for (i = 0; i < 768; i ++) {
@@ -77,13 +72,13 @@ int8_t	*PI_15, *PI_16, *PI_X;
   *	each 128 bit block contains 4 subblocks of 32 bits
   *	on which the given puncturing is applied
   */
-	memset (indexTable, 0, (3072 + 24) * sizeof (int16_t));
+	memset (punctureTable, 0, (3072 + 24) * sizeof (bool));
 
 	for (i = 0; i < 21; i ++) {
 	   for (k = 0; k < 32 * 4; k ++) {
-	      if (PI_16 [k % 32] == 1)  
-	         indexTable [viterbiCounter] = inputCounter ++;
-	      viterbiCounter ++;
+	      if (get_PCodes (16 - 1) [k % 32] == 1)  
+	         punctureTable [local] = true;
+	      local ++;
 	   }
 	}
 /**
@@ -94,9 +89,9 @@ int8_t	*PI_15, *PI_16, *PI_X;
   */
 	for (i = 0; i < 3; i ++) {
 	   for (k = 0; k < 32 * 4; k ++) {
-	      if (PI_15 [k % 32] == 1)  
-	         indexTable [viterbiCounter] = inputCounter ++;
-	      viterbiCounter ++;
+	      if (get_PCodes (15 - 1) [k % 32] == 1)  
+	         punctureTable [local] = true;
+	      local ++;
 	   }
 	}
 
@@ -105,9 +100,9 @@ int8_t	*PI_15, *PI_16, *PI_X;
   *	This block constitues the 6 * 4 bits of the register itself.
   */
 	for (k = 0; k < 24; k ++) {
-	   if (PI_X [k] == 1) 
-	      indexTable [viterbiCounter] = inputCounter ++;
-	   viterbiCounter ++;
+	   if (get_PCodes (8 - 1) [k] == 1) 
+	      punctureTable [local] = true;
+	   local ++;
 	}
 }
 
@@ -149,7 +144,7 @@ void	ficHandler::setBitsperBlock	(int16_t b) {
   *	The function is called with a blkno. This should be 1, 2 or 3
   *	for each time 2304 bits are in, we call process_ficInput
   */
-void	ficHandler::process_ficBlock (int16_t *data,
+void	ficHandler::process_ficBlock (std::vector<int16_t> data,
 	                              int16_t blkno) {
 int32_t	i;
 
@@ -162,7 +157,7 @@ int32_t	i;
 	   for (i = 0; i < BitsperBlock; i ++) {
 	      ofdm_input [index ++] = data [i];
 	      if (index >= 2304) {
-	         process_ficInput (ofdm_input, ficno);
+	         process_ficInput (ficno);
 	         index = 0;
 	         ficno ++;
 	      }
@@ -183,15 +178,16 @@ int32_t	i;
   *	In the next coding step, we will combine this function with the
   *	one above
   */
-void	ficHandler::process_ficInput (int16_t *ficBlock,
-	                              int16_t ficno) {
+void	ficHandler::process_ficInput (int16_t ficno) {
 int16_t	i;
+int16_t	viterbiBlock [3072 + 24];
+int16_t	inputCount	= 0;
 
 	memset (viterbiBlock, 0, (3072 + 24) * sizeof (int16_t));
 
 	for (i = 0; i < 4 * 768 + 24; i ++)
-	   if (indexTable [i] != 0)
-	      viterbiBlock [i] = ficBlock [indexTable [i]];
+	   if (punctureTable [i])
+	      viterbiBlock [i] = ofdm_input [inputCount ++];
 /**
   *	Now we have the full word ready for deconvolution
   *	deconvolution is according to DAB standard section 11.2

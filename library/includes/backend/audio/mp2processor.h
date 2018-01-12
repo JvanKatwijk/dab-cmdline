@@ -53,6 +53,7 @@ public:
 	                                 audioOut_t,
 	                                 dataOut_t,
 	                                 programQuality_t,
+	                                 motdata_t,
 	                                 void	*);
 			~mp2Processor	(void);
 	void		addtoFrame	(uint8_t *);

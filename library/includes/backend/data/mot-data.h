@@ -23,6 +23,7 @@
 #ifndef	__MOT_HANDLER__
 #define	__MOT_HANDLER__
 #include	"dab-constants.h"
+#include	"dab-api.h"
 #include	<vector>
 
 
@@ -73,7 +74,7 @@ int16_t	i;
 
 class	motHandler {
 public:
-		motHandler	(void);
+		motHandler	(motdata_t);
 		~motHandler	(void);
 void		process_mscGroup	(uint8_t *,
 	                                 uint8_t,
@@ -123,8 +124,12 @@ private:
 	                                 int16_t	contentsubType,
 	                                 std::string	name);
 	bool		isComplete	(motElement *);
-	void	handleComplete	(motElement *);
-	void	checkDir	(std::string &);
-	void	the_picture	(std::vector<uint8_t>, int, std::string);
+	void		handleComplete	(motElement *);
+	void		checkDir	(std::string &);
+	void		the_picture	(std::vector<uint8_t>, int, std::string);
+	std::string	newName		(const char *dir);
+        int		pictureCount;
+	motdata_t	motdata_Handler;
+	std::string	buildName	(const char *dir, std::string name);
 };
 #endif

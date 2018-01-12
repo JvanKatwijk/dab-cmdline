@@ -180,7 +180,7 @@ const char	**t;
 	   
 //	Note that the callbacks are plain static functions
 	theLibrary	= dabInit (theDevice,
-	                           dabMode,			// Mode for now
+	                           dabMode,		// Mode for now
 	                           spectrumBuffer,
 	                           iqBuffer,
 	                           syncsignal_Handler,
@@ -193,6 +193,7 @@ const char	**t;
 	                           NULL,
 	                           programdata_Handler,
 	                           mscQuality_Handler,
+	                           NULL,	// no mot slides
 	                           this		// context, userData
 	                          );
 	

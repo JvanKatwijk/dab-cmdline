@@ -56,11 +56,11 @@ int16_t	i;
 	this	-> T_u			= params -> get_T_u ();
 	this	-> nrBlocks		= params -> get_L ();
 	this	-> carriers		= params -> get_carriers ();
-	ibits				= new int16_t [2 * carriers];
+	ibits. resize (2 * carriers);
 
 	this	-> T_g			= T_s - T_u;
 	fft_buffer			= my_fftHandler -> getVector ();
-	phaseReference			= new std::complex<float> [T_u];
+	phaseReference. resize (T_u);
 //
 	current_snr			= 0;	
 	cnt				= 0;
@@ -92,7 +92,6 @@ int16_t	i;
 	   threadHandle. join ();
 	}
 
-	delete[]	phaseReference;
 	for (i = 0; i < nrBlocks; i ++)
 	   delete[] command [i];
 	delete[] command;
@@ -186,7 +185,8 @@ void	ofdmDecoder::processBlock_0 (void) {
   *	we are now in the frequency domain, and we keep the carriers
   *	as coming from the FFT as phase reference.
   */
-	memcpy (phaseReference, fft_buffer, T_u * sizeof (std::complex<float>));
+	memcpy (phaseReference. data (),
+	               fft_buffer, T_u * sizeof (std::complex<float>));
 }
 /**
   *	for the other blocks of data, the first step is to go from
@@ -236,7 +236,8 @@ toBitsLabel:
 	   ibits [carriers + i] = - imag (r1) / ab1 * 127.0;
 	}
 
-	memcpy (phaseReference, fft_buffer, T_u * sizeof (std::complex<float>));
+	memcpy (phaseReference. data (),
+	          fft_buffer, T_u * sizeof (std::complex<float>));
 handlerLabel:
 	my_ficHandler -> process_ficBlock (ibits, blkno);
 
@@ -287,7 +288,8 @@ toBitsLabel:
 	   ibits [carriers + i] = - imag (r1) / ab1 * 127.0;
 	}
 
-	memcpy (phaseReference, fft_buffer, T_u * sizeof (std::complex<float>));
+	memcpy (phaseReference. data (),
+	             fft_buffer, T_u * sizeof (std::complex<float>));
 handlerLabel:
 	my_mscHandler -> process_mscBlock (ibits, blkno);
 }

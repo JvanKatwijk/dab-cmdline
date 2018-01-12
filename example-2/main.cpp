@@ -140,6 +140,7 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	(void)ctx;
 	std::cerr << dynamicLabel << "\r";
 }
+
 //
 //	Note: the function is called from the tdcHandler with a
 //	frame, either frame 0 or frame 1.
@@ -410,6 +411,7 @@ bool	err;
 	                                bytesOut_Handler,
 	                                programdataHandler,
 	                                mscQuality,
+	                                NULL,
 	                                NULL
 	                               );
 	if (theRadio == NULL) {

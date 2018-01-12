@@ -28,6 +28,7 @@
 
 #include	<stdio.h>
 #include	<stdint.h>
+#include	<vector>
 #include	"viterbi-768.h"
 #include	"fib-processor.h"
 #include	<mutex>
@@ -41,7 +42,7 @@ public:
 	                                 fib_quality_t,
 	                                 void	*);
 		~ficHandler		(void);
-	void	process_ficBlock	(int16_t *, int16_t);
+	void	process_ficBlock	(std::vector<int16_t>, int16_t);
 	void	setBitsperBlock		(int16_t);
 	void	clearEnsemble		(void);
 	bool	syncReached		(void);
@@ -56,11 +57,10 @@ public:
 private:
 	fib_quality_t	fib_qualityHandler;
 	void		*userData;
-	void		process_ficInput	(int16_t *, int16_t);
-	uint8_t		bitBuffer_out [768];
-        int16_t		ofdm_input    [2304];
-        int16_t		indexTable    [4 * 768 + 24];
-        int16_t		viterbiBlock  [4 * 768 + 24];
+	void		process_ficInput	(int16_t);
+	uint8_t		bitBuffer_out	[768];
+        int16_t		ofdm_input	[2304];
+        bool		punctureTable	[4 * 768 + 24];
 
 	int16_t		index;
 	int16_t		BitsperBlock;

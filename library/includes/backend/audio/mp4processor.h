@@ -44,6 +44,7 @@ public:
 	                                 audioOut_t,
 	                                 dataOut_t,
 	                                 programQuality_t,
+	                                 motdata_t,
 	                                 void	*);
 			~mp4Processor	(void);
 	void		addtoFrame	(uint8_t *);

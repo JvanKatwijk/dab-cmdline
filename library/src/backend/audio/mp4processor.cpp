@@ -45,8 +45,11 @@
 	                            audioOut_t		soundOut,
 	                            dataOut_t		dataOut,
 	                            programQuality_t	mscQuality,
+	                            motdata_t		motdata_Handler,
 	                            void		*ctx):
-	                                  my_padHandler (dataOut, ctx),
+	                                  my_padHandler (dataOut,
+	                                                 motdata_Handler,
+	                                                 ctx),
 	                                  my_rsDecoder (8, 0435, 0, 1, 10),
 	                                  aacDecoder (soundOut, ctx) {
 

@@ -18,7 +18,6 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 #include	"mot-data.h"
 //
@@ -30,9 +29,10 @@
 //	The "directory" case, where a directory of files is maintained
 //	to form together a slideshow or a website
 //
-		motHandler::motHandler (void) {
+		motHandler::motHandler (motdata_t motdata_Handler) {
 int16_t	i, j;
 
+	this	-> motdata_Handler	= motdata_Handler;
 	for (i = 0; i < 16; i ++) {
 	   table [i]. ordernumber = -1;
 	   for (j = 0; j < 100; j ++)
@@ -41,6 +41,7 @@ int16_t	i, j;
 	ordernumber	= 1;
 	theDirectory	= NULL;
 	old_slide	= NULL;
+	pictureCount	= 0;
 }
 
 	 	motHandler::~motHandler (void) {
@@ -119,6 +120,7 @@ std::string	name 	= std::string ("");
 	      case 00:
 	         pointer += 1;
 	         break;
+
 	      case 01:
 	         pointer += 2;
 	         break;
@@ -182,8 +184,9 @@ int16_t	i;
 	if (lastFlag) 
 	   handle -> numofSegments = segmentNumber + 1;
 
-	if (isComplete (handle)) 
+	if (isComplete (handle)) {
 	   handleComplete (handle);
+	}
 }
 
 bool	motHandler::isComplete (motElement *p) {
@@ -217,8 +220,6 @@ std::vector<uint8_t> result;
 
 	if (p -> contentType != 2) {
            if (p -> name != std::string ("")) {
-	      fprintf (stderr, "going to write file %s\n",
-	                           (p ->  name). c_str ());
 	      checkDir (p -> name);
 	      FILE *x = fopen ((p -> name). c_str (), "w+b");
 	      if (x == NULL)
@@ -232,14 +233,25 @@ std::vector<uint8_t> result;
 	   return;
 	}
 
-	if (old_slide != NULL)
+	if (motdata_Handler == NULL)
+	   return;
+	if (old_slide != NULL) {
 	   for (i = 0; i < p ->  numofSegments; i ++) {
 	      p -> marked [i] = false;
 	      p -> segments [i]. clear ();
 	   }
-//	fprintf (stderr, "going to show picture %s\n",
-//	                                   (p -> name). c_str ());
-//	checkDir (p -> name);
+	}
+	if (p -> name == std::string (""))
+	   p -> name = newName ("/tmp/");
+	else
+	   p -> name = buildName ("/tmp/", p -> name);
+
+	FILE *f	= fopen (p -> name. c_str (), "w+b");
+	if (f == NULL)
+	   return;
+	fwrite (result. data (), 1, result. size (), f);
+	motdata_Handler (p -> name, p -> contentsubType, NULL);
+	fclose (f);
 //	the_picture (result, p -> contentsubType, p -> name);
 	old_slide	= p;
 }
@@ -480,7 +492,30 @@ motElement	*currEntry = &(theDirectory -> dir_proper [index]);
 }
 
 
-void	motHandler::the_picture     (std::vector<uint8_t>, int, std::string) {
+void	motHandler::the_picture     (std::vector<uint8_t> data,
+	                                  int subType, std::string name) {
+FILE *f	= fopen (name. c_str (), "wb");
+	if (f == NULL)
+	   return;
+	fwrite (data. data (), 1, data. size (), f);
+	motdata_Handler (name. c_str (), subType, NULL);
+	fclose (f);
+}
+
+std::string motHandler::newName	(const char *dir) {
+	pictureCount ++;
+	std::string s = std::string (dir);
+	std::string temp = std::string ("picture ");
+	s . append (temp); s. append (std::to_string (pictureCount));
+	return s;
+}
+
+std::string motHandler::buildName (const char *dir, std::string name) {
+	pictureCount ++;
+	std::string s = std::string (dir);
+	std::string temp = std::string ("picture ");
+	s . append (temp); s. append (std::to_string (pictureCount));
+	return s;
 }
 
 

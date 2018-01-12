@@ -44,6 +44,7 @@
 	                         audioOut_t	soundOut,
 	                         dataOut_t	dataOut,
 	                         programQuality_t mscQuality,
+	                         motdata_t	motdata_Handler,
 	                         void		*ctx) {
 int32_t i;
 
@@ -72,13 +73,15 @@ int32_t i;
 	   our_dabProcessor = new mp2Processor (bitRate,
 	                                        soundOut,
 	                                        dataOut,
-	                                        mscQuality, ctx);
+	                                        mscQuality,
+	                                        motdata_Handler, ctx);
 	else
 	if (dabModus == DAB_PLUS) 
 	   our_dabProcessor = new mp4Processor (bitRate,
 	                                        soundOut,
 	                                        dataOut,
-	                                        mscQuality, ctx);
+	                                        mscQuality,
+	                                        motdata_Handler, ctx);
 	else		// cannot happen
 	   our_dabProcessor = new dabProcessor ();
 

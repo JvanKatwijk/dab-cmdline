@@ -51,16 +51,17 @@ public:
 	                    uint8_t		Mode,
 	                    RingBuffer<std::complex<float>> *spectrumBuffer,
 	                    RingBuffer<std::complex<float>> *iqBuffer,
-	                    syncsignal_t	syncsignalHandler,
-	                    systemdata_t	systemdataHandler,
-	                    ensemblename_t	ensemblenameHandler,
-	                    programname_t	programnamehandler,
-	                    fib_quality_t	fib_qualityHandler,
+	                    syncsignal_t	syncsignal_Handler,
+	                    systemdata_t	systemdata_Handler,
+	                    ensemblename_t	ensemblename_Handler,
+	                    programname_t	programname_handler,
+	                    fib_quality_t	fibquality_Handler,
 	                    audioOut_t		audioOut_Handler,
 	                    dataOut_t		dataOut_Handler,
 	                    bytesOut_t		bytesOut_Handler,
-	                    programdata_t	programdataHandler,
-	                    programQuality_t	program_qualityHandler,
+	                    programdata_t	programdata_Handler,
+	                    programQuality_t	programquality_Handler,
+	                    motdata_t		motdata_Handler,
 	                    void		*ctx);
 			~dabClass	(void);
 	void		startProcessing	(void);
@@ -80,14 +81,15 @@ private:
 	deviceHandler		*inputDevice;
 	RingBuffer<std::complex<float>>	*spectrumBuffer;
 	RingBuffer<std::complex<float>>	*iqBuffer;
-	syncsignal_t		syncsignalHandler;
-	systemdata_t		systemdataHandler;
-	ensemblename_t		ensemblenameHandler;
-	programname_t		programnameHandler;
-	fib_quality_t		fib_qualityHandler;
+	syncsignal_t		syncsignal_Handler;
+	systemdata_t		systemdata_Handler;
+	ensemblename_t		ensemblename_Handler;
+	programname_t		programname_Handler;
+	fib_quality_t		fibquality_Handler;
 	audioOut_t		audioOut_Handler;
 	dataOut_t		dataOut_Handler;
-	programdata_t		programdataHandler;
+	programdata_t		programdata_Handler;
+	motdata_t		motdata_Handler;
 	void			*userData;
 };
 

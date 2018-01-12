@@ -23,6 +23,7 @@
 #define	__OFDM_DECODER__
 
 #include	<stdint.h>
+#include	<vector>
 #include	<thread>
 #include	<mutex>
 #include	<condition_variable>
@@ -78,11 +79,11 @@ private:
 	int32_t		carriers;
 	int32_t		nrBlocks;
 	int16_t		getMiddle	(void);
-	std::complex<float>	*phaseReference;
+	std::vector <complex<float> >	phaseReference;
+	std::vector<int16_t>            ibits;
 	std::complex<float>	*fft_buffer;
 	interLeaver	myMapper;
 	int32_t		blockIndex;
-	int16_t		*ibits;
 	float		current_snr;
 };
 

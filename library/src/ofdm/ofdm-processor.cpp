@@ -74,7 +74,7 @@ int32_t	i;
 	this	-> carrierDiff		= params. get_carrierDiff ();
         bufferSize			= 32768;
         this    -> spectrumBuffer       = spectrumBuffer;
-        localBuffer			= new std::complex<float> [bufferSize];
+        localBuffer. resize (bufferSize);
         localCounter			= 0;
 	this	-> my_ficHandler	= fic;
 	tiiSwitch			= false;
@@ -158,7 +158,8 @@ std::complex<float> temp;
 	sampleCnt	++;
 	if (++ sampleCnt > INPUT_RATE / N) {
 	   if (spectrumBuffer != NULL)
-              spectrumBuffer -> putDataIntoBuffer (localBuffer, localCounter);
+              spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
+	                                              localCounter);
            localCounter = 0;
 	   call_systemData (isSynced,
 	                    my_ofdmDecoder. get_snr (),
@@ -203,7 +204,8 @@ int32_t		i;
 	sampleCnt	+= n;
 	if (sampleCnt > INPUT_RATE / N) {
 	   if (spectrumBuffer != NULL)
-              spectrumBuffer -> putDataIntoBuffer (localBuffer, bufferSize);
+              spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
+	                                                      bufferSize);
            localCounter = 0;
 	   call_systemData (isSynced,
 	                    my_ofdmDecoder. get_snr (),

@@ -114,6 +114,7 @@ typedef	struct {
 //	dynamic label data, embedded in the audio stream, is sent as string
 	typedef void (*dataOut_t)(std::string, void *);
 //
+//
 //	byte oriented data, emitted by various dataHandlers, is sent
 //	as array of uint8_t values (packed bytes)
 	typedef void (*bytesOut_t)(uint8_t *, int16_t, uint8_t, void *);
@@ -128,9 +129,15 @@ typedef	struct {
 	typedef void (*programQuality_t)(int16_t, int16_t, int16_t, void *);
 //
 //	After selecting a service, parameters of the selected program
-//	ar sent back.
+//	are sent back.
 	typedef void (*programdata_t)(audiodata *, void *);
 
+//
+//	MOT pictures - i.e. slides encoded in the Program Associated data
+//	are stored in a file. Each time such a file is created, the
+//	function registered as
+	typedef void (*motdata_t)(std::string, int, void *);
+//	is invoked (if not specified as NULL)
 /////////////////////////////////////////////////////////////////////////
 //
 //	The API functions
@@ -162,6 +169,7 @@ void	*dabInit   (deviceHandler       *,
 	            bytesOut_t		bytesOut,
 	            programdata_t       programdataHandler,
 	            programQuality_t    program_qualityHandler,
+	            motdata_t		motdata_Handler,
 	            void                *userData);
 
 //	dabExit cleans up the library on termination

@@ -29,7 +29,7 @@
 
 #include	<stdio.h>
 #include	<stdint.h>
-#include	<stdio.h>
+#include	<vector>
 #include	<mutex>
 #include	<condition_variable>
 #include	"dab-constants.h"
@@ -46,9 +46,10 @@ public:
 	                                 dataOut_t,
 	                                 bytesOut_t,
 	                                 programQuality_t,
+	                                 motdata_t,
 	                                 void		*);
 		~mscHandler		(void);
-	void	process_mscBlock	(int16_t *, int16_t);
+	void	process_mscBlock	(std::vector<int16_t>, int16_t);
 	void	set_audioChannel	(audiodata	*);
 	void	set_dataChannel		(packetdata     *);
 	void	stopProcessing		(void);
@@ -58,12 +59,13 @@ private:
 	dataOut_t	dataOut;
 	bytesOut_t	bytesOut;
 	programQuality_t programQuality;
+	motdata_t	motdata_Handler;
 	void		*userData;
 	dabParams	params;
 	bool		audioService;
 	std::mutex	mutexer;
 	dabVirtual	*dabHandler;
-	int16_t		*cifVector;
+	std::vector<int16_t> cifVector;
 	int16_t		cifCount;
 	int16_t		blkCount;
 	bool		work_to_be_done;

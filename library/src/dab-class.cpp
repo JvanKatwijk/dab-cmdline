@@ -34,44 +34,47 @@
 	                    uint8_t		Mode,
 	                    RingBuffer<std::complex<float>> *spectrumBuffer,
 	                    RingBuffer<std::complex<float>> *iqBuffer,
-	                    syncsignal_t	syncsignalHandler,
-	                    systemdata_t	systemdataHandler,
-	                    ensemblename_t	ensemblenameHandler,
-	                    programname_t	programnameHandler,
-	                    fib_quality_t	fib_qualityHandler,
+	                    syncsignal_t	syncsignal_Handler,
+	                    systemdata_t	systemdata_Handler,
+	                    ensemblename_t	ensemblename_Handler,
+	                    programname_t	programname_Handler,
+	                    fib_quality_t	fibquality_Handler,
 	                    audioOut_t		audioOut_Handler,
 	                    dataOut_t		dataOut_Handler,
 	                    bytesOut_t		bytesOut_Handler,
-	                    programdata_t	programdataHandler,
-	                    programQuality_t	program_qualityHandler,
+	                    programdata_t	programdata_Handler,
+	                    programQuality_t	programquality_Handler,
+	                    motdata_t		motdata_Handler,
 	                    void		*ctx):
-	                                   the_ficHandler (ensemblenameHandler,
-	                                                   programnameHandler,
-	                                                   fib_qualityHandler,
+	                                   the_ficHandler (ensemblename_Handler,
+	                                                   programname_Handler,
+	                                                   fibquality_Handler,
 	                                                   ctx),
 	                                   the_mscHandler (Mode,
 	                                                   audioOut_Handler,
 	                                                   dataOut_Handler,
 	                                                   bytesOut_Handler,
-	                                                   program_qualityHandler,
+	                                                   programquality_Handler,
+	                                                   motdata_Handler,
 	                                                   ctx) {
 	this	-> inputDevice		= inputDevice;
 	this	-> spectrumBuffer	= spectrumBuffer,
 	this	-> iqBuffer		= iqBuffer,
-	this	-> syncsignalHandler	= syncsignalHandler;
-	this	-> systemdataHandler	= systemdataHandler;
-	this	-> ensemblenameHandler	= ensemblenameHandler;
-	this	-> programnameHandler	= programnameHandler;
-	this	-> fib_qualityHandler	= fib_qualityHandler;
+	this	-> syncsignal_Handler	= syncsignal_Handler;
+	this	-> systemdata_Handler	= systemdata_Handler;
+	this	-> ensemblename_Handler	= ensemblename_Handler;
+	this	-> programname_Handler	= programname_Handler;
+	this	-> fibquality_Handler	= fibquality_Handler;
 	this	-> audioOut_Handler	= audioOut_Handler;
 	this	-> dataOut_Handler	= dataOut_Handler;
-	this	-> programdataHandler	= programdataHandler;
+	this	-> programdata_Handler	= programdata_Handler;
+	this	-> motdata_Handler	= motdata_Handler;
 	this	-> userData		= ctx;
 
 	 the_ofdmProcessor = new ofdmProcessor  (inputDevice,
 	                                        Mode,
-	                                        syncsignalHandler,
-	                                        systemdataHandler,
+	                                        syncsignal_Handler,
+	                                        systemdata_Handler,
 	                                        &the_mscHandler,
 	                                        &the_ficHandler,
 	                                        3,
@@ -132,8 +135,8 @@ packetdata d2;
 	        return -4;
 	     the_mscHandler. set_audioChannel (&d1);
 	     fprintf (stderr, "selected %s\n", name. c_str ());
-	     if (programdataHandler != NULL) 
-	        programdataHandler (&d1, userData);
+	     if (programdata_Handler != NULL) 
+	        programdata_Handler (&d1, userData);
 	     return 1;
 //
 //	For the command line version, we do not have a data service

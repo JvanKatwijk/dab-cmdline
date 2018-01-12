@@ -27,10 +27,11 @@
   *	\class padHandler
   *	Handles the pad segments passed on from mp2- and mp4Processor
   */
-	padHandler::padHandler	(dataOut_t dataOut, void *ctx) {
+	padHandler::padHandler	(dataOut_t dataOut,
+	                             motdata_t motdata_Handler, void *ctx) {
 	this	-> dataOut	= dataOut;
 	this	-> ctx		= ctx;
-	my_motHandler		= new motHandler ();
+	my_motHandler		= new motHandler (motdata_Handler);
 	
 //
 //	mscGroupElement indicates whether we are handling an

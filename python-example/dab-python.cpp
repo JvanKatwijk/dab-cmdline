@@ -302,6 +302,7 @@ PyGILState_STATE gstate;
 //	                   bytesOut_t	       bytesOut_Handler,
 //	                   programdata_t       programdataHandler,
 //	                   programQuality_t    program_qualityHandler,
+//			   void		       *s,
 //	                   void                *userData);
 
 
@@ -472,6 +473,7 @@ void	*result;
 	                  (bytesOut_t)	        NULL,
 	                  (programdata_t)	&callback_programdata,
 	                  (programQuality_t)	&callback_programQuality,
+	                  NULL,			// no mot slides
 	                  NULL
 	                 );
 	if (result == NULL) {

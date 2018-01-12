@@ -292,6 +292,7 @@ bool	err;
 	                                bytesOut_Handler,
 	                                programdataHandler,
 	                                mscQuality,
+	                                NULL,		// no mot slides
 	                                NULL
 	                               );
 	if (theRadio == NULL) {

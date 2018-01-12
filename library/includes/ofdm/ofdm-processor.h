@@ -29,6 +29,7 @@
 #include	<thread>
 #include	<atomic>
 #include	<stdint.h>
+#include	<vector>
 #include	"phasereference.h"
 #include	"ofdm-decoder.h"
 #include	"dab-params.h"
@@ -100,7 +101,7 @@ virtual	void		run		(void);
         RingBuffer<std::complex<float>> *spectrumBuffer;
         int32_t         bufferSize;
         int32_t         localCounter;
-        std::complex<float>      *localBuffer;
+        std::vector<std::complex<float> >   localBuffer;
 };
 #endif
 

@@ -296,6 +296,7 @@ deviceHandler	*theDevice;
 	                           bytesOut_Handler,
 	                           programdataHandler,
 	                           mscQuality,
+	                           NULL,
 	                           NULL
 	                          );
 	if (theRadio == NULL) {
