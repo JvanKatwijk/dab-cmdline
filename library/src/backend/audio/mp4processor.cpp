@@ -227,6 +227,16 @@ stream_parms	streamParameters;
 	   if (check_crc_bytes (&outVector [au_start [i]],
 	                        aac_frame_length)) {
 	      bool err;
+//
+//	if there is pad handle it always
+	      if (((outVector [au_start [i] + 0] >> 5) & 07) == 4) {
+	         int16_t count = outVector [au_start [i] + 1];
+                 uint8_t buffer [count];
+                 memcpy (buffer, &outVector [au_start [i] + 2], count);
+                 uint8_t L0   = buffer [count - 1];
+                 uint8_t L1   = buffer [count - 2];
+                 my_padHandler. processPAD (buffer, count - 3, L1, L0);
+              }
 #ifdef	AAC_OUT
 	      uint8_t fileBuffer [1024];
 	      buildHeader (aac_frame_length, &streamParameters, fileBuffer);
@@ -236,11 +246,22 @@ stream_parms	streamParameters;
 	      if (soundOut != NULL) 
 	         (soundOut)((int16_t *)(&fileBuffer [0]),
 	                    aac_frame_length + 7, 0, false, NULL);
-#else
-	      handle_aacFrame (&outVector [au_start [i]],
-	                       aac_frame_length,
-	                       &streamParameters,
-	                       &err);
+#else	
+//	we handle the aac -> PMC conversion here
+	
+	      uint8_t theAudioUnit [2 * 960 + 10];	// sure, large enough
+	      memcpy (theAudioUnit,
+	                       &outVector [au_start [i]], aac_frame_length);
+	      memset (&theAudioUnit [aac_frame_length], 0, 10);
+
+	      int tmp = aacDecoder. MP42PCM (&streamParameters,
+	                                     theAudioUnit,
+	                                     aac_frame_length);
+	      err = tmp == 0;
+//	      handle_aacFrame (&outVector [au_start [i]],
+//	                       aac_frame_length,
+//	                       &streamParameters,
+//	                       &err);
 	      isStereo (streamParameters. aacChannelMode);
 	      if (err) 
 	         aacErrors ++;
@@ -267,14 +288,14 @@ uint8_t theAudioUnit [2 * 960 + 10];	// sure, large enough
 	memcpy (theAudioUnit, v, frame_length);
 	memset (&theAudioUnit [frame_length], 0, 10);
 
-	if (((theAudioUnit [0] >> 5) & 07) == 4) {
-	   int16_t count = theAudioUnit [1];
-           uint8_t buffer [count];
-           memcpy (buffer, &theAudioUnit [2], count);
-           uint8_t L0   = buffer [count - 1];
-           uint8_t L1   = buffer [count - 2];
-           my_padHandler. processPAD (buffer, count - 3, L1, L0);
-        }
+//	if (((theAudioUnit [0] >> 5) & 07) == 4) {
+//	   int16_t count = theAudioUnit [1];
+//           uint8_t buffer [count];
+//           memcpy (buffer, &theAudioUnit [2], count);
+//           uint8_t L0   = buffer [count - 1];
+//           uint8_t L1   = buffer [count - 2];
+//           my_padHandler. processPAD (buffer, count - 3, L1, L0);
+//        }
 
 	int tmp = aacDecoder. MP42PCM (sp,
 	                               theAudioUnit,
