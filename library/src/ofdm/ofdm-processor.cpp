@@ -135,7 +135,7 @@ std::complex<float> temp;
 	if (bufferContent == 0) {
 	   bufferContent = inputDevice -> Samples ();
 	   while (running. load () && (bufferContent == 0)) {
-	      usleep (10000);
+	      usleep (1000);
 	      bufferContent = inputDevice -> Samples (); 
 	   }
 	}
@@ -180,7 +180,7 @@ int32_t		i;
 	if (n > bufferContent) {
 	   bufferContent = inputDevice -> Samples ();
 	   while (running. load () && (bufferContent < n)) {
-	      usleep (1000000);
+	      usleep (1000);
 	      bufferContent = inputDevice -> Samples ();
 	   }
 	}
