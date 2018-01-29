@@ -60,6 +60,7 @@ typedef struct {
 	int16_t	DGflag;
 	int16_t	packetAddress;
 	int16_t	appType;
+	bool	is_madePublic;
 } packetdata;
 
 //
@@ -75,6 +76,7 @@ typedef	struct {
 	int16_t	ASCTy;
 	int16_t	language;
 	int16_t	programType;
+	bool	is_madePublic;
 } audiodata;
 
 //////////////////////// C A L L B A C K F U N C T I O N S ///////////////

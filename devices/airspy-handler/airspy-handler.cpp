@@ -109,8 +109,8 @@ uint32_t samplerate_count;
 
 	selectedRate	= 0;
 	for (i = 0; i < (int)samplerate_count; i ++) {
-	   if (abs (myBuffer [i] - 2048000.0) < distance) {
-	      distance	= abs (myBuffer [i] - 2048000.0);
+	   if (abs ((int)myBuffer [i] - 2048000) < distance) {
+	      distance	= abs ((int)myBuffer [i] - 2048000);
 	      selectedRate = myBuffer [i];
 	   }
 	}
@@ -152,7 +152,8 @@ uint32_t samplerate_count;
 	convIndex		= 0;
 	convBuffer		= new std::complex<float> [convBufferSize + 1];
 
-	theBuffer		= new RingBuffer<std::complex<float>> (512 *1024);
+	theBuffer		=
+	               new RingBuffer<std::complex<float>> (512 *1024);
 	running		= false;
 //
 //	Here we set the gain and frequency
@@ -180,6 +181,7 @@ uint32_t samplerate_count;
 	             my_airspy_error_name((airspy_error)result), result);
 	   }
 	}
+
 	my_airspy_exit ();
 	if (Handle != NULL) 
 #ifdef __MINGW32__
@@ -267,8 +269,6 @@ airspyHandler *p;
 
 	uint32_t bytes_to_write = transfer -> sample_count * sizeof (int16_t) * 2; 
 	p = static_cast<airspyHandler *> (transfer -> ctx);
-
-// AIRSPY_SAMPLE_FLOAT32_IQ:
 	uint8_t *pt_rx_buffer   = (uint8_t *)transfer -> samples;
 	
 	while (bytes_to_write > 0) {

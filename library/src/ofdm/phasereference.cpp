@@ -133,7 +133,7 @@ float   computedDiffs [SEARCH_RANGE + diff_length + 1];
 	   computedDiffs [i - (T_u - SEARCH_RANGE / 2)] =
 	      abs (arg (fft_buffer [i % T_u] * conj (fft_buffer [(i + 1) % T_u])));
 	float   Mmin = 1000;
-	for (i = T_u - SEARCH_RANGE /2; i < T_u + SEARCH_RANGE / 2; i ++) {
+	for (i = T_u - SEARCH_RANGE / 2; i < T_u + SEARCH_RANGE / 2; i ++) {
 	   float sum = 0;
 	   for (j = 1; j < diff_length; j ++)
 	      if (phaseDifferences [j - 1] < 0.1)

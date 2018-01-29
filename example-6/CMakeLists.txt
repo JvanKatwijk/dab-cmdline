@@ -115,6 +115,7 @@ endif ()
 	 add_definitions (-DHAVE_RTL_TCP)
 	endif (RTL_TCP)
 	
+
 	if (SDRPLAY)
 	   find_path (SDRPLAYLIB_INCLUDE_DIR
                       NAMES mirsdrapi-rsp.h
@@ -122,6 +123,13 @@ endif ()
                       /usr/local/include/
 	   )
            include_directories (${SDRPLAYLIB_INCLUDE_DIR})
+
+           find_library (SDRPLAYLIB mirsdrapi-rsp)
+           if(NOT(SDRPLAYLIB))
+              message(FATAL_ERROR "please install -lmirsdrapi-rsp")
+           else(NOT(SDRPLAYLIB))
+              list (APPEND extraLibs ${SDRPLAYLIB})
+           endif(NOT(SDRPLAYLIB))
 
 	   include_directories (
 	     ../devices/sdrplay-handler

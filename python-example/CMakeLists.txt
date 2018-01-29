@@ -46,6 +46,13 @@ endif ()
 	   )
            include_directories (${SDRPLAYLIB_INCLUDE_DIR})
 
+           find_library (SDRPLAYLIB mirsdrapi-rsp)
+           if(NOT(SDRPLAYLIB))
+              message(FATAL_ERROR "please install -lmirsdrapi-rsp")
+           else(NOT(SDRPLAYLIB))
+              list (APPEND extraLibs ${SDRPLAYLIB})
+           endif(NOT(SDRPLAYLIB))
+
 	   include_directories (
 	     ../devices/sdrplay-handler
 	   )

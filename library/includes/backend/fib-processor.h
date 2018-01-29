@@ -49,8 +49,8 @@
 	   int16_t	language;
 	   int16_t	programType;
 	   uint16_t	pNum;
-	   
 	};
+
 	typedef	struct serviceid serviceId;
 //      The service component describes the actual service
 //      It really should be a union
@@ -69,6 +69,7 @@
 	   uint8_t	DGflag;		// used for TDC
            int16_t      packetAddress;  // used in packet
 	   int16_t	appType;	// used in packet
+	   bool		is_madePublic;
         };
 
         typedef struct servicecomponents serviceComponent;
@@ -101,6 +102,8 @@ public:
 	uint8_t	kindofService		(std::string &);
 	void	dataforAudioService	(std::string &, audiodata *);
 	void	dataforDataService	(std::string &, packetdata *);
+	void	dataforAudioService	(std::string &, audiodata *, int16_t);
+	void	dataforDataService	(std::string &, packetdata *, int16_t);
 	std::complex<float> get_coordinates	(int16_t, int16_t, bool *);
 private:
 	ensemblename_t	ensemblenameHandler;
@@ -109,7 +112,7 @@ private:
 	serviceId	*findServiceId (int32_t);
 	serviceComponent *find_packetComponent (int16_t);
 	serviceComponent *find_serviceComponent (int32_t SId, int16_t SCId);
-
+	serviceId	*findServiceId	(std::string);
         void            bind_audioService (int8_t,
                                            uint32_t, int16_t,
                                            int16_t, int16_t, int16_t);
@@ -147,9 +150,9 @@ private:
 	                                         int16_t, uint8_t);
 	int16_t		HandleFIG0Extension22	(uint8_t *, int16_t);
 	int32_t		dateTime	[8];
-	channelMap	ficList [64];
-	serviceComponent	components [64];
-	serviceId	*listofServices;
+	channelMap	subChannels [64];
+	serviceComponent	ServiceComps [64];
+	serviceId	listofServices [64];
 	tii_table	coordinates;
 	bool		dateFlag;
 	bool		firstTime;

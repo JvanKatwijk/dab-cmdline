@@ -21,6 +21,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *	E X A M P L E  P R O G R A M
+ *	This program might (or might not) be used to mould the interface to
+ *	your wishes. Do not take it as a definitive and "ready: program
  *	for the DAB-library
  */
 #include	<unistd.h>
@@ -56,8 +58,8 @@ using std::cerr;
 using std::endl;
 
 void    printOptions (void);	// forward declaration
-//	we deal with some callbacks, so we have some data that needs
-//	to be accessed from global contexts
+//	we deal with callbacks from different threads. So, if you extend
+//	the functions, take care and add locking whenever needed
 static
 std::atomic<bool> run;
 
@@ -396,7 +398,7 @@ bool	err;
 	   }
 	}
 //
-//	and with a sound device we can create a "backend"
+//	and with a sound device we now can create a "backend"
 	theRadio	= new dabClass (theDevice,
 	                                theMode,
 	                                NULL,		// no spectrum shown
@@ -411,8 +413,8 @@ bool	err;
 	                                bytesOut_Handler,
 	                                programdataHandler,
 	                                mscQuality,
-	                                NULL,
-	                                NULL
+	                                NULL,		// MOT in PAD
+	                                NULL		// Ctx
 	                               );
 	if (theRadio == NULL) {
 	   std::cerr << "sorry, no radio available, fatal\n";

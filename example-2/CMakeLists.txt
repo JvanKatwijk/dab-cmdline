@@ -74,19 +74,6 @@ endif ()
             message(FATAL_ERROR "please install libfaad")
         endif ()
 
-        find_package(zlib)
-	if (NOT ZLIB_FOUND)
-            message(FATAL_ERROR "please install libz")
-        endif ()
-	list(APPEND extraLibs ${ZLIB_LIBRARY})
-
-	find_library (PTHREADS pthread)
-	if (NOT(PTHREADS))
-	   message (FATAL_ERROR "please install libpthread")
-	else (NOT(PTHREADS))
-	   set (extraLibs ${extraLibs} ${PTHREADS})
-	endif (NOT(PTHREADS))
-
 
         find_package(LibSampleRate)
         if (NOT LIBSAMPLERATE_FOUND)
@@ -94,11 +81,6 @@ endif ()
         endif ()
         list(APPEND extraLibs ${LIBSAMPLERATE_LIBRARY})
 
-        find_package(Portaudio)
-        if (NOT PORTAUDIO_FOUND)
-            message(FATAL_ERROR "please install portaudio V19")
-        endif ()
-        list(APPEND extraLibs ${PORTAUDIO_LIBRARIES})
 #########################################################################
         find_package (PkgConfig)
 
@@ -130,6 +112,13 @@ endif ()
                       /usr/local/include/
 	   )
            include_directories (${SDRPLAYLIB_INCLUDE_DIR})
+
+           find_library (SDRPLAYLIB mirsdrapi-rsp)
+           if(NOT(SDRPLAYLIB))
+              message(FATAL_ERROR "please install -lmirsdrapi-rsp")
+           else(NOT(SDRPLAYLIB))
+              list (APPEND extraLibs ${SDRPLAYLIB})
+           endif(NOT(SDRPLAYLIB))
 
 	   include_directories (
 	     ../devices/sdrplay-handler
@@ -196,6 +185,25 @@ endif ()
 
 	   add_definitions (-DHAVE_RTLSDR)
 	endif()
+
+        find_package(Portaudio)
+        if (NOT PORTAUDIO_FOUND)
+            message(FATAL_ERROR "please install portaudio V19")
+        endif ()
+        list(APPEND extraLibs ${PORTAUDIO_LIBRARIES})
+
+        find_package(zlib)
+	if (NOT ZLIB_FOUND)
+            message(FATAL_ERROR "please install libz")
+        endif ()
+	list(APPEND extraLibs ${ZLIB_LIBRARY})
+
+	find_library (PTHREADS pthread)
+	if (NOT(PTHREADS))
+	   message (FATAL_ERROR "please install libpthread")
+	else (NOT(PTHREADS))
+	   set (extraLibs ${extraLibs} ${PTHREADS})
+	endif (NOT(PTHREADS))
 
 	if (WAVFILES)
 	   include_directories (

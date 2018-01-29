@@ -103,7 +103,6 @@
 	   fprintf (stderr, "NULL detected\n");
 	this	-> programnameHandler	= programnameHandler;
 	this	-> userData		= userData;
-	listofServices		= new serviceId [64];
 	memset (dateTime, 0, 8);
 	dateFlag		= false;
 	clearEnsemble	();
@@ -111,10 +110,9 @@
 }
 	
 	fib_processor::~fib_processor (void) {
-	delete[] listofServices;
 }
 //
-//	FIB's are segments of 256 bits. When here, we already
+//	FIB's are segments of 256 bits. When here, they already
 //	passed the crc and we start unpacking into FIGs
 //	This is merely a dispatcher
 void	fib_processor::process_FIB (uint8_t *p, uint16_t fib) {
@@ -290,49 +288,49 @@ int16_t StartAdr	= getBits (d, bitOffset + 6, 10);
 int16_t	tabelIndex;
 int16_t	option, protLevel, subChanSize;
 	(void)pd;		// not used right now, maybe later
-	ficList [SubChId]. StartAddr = StartAdr;
+	subChannels [SubChId]. StartAddr = StartAdr;
 	if (getBits_1 (d, bitOffset + 16) == 0) {	// short form
 	   tabelIndex = getBits_6 (d, bitOffset + 18);
-	   ficList [SubChId]. Length  	= ProtLevel [tabelIndex][0];
-	   ficList [SubChId]. shortForm	= true;
-	   ficList [SubChId]. protLevel	= ProtLevel [tabelIndex][1];
-	   ficList [SubChId]. BitRate	= ProtLevel [tabelIndex][2];
+	   subChannels [SubChId]. Length  	= ProtLevel [tabelIndex][0];
+	   subChannels [SubChId]. shortForm	= true;
+	   subChannels [SubChId]. protLevel	= ProtLevel [tabelIndex][1];
+	   subChannels [SubChId]. BitRate	= ProtLevel [tabelIndex][2];
 	   bitOffset += 24;
 	}
 	else { 	// EEP long form
-	   ficList [SubChId]. shortForm	= false;
+	   subChannels [SubChId]. shortForm	= false;
 	   option = getBits_3 (d, bitOffset + 17);
 	   if (option == 0) { 		// A Level protection
 	      protLevel = getBits_2 (d, bitOffset + 20);
 //
-	      ficList [SubChId]. protLevel = protLevel;
+	      subChannels [SubChId]. protLevel = protLevel;
 	      subChanSize = getBits (d, bitOffset + 22, 10);
-	      ficList [SubChId]. Length	= subChanSize;
+	      subChannels [SubChId]. Length	= subChanSize;
 	      if (protLevel == 0)	// actually protLevel 1
-	         ficList [SubChId]. BitRate	= subChanSize / 12 * 8;
+	         subChannels [SubChId]. BitRate	= subChanSize / 12 * 8;
 	      if (protLevel == 1)
-	         ficList [SubChId]. BitRate	= subChanSize / 8 * 8;
+	         subChannels [SubChId]. BitRate	= subChanSize / 8 * 8;
 	      if (protLevel == 2)
-	         ficList [SubChId]. BitRate	= subChanSize / 6 * 8;
+	         subChannels [SubChId]. BitRate	= subChanSize / 6 * 8;
 	      if (protLevel == 3)
-	         ficList [SubChId]. BitRate	= subChanSize / 4 * 8;
+	         subChannels [SubChId]. BitRate	= subChanSize / 4 * 8;
 	   }
 	   else			// option should be 001
 	   if (option == 001) {		// B Level protection
 	      protLevel = getBits_2 (d, bitOffset + 20);
 //
 //	we encode the B protection levels by adding a 04 to the level
-	      ficList [SubChId]. protLevel = protLevel + (1 << 2);
+	      subChannels [SubChId]. protLevel = protLevel + (1 << 2);
 	      subChanSize = getBits (d, bitOffset + 22, 10);
-	      ficList [SubChId]. Length = subChanSize;
+	      subChannels [SubChId]. Length = subChanSize;
 	      if (protLevel == 0)	// actually prot level 1
-	         ficList [SubChId]. BitRate	= subChanSize / 27 * 32;
+	         subChannels [SubChId]. BitRate	= subChanSize / 27 * 32;
 	      if (protLevel == 1)
-	         ficList [SubChId]. BitRate	= subChanSize / 21 * 32;
+	         subChannels [SubChId]. BitRate	= subChanSize / 21 * 32;
 	      if (protLevel == 2)
-	         ficList [SubChId]. BitRate	= subChanSize / 18 * 32;
+	         subChannels [SubChId]. BitRate	= subChanSize / 18 * 32;
 	      if (protLevel == 3)
-	         ficList [SubChId]. BitRate	= subChanSize / 15 * 32;
+	         subChannels [SubChId]. BitRate	= subChanSize / 15 * 32;
 	   }
 
 	   bitOffset += 32;
@@ -429,10 +427,28 @@ int16_t packetAddress   = getBits (d, used * 8 + 30, 10);
 uint16_t        CAOrg   = getBits (d, used * 8 + 40, 16);
 
 serviceComponent *packetComp = find_packetComponent (SCId);
+serviceId	 *service;
 
         used += 56 / 8;
         if (packetComp == NULL)		// no serviceComponent yet
            return used;
+//
+//      If the component exists, we first look whether is
+//      was already handled
+        if (packetComp -> is_madePublic)
+           return used;
+//
+//      if the  Data Service Component Type == 0, we do not deal
+//      with it
+        if (DSCTy == 0)
+           return used;
+
+	service = packetComp -> service;
+        std::string serviceName = service -> serviceLabel. label;
+        if (packetComp -> componentNr == 0)     // otherwise sub component
+           addtoEnsemble (serviceName, service -> serviceId);
+
+        packetComp      -> is_madePublic = true;
         packetComp      -> subchannelId = SubChId;
         packetComp      -> DSCTy        = DSCTy;
 	packetComp	-> DGflag	= DGflag;
@@ -458,7 +474,7 @@ int16_t	subChId, serviceComp, language;
 	   if (getBits_1 (d, loffset + 1) == 0) {
 	      subChId	= getBits_6 (d, loffset + 2);
 	      language	= getBits_8 (d, loffset + 8);
-	      ficList [subChId]. language = language;
+	      subChannels [subChId]. language = language;
 	   }
 	   loffset += 16;
 	}
@@ -565,9 +581,7 @@ int32_t D	= d + 1;
 	if (fig [offset + 20] == 1)
 	   dateTime [5] = getBits_6 (fig, offset + 32);	// Sekunden
 	dateFlag	= true;
-#ifdef	GUI_3
-	emit newDateTime (dateTime);
-#endif
+//	emit newDateTime (dateTime);
 }
 
 void	fib_processor::FIG0Extension13 (uint8_t *d) {
@@ -642,8 +656,8 @@ int16_t	i;
 	   used = used + 1;
 
 	   for (i = 0; i < 64; i ++) {
-              if (ficList [i]. SubChId == SubChId) {
-                 ficList [i]. FEC_scheme = FEC_scheme;
+              if (subChannels [i]. SubChId == SubChId) {
+                 subChannels [i]. FEC_scheme = FEC_scheme;
               }
            }
 
@@ -862,7 +876,6 @@ char		label [17];
 	                                (const char *) label,
 	                                (CharacterSet) charSet));
 //	         fprintf (stderr, "FIG1/1: SId = %4x\t%s\n", SId, label);
-	         addtoEnsemble (myIndex -> serviceLabel. label, SId);
 	         myIndex -> serviceLabel. hasName = true;
 	      }
 	      break;
@@ -948,7 +961,24 @@ char		label [17];
 	(void)XPAD_aid;
 	(void)flagfield;
 }
+
 //
+static
+bool	compareNames (std::string in, std::string ref) {
+int16_t	i;
+
+	if (ref == in)
+	   return true;
+
+	return ref. find (in, 0) == 0;
+	if (ref. length () < in. length ())
+	   return false;
+	for (i = 0; i < in. length (); i ++)
+	   if (in. at (i) != ref. at (i))
+	      return false;
+	return true;
+}
+
 //	locate - and create if needed - a reference to the entry
 //	for the serviceId serviceId
 serviceId	*fib_processor::findServiceId (int32_t serviceId) {
@@ -971,16 +1001,28 @@ int16_t	i;
 	return &listofServices [0];	// should not happen
 }
 
+serviceId	*fib_processor::findServiceId (std::string serviceName) {
+int16_t	i;
+
+	for (i = 0; i < 64; i ++)
+	   if ((listofServices [i]. inUse) &&
+	        compareNames (serviceName,
+	                     listofServices [i]. serviceLabel. label))
+	      return &listofServices [i];
+
+	return NULL;
+}
+
 serviceComponent *fib_processor::find_packetComponent (int16_t SCId) {
 int16_t i;
 
         for (i = 0; i < 64; i ++) {
-           if (!components [i]. inUse)
+           if (!ServiceComps [i]. inUse)
               continue;
-           if (components [i]. TMid != 03)
+           if (ServiceComps [i]. TMid != 03)
               continue;
-           if (components [i]. SCId == SCId)
-              return &components [i];
+           if (ServiceComps [i]. SCId == SCId)
+              return &ServiceComps [i];
         }
         return NULL;
 }
@@ -990,11 +1032,11 @@ serviceComponent *fib_processor::find_serviceComponent (int32_t SId,
 int16_t i;
 
 	for (i = 0; i < 64; i ++) {
-	   if (!components [i]. inUse)
+	   if (!ServiceComps [i]. inUse)
 	      continue;
 
-	   if ( (findServiceId (SId) == components [i]. service)) {
-	      return &components [i];
+	   if ( (findServiceId (SId) == ServiceComps [i]. service)) {
+	      return &ServiceComps [i];
 	   }
 	}
 
@@ -1013,25 +1055,32 @@ serviceId *s	= findServiceId	(SId);
 int16_t	i;
 int16_t	firstFree	= -1;
 
+	if (!s -> serviceLabel. hasName)
+	   return;
+
 	for (i = 0; i < 64; i ++) {
-	   if (!components [i]. inUse) {
+	   if (!ServiceComps [i]. inUse) {
 	      if (firstFree == -1)
 	         firstFree = i;
 	      continue;
 	   }
-	   if ((components [i]. service == s) &&
-               (components [i]. componentNr == compnr))
+	   if ((ServiceComps [i]. service == s) &&
+               (ServiceComps [i]. componentNr == compnr))
 	      return;
 	}
-	components [firstFree]. inUse = true;
-	components [firstFree]. TMid	= TMid;
-	components [firstFree]. componentNr = compnr;
-	components [firstFree]. service = s;
-	components [firstFree]. subchannelId = subChId;
-	components [firstFree]. PS_flag = ps_flag;
-	components [firstFree]. ASCTy = ASCTy;
-//	fprintf (stderr, "service %8x (comp %d) is audio\n", SId, compnr);
+
+	std::string dataName = s -> serviceLabel. label;
+        addtoEnsemble (dataName, s -> serviceId);
+
+	ServiceComps [firstFree]. inUse = true;
+	ServiceComps [firstFree]. TMid	= TMid;
+	ServiceComps [firstFree]. componentNr = compnr;
+	ServiceComps [firstFree]. service = s;
+	ServiceComps [firstFree]. subchannelId = subChId;
+	ServiceComps [firstFree]. PS_flag = ps_flag;
+	ServiceComps [firstFree]. ASCTy = ASCTy;
 }
+
 //      bind_packetService is the main processor for - what the name suggests -
 //      connecting the service component defining the service to the SId,
 ///     Note that the subchannel is assigned through a FIG0/3
@@ -1045,31 +1094,36 @@ serviceId *s    = findServiceId (SId);
 int16_t i;
 int16_t	firstFree	= -1;
 
-       for (i = 0; i < 64; i ++) {
-	   if (!components [i]. inUse) {
+	if (!s -> serviceLabel. hasName)        // wait until we have a name
+           return;
+
+	for (i = 0; i < 64; i ++) {
+	   if ((ServiceComps [i]. inUse) &&
+	                      (ServiceComps [i]. SCId == SCId))
+	      return;
+
+	   if (!ServiceComps [i]. inUse) {
 	      if (firstFree == -1)
 	         firstFree = i;
 	      continue;
 	   }
-	   if ((components [i]. service == s) && 
-	       (components [i]. componentNr == compnr))
-	      return;
 	}
-	components [firstFree]. inUse  = true;
-	components [firstFree]. TMid   = TMid;
-	components [firstFree]. service = s;
-	components [firstFree]. componentNr = compnr;
-	components [firstFree]. SCId   = SCId;
-	components [firstFree]. PS_flag = ps_flag;
-	components [firstFree]. CAflag = CAflag;
-//	fprintf (stderr, "service %8x (comp %d) is packet\n", SId, compnr);
+
+	ServiceComps [firstFree]. inUse  = true;
+	ServiceComps [firstFree]. TMid   = TMid;
+	ServiceComps [firstFree]. service = s;
+	ServiceComps [firstFree]. componentNr = compnr;
+	ServiceComps [firstFree]. SCId   = SCId;
+	ServiceComps [firstFree]. PS_flag = ps_flag;
+	ServiceComps [firstFree]. CAflag = CAflag;
+	ServiceComps [firstFree]. is_madePublic = false;
 }
 
 void	fib_processor::setupforNewFrame (void) {
 int16_t	i;
 	isSynced	= false;
 	for (i = 0; i < 64; i ++)
-	   components [i]. inUse = false;
+	   ServiceComps [i]. inUse = false;
 	
 }
 
@@ -1077,29 +1131,15 @@ void	fib_processor::clearEnsemble (void) {
 int16_t i;
 	setupforNewFrame ();
 	coordinates. cleanUp ();
-	memset (components, 0, sizeof (components));
-	memset (ficList, 0, sizeof (ficList));
+	memset (ServiceComps, 0, sizeof (ServiceComps));
+	memset (subChannels, 0, sizeof (subChannels));
 	for (i = 0; i < 64; i ++) {
 	   listofServices [i]. inUse = false;
 	   listofServices [i]. serviceId = -1;
 	   listofServices [i]. serviceLabel. label = "";
-	   components [i]. inUse = false;
+	   ServiceComps [i]. inUse = false;
 	}
 	firstTime	= true;
-}
-
-bool	compareNames (std::string in, std::string ref) {
-int16_t	i;
-
-	if (ref == in)
-	   return true;
-
-	if (ref. length () < in. length ())
-	   return false;
-	for (i = 0; i < in. length (); i ++)
-	   if (in. at (i) != ref. at (i))
-	      return false;
-	return true;
 }
 
 std::string fib_processor::nameFor (int32_t serviceId) {
@@ -1133,7 +1173,10 @@ int16_t i;
 	}
 	return -1;
 }
-	
+
+//
+//	with kindofService we look for the "main" service,
+//	not a subservice, if any
 uint8_t	fib_processor::kindofService (std::string &s) {
 int16_t	i, j;
 int32_t	selectedService;
@@ -1151,115 +1194,108 @@ int32_t	selectedService;
 
 	   selectedService = listofServices [i]. serviceId;
 	   for (j = 0; j < 64; j ++) {
-	      if (!components [j]. inUse)
+	      if (!ServiceComps [j]. inUse)
 	         continue;
 	      if ((uint32_t)selectedService !=
-	                        components [j]. service -> serviceId)
+	                        ServiceComps [j]. service -> serviceId)
 	         continue;
 
-	      if (components [j]. TMid == 03) 
+	      if (ServiceComps [j]. componentNr != 0)
+	         continue;
+
+	      if (ServiceComps [j]. TMid == 03) 
 	         return PACKET_SERVICE;
 
-	      if (components [j]. TMid == 00) 
+	      if (ServiceComps [j]. TMid == 00) 
 	         return AUDIO_SERVICE;
-	      fprintf (stderr, "TMid == %d\n", components [j]. TMid);
 	   }
 	}
 	return UNKNOWN_SERVICE;
 }
 
 void	fib_processor::dataforDataService (std::string &s, packetdata *d) {
+	dataforDataService (s, d, 0);
+}
+
+void	fib_processor::dataforDataService (std::string &s,
+	                                   packetdata *d, int16_t compnr) {
 int16_t	i, j;
-int32_t	selectedService;
+serviceId *selectedService = findServiceId (s);
 
-//	first we locate the serviceId
-	for (i = 0; i < 64; i ++) {
-	   if (!listofServices [i]. inUse)
+	d -> defined = false;
+
+	if (selectedService == NULL)
+	   return;
+
+	for (j = 0; j < 64; j ++) {
+	   int16_t subchId;
+	   if ((!ServiceComps [j]. inUse) ||
+	                        (ServiceComps [j]. TMid != 03)) 
 	      continue;
 
-	   if (!listofServices [i]. serviceLabel. hasName)
+	   if (ServiceComps [j]. componentNr != compnr)
 	      continue;
 
-	   if (!compareNames (s, listofServices [i]. serviceLabel. label))
+	   if (selectedService != ServiceComps [j]. service)
 	      continue;
 
-	   selectedService = listofServices [i]. serviceId;
-	   for (j = 0; j < 64; j ++) {
-	      int16_t subchId;
-	      if (!components [j]. inUse)
-	         continue;
-	      if ((uint32_t)selectedService !=
-	                             components [j]. service -> serviceId)
-	         continue;
-
-	      if (components [j]. TMid != 03) {
-	         fprintf (stderr, "fatal error, expected data service\n");
-	         return;
-	      }
-
-	     d -> defined	= true;
-	     subchId	= components [j]. subchannelId;
-	      d	-> subchId	= subchId;
-	      d	-> startAddr	= ficList [subchId]. StartAddr;
-	      d	-> shortForm	= ficList [subchId]. shortForm;
-	      d	-> protLevel	= ficList [subchId]. protLevel;
-	      d	-> DSCTy	= components [j]. DSCTy;
-	      d	-> length	= ficList [subchId]. Length;
-	      d	-> bitRate	= ficList [subchId]. BitRate;
-	      d	-> FEC_scheme	= ficList [subchId]. FEC_scheme;
-	      d	-> DGflag	= components [j]. DGflag;
-	      d	-> packetAddress = components [j]. packetAddress;
-	      d -> appType	= components [j]. appType;
-	      return;
-	   }
+	   d -> defined	= true;
+	   subchId	= ServiceComps [j]. subchannelId;
+	   d	-> subchId	= subchId;
+	   d	-> startAddr	= subChannels [subchId]. StartAddr;
+	   d	-> shortForm	= subChannels [subchId]. shortForm;
+	   d	-> protLevel	= subChannels [subchId]. protLevel;
+	   d	-> length	= subChannels [subchId]. Length;
+	   d	-> bitRate	= subChannels [subchId]. BitRate;
+	   d	-> FEC_scheme	= subChannels [subchId]. FEC_scheme;
+	   d	-> DSCTy	= ServiceComps [j]. DSCTy;
+	   d	-> DGflag	= ServiceComps [j]. DGflag;
+	   d	-> packetAddress = ServiceComps [j]. packetAddress;
+	   d	-> appType	= ServiceComps [j]. appType;
+	   return;
 	}
 	fprintf (stderr, "service %s insuffiently defined\n", s.c_str());
 }
 
 void	fib_processor::dataforAudioService (std::string &s, audiodata *d) {
+	dataforAudioService (s, d, 0);
+}
+
+void	fib_processor::dataforAudioService (std::string &s,
+	                                    audiodata *d, int16_t compnr) {
 int16_t	i, j;
-int32_t	selectedService;
+serviceId * selectedService = findServiceId (s);
 
 	d -> defined	= false;
+	if (selectedService == NULL)
+	   return;
+
 //	first we locate the serviceId
-	for (i = 0; i < 64; i ++) {
-	   if (!listofServices [i]. inUse)
+	for (j = 0; j < 64; j ++) {
+	   int16_t subchId;
+	   if ((!ServiceComps [j]. inUse) ||
+	                        (ServiceComps [j]. TMid != 00))
 	      continue;
 
-	   if (!listofServices [i]. serviceLabel. hasName)
+	   if (ServiceComps [j]. componentNr != compnr)
 	      continue;
 
-	   if (!compareNames (s, listofServices [i]. serviceLabel. label))
+	   if (selectedService != ServiceComps [j]. service)
 	      continue;
 
-	   selectedService = listofServices [i]. serviceId;
-	   for (j = 0; j < 64; j ++) {
-	      int16_t subchId;
-	      if (!components [j]. inUse)
-	         continue;
-	      if ((uint32_t)selectedService !=
-	                        components [j]. service -> serviceId)
-	         continue;
-
-	      if (components [j]. TMid != 00) {
-	         fprintf (stderr, "fatal error, expected audio service\n");
-	         return;
-	      }
-	      d -> defined	= true;
-	      subchId	= components [j]. subchannelId;
-	      d	-> subchId	= subchId;
-	      d	-> startAddr	= ficList [subchId]. StartAddr;
-	      d	-> shortForm	= ficList [subchId]. shortForm;
-	      d	-> protLevel	= ficList [subchId]. protLevel;
-	      d	-> length	= ficList [subchId]. Length;
-	      d	-> bitRate	= ficList [subchId]. BitRate;
-	      d	-> ASCTy	= components [j]. ASCTy;
-	      d	-> language	= listofServices [i]. language;
-	      d	-> programType	= listofServices [i]. programType;
-	      return;
-	   }
+	   d -> defined	= true;
+	   subchId	= ServiceComps [j]. subchannelId;
+	   d	-> subchId	= subchId;
+	   d	-> startAddr	= subChannels [subchId]. StartAddr;
+	   d	-> shortForm	= subChannels [subchId]. shortForm;
+	   d	-> protLevel	= subChannels [subchId]. protLevel;
+	   d	-> length	= subChannels [subchId]. Length;
+	   d	-> bitRate	= subChannels [subchId]. BitRate;
+	   d	-> ASCTy	= ServiceComps [j]. ASCTy;
+	   d	-> language	= listofServices [i]. language;
+	   d	-> programType	= listofServices [i]. programType;
+	   return;
 	}
-	fprintf (stderr, "service %s insuffiently defined\n", s. c_str());
 }
 //
 //	and now for the would-be signals
@@ -1270,7 +1306,8 @@ void	fib_processor::addtoEnsemble	(const std::string &s, int32_t SId) {
 }
 
 void	fib_processor::nameofEnsemble  (int id, const std::string &s) {
-	ensemblenameHandler (s, id, userData);
+	if (ensemblenameHandler != NULL)
+	   ensemblenameHandler (s, id, userData);
 	isSynced	= true;
 }
 

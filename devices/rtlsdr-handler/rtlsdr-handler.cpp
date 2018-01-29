@@ -242,8 +242,11 @@ void	rtlsdrHandler::set_autogain	(bool b) {
 	rtlsdr_set_tuner_gain (device, theGain);
 }
 
+//
+//	we only have 8 bits, so rather than doing a float division to get
+//	the float value we want, we precompute the possibilities
 static 
-	float convTable [] = {
+float convTable [] = {
  -128 / 128.0 , -127 / 128.0 , -126 / 128.0 , -125 / 128.0 , -124 / 128.0 , -123 / 128.0 , -122 / 128.0 , -121 / 128.0 , -120 / 128.0 , -119 / 128.0 , -118 / 128.0 , -117 / 128.0 , -116 / 128.0 , -115 / 128.0 , -114 / 128.0 , -113 / 128.0 
 , -112 / 128.0 , -111 / 128.0 , -110 / 128.0 , -109 / 128.0 , -108 / 128.0 , -107 / 128.0 , -106 / 128.0 , -105 / 128.0 , -104 / 128.0 , -103 / 128.0 , -102 / 128.0 , -101 / 128.0 , -100 / 128.0 , -99 / 128.0 , -98 / 128.0 , -97 / 128.0 
 , -96 / 128.0 , -95 / 128.0 , -94 / 128.0 , -93 / 128.0 , -92 / 128.0 , -91 / 128.0 , -90 / 128.0 , -89 / 128.0 , -88 / 128.0 , -87 / 128.0 , -86 / 128.0 , -85 / 128.0 , -84 / 128.0 , -83 / 128.0 , -82 / 128.0 , -81 / 128.0 
@@ -274,8 +277,6 @@ uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 	    V [i] = std::complex<float>
 	                    (convTable [tempBuffer [2 * i]],
 	                     convTable [tempBuffer [2 * i + 1]]);;
-//	                    ((float (tempBuffer [2 * i] - 128)) / 128.0,
-//	                     (float (tempBuffer [2 * i + 1] - 128)) / 128.0);
 	return amount / 2;
 }
 

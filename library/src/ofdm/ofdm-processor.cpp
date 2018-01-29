@@ -135,7 +135,7 @@ std::complex<float> temp;
 	if (bufferContent == 0) {
 	   bufferContent = inputDevice -> Samples ();
 	   while (running. load () && (bufferContent == 0)) {
-	      usleep (1000);
+	      usleep (10000);
 	      bufferContent = inputDevice -> Samples (); 
 	   }
 	}
@@ -157,7 +157,7 @@ std::complex<float> temp;
 #define	N	5
 	sampleCnt	++;
 	if (++ sampleCnt > INPUT_RATE / N) {
-	   if (spectrumBuffer != NULL)
+	   if (spectrumBuffer != NULL) 
               spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
 	                                              localCounter);
            localCounter = 0;
@@ -180,7 +180,7 @@ int32_t		i;
 	if (n > bufferContent) {
 	   bufferContent = inputDevice -> Samples ();
 	   while (running. load () && (bufferContent < n)) {
-	      usleep (1000);
+	      usleep (1000000);
 	      bufferContent = inputDevice -> Samples ();
 	   }
 	}
@@ -274,7 +274,7 @@ int		index_attempts		= 0;
 	            syncBufferIndex = (syncBufferIndex + 1) & syncBufferMask;
 	            counter ++;
 	
-	            if (counter > 2 * T_F) { // hopeless
+	            if (counter > 2 * T_F) { // hopeless	
 	               break;
 	            }
 	         }
@@ -302,8 +302,9 @@ int		index_attempts		= 0;
 	         if (counter > T_null + 50)  // hopeless
 	            break;
 	      }
-	      if (counter > T_null + 50)
+	      if (counter > T_null + 50) {
 	         continue;
+	      }
 	      dip_attempts	= 0;
 //      We arrive here when time synchronized, either from above
 //      or after having processed a frame
@@ -319,12 +320,10 @@ int		index_attempts		= 0;
 	      if (startIndex < 0) { // no sync, try again
 	         isSynced	= false;
 	         if (++index_attempts > 10) {
-	            fprintf (stderr, "no index yet\n");
 	            syncsignalHandler (false, userData);
 	         }
 	         continue;
 	      }
-
 	      index_attempts	= 0;
 	      syncsignalHandler (true, userData);
 	      isSynced	= true;
