@@ -86,12 +86,13 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/backend/eep-protection.h
 	     ./includes/backend/firecode-checker.h
 	     ./includes/backend/dab-processor.h
-	     ./includes/backend/dab-virtual.h
 	     ./includes/backend/charsets.h
 	     ./includes/backend/galois.h
-	     ./includes/backend/msc-handler.h
 	     ./includes/backend/reed-solomon.h
-	     ./includes/backend/audio/dab-audio.h
+	     ./includes/backend/msc-handler.h
+	     ./includes/backend/virtual-backend.h
+	     ./includes/backend/audio-backend.h
+	     ./includes/backend/data-backend.h
 	     ./includes/backend/audio/faad-decoder.h
 	     ./includes/backend/audio/mp4processor.h 
 	     ./includes/backend/audio/mp2processor.h 
@@ -100,7 +101,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/backend/data/pad-handler.h 
 	     ./includes/backend/data/mot-data.h 
 	     ./includes/backend/data/tdc-datahandler.h 
-	     ./includes/backend/data/dab-data.h
 	     ./includes/backend/data/data-processor.h
 	     ./includes/various/fft_handler.h
 	     ./includes/various/dab-params.h
@@ -119,19 +119,20 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/backend/viterbi_768/viterbi-768.cpp
 	     ./src/backend/viterbi_768/spiral-no-sse.c
 	     ./src/backend/fic-handler.cpp
-	     ./src/backend/msc-handler.cpp
 	     ./src/backend/protection.cpp
 	     ./src/backend/eep-protection.cpp
 	     ./src/backend/uep-protection.cpp
 	     ./src/backend/fib-processor.cpp
 	     ./src/backend/firecode-checker.cpp
-	     ./src/backend/dab-virtual.cpp
 	     ./src/backend/dab-processor.cpp
 	     ./src/backend/protTables.cpp
 	     ./src/backend/charsets.cpp
 	     ./src/backend/galois.cpp
 	     ./src/backend/reed-solomon.cpp
-	     ./src/backend/audio/dab-audio.cpp
+	     ./src/backend/msc-handler.cpp
+	     ./src/backend/virtual-backend.cpp
+	     ./src/backend/audio-backend.cpp
+	     ./src/backend/data-backend.cpp
 	     ./src/backend/audio/mp4processor.cpp 
 	     ./src/backend/audio/mp2processor.cpp 
 	     ./src/backend/data/mot-databuilder.cpp 
@@ -139,7 +140,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/backend/data/tdc-datahandler.cpp
 	     ./src/backend/data/pad-handler.cpp 
 	     ./src/backend/data/mot-data.cpp 
-	     ./src/backend/data/dab-data.cpp
 	     ./src/backend/data/data-processor.cpp
 	     ./src/various/fft_handler.cpp
 	     ./src/various/dab-params.cpp

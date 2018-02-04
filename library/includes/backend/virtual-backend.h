@@ -1,8 +1,8 @@
 #
 /*
- *    Copyright (C) 2013 .. 2017
+ *    Copyright (C) 2014 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair programming 
+ *    Lazy Chair Programming
  *
  *    This file is part of the DAB-library
  *    DAB-library is free software; you can redistribute it and/or modify
@@ -18,30 +18,30 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
-//
-//	dummy for the dab handler
-//
-#include	"dab-constants.h"
-#include	"dab-virtual.h"
+#
+#ifndef __VIRTUAL_BACKEND__
+#define	__VIRTUAL_BACKEND__
+
+#include	<stdint.h>
+#include	<stdio.h>
 
 
-	dabVirtual::dabVirtual	(void) {
-}
+#define	CUSize	(4 * 16)
 
-	dabVirtual::~dabVirtual	(void) {
-}
+class	virtualBackend {
+public:
+		virtualBackend	(int16_t, int16_t);
+virtual		~virtualBackend	(void);
+virtual int32_t	process		(int16_t *, int16_t);
+virtual void	stopRunning	(void);
+virtual	void	stop		(void);
+	int16_t	startAddr	(void);
+	int16_t	Length		(void);
+protected:
+	int16_t startAddress;
+	int16_t	segmentLength;
+};
+#endif
 
-int32_t	dabVirtual::process	(int16_t *v, int16_t c) {
-	(void)v;
-	(void)c;
-	return 32768;
-}
-
-void	dabVirtual::stopRunning	(void) {
-}
-
-void	dabVirtual::stop	(void) {
-}
 

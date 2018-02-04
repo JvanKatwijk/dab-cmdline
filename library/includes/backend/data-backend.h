@@ -20,35 +20,28 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__DAB_DATA__
-#define	__DAB_DATA__
+#ifndef	__DATA_BACKEND__
+#define	__DATA_BACKEND__
 
 #include	<stdio.h>
 #include        <thread>
 #include        <mutex>
 #include	<atomic>
-#include        <condition_variable>
+#include	<vector>
+#include	"semaphore.h"
 #include	"dab-api.h"
-#include	"dab-virtual.h"
+#include	"virtual-backend.h"
 #include	"ringbuffer.h"
 
 class	dabProcessor;
 class	protection;
 
-class	dabData: public dabVirtual {
+class	dataBackend: public virtualBackend {
 public:
-	dabData		(uint8_t	DSCTy,
-	                 int16_t	packetAddress,
-	                 int16_t	appType,
-	                 int16_t	fragmentSize,
-	                 int16_t	bitRate,
-	                 bool		shortForm,
-	                 int16_t	protLevel,
-	                 uint8_t	DGflag,
-	                 int16_t	FEC_scheme,
-	                 bytesOut_t	bytesOut,
-	                 void		*userData);
-	~dabData	(void);
+		dataBackend	(packetdata	*,
+	                         bytesOut_t	bytesOut,
+	                         void		*userData);
+		~dataBackend	(void);
 	int32_t	process		(int16_t *, int16_t);
 	void	stopRunning	(void);
 	void	start		(void);
@@ -66,15 +59,19 @@ private:
 void	run		(void);
 	std::atomic<bool>	running;
 	std::thread	threadHandle;
-	int32_t		countforInterleaver;
-	uint8_t		*outV;
+	int16_t		interleaverIndex;
+	int16_t		countforInterleaver;
+	std::vector<uint8_t> outV;
+	std::vector<int16_t>	tempX;
 	int16_t		**interleaveData;
-	std::condition_variable Locker;
-        std::mutex      ourMutex;
+	Semaphore	freeSlots;
+	Semaphore	usedSlots;
 
-	int16_t		*Data;
+	int16_t		*theData [20];
+	int16_t		nextIn;
+	int16_t		nextOut;
+
 	protection	*protectionHandler;
-	RingBuffer<int16_t>	*Buffer;
 	dabProcessor	*our_dabProcessor;
 };
 

@@ -28,7 +28,6 @@
 #include	<vector>
 #include	"dab-api.h"
 #include	"dab-processor.h"
-#include	"dab-virtual.h"
 
 class	virtual_dataHandler;
 

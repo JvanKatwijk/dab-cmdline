@@ -514,7 +514,7 @@ uint8_t		extensionFlag;
         SCIds   = getBits_4 (d, lOffset + 4);
         lOffset += 8;
 
-        lsFlag  = getBits_1 (d, lOffset + 8);
+        lsFlag  = getBits_1 (d, lOffset);
         if (lsFlag == 1) {
            SCid = getBits (d, lOffset + 4, 12);
            lOffset += 16;

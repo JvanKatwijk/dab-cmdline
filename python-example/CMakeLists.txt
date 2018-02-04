@@ -185,12 +185,13 @@ endif ()
 	     ../library/includes/backend/eep-protection.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/dab-processor.h
-	     ../library/includes/backend/dab-virtual.h
 	     ../library/includes/backend/charsets.h
 	     ../library/includes/backend/galois.h
-	     ../library/includes/backend/msc-handler.h
 	     ../library/includes/backend/reed-solomon.h
-	     ../library/includes/backend/audio/dab-audio.h
+	     ../library/includes/backend/msc-handler.h
+	     ../library/includes/backend/virtual-backend.h
+	     ../library/includes/backend/audio-backend.h
+	     ../library/includes/backend/data-backend.h
 	     ../library/includes/backend/audio/faad-decoder.h
 	     ../library/includes/backend/audio/mp4processor.h 
 	     ../library/includes/backend/audio/mp2processor.h 
@@ -199,7 +200,6 @@ endif ()
 	     ../library/includes/backend/data/pad-handler.h 
 	     ../library/includes/backend/data/mot-data.h 
 	     ../library/includes/backend/data/tdc-datahandler.h 
-	     ../library/includes/backend/data/dab-data.h
 	     ../library/includes/backend/data/data-processor.h
 	     ../library/includes/various/fft_handler.h
 	     ../library/includes/various/dab-params.h
@@ -225,19 +225,20 @@ endif ()
 	     ../library/src/backend/viterbi_768/viterbi-768.cpp
 	     ../library/src/backend/viterbi_768/spiral-no-sse.c
 	     ../library/src/backend/fic-handler.cpp
-	     ../library/src/backend/msc-handler.cpp
 	     ../library/src/backend/protection.cpp
 	     ../library/src/backend/eep-protection.cpp
 	     ../library/src/backend/uep-protection.cpp
 	     ../library/src/backend/fib-processor.cpp
 	     ../library/src/backend/firecode-checker.cpp
-	     ../library/src/backend/dab-virtual.cpp
 	     ../library/src/backend/dab-processor.cpp
 	     ../library/src/backend/protTables.cpp
 	     ../library/src/backend/charsets.cpp
 	     ../library/src/backend/galois.cpp
 	     ../library/src/backend/reed-solomon.cpp
-	     ../library/src/backend/audio/dab-audio.cpp
+	     ../library/src/backend/msc-handler.cpp
+	     ../library/src/backend/virtual-backend.cpp
+	     ../library/src/backend/audio-backend.cpp
+	     ../library/src/backend/data-backend.cpp
 	     ../library/src/backend/audio/mp4processor.cpp 
 	     ../library/src/backend/audio/mp2processor.cpp 
 	     ../library/src/backend/data/mot-databuilder.cpp 
@@ -245,7 +246,6 @@ endif ()
 	     ../library/src/backend/data/tdc-datahandler.cpp
 	     ../library/src/backend/data/pad-handler.cpp 
 	     ../library/src/backend/data/mot-data.cpp 
-	     ../library/src/backend/data/dab-data.cpp
 	     ../library/src/backend/data/data-processor.cpp
 	     ../library/src/various/fft_handler.cpp
 	     ../library/src/various/dab-params.cpp

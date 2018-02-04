@@ -20,42 +20,41 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__DAB_AUDIO__
-#define	__DAB_AUDIO__
+#ifndef	__AUDIO_BACKEND__
+#define	__AUDIO_BACKEND__
 
-#include	"dab-virtual.h"
-#include	"ringbuffer.h"
 #include	<stdio.h>
 #include	<thread>
 #include	<mutex>
 #include	<condition_variable>
 #include	<atomic>
+#include	<vector>
 #include	"dab-api.h"
-
+#include	"virtual-backend.h"
+#include	"ringbuffer.h"
+#include	"semaphore.h"
 class	dabProcessor;
 class	protection;
 class	audioSink;
 
-class	dabAudio:public dabVirtual {
+class	audioBackend:public virtualBackend {
 public:
-	dabAudio	(uint8_t dabModus,
-	                 int16_t fragmentSize,
-	                 int16_t bitRate,
-	                 bool	shortForm,
-	                 int16_t protLevel,
+	audioBackend	(audiodata *,
 	                 audioOut_t,
 	                 dataOut_t,
 	                 programQuality_t,
 	                 motdata_t,
 	                 void	*);
-	~dabAudio	(void);
+	~audioBackend	(void);
 int32_t	process		(int16_t *, int16_t);
 void	stopRunning	(void);
 void	start		(void);
 protected:
 	RingBuffer<int16_t>	*audioBuffer;
 private:
-void	run		(void);
+	void		run		(void);
+	void		processSegment	(int16_t *);
+
 	std::atomic<bool>	running;
 	std::thread	threadHandle;
 	uint8_t		dabModus;
@@ -63,11 +62,17 @@ void	run		(void);
 	int16_t		bitRate;
 	bool		shortForm;
 	int16_t		protLevel;
-	uint8_t		*outV;
+	std::vector<uint8_t> outV;
 	int16_t		**interleaveData;
+	int16_t		interleaverIndex;
+	int16_t		countforInterleaver;
+	std::vector<int16_t> tempX;
 
-	std::condition_variable Locker;
-	std::mutex	ourMutex;
+	Semaphore	freeSlots;
+	Semaphore	usedSlots;
+	int16_t		nextIn;
+	int16_t		nextOut;
+	int16_t		*theData [20];
 
 	protection	*protectionHandler;
 	dabProcessor	*our_dabProcessor;
