@@ -82,7 +82,7 @@ audioBase	*soundOut	= NULL;
 tcpServer	tdcServer (8888);
 #endif
 
-std::string	programName		= "Classic FM";
+std::string	programName		= "Sky Radio";
 int32_t		serviceIdentifier	= -1;
 
 static void sighandler (int signum) {

@@ -72,6 +72,8 @@ public:
 private:
 
 	int16_t		hwVersion;
+	int16_t		nrBits;
+	float		denominator;
 	uint16_t	deviceIndex;
 	uint32_t	numofDevs;	// int32_t not my choice
 	int32_t		inputRate;

@@ -64,12 +64,21 @@ mir_sdr_DeviceT devDesc [4];
 	                              devDesc [deviceIndex]. SerNo, hwVersion);
 	mir_sdr_SetDeviceIdx (deviceIndex);
 
-	if (hwVersion >= 2) 
+	if (hwVersion == 2) 
 	   if (antenna == 0)
 	      err = mir_sdr_RSPII_AntennaControl (mir_sdr_RSPII_ANTENNA_A);
 	   else
 	      err = mir_sdr_RSPII_AntennaControl (mir_sdr_RSPII_ANTENNA_B);
-	   
+
+	if (hwVersion == 255) {
+	   nrBits	= 14;
+	   denominator	= 16384.0;
+	}
+        else {
+           nrBits	= 12;
+	   denominator	= 2048.0;
+	}
+
 	_I_Buffer	= new RingBuffer<std::complex<float>>(8 * 1024 * 1024);
 //
 	mir_sdr_AgcControl (autoGain ?
@@ -179,8 +188,8 @@ sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
 std::complex<float> localBuf [numSamples];
 
 	for (i = 0; i <  (int)numSamples; i ++)
-	   localBuf [i] = std::complex<float> (float (xi [i]) / 2048.0,
-	                                       float (xq [i]) / 2048.0);
+	   localBuf [i] = std::complex<float> (float (xi [i]) / nrBits,
+	                                       float (xq [i]) / nrBits);
 	p -> _I_Buffer -> putDataIntoBuffer (localBuf, numSamples);
 	(void)	firstSampleNum;
 	(void)	grChanged;
@@ -244,7 +253,7 @@ void	sdrplayHandler::stopReader	(void) {
 }
 
 //
-//	Note that the sdrPlay returns 12 bit values
+//	Note that the sdrPlay returns 12/14 bit values
 int32_t	sdrplayHandler::getSamples (std::complex<float> *V, int32_t size) { 
 int32_t count	= 0;
 float	sum	= 0;

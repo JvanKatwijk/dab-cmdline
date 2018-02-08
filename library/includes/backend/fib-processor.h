@@ -41,9 +41,9 @@
 	typedef struct subchannelmap channelMap;
 //	from FIG1/2
 	struct serviceid {
+	   bool		inUse;
 	   uint32_t	serviceId;
 	   dabLabel	serviceLabel;
-	   bool		inUse;
 	   bool		hasPNum;
 	   bool		hasLanguage;
 	   int16_t	language;
@@ -125,18 +125,29 @@ private:
 	void		FIG0Extension1		(uint8_t *);
 	void		FIG0Extension2		(uint8_t *);
 	void		FIG0Extension3		(uint8_t *);
+	void		FIG0Extension4		(uint8_t *);
 	void		FIG0Extension5		(uint8_t *);
-	void		FIG0Extension8		(uint8_t *);
-	void		FIG0Extension9		(uint8_t *);
-	void		FIG0Extension10		(uint8_t *);
-	void		FIG0Extension13		(uint8_t *);
-	void		FIG0Extension14		(uint8_t *);
-	void		FIG0Extension16		(uint8_t *);
-	void		FIG0Extension17		(uint8_t *);
-	void		FIG0Extension18		(uint8_t *);
-	void		FIG0Extension19		(uint8_t *);
-	void		FIG0Extension21		(uint8_t *);
-	void		FIG0Extension22		(uint8_t *);
+	void		FIG0Extension6		(uint8_t *);
+	void            FIG0Extension7          (uint8_t *);
+        void            FIG0Extension8          (uint8_t *);
+        void            FIG0Extension9          (uint8_t *);
+        void            FIG0Extension10         (uint8_t *);
+        void            FIG0Extension11         (uint8_t *);
+        void            FIG0Extension12         (uint8_t *);
+        void            FIG0Extension13         (uint8_t *);
+        void            FIG0Extension14         (uint8_t *);
+        void            FIG0Extension15         (uint8_t *);
+        void            FIG0Extension16         (uint8_t *);
+        void            FIG0Extension17         (uint8_t *);
+        void            FIG0Extension18         (uint8_t *);
+        void            FIG0Extension19         (uint8_t *);
+        void            FIG0Extension20         (uint8_t *);
+        void            FIG0Extension21         (uint8_t *);
+        void            FIG0Extension22         (uint8_t *);
+        void            FIG0Extension23         (uint8_t *);
+        void            FIG0Extension24         (uint8_t *);
+        void            FIG0Extension25         (uint8_t *);
+        void            FIG0Extension26         (uint8_t *);
 
 	int16_t		HandleFIG0Extension1	(uint8_t *,
 	                                         int16_t, uint8_t);
