@@ -125,12 +125,20 @@ bool	dabClass::is_dataService (std::string name) {
 }
 
 int16_t	dabClass::dab_service (std::string name) {
+int	componentNumber	= 0;	// default main service
 audiodata d1;
 packetdata d2;
+std::string searchName	= name;
+int	k	= the_ficHandler. kindofService (name);
+	if (searchName [0] == '*') {
+	   searchName. erase (0, 1);	
+	   componentNumber = 1;
+	}
 
-	switch (the_ficHandler. kindofService (name)) {
+	switch (k) {
 	   case AUDIO_SERVICE:
-	     the_ficHandler. dataforAudioService (name, &d1);
+	     the_ficHandler. dataforAudioService (searchName,
+	                                          &d1, componentNumber);
 	     if (!d1. defined) 
 	        return -4;
 	     the_mscHandler. set_audioChannel (&d1);
@@ -141,7 +149,8 @@ packetdata d2;
 //
 //	For the command line version, we do not have a data service
 	   case PACKET_SERVICE:
-	      the_ficHandler. dataforDataService (name, &d2);
+	      the_ficHandler. dataforDataService (searchName,
+	                                          &d2, componentNumber);
 	      if (!d2. defined)
 	         return -3;
 	      the_mscHandler. set_dataChannel (&d2);

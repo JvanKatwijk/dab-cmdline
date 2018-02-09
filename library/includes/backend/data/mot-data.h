@@ -34,7 +34,7 @@ typedef struct  {
 	int32_t		bodySize;
 	uint16_t	contentType;
 	uint16_t	contentsubType;
-	int16_t		segmentSize;
+	int32_t		segmentSize;
 	int16_t		numofSegments;
 	bool		marked	[100];
 	std::vector<uint8_t> segments [100];
@@ -47,13 +47,14 @@ public:
 	uint8_t		*dir_segments;
 	int16_t		dir_segmentSize;
 	int16_t		num_dirSegments;
-	int16_t		dirSize;
+	int32_t		dirSize;
 	int16_t		numObjects;
 	motElement	*dir_proper;
 	bool		marked [512];
 	MOT_directory (uint16_t transportId,
-	               int16_t	segmentSize,
-	               int32_t dirSize, int16_t objects) {
+	               int32_t	segmentSize,
+	               int32_t dirSize,
+	               int16_t objects) {
 int16_t	i;
 	   for (i = 0; i < 512; i ++)
 	      marked [i] = false;
@@ -79,20 +80,20 @@ public:
 void		process_mscGroup	(uint8_t *,
 	                                 uint8_t,
 	                                 bool,
-	                                 int16_t,
+	                                 int32_t,
 	                                 uint16_t);
 void		processHeader (int16_t	transportId,
 	                       uint8_t	*segment,
-	                       int16_t	segmentSize,
+	                       int32_t	segmentSize,
 	                       bool	lastFlag);
 void		processDirectory (int16_t	transportId,
 	                       uint8_t	*segment,
-	                       int16_t	segmentSize,
+	                       int32_t	segmentSize,
 	                       bool	lastFlag);
 void		directorySegment (uint16_t	transportId,
 	                          uint8_t	*segment,
 	                          int16_t	segmentNumber,
-	                          int16_t	segmentSize,
+	                          int32_t	segmentSize,
 	                          bool		lastFlag);
 void		analyse_theDirectory	(void);
 int16_t		get_dirEntry	(int16_t	number,
@@ -102,7 +103,7 @@ int16_t		get_dirEntry	(int16_t	number,
 void		processSegment	(int16_t	transportId,
 	                         uint8_t	*segment,
 	                         int16_t	segmentNumber,
-	                         int16_t	segmentSize,
+	                         int32_t	segmentSize,
 	                         bool		lastFlag);
 	void	my_help		(void);
 private:
@@ -113,13 +114,13 @@ private:
 	
 	motElement	*getHandle	(uint16_t transportId);
 	void		newEntry	(uint16_t	transportId,
-	                                 int16_t	size,
+	                                 int32_t	size,
 	                                 int16_t	contentType,
 	                                 int16_t	contentsubType,
 	                                 std::string	name);
 	void		newEntry	(int16_t	index,
 	                                 uint16_t	transportId,
-	                                 int16_t	size,
+	                                 int32_t	size,
 	                                 int16_t	contentType,
 	                                 int16_t	contentsubType,
 	                                 std::string	name);

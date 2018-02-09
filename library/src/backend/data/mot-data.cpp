@@ -47,13 +47,12 @@ int16_t	i, j;
 	 	motHandler::~motHandler (void) {
 }
 
-
 void	motHandler::process_mscGroup (uint8_t	*data,
 	                              uint8_t	groupType,
 	                              bool	lastSegment,
-	                              int16_t	segmentNumber,
+	                              int32_t	segmentNumber,
 	                              uint16_t	transportId) {
-uint16_t segmentSize	= ((data [0] & 0x1F) << 8) | data [1];
+uint32_t segmentSize	= ((data [0] & 0x1F) << 8) | data [1];
 
 	if ((segmentNumber == 0) && (groupType == 3))  // header
 	   processHeader (transportId,
@@ -94,7 +93,7 @@ uint16_t segmentSize	= ((data [0] & 0x1F) << 8) | data [1];
 //	creates a header for an item in a directory
 void	motHandler::processHeader (int16_t	transportId,
 	                           uint8_t	*segment,
-	                           int16_t	segmentSize,
+	                           int32_t	segmentSize,
 	                           bool		lastFlag) {
 uint32_t headerSize     =
              ((segment [3] & 0x0F) << 9) | (segment [4]) | (segment [5] >> 7);
@@ -104,7 +103,7 @@ uint32_t bodySize       =
 
 uint8_t contentType	= ((segment [5] >> 1) & 0x3F);
 uint16_t contentsubType = ((segment [5] & 0x01) << 8) | segment [6];
-int16_t	pointer	= 7;
+int32_t	pointer	= 7;
 std::string	name 	= std::string ("");
 
 //      If we had a header with that transportId, do not do anything
@@ -115,7 +114,7 @@ std::string	name 	= std::string ("");
 	while (pointer < headerSize) {
 	   uint8_t PLI = (segment [pointer] & 0300) >> 6;
 	   uint8_t paramId = (segment [pointer] & 077);
-	   uint16_t	length;
+	   uint32_t	length;
 	   switch (PLI) {
 	      case 00:
 	         pointer += 1;
@@ -154,7 +153,7 @@ std::string	name 	= std::string ("");
 void	motHandler::processSegment	(int16_t	transportId,
 	                                 uint8_t	*bodySegment,
 	                                 int16_t	segmentNumber,
-	                                 int16_t	segmentSize,
+	                                 int32_t	segmentSize,
 	                                 bool		lastFlag) {
 int16_t	i;
 
@@ -194,6 +193,7 @@ int16_t	i;
 
 	if (p -> numofSegments == -1)
 	   return false;
+
 	for (i = 0; i < p ->  numofSegments; i ++)
 	   if (!(p -> marked [i]))
 	      return false;
@@ -221,7 +221,7 @@ std::vector<uint8_t> result;
 	if (p -> contentType != 2) {
            if (p -> name != std::string ("")) {
 	      checkDir (p -> name);
-	      FILE *x = fopen ((p -> name). c_str (), "w+b");
+	      FILE *x = fopen ((p -> name). c_str (), "wb");
 	      if (x == NULL)
 	         fprintf (stderr, "cannot write file %s\n",
 	                            (p -> name). c_str ());
@@ -245,8 +245,7 @@ std::vector<uint8_t> result;
 	   p -> name = newName ("/tmp/");
 	else
 	   p -> name = buildName ("/tmp/", p -> name);
-
-	FILE *f	= fopen (p -> name. c_str (), "w+b");
+	FILE *f	= fopen (p -> name. c_str (), "wb");
 	if (f == NULL)
 	   return;
 	fwrite (result. data (), 1, result. size (), f);
@@ -261,7 +260,7 @@ void	motHandler::checkDir (std::string &s) {
 	
 void	motHandler::processDirectory (int16_t	transportId,
                                       uint8_t	*segment,
-                                      int16_t	segmentSize,
+                                      int32_t	segmentSize,
                                       bool	lastFlag) {
 uint32_t directorySize	= ((segment [0] & 0x3F) << 24) |
 	                  ((segment [1]       ) << 16) |
@@ -287,7 +286,7 @@ int16_t segSize		= ((segment [9] & 0x1F) << 8) | segment [10];
 void	motHandler::directorySegment (uint16_t	transportId,
                                       uint8_t	*segment,
                                       int16_t	segmentNumber,
-                                      int16_t	segmentSize,
+                                      int32_t	segmentSize,
                                       bool	lastSegment) {
 int16_t	i;
 
@@ -426,7 +425,7 @@ int16_t	i;
 //
 //	Handling a plain header is by:
 void	motHandler::newEntry (uint16_t	transportId,
-	                      int16_t	size,
+	                      int32_t	size,
 	                      int16_t	contentType,
 	                      int16_t	contentsubType,
 	                      std::string	name) {
@@ -474,7 +473,7 @@ int16_t		lowIndex;
 //	handling an entry in a directory is
 void	motHandler::newEntry (int16_t	index,
 	                      uint16_t	transportId,
-	                      int16_t	size,
+	                      int32_t	size,
 	                      int16_t	contentType,
 	                      int16_t	contentsubType,
 	                      std::string	name) {
@@ -490,7 +489,6 @@ motElement	*currEntry = &(theDirectory -> dir_proper [index]);
 	currEntry -> numofSegments	= -1;
 	currEntry -> name		= name;
 }
-
 
 void	motHandler::the_picture     (std::vector<uint8_t> data,
 	                                  int subType, std::string name) {

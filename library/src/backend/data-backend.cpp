@@ -43,8 +43,6 @@ int32_t i;
         this    -> bitRate              = d -> bitRate;
         this    -> shortForm            = d -> shortForm;
         this    -> protLevel            = d -> protLevel;
-	fprintf (stderr, "fragmentSize = %d, protlevel = %d\n",
-	                       fragmentSize, protLevel);
         our_dabProcessor        = new dataProcessor (bitRate,
                                                      d -> DSCTy,
                                                      d -> appType,

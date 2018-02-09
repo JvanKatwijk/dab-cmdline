@@ -50,8 +50,8 @@ public:
 	std::string nameFor		(int32_t);
 	int32_t	SIdFor			(std::string &);
 	uint8_t	kindofService		(std::string &);
-	void	dataforDataService	(std::string &, packetdata *);
-	void	dataforAudioService	(std::string &, audiodata *);
+	void	dataforDataService	(std::string &, packetdata *, int);
+	void	dataforAudioService	(std::string &, audiodata *, int);
 	std::complex<float> get_coordinates      (int16_t, int16_t, bool *);
 
 private:

@@ -495,6 +495,11 @@ serviceId	 *service;
         std::string serviceName = service -> serviceLabel. label;
         if (packetComp -> componentNr == 0)     // otherwise sub component
            addtoEnsemble (serviceName, service -> serviceId);
+	else {
+	   std::string presentationName = "*";
+	   presentationName. append (serviceName);
+	   addtoEnsemble (presentationName, service -> serviceId);
+	}
 
         packetComp      -> is_madePublic = true;
         packetComp      -> subchannelId = SubChId;
@@ -1301,11 +1306,15 @@ int16_t i;
 }
 
 //
-//	with kindofService we look for the "main" service,
-//	not a subservice, if any
 uint8_t	fib_processor::kindofService (std::string &s) {
 int16_t	i, j;
+int	componentNumber	= 0;
 int32_t	selectedService;
+std::string searchString	= s;
+	if (s [0] = '*') {
+	   searchString. erase (0, 1);
+	   componentNumber	= 1;
+	}
 
 //	first we locate the serviceId
 	for (i = 0; i < 64; i ++) {
@@ -1315,7 +1324,8 @@ int32_t	selectedService;
 	   if (!listofServices [i]. serviceLabel. hasName)
 	      continue;
 
-	   if (!compareNames (s, listofServices [i]. serviceLabel. label))
+	   if (!compareNames (searchString,
+	                     listofServices [i]. serviceLabel. label))
 	      continue;
 
 	   selectedService = listofServices [i]. serviceId;
@@ -1326,7 +1336,7 @@ int32_t	selectedService;
 	                        ServiceComps [j]. service -> serviceId)
 	         continue;
 
-	      if (ServiceComps [j]. componentNr != 0)
+	      if (ServiceComps [j]. componentNr != componentNumber)
 	         continue;
 
 	      if (ServiceComps [j]. TMid == 03) 

@@ -235,15 +235,15 @@ uint8_t	result;
 	return result;
 }
 
-void	ficHandler::dataforAudioService	(std::string &s, audiodata *d) {
+void	ficHandler::dataforAudioService	(std::string &s, audiodata *d, int c) {
 	fibProtector. lock ();
-	fibProcessor. dataforAudioService (s, d);
+	fibProcessor. dataforAudioService (s, d, c);
 	fibProtector. unlock ();
 }
 
-void	ficHandler::dataforDataService	(std::string &s, packetdata *d) {
+void	ficHandler::dataforDataService	(std::string &s, packetdata *d, int c) {
 	fibProtector. lock ();
-	fibProcessor. dataforDataService (s, d);
+	fibProcessor. dataforDataService (s, d, c);
 	fibProtector. unlock ();
 }
 
