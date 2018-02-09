@@ -46,7 +46,7 @@
 	                                                     d -> length),
 	                                     outV (24 * d -> bitRate),
 	                                     freeSlots (20) {
-int32_t i;
+int32_t i, j;
 
 	this    -> dabModus             = d -> ASCTy == 077 ? DAB_PLUS : DAB;
 	this    -> fragmentSize         = d -> length * CUSize;
@@ -93,6 +93,18 @@ int32_t i;
 	nextOut			= 0;
 	for (i = 0; i < 20; i ++)
 	   theData [i] = new int16_t [fragmentSize];
+//
+	uint8_t	shiftRegister [9];
+	disperseVector. resize (bitRate * 24);
+        memset (shiftRegister, 1, 9);
+        for (i = 0; i < bitRate * 24; i ++) {
+           uint8_t b = shiftRegister [8] ^ shiftRegister [4];
+           for (j = 8; j > 0; j--)
+              shiftRegister [j] = shiftRegister [j - 1];
+           shiftRegister [0] = b;
+           disperseVector [i] = b;
+	}
+
 	start ();
 }
 
@@ -132,7 +144,6 @@ int32_t	fr;
 
 const	int16_t interleaveMap [] = {0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
 void    audioBackend::processSegment (int16_t *Data) {
-uint8_t shiftRegister [9];
 int16_t i, j;
 
         for (i = 0; i < fragmentSize; i ++) {
@@ -155,15 +166,9 @@ int16_t i, j;
                                          fragmentSize,
                                          outV. data ());
 //
-//      and the inline energy dispersal
-        memset (shiftRegister, 1, 9);
-        for (i = 0; i < bitRate * 24; i ++) {
-           uint8_t b = shiftRegister [8] ^ shiftRegister [4];
-           for (j = 8; j > 0; j--)
-              shiftRegister [j] = shiftRegister [j - 1];
-           shiftRegister [0] = b;
-           outV [i] ^= b;
-        }
+//      and the energy dispersal
+	for (i = 0; i < bitRate * 24; i ++)
+	   outV [i] ^= disperseVector [i];
 
         our_dabProcessor -> addtoFrame (outV. data ());
 }

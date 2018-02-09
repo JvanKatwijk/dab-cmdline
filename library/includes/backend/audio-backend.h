@@ -33,6 +33,7 @@
 #include	"virtual-backend.h"
 #include	"ringbuffer.h"
 #include	"semaphore.h"
+
 class	dabProcessor;
 class	protection;
 class	audioSink;
@@ -63,6 +64,7 @@ private:
 	bool		shortForm;
 	int16_t		protLevel;
 	std::vector<uint8_t> outV;
+	std::vector<uint8_t> disperseVector;
 	int16_t		**interleaveData;
 	int16_t		interleaverIndex;
 	int16_t		countforInterleaver;

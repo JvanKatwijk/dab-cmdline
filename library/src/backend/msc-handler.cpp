@@ -94,6 +94,7 @@ void	mscHandler::set_dataChannel (packetdata *d) {
 	delete theBackend;
 	theBackend	= new dataBackend (d,
 	                                   bytesOut,
+	                                   motdata_Handler,
 	                                   userData);
 	mutexer. unlock ();
 }

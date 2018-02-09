@@ -25,8 +25,8 @@
 #include	"mot-data.h"
 
 
-	mot_databuilder::mot_databuilder (void) {
-	my_motHandler	= new motHandler (NULL);
+	mot_databuilder::mot_databuilder (motdata_t motdataHandler) {
+	my_motHandler	= new motHandler (motdataHandler);
 }
 
 	mot_databuilder::~mot_databuilder (void) {

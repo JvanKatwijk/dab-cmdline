@@ -39,6 +39,7 @@ public:
 	                 uint8_t	DGflag,
 	                 int16_t	FEC_scheme,
 	                 bytesOut_t	bytesOut,
+	                 motdata_t	modedataHandler,
 	                 void		*ctx);
 	~dataProcessor	(void);
 void	addtoFrame	(uint8_t *);

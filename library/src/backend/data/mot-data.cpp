@@ -233,8 +233,10 @@ std::vector<uint8_t> result;
 	   return;
 	}
 
-	if (motdata_Handler == NULL)
+	if (motdata_Handler == NULL) {
 	   return;
+	}
+
 	if (old_slide != NULL) {
 	   for (i = 0; i < p ->  numofSegments; i ++) {
 	      p -> marked [i] = false;
@@ -245,7 +247,7 @@ std::vector<uint8_t> result;
 	   p -> name = newName ("/tmp/");
 	else
 	   p -> name = buildName ("/tmp/", p -> name);
-	FILE *f	= fopen (p -> name. c_str (), "wb");
+	FILE *f	= fopen ((p -> name). c_str (), "wb");
 	if (f == NULL)
 	   return;
 	fwrite (result. data (), 1, result. size (), f);

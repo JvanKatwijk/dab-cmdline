@@ -24,12 +24,13 @@
 #define	MOT_DATABUILDER
 #include	"dab-constants.h"
 #include	"virtual-datahandler.h"
+#include	"dab-api.h"
 
 class	motHandler;
 
 class	mot_databuilder:public virtual_dataHandler {
 public:
-	mot_databuilder		(void);
+	mot_databuilder		(motdata_t);
 	~mot_databuilder	(void);
 void	add_mscDatagroup	(std::vector<uint8_t>);
 private:

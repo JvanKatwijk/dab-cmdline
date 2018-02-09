@@ -36,6 +36,7 @@
 	                                 uint8_t	DGflag,
 	                         	 int16_t	FEC_scheme,
 	                                 bytesOut_t	bytesOut,
+	                                 motdata_t	motdataHandler,
 	                                 void	        *ctx) {
 
 	this	-> bitRate		= bitRate;
@@ -55,7 +56,7 @@
 	      break;
 
 	   case 60:
-	      my_dataHandler	= new mot_databuilder ();
+	      my_dataHandler	= new mot_databuilder (motdataHandler);
 	      break;
 	}
 

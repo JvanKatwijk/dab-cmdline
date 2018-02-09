@@ -40,6 +40,7 @@ class	dataBackend: public virtualBackend {
 public:
 		dataBackend	(packetdata	*,
 	                         bytesOut_t	bytesOut,
+	                         motdata_t	motdataHandler,
 	                         void		*userData);
 		~dataBackend	(void);
 	int32_t	process		(int16_t *, int16_t);
@@ -63,6 +64,7 @@ void	run		(void);
 	int16_t		countforInterleaver;
 	std::vector<uint8_t> outV;
 	std::vector<int16_t>	tempX;
+	std::vector<uint8_t>	disperseVector;
 	int16_t		**interleaveData;
 	Semaphore	freeSlots;
 	Semaphore	usedSlots;
