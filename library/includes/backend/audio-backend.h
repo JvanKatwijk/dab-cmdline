@@ -50,8 +50,6 @@ public:
 int32_t	process		(int16_t *, int16_t);
 void	stopRunning	(void);
 void	start		(void);
-protected:
-	RingBuffer<int16_t>	*audioBuffer;
 private:
 	void		run		(void);
 	void		processSegment	(int16_t *);

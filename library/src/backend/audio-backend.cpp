@@ -70,7 +70,6 @@ int32_t i, j;
 	   protectionHandler	= new eep_protection (bitRate,
 	                                              protLevel);
 //
-	
 	if (dabModus == DAB) 
 	   our_dabProcessor = new mp2Processor (bitRate,
 	                                        soundOut,
@@ -116,7 +115,6 @@ int16_t	i;
 	}
 	delete protectionHandler;
 	delete our_dabProcessor;
-	delete	Buffer;
 	for (i = 0; i < 16; i ++) 
 	   delete[]  interleaveData [i];
 	delete [] interleaveData;

@@ -130,6 +130,7 @@ audiodata d1;
 packetdata d2;
 std::string searchName	= name;
 int	k	= the_ficHandler. kindofService (name);
+
 	if (searchName [0] == '*') {
 	   searchName. erase (0, 1);	
 	   componentNumber = 1;
