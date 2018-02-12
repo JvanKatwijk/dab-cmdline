@@ -48,7 +48,6 @@ public:
 	void	start		(void);
 private:
 	uint8_t		DSCTy;
-	int16_t		packetAddress;
 	int16_t		fragmentSize;
 	int16_t		bitRate;
 	bool		shortForm;

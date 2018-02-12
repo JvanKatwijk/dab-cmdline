@@ -697,45 +697,10 @@ int16_t		appType;
 	   appType		= getBits (d, lOffset, 11);
 	   int16_t length	= getBits_5 (d, lOffset + 11);
 	   lOffset += (11 + 5 + 8 * length);
-//	TS 101 756
-	   switch (appType) {
-	      case 0x000:		// reserved for future use
-	      case 0x001:		// not used
-	         break;
-
-	      case 0x002:		// MOT slideshow
-	      case 0x003:		// MOT Broadcast Web Site
-	         break;
-
-	      case 0x004:		// TPEG
-	         {
-//	            fprintf (stderr, "FIG0/13: AppType 4 -TPEG\n");
-	            serviceComponent *packetComp        =
-	                              find_serviceComponent (SId, SCIdS);
-	            if (packetComp != NULL) {
-	                packetComp      -> appType       = appType;
-                    }
-                 }
-                 break;
-
-	      case 0x005:	// DGPS
-	      case 0x006:	// TMC
-	      case 0x007:	// EPG
-	      case 0x008:	// DAB Java
-	      case 0x009:	// DMB
-              case 0x00a:	// IPDC services
-              case 0x00b:	// Voice applications
-              case 0x00c:	// Middleware
-              case 0x00d:	// Filecasting
-	         break;
-
-	      case 0x44a:		// Journaline
-//	         fprintf (stderr, "Journaline\n");
-	         break;
-
-	      default:
-	         break;
-	   }
+	   serviceComponent *packetComp        =
+	                         find_serviceComponent (SId, SCIdS);
+	   if (packetComp != NULL) 
+	      packetComp      -> appType       = appType;
 	}
 
 	return lOffset / 8;

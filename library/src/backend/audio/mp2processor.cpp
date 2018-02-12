@@ -422,11 +422,11 @@ int32_t table_idx;
 	   get_bits(2);
 	   bound = (mode == MONO) ? 0 : 32;
 	}
-	*stereo	= (mode == JOINT_STEREO);
+	*stereo	= ((mode == JOINT_STEREO) || (mode == STEREO));
 
 // discard the last 4 bits of the header and the CRC value, if present
 	get_bits(4);
-	if ((frame[1] & 1) == 0)
+	if ((frame [1] & 1) == 0)
 	   get_bits(16);
 
 // compute the frame size

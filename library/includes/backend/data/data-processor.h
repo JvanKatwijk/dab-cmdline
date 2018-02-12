@@ -34,12 +34,9 @@ class	virtual_dataHandler;
 class	dataProcessor:public dabProcessor {
 public:
 	dataProcessor	(int16_t	bitRate,
-	                 uint8_t	DSCTy,	
-	                 int16_t	appType,
-	                 uint8_t	DGflag,
-	                 int16_t	FEC_scheme,
-	                 bytesOut_t	bytesOut,
-	                 motdata_t	modedataHandler,
+	                 packetdata	*pd,
+	                 bytesOut_t     bytesOut,
+	                 motdata_t	motdataHandler,
 	                 void		*ctx);
 	~dataProcessor	(void);
 void	addtoFrame	(uint8_t *);
@@ -47,6 +44,7 @@ private:
 	int16_t		bitRate;
 	uint8_t		DSCTy;
 	int16_t		appType;
+	int16_t		packetAddress;
 	uint8_t		DGflag;
 	int16_t		FEC_scheme;
 	bytesOut_t	bytesOut;
@@ -55,7 +53,6 @@ private:
 	int16_t		handledPackets;
 	std::vector<uint8_t> series;
 	uint8_t		packetState;
-	int32_t		streamAddress;		// int since we init with -1
 //
 //	result handlers
 	void		handleTDCAsyncstream 	(uint8_t *, int16_t);

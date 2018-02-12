@@ -39,16 +39,12 @@
 	                                 outV (24 * d -> bitRate),
 	                                 freeSlots (20) {
 int32_t i, j;
-        this    -> packetAddress        = d -> packetAddress;
         this    -> fragmentSize         = d -> length * CUSize;
         this    -> bitRate              = d -> bitRate;
         this    -> shortForm            = d -> shortForm;
         this    -> protLevel            = d -> protLevel;
         our_dabProcessor        = new dataProcessor (bitRate,
-                                                     d -> DSCTy,
-                                                     d -> appType,
-                                                     d -> DGflag,
-                                                     d -> FEC_scheme,
+	                                             d,
                                                      bytesOut,
 	                                             motdataHandler,
                                                      ctx);
