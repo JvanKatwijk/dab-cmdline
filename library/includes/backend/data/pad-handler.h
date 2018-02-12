@@ -25,6 +25,7 @@
 
 #include	<stdint.h>
 #include	<string>
+#include	<vector>
 #include	"dab-api.h"
 
 class	motHandler;
@@ -46,6 +47,7 @@ private:
 
 	bool		pad_crc			(uint8_t *, int16_t);
 	std::string	dynamicLabelText;
+	std::vector<uint8_t> shortpadData;
 	int16_t		charSet;
 	motHandler	*my_motHandler;
 	int16_t		msc_dataGroupLength;

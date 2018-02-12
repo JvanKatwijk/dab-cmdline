@@ -1276,7 +1276,8 @@ int16_t	i, j;
 int	componentNumber	= 0;
 int32_t	selectedService;
 std::string searchString	= s;
-	if (s [0] = '*') {
+
+	if (s [0] == '*') {
 	   searchString. erase (0, 1);
 	   componentNumber	= 1;
 	}

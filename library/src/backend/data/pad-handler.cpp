@@ -4,19 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the Qt-DAB
- *    Qt-DAB is free software; you can redistribute it and/or modify
+ *    This file is part of the DAB library
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    Qt-DAB is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Qt-DAB; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	"pad-handler.h"
@@ -100,20 +100,35 @@ int16_t	i;
 	         break;
 
 	      case 2:   // start of new fragment, extract the length
-	         if (firstSegment) {
-	            dynamicLabelText. clear ();
-	            segmentNumber = 0;
-	         }
-	         else {
-	            if ((b [last - 2] >> 4) != segmentNumber + 1) {
-	               segmentNumber = -1;
-	               return;
-	            }
-	         }
+                    segmentNumber   = b [last - 2] >> 4;
+	            if (firstSegment && !lastSegment) {
+                       if (dynamicLabelText. size () > 0)
+                          dataOut (dynamicLabelText, ctx);
+                       dynamicLabelText. clear ();
+                 }
+
                  segmentNumber   = b [last - 2] >> 4;
 	         still_to_go	 = b [last - 1] & 0x0F;
                  dynamicLabelText. append (1, char(b [last - 3]));
 	         break;
+
+	      case 3:   // continuation of fragment
+                 for (i = 0; (i < 3) && (still_to_go > 0); i ++) {
+                    still_to_go --;
+                    shortpadData. push_back (b [last - 1 - i]);
+                 }
+
+                 if ((still_to_go <= 0) && (shortpadData. size () > 1)) {
+                    shortpadData. push_back (0);
+	            std::string segmentText =
+	                          toStringUsingCharset (
+	                                (const char *)(shortpadData. data ()),
+	                                (CharacterSet) charSet,
+	                                shortpadData. size ());
+	            dynamicLabelText. append (segmentText);
+                    shortpadData. resize (0);
+                 }
+                 break;
 	   }
 	}
 	else {	// No CI
@@ -123,7 +138,7 @@ int16_t	i;
            }
 //	iff we are at the end of the last segment, show the message
 //	(but only if there is something to show) and clear the message
-	   if ((still_to_go <= 0) && (lastSegment)) {
+	   if ((still_to_go <= 0) && (!firstSegment && lastSegment)) {
               if (dynamicLabelText. length () > 0)
                  dataOut (dynamicLabelText, ctx);
               dynamicLabelText. clear ();
