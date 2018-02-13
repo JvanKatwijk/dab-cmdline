@@ -1321,7 +1321,7 @@ void	fib_processor::dataforDataService (std::string &s, packetdata *d) {
 
 void	fib_processor::dataforDataService (std::string &s,
 	                                   packetdata *d, int16_t compnr) {
-int16_t	i, j;
+int16_t	j;
 serviceId *selectedService = findServiceId (s);
 
 	d -> defined = false;
@@ -1341,8 +1341,7 @@ serviceId *selectedService = findServiceId (s);
 	   if (selectedService != ServiceComps [j]. service)
 	      continue;
 
-	   d -> defined	= true;
-	   subchId	= ServiceComps [j]. subchannelId;
+	   subchId		= ServiceComps [j]. subchannelId;
 	   d	-> subchId	= subchId;
 	   d	-> startAddr	= subChannels [subchId]. StartAddr;
 	   d	-> shortForm	= subChannels [subchId]. shortForm;
@@ -1354,6 +1353,7 @@ serviceId *selectedService = findServiceId (s);
 	   d	-> DGflag	= ServiceComps [j]. DGflag;
 	   d	-> packetAddress = ServiceComps [j]. packetAddress;
 	   d	-> appType	= ServiceComps [j]. appType;
+	   d	-> defined	= true;
 	   return;
 	}
 	fprintf (stderr, "service %s insuffiently defined\n", s.c_str());
@@ -1365,7 +1365,7 @@ void	fib_processor::dataforAudioService (std::string &s, audiodata *d) {
 
 void	fib_processor::dataforAudioService (std::string &s,
 	                                    audiodata *d, int16_t compnr) {
-int16_t	i, j;
+int16_t	j;
 serviceId * selectedService = findServiceId (s);
 
 	d -> defined	= false;
@@ -1385,8 +1385,7 @@ serviceId * selectedService = findServiceId (s);
 	   if (selectedService != ServiceComps [j]. service)
 	      continue;
 
-	   d -> defined	= true;
-	   subchId	= ServiceComps [j]. subchannelId;
+	   subchId		= ServiceComps [j]. subchannelId;
 	   d	-> subchId	= subchId;
 	   d	-> startAddr	= subChannels [subchId]. StartAddr;
 	   d	-> shortForm	= subChannels [subchId]. shortForm;
@@ -1394,8 +1393,9 @@ serviceId * selectedService = findServiceId (s);
 	   d	-> length	= subChannels [subchId]. Length;
 	   d	-> bitRate	= subChannels [subchId]. BitRate;
 	   d	-> ASCTy	= ServiceComps [j]. ASCTy;
-	   d	-> language	= listofServices [i]. language;
-	   d	-> programType	= listofServices [i]. programType;
+	   d	-> language	= selectedService -> language;
+	   d	-> programType	= selectedService -> programType;
+	   d	-> defined	= true;
 	   return;
 	}
 }
