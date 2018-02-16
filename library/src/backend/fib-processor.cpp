@@ -337,6 +337,7 @@ int16_t	tabelIndex;
 int16_t	option, protLevel, subChanSize;
 	(void)pd;		// not used right now, maybe later
 	subChannels [SubChId]. StartAddr = StartAdr;
+	subChannels [SubChId]. inUse	 = true;
 	if (getBits_1 (d, bitOffset + 16) == 0) {	// short form
 	   tabelIndex = getBits_6 (d, bitOffset + 18);
 	   subChannels [SubChId]. Length  	= ProtLevel [tabelIndex][0];
@@ -466,26 +467,39 @@ int16_t	Length	= getBits_5 (d, 3);
 //
 //      DSCTy   DataService Component Type
 int16_t fib_processor::HandleFIG0Extension3 (uint8_t *d, int16_t used) {
-int16_t SCId            = getBits (d, used * 8, 12);
+int16_t	SCId            = getBits (d, used * 8, 12);
 int16_t CAOrgflag       = getBits_1 (d, used * 8 + 15);
 int16_t DGflag          = getBits_1 (d, used * 8 + 16);
 int16_t DSCTy           = getBits_6 (d, used * 8 + 18);
 int16_t SubChId         = getBits_6 (d, used * 8 + 24);
 int16_t packetAddress   = getBits (d, used * 8 + 30, 10);
-uint16_t        CAOrg   = getBits (d, used * 8 + 40, 16);
+uint16_t CAOrg;
 
 serviceComponent *packetComp = find_packetComponent (SCId);
 serviceId	 *service;
 
-        used += 56 / 8;
+	if (CAOrgflag == 1) {
+	   CAOrg = getBits (d, used * 8 + 40, 16);
+	   used += 16 / 8; 
+        }
+        used += 40 / 8;
+
         if (packetComp == NULL)		// no serviceComponent yet
            return used;
-//
+
+//      We want to have the subchannel OK
+	if (!subChannels [SubChId]. inUse)
+	   return used;
+
 //      If the component exists, we first look whether is
 //      was already handled
         if (packetComp -> is_madePublic)
            return used;
 //
+//      We want to have the subchannel OK
+        if (!subChannels [SubChId]. inUse)
+           return used;
+
 //      if the  Data Service Component Type == 0, we do not deal
 //      with it
         if (DSCTy == 0)
@@ -1144,7 +1158,7 @@ int16_t i;
 void	fib_processor::bind_audioService (int8_t TMid,
 	                                  uint32_t SId,
 	                                  int16_t compnr,
-	                                  int16_t subChId,
+	                                  int16_t SubChId,
 	                                  int16_t ps_flag,
 	                                  int16_t ASCTy) {
 serviceId *s	= findServiceId	(SId);
@@ -1152,6 +1166,9 @@ int16_t	i;
 int16_t	firstFree	= -1;
 
 	if (!s -> serviceLabel. hasName)
+	   return;
+
+	if (!subChannels [SubChId]. inUse)
 	   return;
 
 	for (i = 0; i < 64; i ++) {
@@ -1168,13 +1185,13 @@ int16_t	firstFree	= -1;
 	std::string dataName = s -> serviceLabel. label;
         addtoEnsemble (dataName, s -> serviceId);
 
-	ServiceComps [firstFree]. inUse = true;
-	ServiceComps [firstFree]. TMid	= TMid;
-	ServiceComps [firstFree]. componentNr = compnr;
-	ServiceComps [firstFree]. service = s;
-	ServiceComps [firstFree]. subchannelId = subChId;
-	ServiceComps [firstFree]. PS_flag = ps_flag;
-	ServiceComps [firstFree]. ASCTy = ASCTy;
+	ServiceComps [firstFree]. inUse		= true;
+	ServiceComps [firstFree]. TMid		= TMid;
+	ServiceComps [firstFree]. componentNr	= compnr;
+	ServiceComps [firstFree]. service	= s;
+	ServiceComps [firstFree]. subchannelId = SubChId;
+	ServiceComps [firstFree]. PS_flag	= ps_flag;
+	ServiceComps [firstFree]. ASCTy		= ASCTy;
 }
 
 //      bind_packetService is the main processor for - what the name suggests -
@@ -1233,7 +1250,8 @@ int16_t i;
 	   listofServices [i]. inUse = false;
 	   listofServices [i]. serviceId = -1;
 	   listofServices [i]. serviceLabel. label = "";
-	   ServiceComps [i]. inUse = false;
+	   ServiceComps [i]. inUse	= false;
+	   subChannels [i]. inUse	= false;
 	}
 	firstTime	= true;
 }
@@ -1324,7 +1342,7 @@ void	fib_processor::dataforDataService (std::string &s,
 int16_t	j;
 serviceId *selectedService = findServiceId (s);
 
-	d -> defined = false;
+	d	-> defined	= false;
 
 	if (selectedService == NULL)
 	   return;

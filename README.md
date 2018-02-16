@@ -27,8 +27,9 @@ To show the use of the library, several example programs are included:
 
 Note that the basic idea of providing these example is to provide
 examples of how to use the library and/or the sources of the library. 
-They are not intended to be full solutions, but merely to give some ideas
-of how to use the library.
+
+THEY ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
+IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
 
 Feel free to adapt each (all) of these programs to your own ideas.
 =======================================================================
@@ -192,6 +193,11 @@ setting is passed on to the server.
 the maximum time to wait for valid data.
 If no valid data is found within this period, execution of the program will
 stop.
+
+Note that in example-2 the -W is replaced by TWO parameters, a -d xxx indicating
+the maximum amount of time to reach time synchronization (which is implicit
+in the other examples) and a -D xxx parameter indicating the maximum amount of
+time to get the signal "ensemble found".
 
 	-A the output channel (example 1 and 2 only)
 again as with the program name, a prefix of the name suffices. As with the programs, the names of the sound channels identified will be printed. Note, however, that in Linux not all all names appearing on the namelist are useful,

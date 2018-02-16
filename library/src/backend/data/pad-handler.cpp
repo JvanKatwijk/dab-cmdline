@@ -100,11 +100,11 @@ int16_t	i;
 	         break;
 
 	      case 2:   // start of new fragment, extract the length
-                    segmentNumber   = b [last - 2] >> 4;
-	            if (firstSegment && !lastSegment) {
-                       if (dynamicLabelText. size () > 0)
-                          dataOut (dynamicLabelText, ctx);
-                       dynamicLabelText. clear ();
+                 segmentNumber   = b [last - 2] >> 4;
+	         if (firstSegment && !lastSegment) {
+                    if (dynamicLabelText. size () > 0)
+                       dataOut (dynamicLabelText, ctx);
+                    dynamicLabelText. clear ();
                  }
 
                  segmentNumber   = b [last - 2] >> 4;

@@ -233,7 +233,8 @@ int16_t		ppmCorrection	= 0;
 int		theGain		= 45;	// scale = 0 .. 100
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
-int16_t		waitingTime	= 10;
+int16_t		timeSyncTime	= 5;
+int16_t		freqSyncTime	= 5;
 bool		autogain	= false;
 int		opt;
 struct sigaction sigact;
@@ -265,16 +266,20 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:QO:")) != -1) {
 #elif   HAVE_RTL_TCP
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #else
-	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:O:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:O:")) != -1) {
 #endif
 	   switch (opt) {
 
-	      case 'W':
-	         waitingTime	= atoi (optarg);
+	      case 'D':
+	         freqSyncTime	= atoi (optarg);
+	         break;
+
+	      case 'd':
+	         timeSyncTime	= atoi (optarg);
 	         break;
 
 	      case 'M':
@@ -441,9 +446,7 @@ bool	err;
 	ensembleRecognized.	store (false);
 	theRadio -> startProcessing ();
 
-	int	timeOut	= 0;
-//	while (!timesyncSet. load () && (++timeOut < 5))
-	while (++timeOut < waitingTime)
+	while (!timeSynced. load () && (--timeSyncTime >= 0))
            sleep (1);
 
         if (!timeSynced. load ()) {
@@ -454,16 +457,17 @@ bool	err;
            delete theRadio;
            delete theDevice;
            exit (22);
-
 	}
         else
 	   std::cerr << "there might be a DAB signal here" << endl;
 
-	if (!ensembleRecognized. load ())
-	   while (!ensembleRecognized. load () && (++timeOut < waitingTime)) {
-	      std::cerr << waitingTime - timeOut << "\r";
+	if (!ensembleRecognized. load ()) {
+	   while (!ensembleRecognized. load () &&
+	                             (--freqSyncTime >= 0)) {
+	      std::cerr << freqSyncTime + 1 << "\r";
 	      sleep (1);
 	   }
+	}
 	std::cerr << "\n";
 
 	if (!ensembleRecognized. load ()) {
@@ -499,7 +503,8 @@ bool	err;
 void    printOptions (void) {
         std::cerr << 
 "                          dab-cmdline options are\n\
-                          -W number   amount of time to look for an ensemble\n\
+                          -D number   amount of time to look for an ensemble\n\
+	                  -d number   seconds within a time sync should be reached\n\
                           -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
                           -B Band     Band is either L_BAND or BAND_III (default)\n\
                           -P name     program to be selected in the ensemble\n\
