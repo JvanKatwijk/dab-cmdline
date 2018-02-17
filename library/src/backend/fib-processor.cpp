@@ -509,11 +509,6 @@ serviceId	 *service;
         std::string serviceName = service -> serviceLabel. label;
         if (packetComp -> componentNr == 0)     // otherwise sub component
            addtoEnsemble (serviceName, service -> serviceId);
-	else {
-	   std::string presentationName = "*";
-	   presentationName. append (serviceName);
-	   addtoEnsemble (presentationName, service -> serviceId);
-	}
 
         packetComp      -> is_madePublic = true;
         packetComp      -> subchannelId = SubChId;
@@ -1294,11 +1289,6 @@ int16_t	i, j;
 int	componentNumber	= 0;
 int32_t	selectedService;
 std::string searchString	= s;
-
-	if (s [0] == '*') {
-	   searchString. erase (0, 1);
-	   componentNumber	= 1;
-	}
 
 //	first we locate the serviceId
 	for (i = 0; i < 64; i ++) {
