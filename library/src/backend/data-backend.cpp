@@ -122,7 +122,6 @@ void	dataBackend::run	(void) {
 int16_t	i;
 int16_t	countforInterleaver	= 0;
 int16_t interleaverIndex	= 0;
-int16_t	Data [fragmentSize];
 
 	running. store (true);
 	while (running. load ()) {

@@ -27,6 +27,7 @@
 #include	<stdint.h>
 #include	<stdio.h>
 #include	<string>
+#include	<mutex>
 #include	"dab-api.h"
 #include	"dab-constants.h"
 #include	"tii_table.h"
@@ -169,6 +170,7 @@ private:
 	bool		dateFlag;
 	bool		firstTime;
 	bool		isSynced;
+	mutex		fibLocker;
 //
 //	these were signals
 	void		addtoEnsemble	(const std::string &, int32_t);

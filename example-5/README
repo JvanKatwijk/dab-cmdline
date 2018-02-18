@@ -21,6 +21,13 @@ FEEL FREE TO IMPROVE THE PROGRAM
 
 Points to note:
 
+The "-W" parameter (to specify Waiting time) is changed into tw
+parameters
+	"-d" to indicate the time within which timesynchronization must be
+	accomplished;
+	"-D" to indicate the time within (after time sync) freq Sync must be
+	reached
+
 bytesOut is a new callback function, a function that is called
 from the tdc handler (and later may be from others as well)
 

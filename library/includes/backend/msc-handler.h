@@ -31,7 +31,7 @@
 #include	<stdint.h>
 #include	<vector>
 #include	<mutex>
-#include	<condition_variable>
+#include	<atomic>
 #include	"dab-constants.h"
 #include	"dab-api.h"
 #include	"dab-params.h"
@@ -52,8 +52,8 @@ public:
 	void	process_mscBlock	(std::vector<int16_t>, int16_t);
 	void	set_audioChannel	(audiodata	*);
 	void	set_dataChannel		(packetdata     *);
+	void	reset			(void);
 	void	stopProcessing		(void);
-	void	stopHandler		(void);
 private:
 	audioOut_t	soundOut;
 	dataOut_t	dataOut;
@@ -64,16 +64,15 @@ private:
 	dabParams	params;
 	bool		audioService;
 	std::mutex	mutexer;
-	virtualBackend	*theBackend;
+	virtualBackend *theBackend;
 	std::vector<int16_t> cifVector;
 	int16_t		cifCount;
 	int16_t		blkCount;
-	bool		work_to_be_done;
+	std::atomic<bool> work_to_do;
 	int16_t		BitsperBlock;
 	int16_t		numberofblocksperCIF;
 	int16_t		blockCount;
 };
 
 #endif
-
 

@@ -149,6 +149,7 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 //	typedef void (*motdata_t)(std::string, int, void *);
 void	motdataHandler (std::string s, int d, void *ctx) {
 	(void)s; (void)d; (void)ctx;
+	fprintf (stderr, "plaatje %s\n", s. c_str ());
 }
 
 //
@@ -461,12 +462,10 @@ bool	err;
         else
 	   std::cerr << "there might be a DAB signal here" << endl;
 
-	if (!ensembleRecognized. load ()) {
-	   while (!ensembleRecognized. load () &&
+	while (!ensembleRecognized. load () &&
 	                             (--freqSyncTime >= 0)) {
-	      std::cerr << freqSyncTime + 1 << "\r";
-	      sleep (1);
-	   }
+	   std::cerr << freqSyncTime + 1 << "\r";
+	   sleep (1);
 	}
 	std::cerr << "\n";
 

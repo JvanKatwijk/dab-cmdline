@@ -222,7 +222,8 @@ int16_t		ppmCorrection	= 0;
 int		theGain		= 35;	// scale = 0 .. 100
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
-int16_t		waitingTime	= 10;
+int16_t		timeSyncTime	= 5;
+int16_t		freqSyncTime	= 10;
 bool		autogain	= false;
 int	opt;
 struct sigaction sigact;
@@ -252,17 +253,19 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:QO:")) != -1) {
 #elif   HAVE_RTL_TCP
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #else
-	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:O:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:O:")) != -1) {
 #endif
-	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
+	      case 'D':
+	         freqSyncTime	= atoi (optarg);
+	         break;
 
-	      case 'W':
-	         waitingTime	= atoi (optarg);
+	      case 'd':
+	         timeSyncTime	= atoi (optarg);
 	         break;
 
 	      case 'M':
@@ -424,9 +427,7 @@ bool	err;
 	ensembleRecognized.	store (false);
 	theRadio -> startProcessing ();
 
-	int	timeOut	= 0;
-//	while (!timesyncSet. load () && (++timeOut < 5))
-	while (++timeOut < waitingTime)
+	while (!timeSynced. load () && (--timeSyncTime >= 0))
            sleep (1);
 
         if (!timeSynced. load ()) {
@@ -442,11 +443,11 @@ bool	err;
         else
 	   cerr << "there might be a DAB signal here" << endl;
 
-	if (!ensembleRecognized. load ())
-	   while (!ensembleRecognized. load () && (++timeOut < waitingTime)) {
-	      fprintf (stderr, "%d\r", waitingTime - timeOut);
-	      sleep (1);
-	   }
+	while (!ensembleRecognized. load () &&
+	                             (--freqSyncTime >= 0)) {
+	    fprintf (stderr, "%d\r", freqSyncTime);
+	    sleep (1);
+	}
 	fprintf (stderr, "\n");
 
 	if (!ensembleRecognized. load ()) {

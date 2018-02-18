@@ -130,7 +130,6 @@ void	audioBackend::start		(void) {
 }
 
 int32_t	audioBackend::process	(int16_t *v, int16_t cnt) {
-int32_t	fr;
 	while (!freeSlots. tryAcquire (200))
 	   if (!running. load ())
 	      return 0;
@@ -142,7 +141,7 @@ int32_t	fr;
 
 const	int16_t interleaveMap [] = {0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
 void    audioBackend::processSegment (int16_t *Data) {
-int16_t i, j;
+int16_t i;
 
         for (i = 0; i < fragmentSize; i ++) {
            tempX [i] = interleaveData [(interleaverIndex +
