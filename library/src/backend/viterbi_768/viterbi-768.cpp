@@ -300,10 +300,12 @@ int32_t  s, i;
 }
 
 extern "C" {
-#ifndef	SSE_AVAILABLE
-void FULL_SPIRAL_no_sse (int, 
+#if defined(SSE_AVAILABLE)
+void FULL_SPIRAL_sse (int,
+#elif defined(NEON_AVAILABLE)
+void FULL_SPIRAL_neon (int,
 #else
-void	FULL_SPIRAL_sse (int,
+void FULL_SPIRAL_no_sse (int,
 #endif
 	                 COMPUTETYPE *Y,
 	                 COMPUTETYPE *X,
@@ -321,10 +323,12 @@ int32_t s;
 	for (s = 0; s < nbits; s++)
 	   memset (d + s, 0, sizeof(decision_t));
 
-#ifndef	SSE_AVAILABLE
-	FULL_SPIRAL_no_sse (nbits,
-#else
+#if defined(SSE_AVAILABLE)
 	FULL_SPIRAL_sse (nbits,
+#elif defined(NEON_AVAILABLE)
+	FULL_SPIRAL_neon (nbits,
+#else
+	FULL_SPIRAL_no_sse (nbits,
 #endif
 	                 vp -> new_metrics -> t,
 	                 vp -> old_metrics -> t,
