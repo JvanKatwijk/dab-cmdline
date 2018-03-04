@@ -53,7 +53,7 @@
 	cifVector. resize (55296);
 	cifCount		= 0;	// msc blocks in CIF
 	blkCount		= 0;
-	theBackend		= new virtualBackend (0, 0);
+	theBackends. push_back (new virtualBackend (0, 0));
 	BitsperBlock		= 2 * params. get_carriers ();
 	if (Mode == 4)	// 2 CIFS per 76 blocks
 	   numberofblocksperCIF	= 36;
@@ -76,9 +76,11 @@ void	mscHandler::reset	(void) {
 int	i;
 
 	mutexer. lock ();
-	theBackend -> stopRunning ();
-	delete theBackend;
-	theBackend	= NULL;
+	for (i = 0; i < theBackends. size (); i ++) {
+	   theBackends [i] -> stopRunning ();
+	   delete theBackends [i];
+	}
+	theBackends. resize (0);
 	work_to_do. store (false);
 	mutexer. unlock ();
 }
@@ -92,12 +94,12 @@ void	mscHandler::set_audioChannel (audiodata *d) {
 	mutexer. lock ();
 //
 //	we could assert here that theBackend == NULL
-	theBackend	= new audioBackend (d,
+	theBackends. push_back (new audioBackend (d,
 	                                    soundOut,
 	                                    dataOut,
 	                                    programQuality,
 	                                    motdata_Handler,
-	                                    userData);
+	                                    userData));
 	work_to_do. store (true);
 	mutexer. unlock ();
 }
@@ -105,10 +107,10 @@ void	mscHandler::set_audioChannel (audiodata *d) {
 
 void	mscHandler::set_dataChannel (packetdata *d) {
 	mutexer. lock ();
-	theBackend	= new dataBackend (d,
+	theBackends. push_back (new dataBackend (d,
 	                                   bytesOut,
 	                                   motdata_Handler,
-	                                   userData);
+	                                   userData));
 	work_to_do. store (true);
 	mutexer. unlock ();
 }
@@ -131,20 +133,21 @@ int	i;
 	mutexer. lock ();
 	blkCount	= 0;
 	cifCount	= (cifCount + 1) & 03;
-	std::vector<int16_t> myBegin;
-	int startAddr	= theBackend -> startAddr ();
-	int Length	= theBackend -> Length    ();
-//
-	myBegin. resize (Length * CUSize);
-	memcpy (myBegin. data (), &cifVector [startAddr * CUSize],
+	for (i = 0; i < theBackends. size (); i ++) {
+	   int startAddr	= theBackends [i] -> startAddr ();
+	   int Length		= theBackends [i] -> Length    ();
+	   if (Length > 0) {
+	      int16_t myBegin [Length * CUSize];
+	      memcpy (myBegin, &cifVector [startAddr * CUSize],
 	                               Length * CUSize * sizeof (int16_t));
-	(void) theBackend -> process (myBegin. data (),
-	                                       Length * CUSize);
+	      (void) theBackends [i] -> process (myBegin, Length * CUSize);
+	   }
+	}
 	mutexer. unlock ();
 }
 //
 
 void	mscHandler::stopProcessing (void) {
-	work_to_do. store (false);
+	reset ();
 }
 

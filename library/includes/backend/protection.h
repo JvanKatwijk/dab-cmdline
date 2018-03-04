@@ -22,8 +22,8 @@
  *
  *	Simple base class for combining uep and eep deconvolvers
  */
-#ifndef	__PROTECTION
-#define	__PROTECTION
+#ifndef	__PROTECTION__
+#define	__PROTECTION__
 
 #include	<stdint.h>
 #include	<vector>
@@ -38,7 +38,7 @@ protected:
         int16_t         bitRate;
         int32_t         outSize;
         std::vector<int16_t> viterbiBlock;
-        std::vector<int16_t> indexTable;
+        std::vector<uint8_t> indexTable;
 };
 #endif
 

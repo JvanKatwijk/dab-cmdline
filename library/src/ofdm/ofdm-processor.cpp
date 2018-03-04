@@ -282,7 +282,7 @@ int		index_attempts		= 0;
 	         if (counter > 2 * T_F) {
                     if (++dip_attempts > 10) {
 	               dip_attempts = 0;
-	               syncsignalHandler (false, userData);
+//	               syncsignalHandler (false, userData);
 	            }
 	            continue;
 	         }

@@ -126,16 +126,27 @@ bool	dabClass::is_dataService (std::string name) {
 
 int16_t	dabClass::dab_service (std::string name) {
 int	k	= the_ficHandler. kindofService (name);
-	the_mscHandler. reset ();
+	the_mscHandler. reset ();	// vital here
 	switch (k) {
 	   case AUDIO_SERVICE: {
-	      audiodata d1;
-	      the_ficHandler. dataforAudioService (name, &d1, 0);
-	      if (!d1. defined) 
+	      audiodata ad;
+	      int i;
+	      the_ficHandler. dataforAudioService (name, &ad, 0);
+	      if (!ad. defined) 
 	         return -4;
-	      the_mscHandler. set_audioChannel (&d1);
+	      the_mscHandler. set_audioChannel (&ad);
 	      if (programdata_Handler != NULL) 
-	         programdata_Handler (&d1, userData);
+	         programdata_Handler (&ad, userData);
+
+	      for (i = 1; i < 5; i ++) {
+	         packetdata pd;
+	         the_ficHandler. dataforDataService (name, &pd, i);
+	         if (pd. defined) {
+	            the_mscHandler. set_dataChannel (&pd);
+	            break;
+	         }
+	      }
+	     
 	      return 1;
 	   }
 

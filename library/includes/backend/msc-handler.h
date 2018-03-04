@@ -64,7 +64,7 @@ private:
 	dabParams	params;
 	bool		audioService;
 	std::mutex	mutexer;
-	virtualBackend *theBackend;
+	std::vector<virtualBackend *>theBackends;
 	std::vector<int16_t> cifVector;
 	int16_t		cifCount;
 	int16_t		blkCount;
