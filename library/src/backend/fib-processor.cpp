@@ -103,7 +103,7 @@
 	   fprintf (stderr, "NULL detected\n");
 	this	-> programnameHandler	= programnameHandler;
 	this	-> userData		= userData;
-	memset (dateTime, 0, 8);
+	memset (dateTime, 0, 8 * sizeof (uint8_t));
 	dateFlag		= false;
 	clearEnsemble	();
 	coordinates. cleanUp ();
@@ -120,34 +120,34 @@ uint8_t	FIGtype;
 int8_t	processedBytes	= 0;
 uint8_t	*d		= p;
 
-//	   fibLocker. lock ();
-	   (void)fib;
-	   while (processedBytes  < 30) {
-	      FIGtype 		= getBits_3 (d, 0);
-	      switch (FIGtype) {
-	         case 0:
-	            process_FIG0 (d);	
-	            break;
+	fibLocker. lock ();
+	(void)fib;
+	while (processedBytes  < 30) {
+	   FIGtype 		= getBits_3 (d, 0);
+	   switch (FIGtype) {
+	      case 0:
+	         process_FIG0 (d);	
+	         break;
 
-	         case 1:
-	            process_FIG1 (d);
-	            break;
+	      case 1:
+	         process_FIG1 (d);
+	         break;
 
-	         case 7:
-	            return;
+	      case 7:
+	         break;
 
-	         default:
-//	            fprintf (stderr, "FIG%d aanwezig\n", FIGtype);
-	            break;
-	      }
+	      default:
+//	         fprintf (stderr, "FIG%d aanwezig\n", FIGtype);
+	         break;
+	   }
 //
 //	Thanks to Ronny Kunze, who discovered that I used
 //	a p rather than a d
-	      processedBytes += getBits_5 (d, 3) + 1;
-//	      processedBytes += getBits (p, 3, 5) + 1;
-	      d = p + processedBytes * 8;
-	   }
-//	   fibLocker. unlock ();
+	   processedBytes += getBits_5 (d, 3) + 1;
+//	   processedBytes += getBits (p, 3, 5) + 1;
+	   d = p + processedBytes * 8;
+	}
+	fibLocker. unlock ();
 }
 //
 //	Handle ensemble is all through FIG0
@@ -337,7 +337,6 @@ int16_t	SubChId		= getBits_6 (d, bitOffset);
 int16_t StartAdr	= getBits (d, bitOffset + 6, 10);
 int16_t	tabelIndex;
 int16_t	option, protLevel, subChanSize;
-	fibLocker. lock ();
 	(void)pd;		// not used right now, maybe later
 	subChannels [SubChId]. StartAddr = StartAdr;
 	subChannels [SubChId]. inUse	 = true;
@@ -387,7 +386,6 @@ int16_t	option, protLevel, subChanSize;
 
 	   bitOffset += 32;
 	}
-	fibLocker. unlock ();
 	return bitOffset / 8;	// we return bytes
 }
 //
@@ -432,7 +430,6 @@ int16_t		numberofComponents;
 	numberofComponents	= getBits_4 (d, lOffset + 4);
 	lOffset	+= 8;
 
-	fibLocker. lock ();
 	for (i = 0; i < numberofComponents; i ++) {
 	   uint8_t	TMid	= getBits_2 (d, lOffset);
 	   if (TMid == 00)  {	// Audio
@@ -452,7 +449,6 @@ int16_t		numberofComponents;
 	      {;}		// for now
 	   lOffset += 16;
 	}
-	fibLocker. unlock ();
 	return lOffset / 8;		// in Bytes
 }
 //
@@ -488,7 +484,7 @@ serviceId	 *service;
 	   used += 16 / 8; 
         }
         used += 40 / 8;
-
+	(void)CAOrg;
         if (packetComp == NULL)		// no serviceComponent yet
            return used;
 
@@ -515,13 +511,11 @@ serviceId	 *service;
         if (packetComp -> componentNr == 0)     // otherwise sub component
            addtoEnsemble (serviceName, service -> serviceId);
 
-	fibLocker. lock ();
         packetComp      -> is_madePublic = true;
         packetComp      -> subchannelId = SubChId;
         packetComp      -> DSCTy        = DSCTy;
 	packetComp	-> DGflag	= DGflag;
         packetComp      -> packetAddress        = packetAddress;
-	fibLocker. unlock ();
         return used;
 }
 //
@@ -534,6 +528,7 @@ int16_t SubChId = getBits_6 (d, 0 + 1 + 1);
 int32_t CAOrg = getBits (d, 2 + 6, 16);
 
 //      fprintf(stderr,"FIG0/4: Rfa=\t%D, Rfu=\t%d, SudChId=\t%02X, CAOrg=\t%04X\n", Rfa, Rfu, SubChId, CAOrg);
+	(void)used; (void)Rfa; (void)Rfu; (void)SubChId; (void)CAOrg;
 }
 //
 //	Service component language
@@ -551,7 +546,6 @@ int16_t	loffset	= offset * 8;
 uint8_t	lsFlag	= getBits_1 (d, loffset);
 int16_t	subChId, serviceComp, language;
 
-	fibLocker. lock ();
 	if (lsFlag == 0) {	// short form
 	   if (getBits_1 (d, loffset + 1) == 0) {
 	      subChId	= getBits_6 (d, loffset + 2);
@@ -566,7 +560,6 @@ int16_t	subChId, serviceComp, language;
 	   loffset += 24;
 	}
 	(void)serviceComp;
-	fibLocker. unlock ();
 	return loffset / 8;
 }
 
@@ -710,7 +703,6 @@ int16_t		appType;
 	NoApplications	= getBits_4 (d, lOffset + 4);
 	lOffset += 8;
 
-	fibLocker. lock ();
 	for (i = 0; i < NoApplications; i ++) {
 	   appType		= getBits (d, lOffset, 11);
 	   int16_t length	= getBits_5 (d, lOffset + 11);
@@ -721,7 +713,6 @@ int16_t		appType;
 	      packetComp      -> appType       = appType;
 	}
 
-	fibLocker. unlock ();
 	return lOffset / 8;
 }
 //
@@ -735,13 +726,11 @@ int16_t	i;
 	   int16_t SubChId	= getBits_6 (d, used * 8);
 	   uint8_t FEC_scheme	= getBits_2 (d, used * 8 + 6);
 	   used = used + 1;
-	   fibLocker. lock ();
 	   for (i = 0; i < 64; i ++) {
               if (subChannels [i]. SubChId == SubChId) {
                  subChannels [i]. FEC_scheme = FEC_scheme;
               }
            }
-	   fibLocker. unlock ();
 	}
 }
 
@@ -775,7 +764,6 @@ int16_t	length	= getBits_5 (d, 3);
 int16_t	offset	= 16;
 serviceId	*s;
 
-	fibLocker. lock ();
 	while (offset < length * 8) {
 	   uint16_t	SId	= getBits (d, offset, 16);
 	   bool	L_flag	= getBits_1 (d, offset + 18);
@@ -797,7 +785,6 @@ serviceId	*s;
 	   else
 	      offset += 32;
 	}
-	fibLocker. unlock ();
 }
 //
 //      Announcement support 8.1.6.1
@@ -951,6 +938,7 @@ char		label [17];
 	Rfu		= getBits_1 (d, 8 + 4);
 	extension	= getBits_3 (d, 8 + 5); 
 	label [16] = 0;
+	(void)Rfu;
 	switch (extension) {
 /*
 	   default:
@@ -982,7 +970,6 @@ char		label [17];
 	   case 1:	// 16 bit Identifier field for service label 8.1.14.1
 	      SId	= getBits (d, 16, 16);
 	      offset	= 32;
-	      fibLocker. lock ();
 	      myIndex	= findServiceId (SId);
 	      if ((!myIndex -> serviceLabel. hasName) && (charSet <= 16)) {
 	         for (i = 0; i < 16; i ++) {
@@ -996,7 +983,6 @@ char		label [17];
 //	         fprintf (stderr, "FIG1/1: SId = %4x\t%s\n", SId, label);
 	         myIndex -> serviceLabel. hasName = true;
 	      }
-	      fibLocker. unlock ();
 	      break;
 
 	   case 3:
@@ -1033,14 +1019,11 @@ char		label [17];
 	   case 5:	 // Data service label - 32 bits 8.1.14.2
 	      SId	= getLBits (d, 16, 32);
 	      offset	= 48;
-	      fibLocker. lock ();
 	      myIndex   = findServiceId (SId);
-	      fibLocker. unlock ();
               if ((!myIndex -> serviceLabel. hasName) && (charSet <= 16)) {
                  for (i = 0; i < 16; i ++) {
                     label [i] = getBits_8 (d, offset + 8 * i);
                  }
-	         fibLocker. lock ();
                  myIndex -> serviceLabel. label. append (
                                toStringUsingCharset (
                                          (const char *) label,
@@ -1050,7 +1033,6 @@ char		label [17];
 	                                 " (data)",
                                          (CharacterSet) charSet));
                  myIndex -> serviceLabel. hasName = true;
-	         fibLocker. unlock ();
 	         addtoEnsemble (myIndex -> serviceLabel. label, SId);
               }
 	      break;
@@ -1256,7 +1238,6 @@ int16_t	i;
 void	fib_processor::clearEnsemble (void) {
 int16_t i;
 
-	fibLocker. lock ();
 	setupforNewFrame ();
 	coordinates. cleanUp ();
 	memset (ServiceComps, 0, sizeof (ServiceComps));
@@ -1269,7 +1250,6 @@ int16_t i;
 	   subChannels [i]. inUse	= false;
 	}
 	firstTime	= true;
-	fibLocker. unlock ();
 }
 
 std::string fib_processor::nameFor (int32_t serviceId) {
@@ -1282,8 +1262,9 @@ int16_t i;
 	   if (!listofServices [i]. serviceLabel. hasName)
               continue;
 
-	   if (listofServices [i]. serviceId == (uint32_t) serviceId) 
+	   if (listofServices [i]. serviceId == (uint32_t) serviceId) {
 	      return listofServices [i]. serviceLabel. label;
+	   }
 	}
 	return "no service found";
 }
@@ -1298,8 +1279,9 @@ int16_t i;
 	   if (!listofServices [i]. serviceLabel. hasName)
               continue;
 
-	   if (compareNames (name, listofServices [i]. serviceLabel. label))
+	   if (compareNames (name, listofServices [i]. serviceLabel. label)) {
 	      return listofServices [i]. serviceId;
+	   }
 	}
 	return -1;
 }
@@ -1408,7 +1390,6 @@ void	fib_processor::dataforAudioService (std::string &s,
 int16_t	j;
 serviceId *selectedService;
 
-
 	d -> defined	= false;
 	fibLocker. lock ();
 	selectedService	= findServiceId (s);
@@ -1447,15 +1428,20 @@ serviceId *selectedService;
 }
 //
 //	and now for the would-be signals
-
+//	Note that the main program may decide to execute calls
+//	in the fib structures, so release the lock
 void	fib_processor::addtoEnsemble	(const std::string &s, int32_t SId) {
+	fibLocker. unlock ();
 	if (programnameHandler != NULL)
 	   programnameHandler (s, SId, userData);
+	fibLocker. lock ();
 }
 
 void	fib_processor::nameofEnsemble  (int id, const std::string &s) {
+	fibLocker. unlock ();
 	if (ensemblenameHandler != NULL)
 	   ensemblenameHandler (s, id, userData);
+	fibLocker. lock ();
 	isSynced	= true;
 }
 

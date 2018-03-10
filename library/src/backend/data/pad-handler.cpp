@@ -245,6 +245,7 @@ static bool    isLastSegment       = false;
 static bool moreXPad	= false;
 int16_t  dataLength	= 0;
 
+	(void)segmentno;
 	if ((CI & 037) == 02) {	// start of segment
 	   uint16_t prefix = (data [0] << 8) | data [1];
 	   uint8_t field_1 = (prefix >> 8) & 017;
@@ -368,6 +369,7 @@ void	padHandler::build_MSC_segment (uint8_t *data, int16_t msc_length) {
 	bool		lastFlag	= false;	// default
 	uint16_t	index;
 
+	(void)continuityIndex; (void)repetitionIndex;
 	if ((data [0] & 0x40) != 0) {
 	   bool res	= check_crc_bytes (data, msc_length - 2);
 	   if (!res) {

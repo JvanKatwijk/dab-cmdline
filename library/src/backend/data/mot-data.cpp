@@ -103,7 +103,7 @@ uint32_t bodySize       =
 
 uint8_t contentType	= ((segment [5] >> 1) & 0x3F);
 uint16_t contentsubType = ((segment [5] & 0x01) << 8) | segment [6];
-int32_t	pointer	= 7;
+uint32_t	pointer	= 7;
 std::string	name 	= std::string ("");
 
 //      If we had a header with that transportId, do not do anything
@@ -139,7 +139,7 @@ std::string	name 	= std::string ("");
 	            pointer += 2;
 	         }
 	         if (paramId == 12) {
-	            int16_t i;
+	            uint16_t i;
 	            for (i = 0; i < length - 1; i ++) 
 	               name. append (1, char (segment [pointer + i + 1]));
 	         }
@@ -272,6 +272,7 @@ int32_t	period		= (segment [6] << 16) |
 	                  (segment [7] <<  8) | segment [8];
 int32_t segSize		= ((segment [9] & 0x1F) << 8) | segment [10];
 
+	(void)period; (void)segSize;
 	if ((theDirectory != NULL) &&
 	                (theDirectory -> transportId == transportId)) 
 	   return;		// already in!!
