@@ -315,9 +315,9 @@ endif ()
 	     ../library/src/backend/galois.cpp
 	     ../library/src/backend/reed-solomon.cpp
 	     ../library/src/backend/msc-handler.cpp
-	     ../library/src/backend/virtual-handler.cpp
-	     ../library/src/backend/audio-handler.cpp
-	     ../library/src/backend/data-handler.cpp
+	     ../library/src/backend/virtual-backend.cpp
+	     ../library/src/backend/audio-backend.cpp
+	     ../library/src/backend/data-backend.cpp
 	     ../library/src/backend/audio/mp4processor.cpp 
 	     ../library/src/backend/audio/mp2processor.cpp 
 	     ../library/src/backend/data/mot-databuilder.cpp 

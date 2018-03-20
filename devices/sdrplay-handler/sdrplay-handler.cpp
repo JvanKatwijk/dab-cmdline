@@ -186,6 +186,7 @@ void myStreamCallback (int16_t		*xi,
 int16_t	i;
 sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
 std::complex<float> localBuf [numSamples];
+int	nrBits		= p -> nrBits;
 
 	for (i = 0; i <  (int)numSamples; i ++)
 	   localBuf [i] = std::complex<float> (float (xi [i]) / nrBits,

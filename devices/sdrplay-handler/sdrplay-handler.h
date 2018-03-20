@@ -68,11 +68,14 @@ public:
 	void	setGain			(int32_t);
 	bool	has_autogain		(void);
 	void	set_agcControl		(bool);
+//
+//	need to be visible, since being accessed from 
+//	within the callback
 	RingBuffer<std::complex<float>>	*_I_Buffer;
+	int16_t		nrBits;
 private:
 
 	int16_t		hwVersion;
-	int16_t		nrBits;
 	float		denominator;
 	uint16_t	deviceIndex;
 	uint32_t	numofDevs;	// int32_t not my choice
