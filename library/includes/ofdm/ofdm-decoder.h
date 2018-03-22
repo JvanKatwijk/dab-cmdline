@@ -34,6 +34,8 @@
 #include	"freq-interleaver.h"
 #include	"semaphore.h"
 
+//	UNCOMMENT THE DEFINE FOR E.G. THE RPI 2
+//#define	__THREADED_DECODING
 class	ficHandler;
 class	mscHandler;
 class	dabParams;
@@ -48,7 +50,7 @@ public:
 	                                 mscHandler	*);
 		~ofdmDecoder		(void);
 	void	processBlock_0		(std::complex<float> *);
-	void	decodeblock		(std::complex<float> *, int32_t n);
+	void	decodeBlock		(std::complex<float> *, int32_t n);
 	int16_t	get_snr			(void);
 	void	stop			(void);
 	void	start			(void);
@@ -59,6 +61,7 @@ private:
         RingBuffer<std::complex<float>> *iqBuffer;
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscHandler;
+#ifdef	__THREADED_DECODING
 	Semaphore	bufferSpace;
 	std::thread	threadHandle;
 	std::mutex	myMutex;
@@ -68,11 +71,17 @@ private:
 	std::atomic<bool>	running;
 	std::complex<float>	**command;
 	int16_t		amount;
-	int		cnt;
 	int16_t		currentBlock;
 	void		processBlock_0		(void);
 	void		decodeFICblock		(int32_t n);
 	void		decodeMscblock		(int32_t n);
+#else
+	void		decodeFICblock		(std::complex<float> *,
+	                                                        int32_t n);
+	void		decodeMscblock		(std::complex<float> *,
+	                                                        int32_t n);
+#endif
+	int		cnt;
 	int32_t		T_s;
 	int32_t		T_u;
 	int32_t		T_g;

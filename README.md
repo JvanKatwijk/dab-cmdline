@@ -35,6 +35,26 @@ Feel free to adapt each (all) of these programs to your own ideas.
 
 =======================================================================
 
+LIBRARY CONFIGURATION PARAMETER (IMPORTANT)
+
+For e.g. the RPI 2, where the CPU has more cores, but the capacity
+of each core is limited, the best option is to split the processing
+of the frontend into two parts. 
+A configuration parameter in the CMakeLists.txt file controls this
+
+If __THREADED_DECODING is defined, either in the file
+"library/includes/ofdm/ofdm-decoder.h" or with a line
+add_definitions (-D__THREADED_DECODING) in the CMakeLists.txt file,
+
+The "ofdm_decoding" (involving a lot of FFT's) will be done in a
+separate thread. This is the way I run it on an RPI2.
+
+The drawback is that synchronization might take longer.
+
+========================================================================
+ 
+=======================================================================
+
 The C (C++) example programs
 ------------------------------------------------------------------------
 

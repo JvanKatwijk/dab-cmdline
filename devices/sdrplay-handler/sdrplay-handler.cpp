@@ -72,7 +72,7 @@ mir_sdr_DeviceT devDesc [4];
 
 	if (hwVersion == 255) {
 	   nrBits	= 14;
-	   denominator	= 16384.0;
+	   denominator	= 8192.0;
 	}
         else {
            nrBits	= 12;
@@ -186,11 +186,11 @@ void myStreamCallback (int16_t		*xi,
 int16_t	i;
 sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
 std::complex<float> localBuf [numSamples];
-int	nrBits		= p -> nrBits;
+float	denominator		= p -> denominator;
 
 	for (i = 0; i <  (int)numSamples; i ++)
-	   localBuf [i] = std::complex<float> (float (xi [i]) / nrBits,
-	                                       float (xq [i]) / nrBits);
+	   localBuf [i] = std::complex<float> (float (xi [i]) / denominator,
+	                                       float (xq [i]) / denominator);
 	p -> _I_Buffer -> putDataIntoBuffer (localBuf, numSamples);
 	(void)	firstSampleNum;
 	(void)	grChanged;
@@ -237,10 +237,6 @@ int	localGRed	= 102 - theGain;
 	mir_sdr_SetPpm       ((float)ppmCorrection);
         err             = mir_sdr_SetDcMode (4, 1);
         err             = mir_sdr_SetDcTrackTime (63);
-//
-        mir_sdr_SetSyncUpdatePeriod ((int)(inputRate / 2));
-        mir_sdr_SetSyncUpdateSampleNum (samplesPerPacket);
-        mir_sdr_DCoffsetIQimbalanceControl (0, 1);
         running. store (true);
         return true;
 }
@@ -256,11 +252,8 @@ void	sdrplayHandler::stopReader	(void) {
 //
 //	Note that the sdrPlay returns 12/14 bit values
 int32_t	sdrplayHandler::getSamples (std::complex<float> *V, int32_t size) { 
-int32_t count	= 0;
-float	sum	= 0;
 
-	count = _I_Buffer	-> getDataFromBuffer (V, size);
-	return count;
+	return _I_Buffer	-> getDataFromBuffer (V, size);
 }
 
 int32_t	sdrplayHandler::Samples	(void) {

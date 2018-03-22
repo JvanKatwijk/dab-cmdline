@@ -72,7 +72,7 @@ int16_t	local	= 0;
   *	each 128 bit block contains 4 subblocks of 32 bits
   *	on which the given puncturing is applied
   */
-	memset (punctureTable, 0, (3072 + 24) * sizeof (uint8_t));
+	memset (punctureTable, 0, (3072 + 24) * sizeof (bool));
 
 	for (i = 0; i < 21; i ++) {
 	   for (k = 0; k < 32 * 4; k ++) {

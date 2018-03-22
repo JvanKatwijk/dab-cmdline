@@ -370,7 +370,7 @@ int		index_attempts		= 0;
 	         for (i = (int)T_u; i < (int)T_s; i ++) 
 	            FreqCorr += ofdmBuffer [i] * conj (ofdmBuffer [i - T_u]);
 	
-	         my_ofdmDecoder. decodeblock (ofdmBuffer, ofdmSymbolCount);
+	         my_ofdmDecoder. decodeBlock (ofdmBuffer, ofdmSymbolCount);
 	      }
 
 //	we integrate the newly found frequency error with the

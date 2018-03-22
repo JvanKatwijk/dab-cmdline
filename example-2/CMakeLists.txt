@@ -63,6 +63,7 @@ if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 endif ()
 
+#add_definitions (-D__THREADED_DECODING)
 #########################################################################
 	find_package (PkgConfig)
 

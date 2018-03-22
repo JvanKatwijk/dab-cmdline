@@ -44,7 +44,9 @@
                                          RingBuffer<std::complex<float>> *iqBuffer,
 	                                 ficHandler	*my_ficHandler,
 	                                 mscHandler	*my_mscHandler):
+#ifdef	__THREADED_DECODING
 		                             bufferSpace (p ->  get_L ()),
+#endif
 	                                     myMapper    (p) {
 int16_t	i;
 	this	-> params		= p;
@@ -64,7 +66,7 @@ int16_t	i;
 //
 	current_snr			= 0;	
 	cnt				= 0;
-
+#ifdef	__THREADED_DECODING
 /**
   *	When implemented in a thread, the thread controls the
   *	reading in of the data and processing the data through
@@ -79,9 +81,11 @@ int16_t	i;
 	amount		= 0;
 //
 //	will be started from within ofdmProcessor
+#endif
 }
 
 	ofdmDecoder::~ofdmDecoder	(void) {
+#ifdef	__THREADED_DECODING
 int16_t	i;
 	if (running. load ()) {
 	   running. store (false);
@@ -95,22 +99,28 @@ int16_t	i;
 	for (i = 0; i < nrBlocks; i ++)
 	   delete[] command [i];
 	delete[] command;
+#endif
 }
 
 void	ofdmDecoder::start	(void) {
+#ifdef	__THREADED_DECODING
 	amount		= 0;
 	running. store (true);
 	threadHandle	= std::thread (&ofdmDecoder::run, this);
+#endif
 }
 	
 void	ofdmDecoder::stop		(void) {
+#ifdef	__THREADED_DECODING
 	if (running. load ()) {
 	   running. store (false);
 	   Locker. notify_all ();
 	   amount	= 100;
 	   threadHandle. join ();
 	}
+#endif
 }
+#ifdef	__THREADED_DECODING
 /**
   *	The code in the thread executes a simple loop,
   *	waiting for the next block and executing the interpretation
@@ -158,7 +168,7 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *vi) {
 	Locker. notify_one ();
 }
 
-void	ofdmDecoder::decodeblock (std::complex<float> *vi, int32_t blkno) {
+void	ofdmDecoder::decodeBlock (std::complex<float> *vi, int32_t blkno) {
 	bufferSpace. acquire ();
 	memcpy (command [blkno], &vi [T_g], sizeof (std::complex<float>) * T_u);
 	myMutex. lock ();
@@ -166,14 +176,26 @@ void	ofdmDecoder::decodeblock (std::complex<float> *vi, int32_t blkno) {
 	myMutex. unlock ();
 	Locker. notify_one ();
 }
+#else
+void	ofdmDecoder::decodeBlock (std::complex<float> *vi, int32_t blkno) {
+	if (blkno < 4)
+	   decodeFICblock (vi, blkno);
+	else
+	   decodeMscblock (vi, blkno);
+}
+#endif
 /**
   *	Note that the distinction, made in the ofdmProcessor class
   *	does not add much here, iff we decide to choose the multi core
   *	option definitely, then code may be simplified there.
   */
+#ifdef	__THREADED_DECODING
 void	ofdmDecoder::processBlock_0 (void) {
-
 	memcpy (fft_buffer, command [0], T_u * sizeof (std::complex<float>));
+#else
+void	ofdmDecoder::processBlock_0 (std::complex<float> *v) {
+	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
+#endif
 	my_fftHandler -> do_FFT (fft_handler::fftForward);
 /**
   *	The SNR is determined by looking at a segment of bins
@@ -197,11 +219,17 @@ void	ofdmDecoder::processBlock_0 (void) {
   *	\brief decodeFICblock
   *	do the transforms and hand over the result to the fichandler
   */
+#ifdef	__THREADED_DECODING
 void	ofdmDecoder::decodeFICblock (int32_t blkno) {
 int16_t	i;
 std::complex<float> conjVector [T_u];
-
 	memcpy (fft_buffer, command [blkno], T_u * sizeof (std::complex<float>));
+#else
+void	ofdmDecoder::decodeFICblock (std::complex<float> * v, int32_t blkno) {
+int16_t i;
+std::complex<float> conjVector [T_u];
+	memcpy (fft_buffer, &v [T_g], T_u * sizeof (std::complex<float>));
+#endif
 fftlabel:
 /**
   *	first step: do the FFT
@@ -264,17 +292,20 @@ handlerLabel:
   *	restrain the blocks from which the constellation is shown
   *	to the FIC blocks
   */
+#ifdef	__THREADED_DECODING
 void	ofdmDecoder::decodeMscblock (int32_t blkno) {
-int16_t	i;
-
 	memcpy (fft_buffer, command [blkno], T_u * sizeof (std::complex<float>));
+#else
+void	ofdmDecoder::decodeMscblock (std::complex<float> *v, int32_t blkno) {
+	memcpy (fft_buffer, &v [T_g], T_u * sizeof (std::complex<float>));
+#endif
 fftLabel:
 	my_fftHandler -> do_FFT (fft_handler::fftForward);
 //
 //	Note that "mapIn" maps to -carriers / 2 .. carriers / 2
 //	we did not set the fft output to low .. high
 toBitsLabel:
-	for (i = 0; i < carriers; i ++) {
+	for (int i = 0; i < carriers; i ++) {
 	   int16_t	index	= myMapper. mapIn (i);
 	   if (index < 0) 
 	      index += T_u;
