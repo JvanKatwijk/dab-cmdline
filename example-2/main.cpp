@@ -440,6 +440,10 @@ bool	err;
 	   theDevice	-> set_autogain (autogain);
 	theDevice	-> setVFOFrequency (frequency);
 	theDevice	-> restartReader ();
+	theDevice	-> setGain (theGain);
+	if (autogain)
+	   theDevice	-> set_autogain (autogain);
+	theDevice	-> setVFOFrequency (frequency);
 //
 //	The device should be working right now
 
