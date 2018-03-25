@@ -37,7 +37,7 @@ mir_sdr_DeviceT devDesc [4];
 
 	this	-> inputRate		= 2048000;
         this    -> frequency            = frequency;
-        this    -> ppmCorrection        = ppmCorrection;
+        this    -> ppmCorrection        = ppm;
         this    -> theGain              = gain;
         this    -> deviceIndex          = deviceIndex;
         this    -> agcMode		= autoGain ?
@@ -79,11 +79,11 @@ mir_sdr_DeviceT devDesc [4];
 	   denominator	= 2048.0;
 	}
 
-	_I_Buffer	= new RingBuffer<std::complex<float>>(8 * 1024 * 1024);
+	_I_Buffer	= new RingBuffer<std::complex<float>>(1024 * 1024);
 //
-	mir_sdr_AgcControl (autoGain ?
-	                 mir_sdr_AGC_100HZ :
-	                 mir_sdr_AGC_DISABLE, - (102 - theGain), 0, 0, 0, 0, 0);
+//	mir_sdr_AgcControl (autoGain ?
+//	                 mir_sdr_AGC_100HZ :
+//	                 mir_sdr_AGC_DISABLE, - (102 - theGain), 0, 0, 0, 0, 0);
 	if (!autoGain)
 	   mir_sdr_SetGr (102 - theGain, 1, 0);
 	running. store (false);
@@ -138,8 +138,9 @@ int	samplesPerPacket;
 	}
 
 	if (bankFor_sdr (realFreq) == bankFor_sdr (frequency)) {
-	   mir_sdr_SetRf (float (realFreq), 1, 0);
+	   mir_sdr_SetRf (double (realFreq), 1, 0);
 	   frequency	= realFreq;
+	   fprintf (stderr, "freq gezet op %d\n", realFreq);
 	   return;
 	}
 	stopReader	();
@@ -158,6 +159,7 @@ int16_t	sdrplayHandler::maxGain	(void) {
 //	gain value upon an attenation value and set setexternal Gain
 void	sdrplayHandler::setGain		(int32_t g) {
 	theGain		= g;
+	fprintf (stderr, "gain reducction wordt %d\n", 102 - g);
 	mir_sdr_SetGr (102 - theGain, 1, 0);
 }
 
@@ -218,11 +220,11 @@ int	localGRed	= 102 - theGain;
 
 	fprintf (stderr, "frequency = %d localGred = %d\n", frequency, localGRed);
 	err	= mir_sdr_StreamInit (&localGRed,
-	                              double (inputRate) / mHz (1),
-	                              double (frequency) / mHz (1),
+	                              double (inputRate) / 1000000.0,
+	                              double (frequency) / 1000000.0,
 	                              mir_sdr_BW_1_536,
 	                              mir_sdr_IF_Zero,
-	                              0,	// lnaEnable do not know yet
+	                              1,	// lnaEnable do not know yet
 	                              &gRdBSystem,
 	                              mir_sdr_USE_SET_GR,
 	                              &samplesPerPacket,
@@ -234,7 +236,7 @@ int	localGRed	= 102 - theGain;
 	   return false;
 	}
 
-	mir_sdr_SetPpm       ((float)ppmCorrection);
+//	mir_sdr_SetPpm       ((float)ppmCorrection);
         err             = mir_sdr_SetDcMode (4, 1);
         err             = mir_sdr_SetDcTrackTime (63);
         running. store (true);
@@ -249,11 +251,9 @@ void	sdrplayHandler::stopReader	(void) {
 	running. store (false);
 }
 
-//
 //	Note that the sdrPlay returns 12/14 bit values
 int32_t	sdrplayHandler::getSamples (std::complex<float> *V, int32_t size) { 
-
-	return _I_Buffer	-> getDataFromBuffer (V, size);
+	return  _I_Buffer	-> getDataFromBuffer (V, size);
 }
 
 int32_t	sdrplayHandler::Samples	(void) {

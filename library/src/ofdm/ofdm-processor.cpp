@@ -249,6 +249,7 @@ int		index_attempts		= 0;
 	      jan_abs (getSample (0));
 	   }
 
+	   fprintf (stderr, "we zijn gestart\n");
 	   while (true) {
 //      As long as we are not (time) synced, we try to handle that
               if (!isSynced) {
