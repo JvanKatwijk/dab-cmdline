@@ -1,0 +1,37 @@
+
+Example 2
+
+Example 2 is a simple command line version of the DAB software. The
+input device is fixed, depending on a setting in the CMakeLists.txt
+file. The output is either to the soundcard (default) or to a file
+(-O option).
+
+Other than example 1, it binds directly to the functionality implementing
+the DAB decoding.
+
+All callbacks are defined, most of them with an empty body.
+
+See the file main.cpp for the command line options
+
+Feel free to improve the program
+
+Points to note:
+
+bytesOut is a new callback function, a function that is called
+from the tdc handler (and later may be from others as well)
+
+The data parameter is a packet with a 4 byte header
+byte 0 is 0xFF
+byte 1 is 0x00
+byte 2 is 0xFF
+byte 3 is 0x00
+byte 4 is the high byte of the 16 bit size
+byte 5 is the low  byte of the 16 bit size
+byte 6 is 0x00
+byte 7 is 0 for packet type 0, 0xFF for packet type 1
+
+Note that the lenngth is the length of the data part, so not taking the
+header into account
+
+The bytesOut function puts the data into a simple TCP server that can be 
+read from port 8888 (depending on the configuration).
