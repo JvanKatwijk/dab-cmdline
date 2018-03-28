@@ -434,7 +434,10 @@ bool	err;
 	}
 //
 	if (soundOut == NULL) {	// not bound to a file?
-	   soundOut	= new audioSink	(latency, soundChannel, &err);
+	   if (audiofilePointer != NULL)
+	      soundOut = new audioBase ();
+	   else
+	      soundOut	= new audioSink	(latency, soundChannel, &err);
 	   if (err) {
 	      std::cerr << "no valid sound channel, fatal\n";
 	      exit (33);
@@ -531,6 +534,7 @@ bool	err;
 	         pcmLock. lock ();
 		 sf_close (audiofilePointer);
 	         audiofilePointer = NULL;
+	         run. store (false);
 	         pcmLock. unlock ();
 	      }
 	   }
