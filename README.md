@@ -3,7 +3,6 @@ DAB COMMAND LINE and DAB LIBRARY
 
 ======================================================================
 
-T H I S  I S - NEVER ENDING -  W O R K  I N  P R O G R E S S 
 
 =======================================================================
 
@@ -50,6 +49,7 @@ The "ofdm_decoding" (involving a lot of FFT's) will be done in a
 separate thread. This is the way I run it on an RPI2.
 
 The drawback is that synchronization might take longer.
+
 
 ========================================================================
  

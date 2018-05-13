@@ -1067,21 +1067,32 @@ char		label [17];
 	(void)flagfield;
 }
 
-//
+#define	FULL_MATCH	0100
+#define	PREFIX_MATCH	0200
+#define	NO_MATCH	0000
+
+//	tricky: the names in the directoty contain spaces at the end
 static
-bool	compareNames (std::string in, std::string ref) {
-int16_t	i;
+int	compareNames (std::string in, std::string ref) {
 
 	if (ref == in)
-	   return true;
+	   return FULL_MATCH;
 
-	return ref. find (in, 0) == 0;
 	if (ref. length () < in. length ())
-	   return false;
-	for (i = 0; i < (int16_t)(in. length ()); i ++)
-	   if (in. at (i) != ref. at (i))
-	      return false;
-	return true;
+	   return NO_MATCH;
+
+	if (ref. find (in, 0) != 0) 
+	   return NO_MATCH;
+
+	if  (in. length () == ref. length ())
+	   return FULL_MATCH;
+//
+//	Most likely we will find a prefix as match, since the
+//	FIC structure fills the service names woth spaces to 16 letters
+	if (ref. at (in. length ()) == ' ')
+	   return FULL_MATCH;
+
+	return PREFIX_MATCH;
 }
 
 //	locate - and create if needed - a reference to the entry
@@ -1105,17 +1116,31 @@ int16_t	i;
 
 	return &listofServices [0];	// should not happen
 }
-
+//
+//	since some servicenames are long, we allow selection of a
+//	service based on the first few letters/digits of the name.
+//	However, in case of servicenames where one is a prefix
+//	of the other, the full match should have precedence over the
+//	prefix match
 serviceId	*fib_processor::findServiceId (std::string serviceName) {
 int16_t	i;
+int	indexforprefixMatch	= -1;
 
-	for (i = 0; i < 64; i ++)
-	   if ((listofServices [i]. inUse) &&
-	        compareNames (serviceName,
-	                     listofServices [i]. serviceLabel. label))
-	      return &listofServices [i];
+	for (i = 0; i < 64; i ++) {
+	   if (listofServices [i]. inUse) {
+	      int res = compareNames (serviceName,
+	                     listofServices [i]. serviceLabel. label);
+	      if (res == FULL_MATCH) {
+	         return &listofServices [i];
+	      }
+	      if (res == PREFIX_MATCH) {
+	         indexforprefixMatch = i;
+	      }
+	   }
+	}
 
-	return NULL;
+	return indexforprefixMatch >= 0 ?
+	              &listofServices [indexforprefixMatch] : NULL;
 }
 
 serviceComponent *fib_processor::find_packetComponent (int16_t SCId) {
@@ -1271,6 +1296,7 @@ int16_t i;
 
 int32_t	fib_processor::SIdFor (std::string &name) {
 int16_t i;
+int	serviceIndex	= -1;
 
 	for (i = 0; i < 64; i ++) {
 	   if (!listofServices [i]. inUse)
@@ -1279,10 +1305,19 @@ int16_t i;
 	   if (!listofServices [i]. serviceLabel. hasName)
               continue;
 
-	   if (compareNames (name, listofServices [i]. serviceLabel. label)) {
-	      return listofServices [i]. serviceId;
+	   int res = compareNames (name,
+	                      listofServices [i]. serviceLabel. label);
+	   if (res == NO_MATCH)
+	      continue;
+	   if (res == PREFIX_MATCH) {
+	      serviceIndex = i;
+	      continue;
 	   }
+//	it is a FULL match:
+	   return listofServices [i]. serviceId;
 	}
+	if (serviceIndex >= 0)
+	   return listofServices [i]. serviceId;
 	return -1;
 }
 //
@@ -1291,25 +1326,37 @@ uint8_t	fib_processor::kindofService (std::string &s) {
 int16_t	i, j;
 int16_t	service		= UNKNOWN_SERVICE;
 int32_t	selectedService = -1;
+int	serviceIndex	= -1;
 
 	fibLocker. lock ();
 //	first we locate the serviceId
 	for (i = 0; i < 64; i ++) {
+	   int	res;
 	   if (!listofServices [i]. inUse)
 	      continue;
 
 	   if (!listofServices [i]. serviceLabel. hasName)
 	      continue;
 
-	   if (!compareNames (s, listofServices [i]. serviceLabel. label))
+	   res = compareNames (s,
+	                listofServices [i]. serviceLabel. label);
+	   if (res == NO_MATCH)
 	      continue;
+	   if (res == PREFIX_MATCH) {
+	      serviceIndex = i;
+	      continue;
+	   }
+	   serviceIndex = i;
+	   break;
+	}
 
-	   selectedService = listofServices [i]. serviceId;
+	if (serviceIndex != -1) {
+	   selectedService = listofServices [serviceIndex]. serviceId;
 	   for (j = 0; j < 64; j ++) {
 	      if (!ServiceComps [j]. inUse)
 	         continue;
 	      if ((uint32_t)selectedService !=
-	                        ServiceComps [j]. service -> serviceId)
+	                           ServiceComps [j]. service -> serviceId)
 	         continue;
 
 	      if (ServiceComps [j]. componentNr != 0)
@@ -1325,8 +1372,6 @@ int32_t	selectedService = -1;
 	         break;
 	      }
 	   }
-	   if (service != UNKNOWN_SERVICE)
-	      break;
 	}
 	fibLocker. unlock ();
 	return service;
