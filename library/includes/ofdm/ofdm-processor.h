@@ -36,7 +36,7 @@
 #include	"ringbuffer.h"
 #include	"dab-api.h"
 #include	"fft_handler.h"
-
+#include	"sample-reader.h"
 //
 class	ofdmDecoder;
 class	mscHandler;
@@ -62,15 +62,15 @@ public:
 	void	setOffset		(int32_t);
 	void	start			(void);
 	bool	signalSeemsGood		(void);
+	void	show_Corrector		(int);
 private:
 	deviceHandler	*inputDevice;
 	dabParams	params;
-	fft_handler	my_fftHandler;
 	syncsignal_t	syncsignalHandler;
 	systemdata_t	systemdataHandler;
 	void		call_systemData (bool, int16_t, int32_t);
+	sampleReader	myReader;
 	std::thread	threadHandle;
-	int32_t		syncBufferIndex;
 	void		*userData;
 	std::atomic<bool>	running;
 	bool		isSynced;
@@ -84,24 +84,14 @@ private:
 	int32_t		carriers;
 	int32_t		carrierDiff;
 	float		sLevel;
-	std::complex<float>	*oscillatorTable;
 	phaseReference	phaseSynchronizer;
 	ofdmDecoder	my_ofdmDecoder;
 	ficHandler	*my_ficHandler;
 	mscHandler	*my_mscBuffer;
-	bool		tiiSwitch;
 
-	int32_t		sampleCnt;
-	std::complex<float>	getSample	(int32_t);
-	void		getSamples		(std::complex<float> *,
-	                                         int16_t, int32_t);
 virtual	void		run		(void);
-	int32_t		bufferContent;
 	bool		isReset;
         RingBuffer<std::complex<float>> *spectrumBuffer;
-        int32_t         bufferSize;
-        int32_t         localCounter;
-        std::vector<std::complex<float> >   localBuffer;
 };
 #endif
 

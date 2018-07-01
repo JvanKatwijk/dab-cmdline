@@ -13,12 +13,10 @@ The library interface is given in dab-api.h
 
 To show the use of the library, several example programs are included:
 
-	- The example programs example-1, example-2, example-3, example-4,
+	- The example programs example-1, example-2, exmple-2a,
+	   example-3, example-4,
 	  example-5 and example-6 are regular C (C++) programs. 
 	  
-	- simpleDab is a Qt based GUI program, linking to the library.
-	  It shows the use of the library when handled from with a Qt GUI.
-
 	- python-example contains an example program in python to use (an
 	  extended form of) the library.
 	  An additional file, dab-python.cpp, contains
@@ -30,8 +28,8 @@ examples of how to use the library and/or the sources of the library.
 THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
 IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
 
-It is most likely necessary that you adapt a program to your own needs or you might
-have to rewrite it completely.
+It is most likely necessary that you adapt a program to your
+own needs or you might have to rewrite it completely, feel free to do so.
 
 =======================================================================
 
@@ -46,7 +44,7 @@ If __THREADED_DECODING is defined, either in the file
 "library/includes/ofdm/ofdm-decoder.h" or with a line
 add_definitions (-D__THREADED_DECODING) in the CMakeLists.txt file,
 
-The "ofdm_decoding" (involving a lot of FFT's) will be done in a
+The "ofdm_decoding" (involving a lot of FFT's) then will be done in a
 separate thread. This is the way I run it on an RPI2.
 
 The drawback is that synchronization might take longer.
@@ -179,9 +177,6 @@ Libraries (together with the "development" or ".h" files) needed for creating th
 
 ============================================================================
 
-
-For "simpleDab" one uses qt-make, there is a ".pro" file
-
 For the python-example read the README file in the python-example directory.
 HOWEVER: before running the example program one has to create an
 ADAPTED library.
@@ -264,15 +259,6 @@ An example of a full specification of the command line is
 
 The program - when started - will try to identify a DAB datastream in the selected channel (here channel 12C). If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded.
 
-=========================================================================
-
-simpleDAB
--------------------------------------------------------------------------
-
-The simpleDAB directory contains the files for a simplified Qt GUI.
-It binds to the dab-library, and can be created by qmake/make. No attempts
-is made to create a CmakeLists.txt file, since the program is merely
-an example to demonstrate the use of the library in a Qt context.
 
 ========================================================================
 

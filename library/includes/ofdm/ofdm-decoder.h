@@ -32,19 +32,16 @@
 #include	"ringbuffer.h"
 #include	"phasetable.h"
 #include	"freq-interleaver.h"
+#include	"fft_handler.h"
 #include	"semaphore.h"
 
-//	UNCOMMENT THE DEFINE FOR E.G. THE RPI 2
-//#define	__THREADED_DECODING
 class	ficHandler;
 class	mscHandler;
 class	dabParams;
-class	fft_handler;
 
 class	ofdmDecoder {
 public:
 		ofdmDecoder		(dabParams	*,
-	                                 fft_handler	*,
                                          RingBuffer<std::complex<float>> *,
 	                                 ficHandler	*,
 	                                 mscHandler	*);
@@ -55,7 +52,7 @@ public:
 	void	stop			(void);
 	void	start			(void);
 private:
-	fft_handler	*my_fftHandler;
+	fft_handler	my_fftHandler;
 	int16_t		get_snr		(std::complex<float> *);
 	dabParams	*params;
         RingBuffer<std::complex<float>> *iqBuffer;

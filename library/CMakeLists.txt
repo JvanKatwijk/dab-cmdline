@@ -65,7 +65,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	           ./includes/backend/audio
 	           ./includes/backend/data
 	           ./includes/backend/data/journaline
-	           ./includes/various
+	           ./includes/support
 	           /usr/include/
 	)
 
@@ -80,6 +80,8 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/ofdm/phasereference.h
 	     ./includes/ofdm/phasetable.h
 	     ./includes/ofdm/freq-interleaver.h
+	     ./includes/ofdm/sample-reader.h
+	     ./includes/ofdm/timesyncer.h
 	     ./includes/backend/viterbi_768/viterbi-768.h
 	     ./includes/backend/protection.h
 	     ./includes/backend/uep-protection.h
@@ -102,9 +104,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/backend/data/mot-data.h 
 	     ./includes/backend/data/tdc-datahandler.h 
 	     ./includes/backend/data/data-processor.h
-	     ./includes/various/fft_handler.h
-	     ./includes/various/dab-params.h
-	     ./includes/various/tii_table.h
+	     ./includes/support/fft_handler.h
+	     ./includes/support/dab-params.h
+	     ./includes/support/tii_table.h
 	)
 
 	set (${objectName}_SRCS
@@ -116,6 +118,8 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/ofdm/phasereference.cpp
 	     ./src/ofdm/phasetable.cpp
 	     ./src/ofdm/freq-interleaver.cpp
+	     ./src/ofdm/sample-reader.cpp
+	     ./src/ofdm/timesyncer.cpp
 	     ./src/backend/viterbi_768/viterbi-768.cpp
 	     ./src/backend/viterbi_768/spiral-no-sse.c
 	     ./src/backend/fic-handler.cpp
@@ -141,9 +145,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/backend/data/pad-handler.cpp 
 	     ./src/backend/data/mot-data.cpp 
 	     ./src/backend/data/data-processor.cpp
-	     ./src/various/fft_handler.cpp
-	     ./src/various/dab-params.cpp
-	     ./src/various/tii_table.cpp
+	     ./src/support/fft_handler.cpp
+	     ./src/support/dab-params.cpp
+	     ./src/support/tii_table.cpp
 	)
 
 #

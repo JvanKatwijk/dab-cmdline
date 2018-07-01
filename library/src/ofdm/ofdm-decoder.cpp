@@ -40,17 +40,16 @@
   *	carriers and map them on (soft) bits
   */
 	ofdmDecoder::ofdmDecoder	(dabParams	*p,
-	                                 fft_handler	*my_fftHandler,
                                          RingBuffer<std::complex<float>> *iqBuffer,
 	                                 ficHandler	*my_ficHandler,
 	                                 mscHandler	*my_mscHandler):
+	                                     my_fftHandler (p -> get_dabMode ()),
 #ifdef	__THREADED_DECODING
 		                             bufferSpace (p ->  get_L ()),
 #endif
 	                                     myMapper    (p) {
 int16_t	i;
 	this	-> params		= p;
-	this	-> my_fftHandler	= my_fftHandler;
         this    -> iqBuffer             = iqBuffer;
 	this	-> my_ficHandler	= my_ficHandler;
 	this	-> my_mscHandler	= my_mscHandler;
@@ -61,7 +60,7 @@ int16_t	i;
 	ibits. resize (2 * carriers);
 
 	this	-> T_g			= T_s - T_u;
-	fft_buffer			= my_fftHandler -> getVector ();
+	fft_buffer			= my_fftHandler. getVector ();
 	phaseReference. resize (T_u);
 //
 	current_snr			= 0;	
@@ -196,7 +195,7 @@ void	ofdmDecoder::processBlock_0 (void) {
 void	ofdmDecoder::processBlock_0 (std::complex<float> *v) {
 	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
 #endif
-	my_fftHandler -> do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT (fft_handler::fftForward);
 /**
   *	The SNR is determined by looking at a segment of bins
   *	within the signal region and bits outside.
@@ -234,7 +233,7 @@ fftlabel:
 /**
   *	first step: do the FFT
   */
-	my_fftHandler -> do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT (fft_handler::fftForward);
 /**
   *	a little optimization: we do not interchange the
   *	positive/negative frequencies to their right positions.
@@ -300,7 +299,7 @@ void	ofdmDecoder::decodeMscblock (std::complex<float> *v, int32_t blkno) {
 	memcpy (fft_buffer, &v [T_g], T_u * sizeof (std::complex<float>));
 #endif
 fftLabel:
-	my_fftHandler -> do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT (fft_handler::fftForward);
 //
 //	Note that "mapIn" maps to -carriers / 2 .. carriers / 2
 //	we did not set the fft output to low .. high

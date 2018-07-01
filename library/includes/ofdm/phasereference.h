@@ -28,14 +28,13 @@
 #include	<vector>
 #include	"phasetable.h"
 #include	"dab-constants.h"
+#include	"fft_handler.h"
 
 class	dabParams;
-class	fft_handler;
 
 class phaseReference : public phaseTable {
 public:
 		phaseReference (dabParams	*,
-	                        fft_handler	*,
 	                        int16_t, int16_t);
 		~phaseReference	(void);
 	int32_t	findIndex	(std::complex<float> *);
@@ -47,7 +46,7 @@ private:
 	int16_t         threshold;
 	int16_t         diff_length;
 
-	fft_handler     *my_fftHandler;
+	fft_handler	my_fftHandler;
 	std::complex<float>     *fft_buffer;
 
 };

@@ -271,7 +271,7 @@ endif ()
 	           ../library/includes/backend/audio
 	           ../library/includes/backend/data
 	           ../library/includes/backend/data/journaline
-	           ../library/includes/various
+	           ../library/includes/support
 	           /usr/include/
 	)
 
@@ -291,6 +291,8 @@ endif ()
 	     ../library/includes/ofdm/phasereference.h
 	     ../library/includes/ofdm/phasetable.h
 	     ../library/includes/ofdm/freq-interleaver.h
+	     ../library/includes/ofdm/sample-reader.h
+	     ../library/includes/ofdm/timesyncer.h
 	     ../library/includes/backend/viterbi_768/viterbi-768.h
 	     ../library/includes/backend/protection.h
 	     ../library/includes/backend/uep-protection.h
@@ -313,9 +315,9 @@ endif ()
 	     ../library/includes/backend/data/pad-handler.h 
 	     ../library/includes/backend/data/mot-data.h 
 	     ../library/includes/backend/data/data-processor.h
-	     ../library/includes/various/fft_handler.h
-	     ../library/includes/various/dab-params.h
-	     ../library/includes/various/tii_table.h
+	     ../library/includes/support/fft_handler.h
+	     ../library/includes/support/dab-params.h
+	     ../library/includes/support/tii_table.h
 	)
 
 	set (${objectName}_SRCS
@@ -334,6 +336,8 @@ endif ()
 	     ../library/src/ofdm/phasereference.cpp
 	     ../library/src/ofdm/phasetable.cpp
 	     ../library/src/ofdm/freq-interleaver.cpp
+	     ../library/src/ofdm/sample-reader.cpp
+	     ../library/src/ofdm/timesyncer.cpp
 	     ../library/src/backend/viterbi_768/viterbi-768.cpp
 	     ../library/src/backend/viterbi_768/spiral-no-sse.c
 	     ../library/src/backend/fic-handler.cpp
@@ -359,9 +363,9 @@ endif ()
 	     ../library/src/backend/data/pad-handler.cpp 
 	     ../library/src/backend/data/mot-data.cpp 
 	     ../library/src/backend/data/data-processor.cpp
-	     ../library/src/various/fft_handler.cpp
-	     ../library/src/various/dab-params.cpp
-	     ../library/src/various/tii_table.cpp
+	     ../library/src/support/fft_handler.cpp
+	     ../library/src/support/dab-params.cpp
+	     ../library/src/support/tii_table.cpp
 	)
 
 #

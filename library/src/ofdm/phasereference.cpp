@@ -31,19 +31,18 @@
   *	The class inherits from the phaseTable.
   */
 	phaseReference::phaseReference (dabParams	*p,
-	                                fft_handler	*my_fftHandler,
 	                                int16_t		threshold,	
 	                                int16_t		diff_length):
+	                                     my_fftHandler (p -> get_dabMode ()),
 	                                     phaseTable (p -> get_dabMode ()) {
 int32_t	i;
 float	Phi_k;
-	this    -> my_fftHandler        = my_fftHandler;
         this    -> T_u          = p -> get_T_u ();
         this    -> threshold    = threshold;
         this    -> diff_length  = diff_length;
         refTable.               resize (T_u);
         phaseDifferences.       resize (diff_length);
-        fft_buffer              = my_fftHandler -> getVector ();
+        fft_buffer              = my_fftHandler. getVector ();
 
         for (i = 1; i <= p -> get_carriers () / 2; i ++) {
            Phi_k =  get_Phi (i);
@@ -78,12 +77,12 @@ float	sum		= 0;
 float	Max		= -10000;
 
 	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-	my_fftHandler -> do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT (fft_handler::fftForward);
 //	 into the frequency domain, now correlate
 	for (i = 0; i < T_u; i ++) 
 	   fft_buffer [i] *= conj (refTable [i]);
 //	and, again, back into the time domain
-	my_fftHandler -> do_FFT (fft_handler::fftBackwards);
+	my_fftHandler. do_FFT (fft_handler::fftBackwards);
 /**
   *	We compute the average signal value ...
   */
@@ -126,7 +125,7 @@ int16_t i, j, index = 100;
 float   computedDiffs [SEARCH_RANGE + diff_length + 1];
 
 	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-	my_fftHandler -> do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT (fft_handler::fftForward);
 
 	for (i = T_u - SEARCH_RANGE / 2;
 	     i < T_u + SEARCH_RANGE / 2 + diff_length; i ++)
