@@ -72,11 +72,9 @@ void	dabReset           (void *Handle) {
 	((dabClass *)Handle) -> reset ();
 }
 
-
 void	dabStop           (void *Handle) {
 	((dabClass *)Handle) -> stop ();
 }
-
 
 int16_t	dabService     (const char* c_s, void *Handle) {
 	std::string s(c_s);

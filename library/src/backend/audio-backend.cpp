@@ -71,20 +71,20 @@ int32_t i, j;
 	                                              protLevel);
 //
 	if (dabModus == DAB) 
-	   our_dabProcessor = new mp2Processor (bitRate,
+	   our_backendBase = new mp2Processor (bitRate,
 	                                        soundOut,
 	                                        dataOut,
 	                                        mscQuality,
 	                                        motdata_Handler, ctx);
 	else
 	if (dabModus == DAB_PLUS) 
-	   our_dabProcessor = new mp4Processor (bitRate,
+	   our_backendBase = new mp4Processor (bitRate,
 	                                        soundOut,
 	                                        dataOut,
 	                                        mscQuality,
 	                                        motdata_Handler, ctx);
 	else		// cannot happen
-	   our_dabProcessor = new dabProcessor ();
+	   our_backendBase = new backendBase ();
 
 	fprintf (stderr, "we have now %s\n", dabModus == DAB_PLUS ? "DAB+" : "DAB");
 	tempX . resize (fragmentSize);
@@ -114,7 +114,7 @@ int16_t	i;
 	   threadHandle. join ();
 	}
 	delete protectionHandler;
-	delete our_dabProcessor;
+	delete our_backendBase;
 	for (i = 0; i < 16; i ++) 
 	   delete[]  interleaveData [i];
 	delete [] interleaveData;
@@ -167,7 +167,7 @@ int16_t i;
 	for (i = 0; i < bitRate * 24; i ++)
 	   outV [i] ^= disperseVector [i];
 
-        our_dabProcessor -> addtoFrame (outV. data ());
+        our_backendBase -> addtoFrame (outV. data ());
 }
 
 void    audioBackend::run       (void) {

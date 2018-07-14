@@ -127,7 +127,7 @@ The example programs are different though:
 	  "next" (audio) service to be selected.
 
 	- example 6 is an experimental version where control is
-	  through an IP port.
+	  through an IP port. 
 
 =======================================================================
 

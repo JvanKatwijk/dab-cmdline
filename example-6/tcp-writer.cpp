@@ -74,31 +74,19 @@ void	tcpWriter::sendData (uint8_t key, std::string message) {
 std::string m;
 int length	= message. length ();
 const char *s	= message. c_str ();
-std::vector<uint8_t> packet;
+uint8_t	*packet;
 int	i;
 
 	if (!connected)
 	   return;
 	
-	while	(length > PACKET_SIZE - 4) {
-	   packet. resize (PACKET_SIZE);
-	   packet [0] = 0xFF;
-	   packet [1] = PACKET_SIZE - 3;	// we add a null byte
-	   packet [2] = key;
-	   for (i = 0; i < length; i ++)
-	      packet [3 + i] = s [i];
-	   packet [PACKET_SIZE - 1] = 0;
-	   std::lock_guard<std::mutex> guard(mutex);
-	   messageQ. push (packet);
-	   condvar.notify_one ();
-	   length -= PACKET_SIZE - 4;
-	}
-	packet. resize (PACKET_SIZE);
+	packet = new uint8_t [length + 4];
 	packet [0] = 0xFF;
 	packet [1] = length;
 	packet [2] = key;
 	for (i = 0; i < length; i ++)
 	   packet [3 + i] = s [i];
+	packet [length + 3] = 0;
 	std::lock_guard<std::mutex> guard(mutex);
 	messageQ. push (packet);
 	condvar.notify_one ();
@@ -135,10 +123,11 @@ int	c;
 	         if (!running. load ())
 	            mutex. unlock ();
 	         while (!messageQ. empty () && running. load ()) {
-	            std::vector<uint8_t> m  = messageQ.front();
-	            messageQ. pop();
 	            int status = send (client_sock,
-	                                m.data (), m. size (), 0);
+	                                messageQ. front (), 
+	                                messageQ. front () [1] + 4, 0);
+	            delete messageQ. front ();
+	            messageQ. pop();
 	            if (status == -1) {
 	               throw (22);
 	            }

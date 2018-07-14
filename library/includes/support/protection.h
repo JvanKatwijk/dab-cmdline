@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2014 .. 2017
+ *    Copyright (C) 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -19,23 +19,26 @@
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *	Simple base class for combining uep and eep deconvolvers
  */
-#
-#ifndef	__DAB_PROCESSOR
-#define	__DAB_PROCESSOR
+#ifndef	__PROTECTION__
+#define	__PROTECTION__
 
 #include	<stdint.h>
-#include	<stdio.h>
+#include	<vector>
+#include	"viterbi-768.h"
 
-//
-//	virtual class, just for providing a common base
-//	for the real decoder classes
-
-class	dabProcessor {
+class	protection: public viterbi_768 {
 public:
-		dabProcessor	(void);
-virtual		~dabProcessor	(void);
-virtual	void	addtoFrame	(uint8_t *);
+		protection  	(int16_t, int16_t);
+virtual		~protection	(void);
+virtual	bool	deconvolve	(int16_t *, int32_t, uint8_t *);
+protected:
+        int16_t         bitRate;
+        std::vector<uint8_t> indexTable;
+        std::vector<int16_t> viterbiBlock;
+        int32_t         outSize;
 };
 #endif
 

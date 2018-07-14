@@ -20,8 +20,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__OFDM_PROCESSOR__
-#define	__OFDM_PROCESSOR__
+#ifndef	__DAB_PROCESSOR__
+#define	__DAB_PROCESSOR__
 /*
  *
  */
@@ -30,51 +30,73 @@
 #include	<atomic>
 #include	<stdint.h>
 #include	<vector>
+#include	"dab-params.h"
 #include	"phasereference.h"
 #include	"ofdm-decoder.h"
-#include	"dab-params.h"
+#include	"fic-handler.h"
+#include	"msc-handler.h"
 #include	"ringbuffer.h"
 #include	"dab-api.h"
-#include	"fft_handler.h"
 #include	"sample-reader.h"
 //
-class	ofdmDecoder;
-class	mscHandler;
-class	ficHandler;
-class	dabParams;
 class	deviceHandler;
 
-class ofdmProcessor {
+class dabProcessor {
 public:
-		ofdmProcessor  	(deviceHandler *,
+		dabProcessor  	(deviceHandler *,
 	                         uint8_t,		// Mode
 	                         syncsignal_t,
 	                         systemdata_t,
-	                         mscHandler *,
-	                         ficHandler *,
-	                         int16_t,
+	                         ensemblename_t,
+	                         programname_t,
+	                         fib_quality_t,
+	                         audioOut_t,
+	                         bytesOut_t,
+	                         dataOut_t,
+	                         programdata_t,
+	                         programQuality_t,
+	                         motdata_t,
 	                         RingBuffer<std::complex<float>> *,
                                  RingBuffer<std::complex<float>> *,
 	                         void	*);
-	virtual ~ofdmProcessor	(void);
+	virtual ~dabProcessor	(void);
 	void	reset			(void);
 	void	stop			(void);
 	void	setOffset		(int32_t);
 	void	start			(void);
 	bool	signalSeemsGood		(void);
 	void	show_Corrector		(int);
+//      inheriting from our delegates
+	void		setSelectedService	(std::string);
+	uint8_t		kindofService           (std::string);
+	void		dataforAudioService     (std::string,   audiodata *);
+	void		dataforAudioService     (std::string,
+	                                             audiodata *, int16_t);
+	void		dataforDataService      (std::string,   packetdata *);
+	void		dataforDataService      (std::string,
+	                                             packetdata *, int16_t);
+	int32_t		get_SId			(std::string s);
+	std::string	get_serviceName		(int32_t);
+	void		set_audioChannel        (audiodata *);
+	void		set_dataChannel         (packetdata *);
+	std::string	get_ensembleName        (void);
+	void		clearEnsemble           (void);
+	void		reset_msc		(void);
 private:
 	deviceHandler	*inputDevice;
 	dabParams	params;
+	sampleReader	myReader;
+	phaseReference	phaseSynchronizer;
+	ofdmDecoder	my_ofdmDecoder;
+	ficHandler	my_ficHandler;
+	mscHandler	my_mscHandler;
 	syncsignal_t	syncsignalHandler;
 	systemdata_t	systemdataHandler;
 	void		call_systemData (bool, int16_t, int32_t);
-	sampleReader	myReader;
 	std::thread	threadHandle;
 	void		*userData;
 	std::atomic<bool>	running;
 	bool		isSynced;
-	int32_t		localPhase;
 	int32_t		T_null;
 	int32_t		T_u;
 	int32_t		T_s;
@@ -83,15 +105,8 @@ private:
 	int32_t		nrBlocks;
 	int32_t		carriers;
 	int32_t		carrierDiff;
-	float		sLevel;
-	phaseReference	phaseSynchronizer;
-	ofdmDecoder	my_ofdmDecoder;
-	ficHandler	*my_ficHandler;
-	mscHandler	*my_mscBuffer;
 
 virtual	void		run		(void);
-	bool		isReset;
-        RingBuffer<std::complex<float>> *spectrumBuffer;
 };
 #endif
 

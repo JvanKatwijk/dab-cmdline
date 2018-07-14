@@ -83,7 +83,7 @@ tcpServer	tdcServer (8888);
 #endif
 
 std::string	programName		= "Sky Radio";
-int32_t		serviceIdentifier	= -1;
+//int32_t		serviceIdentifier	= -1;
 
 static void sighandler (int signum) {
         fprintf (stderr, "Signal caught, terminating!\n");
@@ -353,7 +353,7 @@ bool	err;
 	      case 'S': {
                  std::stringstream ss;
                  ss << std::hex << optarg;
-                 ss >> serviceIdentifier;
+//	ss >> serviceIdentifier;
                  break;
               }
 
@@ -484,8 +484,8 @@ bool	err;
 	}
 
 	run. store (true);
-	if (serviceIdentifier != -1) 
-	   programName = theRadio -> dab_getserviceName (serviceIdentifier);
+//	if (serviceIdentifier != -1) 
+//	   programName = theRadio -> dab_getserviceName (serviceIdentifier);
 	std::cerr << "we try to start program " <<
                                                  programName << "\n";
 	if (theRadio -> dab_service (programName) < 0) {

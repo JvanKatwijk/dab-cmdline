@@ -22,23 +22,19 @@
  *
  *	Simple base class for combining uep and eep deconvolvers
  */
-#ifndef	__PROTECTION__
-#define	__PROTECTION__
+#include	"protection.h"
 
-#include	<stdint.h>
-#include	<vector>
-#include	"viterbi-768.h"
+     protection::protection  (int16_t bitRate, int16_t protLevel):
+                                        viterbi_768 (24 * bitRate, false),
+                                        indexTable   (outSize * 4 + 24),
+                                        viterbiBlock (outSize * 4 + 24),
+                                        outSize (24 * bitRate) {
+        this    -> bitRate      = bitRate;
+}
 
-class	protection: public viterbi_768 {
-public:
-		protection  	(int16_t, int16_t);
-virtual		~protection	(void);
-virtual	bool	deconvolve	(int16_t *, int32_t, uint8_t *);
-protected:
-        int16_t         bitRate;
-        int32_t         outSize;
-        std::vector<int16_t> viterbiBlock;
-        std::vector<uint8_t> indexTable;
-};
-#endif
+        protection::~protection (void) {}
+bool    protection::deconvolve  (int16_t *a, int32_t b, uint8_t *c) {
+           (void)a; (void)b; (void)c;
+           return false;
+}
 

@@ -31,7 +31,7 @@
 //
 //	dabclass is a convenience class
 	dabClass::dabClass (deviceHandler	*inputDevice,
-	                    uint8_t		Mode,
+	                    uint8_t		dabMode,
 	                    RingBuffer<std::complex<float>> *spectrumBuffer,
 	                    RingBuffer<std::complex<float>> *iqBuffer,
 	                    syncsignal_t	syncsignal_Handler,
@@ -46,17 +46,22 @@
 	                    programQuality_t	programquality_Handler,
 	                    motdata_t		motdata_Handler,
 	                    void		*ctx):
-	                                   the_ficHandler (ensemblename_Handler,
-	                                                   programname_Handler,
-	                                                   fibquality_Handler,
-	                                                   ctx),
-	                                   the_mscHandler (Mode,
-	                                                   audioOut_Handler,
-	                                                   dataOut_Handler,
-	                                                   bytesOut_Handler,
-	                                                   programquality_Handler,
-	                                                   motdata_Handler,
-	                                                   ctx) {
+	                               the_dabProcessor (inputDevice,
+	                                                 dabMode,
+	                                                 syncsignal_Handler,
+	                                                 systemdata_Handler,
+	                                                 ensemblename_Handler,
+	                                                 programname_Handler,
+	                                                 fibquality_Handler,
+	                                                 audioOut_Handler,
+	                                                 bytesOut_Handler,
+	                                                 dataOut_Handler,
+	                                                 programdata_Handler,
+	                                                 programquality_Handler,
+	                                                 motdata_Handler,
+	                                                 spectrumBuffer,
+	                                                 iqBuffer,
+	                                                 ctx) {
 	this	-> inputDevice		= inputDevice;
 	this	-> spectrumBuffer	= spectrumBuffer,
 	this	-> iqBuffer		= iqBuffer,
@@ -70,79 +75,52 @@
 	this	-> programdata_Handler	= programdata_Handler;
 	this	-> motdata_Handler	= motdata_Handler;
 	this	-> userData		= ctx;
-
-	 the_ofdmProcessor = new ofdmProcessor  (inputDevice,
-	                                        Mode,
-	                                        syncsignal_Handler,
-	                                        systemdata_Handler,
-	                                        &the_mscHandler,
-	                                        &the_ficHandler,
-	                                        3,
-	                                        spectrumBuffer,
-	                                        iqBuffer,
-	                                        userData);
 }
 
 	dabClass::~dabClass	(void) {
-	the_ofdmProcessor	-> stop ();
-	delete the_ofdmProcessor;
+	the_dabProcessor. stop ();
 }
 
 void	dabClass::startProcessing	(void) {
-	fprintf (stderr, "ofdm word gestart\n");
-	the_ofdmProcessor	-> start ();
+	the_dabProcessor. start ();
 }
 
 void	dabClass::reset		(void) {
-	the_ofdmProcessor	-> reset ();	
-	the_ficHandler. clearEnsemble ();
+	the_dabProcessor. reset ();	
 }
 
 void	dabClass::stop		(void) {
-	the_ofdmProcessor	-> stop ();	
-	the_ficHandler. clearEnsemble ();
+	the_dabProcessor. stop ();	
 }
 //
-//	The return value > 0, then success, 
-//	otherwise error
-
 bool	dabClass::is_audioService (std::string name) {
-	switch (the_ficHandler. kindofService (name)) {
-	   case AUDIO_SERVICE:
-	      return true;
-	   default:
-	      return false;
-	}
+	return the_dabProcessor. kindofService (name) == AUDIO_SERVICE;
 }
 
 bool	dabClass::is_dataService (std::string name) {
-	switch (the_ficHandler. kindofService (name)) {
-	   case PACKET_SERVICE:
-	      return true;
-	   default:
-	      return false;
-	}
+	return the_dabProcessor. kindofService (name) == PACKET_SERVICE;
 }
-
+//
+//	result > 0 success
 int16_t	dabClass::dab_service (std::string name) {
-int	k	= the_ficHandler. kindofService (name);
-	the_mscHandler. reset ();	// vital here
+int	k	= the_dabProcessor. kindofService (name);
+	the_dabProcessor. reset_msc ();	// vital here
 	switch (k) {
 	   case AUDIO_SERVICE: {
 	      audiodata ad;
 	      int i;
-	      the_ficHandler. dataforAudioService (name, &ad, 0);
+	      the_dabProcessor. dataforAudioService (name, &ad, 0);
 	      if (!ad. defined) 
 	         return -4;
-	      the_mscHandler. set_audioChannel (&ad);
-	      if (programdata_Handler != NULL) 
+	      the_dabProcessor. set_audioChannel (&ad);
+	      if (programdata_Handler != nullptr) 
 	         programdata_Handler (&ad, userData);
 
 	      for (i = 1; i < 5; i ++) {
 	         packetdata pd;
-	         the_ficHandler. dataforDataService (name, &pd, i);
+	         the_dabProcessor. dataforDataService (name, &pd, i);
 	         if (pd. defined) {
-	            the_mscHandler. set_dataChannel (&pd);
+	            the_dabProcessor. set_dataChannel (&pd);
 	            break;
 	         }
 	      }
@@ -152,10 +130,10 @@ int	k	= the_ficHandler. kindofService (name);
 
 	   case PACKET_SERVICE: {
 	      packetdata d2;
-	      the_ficHandler. dataforDataService (name, &d2, 0);
+	      the_dabProcessor. dataforDataService (name, &d2, 0);
 	      if (!d2. defined)
 	         return -3;
-	      the_mscHandler. set_dataChannel (&d2);
+	      the_dabProcessor. set_dataChannel (&d2);
 	      return 1;
 	   }
 
@@ -165,11 +143,11 @@ int	k	= the_ficHandler. kindofService (name);
 	return -1;
 }
 
-int32_t	dabClass::dab_getSId	(std::string name) {
-	return the_ficHandler. SIdFor (name);
+int32_t	dabClass::dab_getSId (std::string s) {
+	return the_dabProcessor. get_SId (s);
 }
 
 std::string dabClass::dab_getserviceName (int32_t SId) {
-	return the_ficHandler. nameFor (SId);
+	return the_dabProcessor. get_serviceName (SId);
 }
 

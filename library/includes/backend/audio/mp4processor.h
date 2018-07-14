@@ -30,7 +30,7 @@
 #include	"dab-constants.h"
 #include	<stdio.h>
 #include	<stdint.h>
-#include	"dab-processor.h"
+#include	"backend-base.h"
 #include	"dab-api.h"
 #include	"firecode-checker.h"
 #include	"reed-solomon.h"
@@ -38,7 +38,7 @@
 #include	"pad-handler.h"
 
 
-class	mp4Processor : public dabProcessor {
+class	mp4Processor : public backendBase {
 public:
 			mp4Processor	(int16_t,
 	                                 audioOut_t,

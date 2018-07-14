@@ -55,7 +55,7 @@ private:
 	bool			isReady;
 	std::mutex		mutex;
 	std::condition_variable condvar;
-	std::queue<std::vector<uint8_t>> messageQ;
+	std::queue<uint8_t *> messageQ;
 };
 #endif
 

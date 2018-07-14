@@ -37,7 +37,8 @@
 
 class ficHandler: public viterbi_768 {
 public:
-		ficHandler		(ensemblename_t,
+		ficHandler		(uint8_t,	// dabMode
+	                                 ensemblename_t,
 	                                 programname_t,
 	                                 fib_quality_t,
 	                                 void	*);

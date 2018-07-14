@@ -34,7 +34,7 @@
 #include	"ringbuffer.h"
 #include	"semaphore.h"
 
-class	dabProcessor;
+class	backendBase;
 class	protection;
 class	audioSink;
 
@@ -75,7 +75,7 @@ private:
 	int16_t		*theData [20];
 
 	protection	*protectionHandler;
-	dabProcessor	*our_dabProcessor;
+	backendBase	*our_backendBase;
 	RingBuffer<int16_t>	*Buffer;
 };
 

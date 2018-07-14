@@ -30,21 +30,22 @@
   *	the first non-null block of a frame
   *	The class inherits from the phaseTable.
   */
-	phaseReference::phaseReference (dabParams	*p,
-	                                int16_t		threshold,	
-	                                int16_t		diff_length):
-	                                     my_fftHandler (p -> get_dabMode ()),
-	                                     phaseTable (p -> get_dabMode ()) {
+	phaseReference::phaseReference (uint8_t	dabMode,
+	                                int16_t	threshold,	
+	                                int16_t	diff_length):
+	                                     phaseTable (dabMode),
+	                                     params (dabMode),
+	                                     my_fftHandler (dabMode) {
 int32_t	i;
 float	Phi_k;
-        this    -> T_u          = p -> get_T_u ();
+        this    -> T_u          = params. get_T_u ();
         this    -> threshold    = threshold;
         this    -> diff_length  = diff_length;
         refTable.               resize (T_u);
         phaseDifferences.       resize (diff_length);
         fft_buffer              = my_fftHandler. getVector ();
 
-        for (i = 1; i <= p -> get_carriers () / 2; i ++) {
+        for (i = 1; i <= params. get_carriers () / 2; i ++) {
            Phi_k =  get_Phi (i);
            refTable [i] = std::complex<float> (cos (Phi_k), sin (Phi_k));
            Phi_k = get_Phi (-i);

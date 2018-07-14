@@ -23,7 +23,7 @@
 #include	"dab-constants.h"
 #include	"data-processor.h"
 #include	"virtual-datahandler.h"
-#include	"mot-databuilder.h"
+#include	"mot-handler.h"
 #include        "tdc-datahandler.h"
 
 //	\class dataProcessor
@@ -55,7 +55,7 @@
 	      break;
 
 	   case 60:
-	      my_dataHandler	= new mot_databuilder (motdataHandler);
+	      my_dataHandler	= new motHandler (motdataHandler, ctx);
 	      break;
 	}
 
@@ -190,4 +190,4 @@ int16_t	usefulLength	= getBits_7 (data, 17);
 	if (!check_CRC_bits (data, packetLength * 8))
 	   return;
 }
-//
+

@@ -107,7 +107,7 @@ int16_t	nbits	= 24 * bitRate;
 	   if (++frameCount >= 50) {
 	      frameCount = 0;
 	      frame_quality	= 2 * (50 - frameErrors);
-	      if (mscQuality != NULL)
+	      if (mscQuality != nullptr)
 	         mscQuality (frame_quality, rs_quality, aac_quality, ctx);
 	      frameErrors = 0;
 	   }
@@ -243,9 +243,9 @@ stream_parms	streamParameters;
 	      memcpy (&fileBuffer [7], 
 	              &outVector [au_start [i]],
 	              aac_frame_length);
-	      if (soundOut != NULL) 
+	      if (soundOut != nullptr) 
 	         (soundOut)((int16_t *)(&fileBuffer [0]),
-	                    aac_frame_length + 7, 0, false, NULL);
+	                    aac_frame_length + 7, 0, false, nullptr);
 #else	
 //	we handle the aac -> PMC conversion here
 	

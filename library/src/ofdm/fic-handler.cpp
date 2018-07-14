@@ -37,17 +37,19 @@
   * 	puncturing.
   *	The data is sent through to the fic processor
   */
-		ficHandler::ficHandler (ensemblename_t ensemblenameHandler,
+		ficHandler::ficHandler (uint8_t	dabMode,
+	                                ensemblename_t ensemblenameHandler,
 	                                programname_t  programnameHandler,
 	                                fib_quality_t fib_qualityHandler,
 	                                void		*userData):
-	                                             viterbi_768 (768, true),
-	                                             fibProcessor (ensemblenameHandler,
-	                                                           programnameHandler,
-	                                                           userData) {
+	                                      viterbi_768 (768, true),
+	                                      fibProcessor (ensemblenameHandler,
+	                                                    programnameHandler,
+	                                                    userData) {
 int16_t	i, j, k;
 int16_t	local	= 0;
 
+	(void)dabMode;
 	this	-> fib_qualityHandler	= fib_qualityHandler;
 	this	-> userData		= userData;
 	index		= 0;
@@ -279,7 +281,7 @@ void	ficHandler::show_ficCRC (bool b) {
 	if (b) 
 	   pos ++;
 	if (++amount >= 100) {
-	   if (fib_qualityHandler != NULL)
+	   if (fib_qualityHandler != nullptr)
 	      fib_qualityHandler (pos, userData);
 	   pos	= 0;
 	   amount	= 0;

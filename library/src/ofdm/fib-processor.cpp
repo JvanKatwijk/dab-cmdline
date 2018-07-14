@@ -99,7 +99,7 @@
 	                              programname_t  programnameHandler,
 	                              void	*userData) {
 	this	-> ensemblenameHandler	= ensemblenameHandler;
-	if (programnameHandler == NULL)
+	if (programnameHandler == nullptr)
 	   fprintf (stderr, "NULL detected\n");
 	this	-> programnameHandler	= programnameHandler;
 	this	-> userData		= userData;
@@ -340,6 +340,7 @@ int16_t	option, protLevel, subChanSize;
 	(void)pd;		// not used right now, maybe later
 	subChannels [SubChId]. StartAddr = StartAdr;
 	subChannels [SubChId]. inUse	 = true;
+
 	if (getBits_1 (d, bitOffset + 16) == 0) {	// short form
 	   tabelIndex = getBits_6 (d, bitOffset + 18);
 	   subChannels [SubChId]. Length  	= ProtLevel [tabelIndex][0];
@@ -485,7 +486,7 @@ serviceId	 *service;
         }
         used += 40 / 8;
 	(void)CAOrg;
-        if (packetComp == NULL)		// no serviceComponent yet
+        if (packetComp == nullptr)		// no serviceComponent yet
            return used;
 
 //      We want to have the subchannel OK
@@ -601,7 +602,7 @@ uint8_t		extensionFlag;
         if (lsFlag == 1) {
            SCid = getBits (d, lOffset + 4, 12);
            lOffset += 16;
-//           if (find_packetComponent ((SCIds << 4) | SCid) != NULL) {
+//           if (find_packetComponent ((SCIds << 4) | SCid) != nullptr) {
 //              fprintf (stderr, "packet component bestaat !!\n");
 //           }
         }
@@ -709,7 +710,7 @@ int16_t		appType;
 	   lOffset += (11 + 5 + 8 * length);
 	   serviceComponent *packetComp        =
 	                         find_serviceComponent (SId, SCIdS);
-	   if (packetComp != NULL) 
+	   if (packetComp != nullptr) 
 	      packetComp      -> appType       = appType;
 	}
 
@@ -1140,7 +1141,7 @@ int	indexforprefixMatch	= -1;
 	}
 
 	return indexforprefixMatch >= 0 ?
-	              &listofServices [indexforprefixMatch] : NULL;
+	              &listofServices [indexforprefixMatch] : nullptr;
 }
 
 serviceComponent *fib_processor::find_packetComponent (int16_t SCId) {
@@ -1154,7 +1155,7 @@ int16_t i;
            if (ServiceComps [i]. SCId == SCId)
               return &ServiceComps [i];
         }
-        return NULL;
+        return nullptr;
 }
 
 serviceComponent *fib_processor::find_serviceComponent (int32_t SId,
@@ -1170,7 +1171,7 @@ int16_t i;
 	   }
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //	bind_audioService is the main processor for - what the name suggests -
@@ -1317,7 +1318,7 @@ int	serviceIndex	= -1;
 	   return listofServices [i]. serviceId;
 	}
 	if (serviceIndex >= 0)
-	   return listofServices [i]. serviceId;
+	   return listofServices [serviceIndex]. serviceId;
 	return -1;
 }
 //
@@ -1391,7 +1392,7 @@ serviceId *selectedService;
 	d	-> defined	= false;	// always a decent default
 	fibLocker. lock ();
 	selectedService = findServiceId (s);
-	if (selectedService == NULL) {
+	if (selectedService == nullptr) {
 	   fibLocker. unlock ();
 	   return;
 	}
@@ -1438,7 +1439,7 @@ serviceId *selectedService;
 	d -> defined	= false;
 	fibLocker. lock ();
 	selectedService	= findServiceId (s);
-	if (selectedService == NULL) {
+	if (selectedService == nullptr) {
 	   fibLocker. unlock ();
 	   return;
 	}
@@ -1477,14 +1478,14 @@ serviceId *selectedService;
 //	in the fib structures, so release the lock
 void	fib_processor::addtoEnsemble	(const std::string &s, int32_t SId) {
 	fibLocker. unlock ();
-	if (programnameHandler != NULL)
+	if (programnameHandler != nullptr)
 	   programnameHandler (s, SId, userData);
 	fibLocker. lock ();
 }
 
 void	fib_processor::nameofEnsemble  (int id, const std::string &s) {
 	fibLocker. unlock ();
-	if (ensemblenameHandler != NULL)
+	if (ensemblenameHandler != nullptr)
 	   ensemblenameHandler (s, id, userData);
 	fibLocker. lock ();
 	isSynced	= true;

@@ -22,8 +22,7 @@
 #
 #include	"sample-reader.h"
 #include	"device-handler.h"
-#include	"ofdm-processor.h"
-
+#include	"dab-processor.h"
 
 static  inline
 int16_t valueFor (int16_t b) {
@@ -33,7 +32,7 @@ int16_t res     = 1;
         return res;
 }
 
-	sampleReader::sampleReader (ofdmProcessor	*parent,
+	sampleReader::sampleReader (dabProcessor *parent,
 	                            deviceHandler	*theRig,
 	                            RingBuffer<std::complex<float>> *spectrumBuffer
 	                           ) {
@@ -98,7 +97,7 @@ std::complex<float> temp;
 	sampleCount	++;
 	if (++ sampleCount > INPUT_RATE / N) {
 	   sampleCount = 0;
-	   if (spectrumBuffer != NULL)
+	   if (spectrumBuffer != nullptr)
               spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
 	                                                    localCounter);
 	   theParent -> show_Corrector (phaseOffset);
@@ -134,7 +133,7 @@ int32_t		i;
 
 	sampleCount	+= n;
 	if (sampleCount > INPUT_RATE / N) {
-	   if (spectrumBuffer != NULL)
+	   if (spectrumBuffer != nullptr)
 	      spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
 	                                                         bufferSize);
 	   theParent -> show_Corrector (phaseOffset);

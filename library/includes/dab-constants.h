@@ -61,7 +61,7 @@ using namespace std;
 #define	MHz(x)		(KHz (x) * 1000)
 #define	mHz(x)		(kHz (x) * 1000)
 
-#define	CURRENT_VERSION	"1.0alfa"
+#define	CURRENT_VERSION	"2.0alfa"
 
 #define		DAB		0100
 #define		DAB_PLUS	0101
@@ -77,6 +77,8 @@ using namespace std;
 #define		UNSYNCED	04
 
 #define		DIFF_LENGTH	42
+#define		THRESHOLD	3
+
 static inline
 bool	isIndeterminate (float x) {
 	return x != x;

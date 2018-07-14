@@ -37,7 +37,6 @@ int32_t offset  = 0;
 uint8_t *data   = (uint8_t *)(m. data ());
 int32_t size    = m. size ();
 int16_t i;
-uint16_t        crc;
 
 //      we maintain offsets in bits, the "m" array has one bit per byte
         while (offset < size) {
@@ -52,9 +51,9 @@ uint16_t        crc;
               return;
 
 //      we have a syncword
-           uint16_t syncword    = getBits (data, offset,      16);
-           int16_t length       = getBits (data, offset + 16, 16);
-           uint16_t crc         = getBits (data, offset + 32, 16);
+//	   uint16_t syncword    = getBits (data, offset,      16);
+	   int16_t length       = getBits (data, offset + 16, 16);
+//	   uint16_t crc         = getBits (data, offset + 32, 16);
 
            uint8_t frametypeIndicator =
                                   getBits (data, offset + 48,  8);
@@ -104,7 +103,7 @@ uint8_t	buffer [length];
 	for (i = 0; i < length; i ++)
 	   buffer [i] = getBits (data, offset + i * 8, 8);
 
-	if (bytesOut != NULL)
+	if (bytesOut != nullptr)
 	   bytesOut (buffer, length, 0, ctx);
 	return offset + length * 8;
 }
@@ -117,7 +116,7 @@ uint8_t	buffer [length];
 	for (i = 0; i < length; i ++)
 	   buffer [i] = getBits (data, offset + i * 8, 8);
 
-	if (bytesOut != NULL)
+	if (bytesOut != nullptr)
 	   bytesOut (buffer, length, 1, ctx);
         return offset + length * 8;
 }

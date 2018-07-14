@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2013 .. 2017
+ *    Copyright (C) 2014 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -20,17 +20,22 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#include	"dab-processor.h"
+#
+#ifndef	__BACKEND_BASE__
+#define	__BACKEND_BASE__
 
-	dabProcessor::dabProcessor (void) {
-}
+#include	<stdint.h>
+#include	<stdio.h>
 
-	dabProcessor::~dabProcessor	(void) {
-}
+//
+//	virtual class, just for providing a common base
+//	for the real decoder classes
 
-void	dabProcessor::addtoFrame	(uint8_t *v) {
-	(void)v;
-}
-
-
+class	backendBase {
+public:
+		backendBase	(void);
+virtual		~backendBase	(void);
+virtual	void	addtoFrame	(uint8_t *);
+};
+#endif
 

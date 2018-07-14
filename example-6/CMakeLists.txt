@@ -232,11 +232,12 @@ endif ()
 	           ../library/includes
 	           ../library/includes/ofdm
 	           ../library/includes/backend
-	           ../library/includes/backend/viterbi_768
 	           ../library/includes/backend/audio
 	           ../library/includes/backend/data
+	           ../library/includes/backend/data/mot
 	           ../library/includes/backend/data/journaline
 	           ../library/includes/support
+	           ../library/includes/support/viterbi_768
 	           /usr/include/
 	)
 
@@ -252,20 +253,18 @@ endif ()
 	     ./tcp-writer.h
 	     ./config.h
 	     ../devices/device-handler.h
-	     ../library/includes/dab-class.h
 	     ../library/includes/dab-constants.h
-	     ../library/includes/ofdm/ofdm-processor.h
+	     ../library/includes/dab-class.h
+	     ../library/includes/dab-processor.h
 	     ../library/includes/ofdm/phasereference.h
 	     ../library/includes/ofdm/phasetable.h
 	     ../library/includes/ofdm/freq-interleaver.h
-	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/ofdm/timesyncer.h
-	     ../library/includes/backend/viterbi_768/viterbi-768.h
-	     ../library/includes/backend/protection.h
-	     ../library/includes/backend/uep-protection.h
-	     ../library/includes/backend/eep-protection.h
+	     ../library/includes/ofdm/fic-handler.h
+	     ../library/includes/ofdm/fib-processor.cpp
+	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/backend/firecode-checker.h
-	     ../library/includes/backend/dab-processor.h
+	     ../library/includes/backend/backend-base.h
 	     ../library/includes/backend/charsets.h
 	     ../library/includes/backend/galois.h
 	     ../library/includes/backend/reed-solomon.h
@@ -276,12 +275,18 @@ endif ()
 	     ../library/includes/backend/audio/faad-decoder.h
 	     ../library/includes/backend/audio/mp4processor.h 
 	     ../library/includes/backend/audio/mp2processor.h 
-	     ../library/includes/backend/data/mot-databuilder.h 
 	     ../library/includes/backend/data/virtual-datahandler.h 
 	     ../library/includes/backend/data/tdc-datahandler.h 
 	     ../library/includes/backend/data/pad-handler.h 
-	     ../library/includes/backend/data/mot-data.h 
 	     ../library/includes/backend/data/data-processor.h
+	     ../library/includes/backend/data/mot/mot-handler.h 
+	     ../library/includes/backend/data/mot/mot-dir.h 
+	     ../library/includes/backend/data/mot/mot-object.h 
+	     ../library/includes/support/viterbi_768/viterbi-768.h
+	     ../library/includes/support/protTables.h
+	     ../library/includes/support/protection.h
+	     ../library/includes/support/uep-protection.h
+	     ../library/includes/support/eep-protection.h
 	     ../library/includes/support/fft_handler.h
 	     ../library/includes/support/dab-params.h
 	     ../library/includes/support/tii_table.h
@@ -298,23 +303,17 @@ endif ()
 	     ./config.cpp
 	     ../devices/device-handler.cpp
 	     ../library/src/dab-class.cpp
-	     ../library/src/ofdm/ofdm-processor.cpp
+	     ../library/src/dab-processor.cpp
 	     ../library/src/ofdm/ofdm-decoder.cpp
 	     ../library/src/ofdm/phasereference.cpp
 	     ../library/src/ofdm/phasetable.cpp
 	     ../library/src/ofdm/freq-interleaver.cpp
-	     ../library/src/ofdm/sample-reader.cpp
 	     ../library/src/ofdm/timesyncer.cpp
-	     ../library/src/backend/viterbi_768/viterbi-768.cpp
-	     ../library/src/backend/viterbi_768/spiral-no-sse.c
-	     ../library/src/backend/fic-handler.cpp
-	     ../library/src/backend/protection.cpp
-	     ../library/src/backend/eep-protection.cpp
-	     ../library/src/backend/uep-protection.cpp
-	     ../library/src/backend/fib-processor.cpp
+	     ../library/src/ofdm/sample-reader.cpp
+	     ../library/src/ofdm/fib-processor.cpp
+	     ../library/src/ofdm/fic-handler.cpp
 	     ../library/src/backend/firecode-checker.cpp
-	     ../library/src/backend/dab-processor.cpp
-	     ../library/src/backend/protTables.cpp
+	     ../library/src/backend/backend-base.cpp
 	     ../library/src/backend/charsets.cpp
 	     ../library/src/backend/galois.cpp
 	     ../library/src/backend/reed-solomon.cpp
@@ -324,12 +323,19 @@ endif ()
 	     ../library/src/backend/data-backend.cpp
 	     ../library/src/backend/audio/mp4processor.cpp 
 	     ../library/src/backend/audio/mp2processor.cpp 
-	     ../library/src/backend/data/mot-databuilder.cpp 
 	     ../library/src/backend/data/virtual-datahandler.cpp 
 	     ../library/src/backend/data/tdc-datahandler.cpp 
 	     ../library/src/backend/data/pad-handler.cpp 
-	     ../library/src/backend/data/mot-data.cpp 
 	     ../library/src/backend/data/data-processor.cpp
+	     ../library/src/backend/data/mot/mot-handler.cpp 
+	     ../library/src/backend/data/mot/mot-dir.cpp 
+	     ../library/src/backend/data/mot/mot-object.cpp 
+	     ../library/src/support/viterbi_768/viterbi-768.cpp
+	     ../library/src/support/viterbi_768/spiral-no-sse.c
+	     ../library/src/support/protTables.cpp
+	     ../library/src/support/protection.cpp
+	     ../library/src/support/eep-protection.cpp
+	     ../library/src/support/uep-protection.cpp
 	     ../library/src/support/fft_handler.cpp
 	     ../library/src/support/dab-params.cpp
 	     ../library/src/support/tii_table.cpp

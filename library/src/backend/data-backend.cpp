@@ -22,7 +22,7 @@
 #
 #include	"dab-constants.h"
 #include	"data-backend.h"
-#include	"dab-processor.h"
+#include	"backend-base.h"
 #include	"eep-protection.h"
 #include	"uep-protection.h"
 #include	"data-processor.h"
@@ -43,7 +43,7 @@ int32_t i, j;
         this    -> bitRate              = d -> bitRate;
         this    -> shortForm            = d -> shortForm;
         this    -> protLevel            = d -> protLevel;
-        our_dabProcessor        = new dataProcessor (bitRate,
+        our_backendBase        = new dataProcessor (bitRate,
 	                                             d,
                                                      bytesOut,
 	                                             motdataHandler,
@@ -99,6 +99,7 @@ int16_t	i;
 	delete[]	interleaveData;
 	for (i = 0; i < 20; i ++)
 	   delete [] theData [i];
+	delete	our_backendBase;
 }
 
 void    dataBackend::start         (void) {
@@ -154,7 +155,7 @@ int16_t interleaverIndex	= 0;
 //	What we get here is a long sequence (24 * bitrate) of bits, not packed
 //	but forming a DAB packet
 //	we hand it over to make an MSC data group
-	   our_dabProcessor -> addtoFrame (outV. data ());
+	   our_backendBase -> addtoFrame (outV. data ());
 	}
 }
 

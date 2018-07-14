@@ -54,7 +54,7 @@ void    listener	(void);
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
-dabClass	*theRadio	= NULL;
+dabClass	*theRadio	= nullptr;
 
 static
 tcpWriter	*theWriter;
@@ -145,9 +145,12 @@ char storage [256];
 //	The function is called from within the library with
 //	a string, the so-called dynamic label
 static
+std::string localString;
+static
 void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
+	localString = dynamicLabel;
 	(void)ctx;
-	theWriter	-> sendData (Q_TEXT_MESSAGE, dynamicLabel);
+	theWriter	-> sendData (Q_TEXT_MESSAGE, localString);
 }
 //
 static
@@ -280,8 +283,8 @@ bool	err;
 //	and with a sound device we can create a "backend"
 	theRadio	= new dabClass (theDevice,
 	                                my_radioData. theMode,
-	                                NULL,		// no spectrum shown
-	                                NULL,		// no constellations
+	                                nullptr,	// no spectrum shown
+	                                nullptr,	// no constellations
 	                                syncsignalHandler,
 	                                systemData,
 	                                ensemblenameHandler,
@@ -292,10 +295,10 @@ bool	err;
 	                                bytesOut_Handler,
 	                                programdataHandler,
 	                                mscQuality,
-	                                NULL,		// no mot slides
-	                                NULL
+	                                nullptr,	// no mot slides
+	                                nullptr
 	                               );
-	if (theRadio == NULL) {
+	if (theRadio == nullptr) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
 	   exit (4);
 	}
@@ -405,20 +408,23 @@ void	listener (void) {
 	      }
 	   }
 	   catch (int e) {
-	       fprintf (stderr, "disconnected\n");
+	      fprintf (stderr, "disconnected\n");
+	      theRadio -> stop ();
 	   }
 	}
 	close (socket_desc);	
 }
 
 void	handleRequest (void) {
+	fprintf (stderr, "handling requests\n");
+	fprintf (stderr, "bufferfill %d\n",
+	                buffer -> GetRingBufferReadAvailable ());
 	while (buffer -> GetRingBufferReadAvailable () >= PACKET_SIZE) {
 	   uint8_t lbuf [PACKET_SIZE];
-	   fprintf (stderr, "bufferfill %d\n",
-	                buffer -> GetRingBufferReadAvailable ());
 	   buffer	-> getDataFromBuffer (lbuf, PACKET_SIZE);
 	   switch (lbuf [2]) {
 	      case Q_QUIT:
+	         fprintf (stderr, "quit request\n");
 	         running. store (false);
 	         throw (33);
 	         break;
@@ -435,13 +441,16 @@ void	handleRequest (void) {
 	                          std::string ((char *)(&(lbuf [3])));
 	         fprintf (stderr, "service request for %s\n",
 	                              my_radioData. serviceName. c_str ());
+	         
 	         if (theRadio -> is_audioService (my_radioData. serviceName))
 	            theRadio -> dab_service (my_radioData. serviceName);
 	         break;
 
 	      case Q_CHANNEL:
+	         fprintf (stderr, "channel request\n");
 	         theRadio	-> stop ();
 	         theDevice	-> stopReader ();
+	         fprintf (stderr, "radio and device stopped\n");
 	         my_radioData. theChannel = std::string ((char *)(&(lbuf [3])));
 	         fprintf (stderr, "selecting channel %s\n", 
 	                              (char *)(&(buffer [1])));
@@ -451,6 +460,8 @@ void	handleRequest (void) {
 	         }
 	         theRadio	-> startProcessing ();
 	         theDevice	-> restartReader ();
+	         programNames. resize (0);
+	         programSIds . resize (0);
 	         break;
 
 	      default:

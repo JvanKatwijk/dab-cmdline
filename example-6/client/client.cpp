@@ -145,25 +145,29 @@ int32_t	basePort;
 void	Client::readData	(void) {
 QByteArray d;
 
-	d. resize (PACKET_SIZE);
-	while (streamer. bytesAvailable () >= PACKET_SIZE) {
-	   int amount = streamer. read (d. data (), d. size ());
-	   buffer -> putDataIntoBuffer (d. data (), amount);
-	   while (buffer -> GetRingBufferReadAvailable () >= PACKET_SIZE) 
-	      handle ();
+	while (streamer. bytesAvailable () > 3) {
+	d. resize (3);
+	streamer. read (d. data (), 3);
+	int length = d [1];
+	d. resize (3 + length + 1);
+	streamer. read (&(d. data () [3]), length + 1);
+	buffer -> putDataIntoBuffer (d. data (), d. size ());
+	handle ();
 	}
 }
 
 void	Client::handle (void) {
-uint8_t lBuf [32];
+uint8_t header [3];
+std::vector<uint8_t> lBuf;
 
-	buffer -> getDataFromBuffer (lBuf, PACKET_SIZE);
-	if (lBuf [0] != 0xFF)
+	buffer -> getDataFromBuffer (header, 3);
+	if (header [0] != 0xFF)
 	   return;
-
-	int	length	= lBuf [1];
-	uint8_t	key	= lBuf [2];
-	const char *v	= (char *)(&(lBuf [3]));
+	int	length	= header [1];
+	uint8_t	key	= header [2];
+	lBuf. resize (length + 1);
+	buffer -> getDataFromBuffer (lBuf. data (), length + 1);
+	const char *v	= (char *)(lBuf. data ());
 	switch (key) {
 	   case Q_SERVICE_NAME:
 	      Services << QString (v); 

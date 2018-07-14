@@ -36,9 +36,7 @@
 #include	<atomic>
 #include	<thread>
 
-#include	"ofdm-processor.h"
-#include	"fic-handler.h"
-#include	"msc-handler.h"
+#include	"dab-processor.h"
 #include	"ringbuffer.h"
 #include	"ensemble-handler.h"
 #include	"dab-params.h"
@@ -48,7 +46,7 @@ class	deviceHandler;
 class dabClass {
 public:
         	dabClass   (deviceHandler	*,
-	                    uint8_t		Mode,
+	                    uint8_t		dabMode,
 	                    RingBuffer<std::complex<float>> *spectrumBuffer,
 	                    RingBuffer<std::complex<float>> *iqBuffer,
 	                    syncsignal_t	syncsignal_Handler,
@@ -67,15 +65,14 @@ public:
 	void		startProcessing	(void);
 	void		reset		(void);
 	void		stop		(void);
-	std::string	dab_getserviceName (int32_t);
 	int16_t		dab_service	(std::string);
 	int32_t		dab_getSId	(std::string);
+	std::string	dab_getserviceName (int32_t);
 	bool		is_audioService	(std::string);
 	bool		is_dataService	(std::string);
 private:
-	ficHandler	the_ficHandler;
-	mscHandler	the_mscHandler;
-	ofdmProcessor	*the_ofdmProcessor;
+	uint8_t		dabMode;
+	dabProcessor	the_dabProcessor;
 //
 
 	deviceHandler		*inputDevice;

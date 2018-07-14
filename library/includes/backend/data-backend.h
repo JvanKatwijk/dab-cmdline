@@ -33,7 +33,7 @@
 #include	"virtual-backend.h"
 #include	"ringbuffer.h"
 
-class	dabProcessor;
+class	backendBase;
 class	protection;
 
 class	dataBackend: public virtualBackend {
@@ -73,7 +73,7 @@ void	run		(void);
 	int16_t		nextOut;
 
 	protection	*protectionHandler;
-	dabProcessor	*our_dabProcessor;
+	backendBase	*our_backendBase;
 };
 
 #endif

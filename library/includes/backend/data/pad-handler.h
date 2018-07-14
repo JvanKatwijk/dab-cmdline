@@ -28,7 +28,7 @@
 #include	<vector>
 #include	"dab-api.h"
 
-class	motHandler;
+class	motObject;
 
 class	padHandler {
 public:
@@ -37,29 +37,33 @@ public:
 	void	processPAD	(uint8_t *, int16_t, uint8_t, uint8_t);
 private:
 	dataOut_t	dataOut;
+	motdata_t	motdata_Handler;
 	void		*ctx;
 	void		handle_variablePAD	(uint8_t *, int16_t, uint8_t);
 	void		handle_shortPAD		(uint8_t *, int16_t, uint8_t);
 	void		dynamicLabel		(uint8_t *, int16_t, uint8_t);
-	void		add_MSC_element		(uint8_t *, int16_t);
-	void		build_MSC_segment	(uint8_t *, int16_t);
-	void		new_MSC_element 	(uint8_t *, int16_t, int16_t);
-
+	void		new_MSC_element 	(std::vector<uint8_t>);
+	void		add_MSC_element		(std::vector<uint8_t>);
+	void		build_MSC_segment	(std::vector<uint8_t>);
 	bool		pad_crc			(uint8_t *, int16_t);
+
 	std::string	dynamicLabelText;
 	std::vector<uint8_t> shortpadData;
 	int16_t		charSet;
-	motHandler	*my_motHandler;
-	int16_t		msc_dataGroupLength;
-	int16_t		msc_dataGroupCurrentLength;
-	uint8_t		msc_dataGroupBuffer	[8192];
 	uint8_t		last_appType;
-	bool		msc_GroupElement;
+	bool		mscGroupElement;
 	int16_t		xpadLength;
 	int16_t		still_to_go;		// for short pad fragments
+	motObject	*currentSlide;
 	bool		firstSegment;
 	bool		lastSegment;
 	int16_t		segmentNumber;
+//      dataGroupLength is set when having processed an appType 1
+        int dataGroupLength;
+//
+//      The msc_dataGroupBuffer is - as the name suggests - used for
+//      assembling the msc_data group.
+        std::vector<uint8_t> msc_dataGroupBuffer;
 };
 
 #endif

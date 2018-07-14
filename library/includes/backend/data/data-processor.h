@@ -27,11 +27,11 @@
 #include	<string.h>
 #include	<vector>
 #include	"dab-api.h"
-#include	"dab-processor.h"
+#include	"backend-base.h"
 
 class	virtual_dataHandler;
 
-class	dataProcessor:public dabProcessor {
+class	dataProcessor:public backendBase {
 public:
 	dataProcessor	(int16_t	bitRate,
 	                 packetdata	*pd,

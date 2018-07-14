@@ -23,7 +23,6 @@
 #include	<stdint.h>
 #include	<stdio.h>
 #include	"freq-interleaver.h"
-#include	"dab-params.h"
 
 /**
   *	\brief createMapper
@@ -54,29 +53,30 @@ int16_t	i;
 	}
 }
 
-	interLeaver::interLeaver (dabParams *p) {
+	interLeaver::interLeaver (uint8_t dabMode):
+	                                params (dabMode) {
 
-	permTable	= new int16_t [p -> get_T_u ()];
-	switch (p -> get_dabMode ()) {
+	permTable	= new int16_t [params. get_T_u ()];
+	switch (dabMode) {
 	   case 1:
 	   default:		// shouldn't happen
-	      createMapper (p -> get_T_u (), 511,
-	                    256, 256 + p -> get_carriers (), permTable);
+	      createMapper (params. get_T_u (), 511,
+	                    256, 256 + params. get_carriers (), permTable);
 	      break;
 
 	   case 2:
-	      createMapper (p -> get_T_u (), 127,
-	                    64, 64 + p -> get_carriers (), permTable);
+	      createMapper (params. get_T_u (), 127,
+	                    64, 64 + params. get_carriers (), permTable);
 	      break;
 
 	   case 3:
-	      createMapper (p -> get_T_u (), 63,
-	                    32, 32 + p -> get_carriers (), permTable);
+	      createMapper (params. get_T_u (), 63,
+	                    32, 32 + params. get_carriers (), permTable);
 	      break;
 
 	   case 4:
-	      createMapper (p -> get_T_u (), 255,
-	                    128, 128 + p -> get_carriers (), permTable);
+	      createMapper (params. get_T_u (), 255,
+	                    128, 128 + params. get_carriers (), permTable);
 	      break;
 	}
 }
