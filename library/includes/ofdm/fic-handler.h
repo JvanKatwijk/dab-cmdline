@@ -34,6 +34,7 @@
 #include	<mutex>
 #include	<string>
 #include	"dab-api.h"
+#include	"dab-params.h"
 
 class ficHandler: public viterbi_768 {
 public:
@@ -44,7 +45,6 @@ public:
 	                                 void	*);
 		~ficHandler		(void);
 	void	process_ficBlock	(std::vector<int16_t>, int16_t);
-	void	setBitsperBlock		(int16_t);
 	void	clearEnsemble		(void);
 	bool	syncReached		(void);
 	int16_t	get_ficRatio		(void);
@@ -56,6 +56,7 @@ public:
 	std::complex<float> get_coordinates      (int16_t, int16_t, bool *);
 
 private:
+	dabparams	params;
 	fib_quality_t	fib_qualityHandler;
 	void		*userData;
 	void		process_ficInput	(int16_t);

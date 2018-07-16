@@ -45,7 +45,8 @@
 	                                      viterbi_768 (768, true),
 	                                      fibProcessor (ensemblenameHandler,
 	                                                    programnameHandler,
-	                                                    userData) {
+	                                                    userData),
+	                                                    params (dabMode) {
 int16_t	i, j, k;
 int16_t	local	= 0;
 
@@ -53,7 +54,7 @@ int16_t	local	= 0;
 	this	-> fib_qualityHandler	= fib_qualityHandler;
 	this	-> userData		= userData;
 	index		= 0;
-	BitsperBlock	= 2 * 1536;
+	BitsperBlock	= 2 * params -> get_carriers ();
 	ficno		= 0;
 	ficBlocks	= 0;
 	ficMissed	= 0;
@@ -111,27 +112,6 @@ int16_t	local	= 0;
 		ficHandler::~ficHandler (void) {
 }
 	
-/**
-  *	\brief setBitsperBlock
-  *	The number of bits to be processed per incoming block
-  *	is 2 * p -> K, which still depends on the Mode.
-  *	for Mode I it is 2 * 1536, for Mode II, it is 2 * 384,
-  *	for Mode III it is 192, Mode IV gives 2 * 768.
-  *	for Mode II we will get the 2304 bits after having read
-  *	the 3 FIC blocks,
-  *	for Mode IV we will get 3 * 2 * 768 = 4608, i.e. two resulting blocks
-  *	Note that Mode III is NOT supported
-  */
-
-void	ficHandler::setBitsperBlock	(int16_t b) {
-	if ((b == 2 * 384) ||
-	    (b == 2 * 768) ||
-	    (b == 2 * 1536))
-	BitsperBlock	= b;
-	index		= 0;
-	ficno		= 0;
-}
-
 /**
   *	\brief process_ficBlock
   *	The number of bits to be processed per incoming block

@@ -208,7 +208,7 @@ SyncOnPhase:
 	         FreqCorr += ofdmBuffer [i] * conj (ofdmBuffer [i - T_u]);
 //
 //	Note that only the first few blocks are handled locally
-//	The FIC/FIB jandling is in this thread, so that there is
+//	The FIC/FIB handling is in this thread, so that there is
 //	no delay is "knowing" that we are synchronized
 	      if (ofdmSymbolCount < 4) {
 	         my_ofdmDecoder. decode (ofdmBuffer. data (),

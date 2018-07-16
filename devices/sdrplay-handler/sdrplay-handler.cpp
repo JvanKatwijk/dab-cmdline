@@ -46,8 +46,8 @@ mir_sdr_DeviceT devDesc [4];
 
 	_I_Buffer	= NULL;
 	err		= mir_sdr_ApiVersion (&ver);
-	if (ver < 2.05) {
-	   fprintf (stderr, "sorry, library too old\n");
+	if (ver < 2.13) {
+	   fprintf (stderr, "please upgrade to sdrplay library 2.13\n");
 	   throw (24);
 	}
 
@@ -184,12 +184,15 @@ void myStreamCallback (int16_t		*xi,
 	               int32_t		fsChanged,
 	               uint32_t		numSamples,
 	               uint32_t		reset,
+	               uint32_t		hwRemoved,
 	               void		*cbContext) {
 int16_t	i;
 sdrplayHandler	*p	= static_cast<sdrplayHandler *> (cbContext);
 std::complex<float> localBuf [numSamples];
 float	denominator		= p -> denominator;
 
+	if (reset || hwRemoved)
+	   return;
 	for (i = 0; i <  (int)numSamples; i ++)
 	   localBuf [i] = std::complex<float> (float (xi [i]) / denominator,
 	                                       float (xq [i]) / denominator);
