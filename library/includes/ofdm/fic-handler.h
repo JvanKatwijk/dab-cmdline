@@ -56,7 +56,7 @@ public:
 	std::complex<float> get_coordinates      (int16_t, int16_t, bool *);
 
 private:
-	dabparams	params;
+	dabParams	params;
 	fib_quality_t	fib_qualityHandler;
 	void		*userData;
 	void		process_ficInput	(int16_t);
