@@ -44,10 +44,10 @@ int32_t i, j;
         this    -> shortForm            = d -> shortForm;
         this    -> protLevel            = d -> protLevel;
         our_backendBase        = new dataProcessor (bitRate,
-	                                             d,
-                                                     bytesOut,
-	                                             motdataHandler,
-                                                     ctx);
+	                                            d,
+                                                    bytesOut,
+	                                            motdataHandler,
+                                                    ctx);
 	nextIn		= 0;
 	nextOut		= 0;
 	for (i = 0; i < 20; i ++)

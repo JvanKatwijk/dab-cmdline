@@ -35,6 +35,9 @@
 #define	CUSize	(4 * 16)
 //	Note CIF counts from 0 .. 3
 
+static
+int16_t	cifVector [55296];
+
 static int blocksperCIF [] = {18, 72, 0, 36};
 
 		mscHandler::mscHandler	(uint8_t	dabMode,
@@ -58,7 +61,7 @@ static int blocksperCIF [] = {18, 72, 0, 36};
 	for (int i = 0; i < params. get_L (); i ++)
 	   theData [i] = new std::complex<float> [params. get_T_u ()];
 
-	cifVector. resize (55296);
+//	cifVector. resize (55296);
 	cifCount		= 0;	// msc blocks in CIF
 	blkCount		= 0;
 	theBackends. push_back (new virtualBackend (0, 0));
@@ -148,8 +151,8 @@ std::vector<int16_t> ibits;
 	         std::complex<float>  r1 = fft_buffer [index] *
 	                               conj (phaseReference [index]);
 	         float ab1    = jan_abs (r1);
-//      Recall:  the viterbi decoder wants 127 max pos, - 127 max neg
-//      we make the bits into softbits in the range -127 .. 127
+//	Recall:  the viterbi decoder wants 127 max pos, - 127 max neg
+//	we make the bits into softbits in the range -127 .. 127
 	         ibits [i]            =  - real (r1) / ab1 * 127.0;
 	         ibits [params. get_carriers () + i]
 	                                 =  - imag (r1) / ab1 * 127.0;
@@ -215,7 +218,7 @@ int16_t	currentblk;
 	for (auto const& b: theBackends) {
 	   int startAddr	= b -> startAddr ();
 	   int Length		= b -> Length    ();
-	   
+
 	   if (Length > 0) {
 	      int16_t myBegin [Length * CUSize];
 	      memcpy (myBegin, &cifVector [startAddr * CUSize],

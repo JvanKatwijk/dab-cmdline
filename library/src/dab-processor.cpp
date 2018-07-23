@@ -311,7 +311,7 @@ void    dabProcessor::set_audioChannel (audiodata *d) {
 }
 
 void    dabProcessor::set_dataChannel (packetdata *d) {
-        my_mscHandler. set_dataChannel (d);
+	my_mscHandler. set_dataChannel (d);
 }
 
 void    dabProcessor::clearEnsemble     (void) {

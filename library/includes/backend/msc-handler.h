@@ -82,7 +82,7 @@ virtual	void		run		(void);
 	bool		audioService;
 	std::mutex	mutexer;
 	std::vector<virtualBackend *>theBackends;
-	std::vector<int16_t> cifVector;
+//	std::vector<int16_t> cifVector;
 	int16_t		cifCount;
 	int16_t		blkCount;
 	std::atomic<bool> work_to_do;

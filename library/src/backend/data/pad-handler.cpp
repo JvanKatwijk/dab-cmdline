@@ -448,7 +448,7 @@ int32_t size    = data. size () < dataGroupLength ? data. size () :
 	switch (groupType) {
 	   case 3:
 	      if (currentSlide == nullptr) {
-	         fprintf (stderr, "creating %d\n", (uint32_t)transportId);
+//	         fprintf (stderr, "creating %d\n", (uint32_t)transportId);
 	         currentSlide   = new motObject (motdata_Handler,
 	                                         false,
 	                                         transportId,
@@ -460,9 +460,9 @@ int32_t size    = data. size () < dataGroupLength ? data. size () :
 	     else {
 	         if (currentSlide -> get_transportId () == transportId)
 	            break;
-	         fprintf (stderr, "out goes %u, in comes %u\n",
-	                  currentSlide -> get_transportId (),
-	                  (uint32_t)transportId);
+//	         fprintf (stderr, "out goes %u, in comes %u\n",
+//	                  currentSlide -> get_transportId (),
+//	                  (uint32_t)transportId);
 	         delete currentSlide;
 	         currentSlide   = new motObject (motdata_Handler,
 	                                         false,

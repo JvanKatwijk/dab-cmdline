@@ -333,7 +333,7 @@ endif ()
 	     ../library/src/backend/data/tdc-datahandler.cpp 
 	     ../library/src/backend/data/pad-handler.cpp 
 	     ../library/src/backend/data/data-processor.cpp
-	     ../library/src/backend/data/mot/data-handler.cpp
+	     ../library/src/backend/data/mot/mot-handler.cpp
 	     ../library/src/backend/data/mot/mot-dir.cpp
 	     ../library/src/backend/data/mot/mot-object.cpp
 	     ../library/src/support/viterbi_768/viterbi-768.cpp

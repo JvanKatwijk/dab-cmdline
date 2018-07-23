@@ -69,7 +69,9 @@ int32_t i, j;
 	else
 	   protectionHandler	= new eep_protection (bitRate,
 	                                              protLevel);
-//
+
+	fprintf (stderr, "protection handler is %s\n",
+	                        shortForm ? "uep_protection" : "eep_protection");
 	if (dabModus == DAB) 
 	   our_backendBase = new mp2Processor (bitRate,
 	                                        soundOut,
@@ -92,7 +94,7 @@ int32_t i, j;
 	nextOut			= 0;
 	for (i = 0; i < 20; i ++)
 	   theData [i] = new int16_t [fragmentSize];
-//
+
 	uint8_t	shiftRegister [9];
 	disperseVector. resize (bitRate * 24);
         memset (shiftRegister, 1, 9);
@@ -160,21 +162,21 @@ int16_t i;
         }
 
 	protectionHandler -> deconvolve (tempX. data (),
-                                         fragmentSize,
-                                         outV. data ());
+	                                 fragmentSize,
+	                                  outV. data ());
 //
 //      and the energy dispersal
 	for (i = 0; i < bitRate * 24; i ++)
 	   outV [i] ^= disperseVector [i];
 
-        our_backendBase -> addtoFrame (outV. data ());
+	our_backendBase -> addtoFrame (outV. data ());
 }
 
 void    audioBackend::run       (void) {
 
         while (running. load ()) {
            while (!usedSlots. tryAcquire (200))
-              if (!running)
+              if (!running. load ())
                  return;
            processSegment (theData [nextOut]);
         }
