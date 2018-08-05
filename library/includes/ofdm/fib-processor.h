@@ -79,12 +79,12 @@
 	   bool		inUse;
 	   int32_t	SubChId;
 	   int32_t	StartAddr;
-	   int32_t	Length;
-	   bool		shortForm;
-	   int32_t	protLevel;
-	   int32_t	BitRate;
+           int32_t	Length;     // 16 .. 416
+           bool		shortForm;  // false: EEP long form
+           int32_t	protLevel;  // UEP: 1 .. 5, EEP: 0 .. 8 with 0 ..3 for -A and 4..7 for -B
+           int32_t	BitRate;    // 32 .. 384
 	   int16_t	language;
-	   int16_t	FEC_scheme;
+           int16_t	FEC_scheme; // 0 .. 3
 	};
 
 
@@ -107,6 +107,8 @@ public:
 	void	dataforAudioService	(std::string &, audiodata *, int16_t);
 	void	dataforDataService	(std::string &, packetdata *, int16_t);
 	std::complex<float> get_coordinates	(int16_t, int16_t, bool *);
+        uint8_t	getECC(bool *);
+
 private:
 	ensemblename_t	ensemblenameHandler;
 	programname_t	programnameHandler;
@@ -167,8 +169,11 @@ private:
 	serviceComponent	ServiceComps [64];
 	serviceId	listofServices [64];
 	tii_table	coordinates;
+        uint8_t		ecc_byte;
+
 	bool		dateFlag;
 	bool		firstTime;
+        bool		ecc_Present;
 	bool		isSynced;
 	mutex		fibLocker;
 //

@@ -229,6 +229,9 @@ void	ficHandler::dataforDataService	(std::string &s, packetdata *d, int c) {
 	fibProtector. unlock ();
 }
 
+// mainId < 0 (-1) => don't check mainId
+// subId == -1 => deliver first available offset
+// subId == -2 => deliver coarse coordinates
 std::complex<float>	ficHandler::get_coordinates (int16_t mainId,
                                              int16_t subId, bool *success) {
 std::complex<float> result;
@@ -237,6 +240,15 @@ std::complex<float> result;
         result = fibProcessor. get_coordinates (mainId, subId, success);
         fibProtector. unlock ();
         return result;
+}
+
+uint8_t ficHandler::getECC(bool *success)
+{
+    uint8_t result;
+    fibProtector. lock ();
+    result = fibProcessor.getECC(success);
+    fibProtector. unlock ();
+    return result;
 }
 
 int16_t	ficHandler::get_ficRatio (void) {

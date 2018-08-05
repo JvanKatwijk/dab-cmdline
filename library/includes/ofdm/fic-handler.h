@@ -54,6 +54,7 @@ public:
 	void	dataforDataService	(std::string &, packetdata *, int);
 	void	dataforAudioService	(std::string &, audiodata *, int);
 	std::complex<float> get_coordinates      (int16_t, int16_t, bool *);
+        uint8_t getECC(bool *);
 
 private:
 	dabParams	params;

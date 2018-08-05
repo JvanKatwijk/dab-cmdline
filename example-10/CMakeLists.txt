@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.8.11 )
-set (objectName dab_cmdline-3)
+set (objectName dab_cmdline)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -28,32 +28,32 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ########################################################################
 if(DEFINED AIRSPY)
    set(AIRSPY true)
-   set(objectName dab-airspy-3)
+   set(objectName dab-airspy)
 endif ()
 
 if(DEFINED SDRPLAY)
    set(SDRPLAY true)
-   set(objectName dab-sdrplay-3)
+   set(objectName dab-sdrplay)
 endif ()
 
 if(DEFINED RTLSDR)
    set(RTLSDR true)
-   set(objectName dab-rtlsdr-3)
+   set(objectName dab-rtlsdr)
 endif ()
 
 if(DEFINED WAVFILES)
    set(WAVFILES true)
-   set(objectName dab-files-3)
+   set(objectName dab-files)
 endif ()
 
 if(DEFINED RAWFILES)
    set(RAWFILES true)
-   set(objectName dab-raw-3)
+   set(objectName dab-raw)
 endif ()
 
 if(DEFINED RTL_TCP)
    set(RTL_TCP true)
-   set(objectName dab-rtl_tcp-3)
+   set(objectName dab-rtl_tcp)
 endif ()
 
 if (DEFINED_SERVER)
@@ -261,6 +261,7 @@ endif ()
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
 	     ./band-handler.h
+             ./dab_tables.h
 	     ./server-thread/tcp-server.h
 	     ../devices/device-handler.h
 	     ../library/includes/dab-constants.h
@@ -306,6 +307,7 @@ endif ()
 	     ${${objectName}_SRCS}
 	     ./main.cpp
 	     ./band-handler.cpp
+	     ./dab_tables.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
 	     ../library/src/dab-class.cpp

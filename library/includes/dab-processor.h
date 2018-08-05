@@ -82,6 +82,10 @@ public:
 	std::string	get_ensembleName        (void);
 	void		clearEnsemble           (void);
 	void		reset_msc		(void);
+
+        std::complex<float> get_coordinates      (int16_t, int16_t, bool *);
+        uint8_t getECC(bool *);
+
 private:
 	deviceHandler	*inputDevice;
 	dabParams	params;

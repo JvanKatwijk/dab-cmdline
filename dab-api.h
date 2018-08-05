@@ -51,15 +51,16 @@ typedef struct {
 	bool	defined;
 	int16_t subchId;
 	int16_t	startAddr;
-	bool	shortForm;
-	int16_t	protLevel;
+        bool	shortForm;  // false: EEP long form
+        int16_t	protLevel;  // shortForm true: UEP (Unequal Error Protection) 1 .. 5
+                            // shortForm false: EEP (Equal Error Protection) 0 .. 3 (1-A .. 4-A) + 4 .. 7 (1-B .. 4-B)
 	int16_t DSCTy;
-	int16_t	length;
-	int16_t	bitRate;
-	int16_t	FEC_scheme;
-	int16_t	DGflag;
+        int16_t	length;     // 16 .. 416
+        int16_t	bitRate;    // 32 .. 384
+        int16_t	FEC_scheme; // 0 .. 3
+        int16_t	DGflag;     // 0 .. 1: bit/bool:    data groups are used to transport the service component
 	int16_t	packetAddress;
-	int16_t	appType;
+        int16_t	appType;    // HandleFIG0Extension13: 11-bit
 	bool	is_madePublic;
 } packetdata;
 
@@ -70,7 +71,8 @@ typedef	struct {
 	int16_t	subchId;
 	int16_t	startAddr;
 	bool	shortForm;
-	int16_t	protLevel;
+        int16_t	protLevel;  // shortForm true: UEP (Unequal Error Protection) 1 .. 5
+                            // shortForm false: EEP (Equal Error Protection) 0 .. 3 (1-A .. 4-A) + 4 .. 7 (1-B .. 4-B)
 	int16_t	length;
 	int16_t	bitRate;
 	int16_t	ASCTy;
@@ -132,7 +134,9 @@ typedef	struct {
 //
 //	After selecting a service, parameters of the selected program
 //	are sent back.
-	typedef void (*programdata_t)(audiodata *, void *);
+        typedef void (*programdata_t)(audiodata *, void *);
+        typedef void (*programPacketData_t)(packetdata *, int, void *);
+        typedef void (*packetdata_t)(packetdata *, void *);
 
 //
 //	MOT pictures - i.e. slides encoded in the Program Associated data
@@ -170,6 +174,8 @@ void	*dabInit   (deviceHandler       *,
 	            dataOut_t           dataOut_Handler,
 	            bytesOut_t		bytesOut,
 	            programdata_t       programdataHandler,
+                    programPacketData_t programPacketDataHandler,
+                    packetdata_t        packetdataHandler,
 	            programQuality_t    program_qualityHandler,
 	            motdata_t		motdata_Handler,
 	            void                *userData);

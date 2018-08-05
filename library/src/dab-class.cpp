@@ -43,6 +43,8 @@
 	                    dataOut_t		dataOut_Handler,
 	                    bytesOut_t		bytesOut_Handler,
 	                    programdata_t	programdata_Handler,
+	                    programPacketData_t	programPacketData_Handler,
+	                    packetdata_t	packetdata_Handler,
 	                    programQuality_t	programquality_Handler,
 	                    motdata_t		motdata_Handler,
 	                    void		*ctx):
@@ -73,6 +75,8 @@
 	this	-> audioOut_Handler	= audioOut_Handler;
 	this	-> dataOut_Handler	= dataOut_Handler;
 	this	-> programdata_Handler	= programdata_Handler;
+	this	-> programPacketData_Handler	= programPacketData_Handler;
+	this	-> packetdata_Handler	= packetdata_Handler;
 	this	-> motdata_Handler	= motdata_Handler;
 	this	-> userData		= ctx;
 }
@@ -100,11 +104,29 @@ bool	dabClass::is_audioService (std::string name) {
 bool	dabClass::is_dataService (std::string name) {
 	return the_dabProcessor. kindofService (name) == PACKET_SERVICE;
 }
+
+// mainId < 0 (-1) => don't check mainId
+// subId == -1 => deliver first available offset
+// subId == -2 => deliver coarse coordinates
+void dabClass::dab_getCoordinates(int16_t mainId, int16_t subId, float *latitude, float *longitude, bool *success)
+{
+    std::complex<float> r = the_dabProcessor.get_coordinates(mainId, subId, success);
+    *latitude = r.real();
+    *longitude = r.imag();
+}
+
+uint8_t dabClass::dab_getExtendedCountryCode(bool *success)
+{
+    return the_dabProcessor.getECC(success);
+}
+
 //
 //	result > 0 success
-int16_t	dabClass::dab_service (std::string name) {
-int	k	= the_dabProcessor. kindofService (name);
-	the_dabProcessor. reset_msc ();	// vital here
+int16_t	dabClass::dab_service (std::string name, bool callbackDataOnly) {
+    const bool tuneToService = !callbackDataOnly;
+    int	k	= the_dabProcessor. kindofService (name);
+    if (tuneToService)
+       the_dabProcessor. reset_msc ();	// vital here
 	switch (k) {
 	   case AUDIO_SERVICE: {
 	      audiodata ad;
@@ -112,14 +134,17 @@ int	k	= the_dabProcessor. kindofService (name);
 	      the_dabProcessor. dataforAudioService (name, &ad, 0);
 	      if (!ad. defined) 
 	         return -4;
-	      the_dabProcessor. set_audioChannel (&ad);
+	      if(tuneToService)
+	         the_dabProcessor. set_audioChannel (&ad);
 	      if (programdata_Handler != nullptr) 
 	         programdata_Handler (&ad, userData);
 
 	      for (i = 1; i < 5; i ++) {
 	         packetdata pd;
 	         the_dabProcessor. dataforDataService (name, &pd, i);
-	         if (pd. defined) {
+	         if ( pd.defined && programPacketData_Handler )
+	            programPacketData_Handler( &pd, i, userData );
+	         if (pd. defined && tuneToService) {
 	            the_dabProcessor. set_dataChannel (&pd);
 	            break;
 	         }
@@ -133,7 +158,10 @@ int	k	= the_dabProcessor. kindofService (name);
 	      the_dabProcessor. dataforDataService (name, &d2, 0);
 	      if (!d2. defined)
 	         return -3;
-	      the_dabProcessor. set_dataChannel (&d2);
+	      if (packetdata_Handler)
+	         packetdata_Handler(&d2, userData);
+	      if (tuneToService)
+	         the_dabProcessor. set_dataChannel (&d2);
 	      return 1;
 	   }
 

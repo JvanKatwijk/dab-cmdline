@@ -1,4 +1,4 @@
-#
+
 /*
  *    Copyright (C)  2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -32,6 +32,7 @@
 #include	"dab-api.h"
 #include	<vector>
 #include	<string>
+#include        <complex>
 #include	<list>
 #include	<atomic>
 #include	<thread>
@@ -58,6 +59,8 @@ public:
 	                    dataOut_t		dataOut_Handler,
 	                    bytesOut_t		bytesOut_Handler,
 	                    programdata_t	programdata_Handler,
+                            programPacketData_t programPacketData_Handler,
+                            packetdata_t        packetdata_Handler,
 	                    programQuality_t	programquality_Handler,
 	                    motdata_t		motdata_Handler,
 	                    void		*ctx);
@@ -65,11 +68,15 @@ public:
 	void		startProcessing	(void);
 	void		reset		(void);
 	void		stop		(void);
-	int16_t		dab_service	(std::string);
+	int16_t		dab_service	(std::string, bool callbackDataOnly = false);
 	int32_t		dab_getSId	(std::string);
 	std::string	dab_getserviceName (int32_t);
 	bool		is_audioService	(std::string);
 	bool		is_dataService	(std::string);
+
+	void		dab_getCoordinates(int16_t mainId, int16_t subId, float *latitude, float *longitude, bool *success);
+	uint8_t		dab_getExtendedCountryCode(bool *success);
+
 private:
 	uint8_t		dabMode;
 	dabProcessor	the_dabProcessor;
@@ -86,6 +93,8 @@ private:
 	audioOut_t		audioOut_Handler;
 	dataOut_t		dataOut_Handler;
 	programdata_t		programdata_Handler;
+        programPacketData_t     programPacketData_Handler;
+        packetdata_t            packetdata_Handler;
 	motdata_t		motdata_Handler;
 	void			*userData;
 };

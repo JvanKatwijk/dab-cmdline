@@ -60,17 +60,27 @@ uint16_t i;
 	offsets. push_back (*t);
 }
 
+// mainId < 0 (-1) => don't check mainId
+// subId == -1 => deliver first available offset
+// subId == -2 => deliver coarse coordinates
 std::complex<float> tii_table::get_coordinates (int16_t mainId,
 	                               int16_t subId, bool *success) {
 uint16_t i;
 float x, y;
 
 	*success	= false;
-	if (this -> mainId != mainId)
+	if (this -> mainId != mainId && mainId >= 0)
 	   return std::complex<float> (0, 0);
 
-	for (i = 0; i < offsets. size (); i ++) {
-	   if (offsets [i]. subId != subId)
+	// subId == -2 => deliver coarse coordinates
+	if (subId == -2) {
+	   *success = true;
+	   return std::complex<float> (latitude, longitude);
+	}
+
+    for (i = 0; i < offsets. size (); i ++) {
+        // subId == -1 => deliver first available offset
+       if (offsets [i]. subId != subId && subId != -1)
 	      continue;
 
 	   x	= latitude + offsets [i]. latitudeOffset;

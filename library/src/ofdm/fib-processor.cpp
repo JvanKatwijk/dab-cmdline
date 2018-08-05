@@ -29,6 +29,7 @@
 //
 // Tabelle ETSI EN 300 401 Page 50
 // Table is copied from the work of Michael Hoehn
+
    const int ProtLevel[64][3]   = {{16,5,32},	// Index 0
                                    {21,4,32},
                                    {24,3,32},
@@ -105,6 +106,7 @@
 	this	-> userData		= userData;
 	memset (dateTime, 0, 8 * sizeof (uint8_t));
 	dateFlag		= false;
+	ecc_Present     = false;
 	clearEnsemble	();
 	coordinates. cleanUp ();
 }
@@ -631,6 +633,12 @@ int16_t	offset	= 16;
 	                -1 * getBits_4 (d, offset + 3):
 	                     getBits_4 (d, offset + 3);
 	dateTime [7] = (getBits_1 (d, offset + 7) == 1)? 30 : 0;
+
+	uint16_t ecc = getBits (d, offset + 8, 8);
+	if (!ecc_Present) {
+		ecc_byte = ecc & 0xFF;
+		ecc_Present = true;
+	}
 }
 
 //
@@ -1498,10 +1506,19 @@ bool	fib_processor::syncReached	(void) {
 	return isSynced;
 }
 
+// mainId < 0 (-1) => don't check mainId
+// subId == -1 => deliver first available offset
+// subId == -2 => deliver coarse coordinates
 std::complex<float>	fib_processor::get_coordinates (int16_t mainId,
 	                                        int16_t subId,
 	                                        bool *success) {
 	coordinates. print_coordinates ();
 	return coordinates. get_coordinates (mainId, subId, success);
+}
+
+uint8_t fib_processor::getECC(bool *success)
+{
+    *success = ecc_Present;
+    return ecc_byte;
 }
 
