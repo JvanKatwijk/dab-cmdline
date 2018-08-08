@@ -243,8 +243,10 @@ bandHandler	dabBand;
 deviceHandler	*theDevice;
 #ifdef	HAVE_WAVFILES
 std::string	fileName;
+bool	repeater		= true;
 #elif	HAVE_RAWFILES
 std::string	fileName;
+bool	repeater		= true;
 #elif HAVE_RTL_TCP
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
@@ -271,7 +273,7 @@ bool	err;
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #else
-	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:O:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:O:R")) != -1) {
 #endif
 	   switch (opt) {
 
@@ -306,9 +308,15 @@ bool	err;
 	      case 'F':
 	         fileName	= std::string (optarg);
 	         break;
+	      case 'R':
+	         repeater	= false;
+	         break;
 #elif	HAVE_RAWFILES
 	      case 'F':
 	         fileName	= std::string (optarg);
+	         break;
+	      case 'R':
+	         repeater	= false;
 	         break;
 #else
 	      case 'C':
@@ -386,9 +394,9 @@ bool	err;
 	                                     theGain,
 	                                     autogain);
 #elif	HAVE_WAVFILES
-	   theDevice	= new wavFiles (fileName);
+	   theDevice	= new wavFiles (fileName, repeater);
 #elif	defined (HAVE_RAWFILES)
-	   theDevice	= new rawFiles (fileName);
+	   theDevice	= new rawFiles (fileName, repeater);
 #elif	HAVE_RTL_TCP
 	   theDevice	= new rtl_tcp_client (hostname,
 	                                      basePort,

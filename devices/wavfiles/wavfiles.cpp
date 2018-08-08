@@ -38,10 +38,11 @@ struct timeval	tv;
 
 #define	__BUFFERSIZE	8 * 32768
 
-	wavFiles::wavFiles (std::string f) {
+	wavFiles::wavFiles (std::string f, bool repeater) {
 SF_INFO *sf_info;
 
 	fileName	= f;
+	this	-> repeater	= repeater;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 
 	sf_info		= (SF_INFO *)alloca (sizeof (SF_INFO));
@@ -124,6 +125,9 @@ int64_t	nextStop;
 
 	   nextStop += period;
 	   t = readBuffer (bi, bufferSize);
+	   if ((t < bufferSize) && !repeater)
+	      throw (34);
+	   else
 	   if (t < bufferSize) {
 	      for (i = t; i < bufferSize; i ++)
 	          bi [i] = 0;
@@ -144,7 +148,7 @@ int32_t	i, n;
 float	temp [2 * length];
 
 	n = sf_readf_float (filePointer, temp, length);
-	if (n < length) {
+	if ((n < length) && repeater) {
 	   sf_seek (filePointer, 0, SEEK_SET);
 	   fprintf (stderr, "End of file, restarting\n");
 	}

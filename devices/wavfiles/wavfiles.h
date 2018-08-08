@@ -30,7 +30,7 @@
 
 class	wavFiles: public deviceHandler {
 public:
-			wavFiles	(std::string);
+			wavFiles	(std::string, bool repeater = true);
 	       		~wavFiles	(void);
 	int32_t		getSamples	(std::complex<float> *, int32_t);
 	uint8_t		myIdentity	(void);
@@ -40,6 +40,7 @@ public:
 	
 private:
 	std::string	fileName;
+	bool		repeater;
 virtual	void		run		(void);
 	int32_t		readBuffer	(std::complex<float> *, int32_t);
 	RingBuffer<std::complex<float>>	*_I_Buffer;

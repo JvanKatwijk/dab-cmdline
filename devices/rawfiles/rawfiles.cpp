@@ -44,8 +44,9 @@ struct timeval  tv;
 #define	__BUFFERSIZE	16 * 32768
 //
 //
-	rawFiles::rawFiles (std::string f) {
+	rawFiles::rawFiles (std::string f, bool repeater) {
 	fileName	= f;
+	this	-> repeater	= repeater;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
@@ -119,11 +120,15 @@ int64_t	nextStop;
 
 	   nextStop += period;
 	   t = readBuffer (bi, bufferSize);
-	   if (t <= 0) {
+	   if ((t <= bufferSize) && !repeater) 
+	      throw (23);
+	   else
+	   if (t < bufferSize) {
 	      for (i = 0; i < bufferSize; i ++)
 	          bi [i] = 0;
 	      t = bufferSize;
 	   }
+
 	   _I_Buffer -> putDataIntoBuffer (bi, t);
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
@@ -142,7 +147,7 @@ uint8_t temp [2 * length];
 	   data [i] = std::complex <float> ((float)(temp [2 * i] - 128) / 128,
 	                                    (float)(temp [2 * i + 1] - 128) / 128);
 	currPos		+= n;
-	if (n < length) {
+	if ((n < length) && repeater) {
 	   fseek (filePointer, 0, SEEK_SET);
 	   fprintf (stderr, "End of file, restarting\n");
 	}

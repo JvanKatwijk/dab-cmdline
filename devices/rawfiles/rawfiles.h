@@ -31,7 +31,7 @@
  */
 class	rawFiles: public deviceHandler {
 public:
-			rawFiles	(std::string);
+			rawFiles	(std::string, bool repeater = true);
 	       		~rawFiles	(void);
 	int32_t		getSamples	(std::complex<float> *, int32_t);
 	uint8_t		myIdentity	(void);
@@ -40,6 +40,7 @@ public:
 	void		stopReader	(void);
 private:
 	std::string	fileName;
+	bool		repeater;
 virtual	void		run		(void);
 	RingBuffer<std::complex<float>>	*_I_Buffer;
 	int32_t		readBuffer	(std::complex<float> *, int32_t);
