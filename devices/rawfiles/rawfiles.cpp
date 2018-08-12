@@ -46,7 +46,7 @@ struct timeval  tv;
 //
 	rawFiles::rawFiles (std::string f, bool repeater) {
 	fileName	= f;
-	this	-> repeater	= repeater;
+	(void) repeater;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
@@ -56,6 +56,28 @@ struct timeval  tv;
 	   throw (31);
 	}
 	currPos		= 0;
+	this	-> eofHandler	= nullptr;
+	this	-> userData	= nullptr;
+	running. store (false);
+}
+
+	rawFiles::rawFiles (std::string f,
+	                    double fileOffsetInSeconds,
+	                    device_eof_callback_t eofHandler,
+	                    void * userData) {
+	fileName	= f;
+	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
+	filePointer	= fopen (f. c_str (), "rb");
+	if (filePointer == NULL) {
+	   fprintf (stderr, "file %s cannot open\n", f. c_str ());
+	   perror ("file ?");
+	   delete _I_Buffer;
+	   throw (31);
+	}
+	currPos = (int64_t)(fileOffsetInSeconds * 2048000.0 * 2.0 );
+	fseek (filePointer, currPos, SEEK_SET);
+	this	-> eofHandler	= eofHandler;
+	this	-> userData	= userData;
 	running. store (false);
 }
 
@@ -105,6 +127,7 @@ std::complex<float>	*bi;
 int32_t	bufferSize	= 32768;
 int64_t	period;
 int64_t	nextStop;
+bool	eofReached	= false;
 
 	running. store (true);
 	period		= (32768 * 1000) / (2 * 2048);	// full IQś read
@@ -120,16 +143,19 @@ int64_t	nextStop;
 
 	   nextStop += period;
 	   t = readBuffer (bi, bufferSize);
-	   if ((t <= bufferSize) && !repeater) 
-	      throw (23);
-	   else
-	   if (t < bufferSize) {
+	   if (t <= bufferSize) {
 	      for (i = 0; i < bufferSize; i ++)
 	          bi [i] = 0;
 	      t = bufferSize;
+	      eofReached	= true;
 	   }
 
 	   _I_Buffer -> putDataIntoBuffer (bi, t);
+	   if (eofReached) {
+	      eofReached = false;
+	      if (eofHandler != nullptr) 
+	         eofHandler (userData);
+	   }
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
 	}
@@ -147,9 +173,9 @@ uint8_t temp [2 * length];
 	   data [i] = std::complex <float> ((float)(temp [2 * i] - 128) / 128,
 	                                    (float)(temp [2 * i + 1] - 128) / 128);
 	currPos		+= n;
-	if ((n < length) && repeater) {
+	if (n < length) {
 	   fseek (filePointer, 0, SEEK_SET);
-	   fprintf (stderr, "End of file, restarting\n");
+//	   fprintf (stderr, "End of file, restarting\n");
 	}
 	return	n / 2;
 }

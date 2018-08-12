@@ -75,7 +75,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ../dab-api.h
 	     ../device-handler.h
 	     ../ringbuffer.h
-	     ./includes/dab-class.h
 	     ./includes/dab-constants.h
 	     ./includes/dab-processor.h
 	     ./includes/ofdm/phasereference.h
@@ -117,7 +116,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	     ./dab-api.cpp
-	     ./src/dab-class.cpp
 	     ./src/dab-processor.cpp
 	     ./src/ofdm/ofdm-decoder.cpp
 	     ./src/ofdm/phasereference.cpp

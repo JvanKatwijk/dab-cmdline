@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2016, 2017
+ *    Copyright (C) 2016, 2017, 2018
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Programming
  *
@@ -30,15 +30,13 @@
 
 //	Experimental API for controlling the dab software library
 //
-//	Version 2.0
+//	Version 3.0
 //	Examples of the use of the DAB-API library are found in the
 //	directories
 //	a. C++ Example, which gives a simple command line interface to
 //	   run DAB
 //	b. python, which gives a python program implementing a simple
 //	   command line interface to run DAB
-//	c. simpleDab, which implements a Qt interface - similar to that
-//	   of Qt-DAB - to the library
 
 
 #include	<stdint.h>
@@ -51,8 +49,8 @@ typedef struct {
 	bool	defined;
 	int16_t subchId;
 	int16_t	startAddr;
-	bool	shortForm;
-	int16_t	protLevel;
+	bool	shortForm;	// false EEP long form
+	int16_t	protLevel;	// 
 	int16_t DSCTy;
 	int16_t	length;
 	int16_t	bitRate;
@@ -64,7 +62,6 @@ typedef struct {
 } packetdata;
 
 //
-//	currently not used
 typedef	struct {
 	bool	defined;
 	int16_t	subchId;
@@ -145,22 +142,16 @@ typedef	struct {
 //	The API functions
 extern "C" {
 //	dabInit is called first, with a valid deviceHandler and a valid
-//	Mode. The parameters "spectrumBuffer" and "iqBuffer" will contain
-//	-- if no NULL parameters are passed -- the data to fill a spectrumbuffer
-//	and a constellation diagram. There use can be seen in the example
-//	program "simpleDab".
+//	Mode.
+//	The parameters "spectrumBuffer" and "iqBuffer" will contain
+//	-- if no NULL parameters are passed -- data to compute a
+//	spectrumbuffer	and a constellation diagram.
 //
 //	The other parameters are as described above. For each of them a NULL
 //	can be passed as parameter, with the expected result.
 //
-//	The "spectrumBuffer" and the "iqBuffer" parameters provide
-//	- as the name suggests - spectrumdata and data to show the
-//	constellation diagram.
-//	Look into the simpleDab example to see how they are/can be used.
 void	*dabInit   (deviceHandler       *,
 	            uint8_t             Mode,
-	            RingBuffer<std::complex<float>> *spectrumBuffer,
-	            RingBuffer<std::complex<float>> *iqBuffer,
 	            syncsignal_t        syncsignalHandler,
 	            systemdata_t        systemdataHandler,
 	            ensemblename_t      ensemblenameHandler,
@@ -172,6 +163,8 @@ void	*dabInit   (deviceHandler       *,
 	            programdata_t       programdataHandler,
 	            programQuality_t    program_qualityHandler,
 	            motdata_t		motdata_Handler,
+	            RingBuffer<std::complex<float>> *spectrumBuffer,
+	            RingBuffer<std::complex<float>> *iqBuffer,
 	            void                *userData);
 
 //	dabExit cleans up the library on termination
@@ -181,26 +174,64 @@ void	dabExit		(void *);
 //	note that the input device needs to be started separately
 void	dabStartProcessing (void *);
 //
+//	dabReset is as the name suggests for resetting the state of the library
 void	dabReset	(void *);
-void	dabStop		(void *);
-//	reset is as the name suggests for resetting the state of the library
 //
-//	after selecting a name for a program, the service can be started
-//	by calling dab_service. Note that it is assumed that an ensemble
-//	was recognized. The function returns with a positive number
-//	when successfull, otherwise it will
-//	return -1 is the service cannot be found
-//	return -2 if the type of service is not recognized
-//	return -3 if the type of service is not audio
-//	return -4 if the service is insufficiently defined
-int16_t	dabService     (const char*, void *);
+//	dabStop will stop operation of the functions in the library
+void	dabStop		(void *);
+//
+//	dabReset_msc will terminate the operation of active audio and/or data
+//	handlers (there may be more than one active!).
+//	If selecting a service (or services),
+//	normal operation is to call first
+//	on dabReset_msc, and then call set_xxxChannel for
+//	the requested services
+void	dabReset_msc		(void *);
+//
+//	is_audioService will return true id the main service with the
+//	name is an audioservice
+bool	is_audioService		(void *, const char *);
+//
+//	is_dataService will return true id the main service with the
+//	name is a dataservice
+bool	is_dataService		(void *, const char *);
+//
+//	dataforAudioService will search for the audiodata of the i-th
+//	(sub)service with the name as given. If no such service exists,
+//	the "defined" bit in the struct will be set to false;
+void	dataforAudioService	(void *, const char *, audiodata *, int);
+//
+//	dataforDataService will search for the packetdata of the i-th
+//	(sub)service with the name as given. If no such service exists,
+//	the "defined" bit in the struct will be set to false;
+void	dataforDataService	(void *, const char *, packetdata *, int);
+//
+//	set-audioChannel will add - if properly defined - a handler
+//	for handling the audiodata as described in the parameter
+//	to the list of active handlers
+void	set_audioChannel	(void *, audiodata *);
+//
+//	set-dataChannel will add - if properly defined - a handler
+//	for handling the packetdata as described in the parameter
+//	to the list of active handlers
+void	set_dataChannel		(void *, packetdata *);
 //
 //	mapping from a name to a Service identifier is done 
-int32_t dab_getSId      (const char*, void *);
+int32_t dab_getSId		(void *, const char*);
 //
 //	and the other way around, mapping the service identifier to a name
-std::string dab_getserviceName (int32_t, void *);
+std::string dab_getserviceName	(void *, int32_t);
 }
+//
+//	Additions, suggested by Hayati
+void	dab_getCoordinates (void *, int16_t mainId, int16_t subId,
+	                            float *latitude, float *longitude,
+	                            bool *success,
+                                    int16_t *pMainId = nullptr,
+	                            int16_t *pSubId = nullptr,
+	                            int16_t *pTD = nullptr);
+uint8_t	dab_getExtendedCountryCode	(void *, bool *success);
+uint8_t	dab_getInternationalTabId	(void *, bool *success);
 
 #endif
 

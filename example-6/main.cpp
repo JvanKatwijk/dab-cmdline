@@ -27,8 +27,10 @@
 #include	<getopt.h>
 #include        <cstdio>
 #include        <iostream>
+#include	<complex>
+#include	<vector>
+#include	"dab-api.h"
 #include	"audiosink.h"
-#include	"dab-class.h"
 #include	"config.h"
 #include	"radiodata.h"
 #include	"band-handler.h"
@@ -54,7 +56,7 @@ void    listener	(void);
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
-dabClass	*theRadio	= nullptr;
+void	*theRadio	= nullptr;
 
 static
 tcpWriter	*theWriter;
@@ -281,23 +283,23 @@ bool	err;
 	}
 //
 //	and with a sound device we can create a "backend"
-	theRadio	= new dabClass (theDevice,
-	                                my_radioData. theMode,
-	                                nullptr,	// no spectrum shown
-	                                nullptr,	// no constellations
-	                                syncsignalHandler,
-	                                systemData,
-	                                ensemblenameHandler,
-	                                programnameHandler,
-	                                fibQuality,
-	                                pcmHandler,
-	                                dataOut_Handler,
-	                                bytesOut_Handler,
-	                                programdataHandler,
-	                                mscQuality,
-	                                nullptr,	// no mot slides
-	                                nullptr
-	                               );
+	theRadio	= dabInit (theDevice,
+	                           my_radioData. theMode,
+	                           syncsignalHandler,
+	                           systemData,
+	                           ensemblenameHandler,
+	                           programnameHandler,
+	                           fibQuality,
+	                           pcmHandler,
+	                           dataOut_Handler,
+	                           bytesOut_Handler,
+	                           programdataHandler,
+	                           mscQuality,
+	                           nullptr,	// no mot slides
+	                           nullptr,	// no spectrum shown
+	                           nullptr,	// no constellations
+	                           nullptr	// ctx
+	                          );
 	if (theRadio == nullptr) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
 	   exit (4);
@@ -317,9 +319,9 @@ bool	err;
 	while (running. load ())
 	   sleep (1);
 	theDevice	-> stopReader ();
-	theRadio	-> stop ();
+	dabStop (theRadio);
 	delete	theWriter;
-	delete	theRadio;
+	dabExit	(theRadio);
 	delete	theDevice;	
 	delete	soundOut;
 }
@@ -409,7 +411,7 @@ void	listener (void) {
 	   }
 	   catch (int e) {
 	      fprintf (stderr, "disconnected\n");
-	      theRadio -> stop ();
+	      dabStop (theRadio);
 	   }
 	}
 	close (socket_desc);	
@@ -442,13 +444,27 @@ void	handleRequest (void) {
 	         fprintf (stderr, "service request for %s\n",
 	                              my_radioData. serviceName. c_str ());
 	         
-	         if (theRadio -> is_audioService (my_radioData. serviceName))
-	            theRadio -> dab_service (my_radioData. serviceName);
+	         if (is_audioService (theRadio,
+	                              my_radioData. serviceName. c_str ())) {
+	            audiodata ad;
+	            dataforAudioService (theRadio,
+	                                 my_radioData. serviceName. c_str (),
+	                                 &ad, 0);
+	            if (!ad. defined) {
+	               std::cerr << "sorry  we cannot handle service " <<
+                                            my_radioData. serviceName << "\n";
+	               running. store (false);
+	            }
+	            else {
+	               dabReset_msc (theRadio);
+	               set_audioChannel (theRadio, &ad);
+	            }
+	         }
 	         break;
 
 	      case Q_CHANNEL:
 	         fprintf (stderr, "channel request\n");
-	         theRadio	-> stop ();
+	         dabStop (theRadio);
 	         theDevice	-> stopReader ();
 	         fprintf (stderr, "radio and device stopped\n");
 	         my_radioData. theChannel = std::string ((char *)(&(lbuf [3])));
@@ -458,7 +474,7 @@ void	handleRequest (void) {
 	                                              my_radioData. theChannel);
 	            theDevice	-> setVFOFrequency (frequency);
 	         }
-	         theRadio	-> startProcessing ();
+	         dabStartProcessing (theRadio);
 	         theDevice	-> restartReader ();
 	         programNames. resize (0);
 	         programSIds . resize (0);

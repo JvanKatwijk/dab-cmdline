@@ -296,7 +296,9 @@ deviceHandler	*theDevice;
 	                           bytesOut_Handler,
 	                           programdataHandler,
 	                           mscQuality,
-	                           NULL,
+	                           NULL,	// no MOT handling
+	                           NULL,	// no spectrum shown
+                                   NULL,	// no constellations
 	                           NULL
 	                          );
 	if (theRadio == NULL) {
@@ -350,10 +352,20 @@ deviceHandler	*theDevice;
 	run. store (true);
 	if (serviceId != -1) 
 	   programName = dab_getserviceName (serviceId, theRadio);
-	fprintf (stderr, "we try to start program %s\n", programName. c_str ());
-	if (dabService (programName.c_str(), theRadio) < 0) {
-	   fprintf (stderr, "sorry  we cannot handle service %s\n", 
-	                                             programName. c_str ());
+
+	std::cerr << "we try to start program " <<
+                                                 programName << "\n";
+	if (!is_audioService (theRadio, programName. c_str ())) {
+	   std::cerr << "sorry  we cannot handle service " <<
+                                                 programName << "\n";
+	   run. store (false);
+	}
+
+	audiodata ad;
+	dataforAudioService (theRadio, programName. c_str (), &ad, 0);
+	if (!ad. defined) {
+	   std::cerr << "sorry  we cannot handle service " <<
+                                                 programName << "\n";
 	   run. store (false);
 	}
 

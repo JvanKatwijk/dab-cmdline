@@ -53,8 +53,14 @@ public:
 	uint8_t	kindofService		(std::string &);
 	void	dataforDataService	(std::string &, packetdata *, int);
 	void	dataforAudioService	(std::string &, audiodata *, int);
-	std::complex<float> get_coordinates      (int16_t, int16_t, bool *);
-
+	std::complex<float>
+		get_coordinates		(int16_t, int16_t, bool *);
+	std::complex<float>
+		get_coordinates		(int16_t, int16_t, bool *,
+                                         int16_t *pMainId, int16_t *,
+	                                 int16_t *pTD);
+	uint8_t getECC			(bool *);
+	uint8_t getInterTabId		(bool *);
 private:
 	dabParams	params;
 	fib_quality_t	fib_qualityHandler;

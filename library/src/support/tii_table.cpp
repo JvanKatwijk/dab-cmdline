@@ -82,6 +82,50 @@ float x, y;
 	return std::complex<float> (0, 0);
 }
 
+//
+//	Function extension contributed by Hayati Ayguen
+// mainId < 0 (-1) => don't check mainId
+// subId == -1 => deliver first available offset
+// subId == -2 => deliver coarse coordinates
+std::complex<float>
+	tii_table::get_coordinates (int16_t mainId, int16_t subId,
+	                            bool *success,
+	                            int16_t *pMainId, int16_t *pSubId,
+	                            int16_t *pTD) {
+uint16_t i;
+float x, y;
+
+	*success	= false;
+
+	if ( (this -> mainId != mainId && mainId >= 0) || this->mainId < 0 )
+	   return std::complex<float> (0, 0);
+
+	// subId == -2 => deliver coarse coordinates
+	if (subId == -2) {
+	   *success = true;
+	   if (pMainId)		*pMainId	= this -> mainId;
+	   if (pSubId)		*pSubId		= 99;	/* invalid value */
+	   if (pTD)		*pTD		= -1;	/* invalid value */
+	   return std::complex<float> (latitude, longitude);
+	}
+
+	for (i = 0; i < offsets. size (); i ++) {
+	   // subId == -1 => deliver first available offset
+	   if (offsets [i]. subId != subId && subId != -1)
+	      continue;
+
+	   x	= latitude + offsets [i]. latitudeOffset;
+	   y	= longitude + offsets [i]. longitudeOffset;
+
+	   if (pMainId != nullptr)	*pMainId	= this -> mainId;
+	   if (pSubId != nullptr)	*pSubId		= offsets [i]. subId;
+	   if (pTD != nullptr)		*pTD		= offsets [i]. TD;
+	   *success = true;
+	   return std::complex<float> (x, y);
+	}
+	return std::complex<float> (0, 0);
+}
+
 void	tii_table::print_coordinates	(void) {
 uint16_t	i;
 	if (mainId < 0)

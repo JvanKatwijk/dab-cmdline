@@ -306,6 +306,30 @@ void    dabProcessor::reset_msc (void) {
         my_mscHandler. reset ();
 }
 
+std::complex<float>
+	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
+	                                 bool *success) {
+        return my_ficHandler. get_coordinates (mainId, subId, success);
+}
+
+std::complex<float>
+	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
+	                                 bool *success,
+	                                 int16_t *pMainId, int16_t *pSubId,
+	                                 int16_t *pTD) {
+        return my_ficHandler. get_coordinates (mainId, subId, success,
+	                                            pMainId, pSubId, pTD);
+}
+
+uint8_t dabProcessor::getECC    (bool *success) {
+        return my_ficHandler. getECC (success);
+}
+
+uint8_t dabProcessor::getInterTabId     (bool *success) {
+        return my_ficHandler. getInterTabId (success);
+}
+
+
 void    dabProcessor::set_audioChannel (audiodata *d) {
         my_mscHandler. set_audioChannel (d);
 }

@@ -238,6 +238,42 @@ std::complex<float> result;
         fibProtector. unlock ();
         return result;
 }
+//
+//	Alternative function (extended), contributed by Hayati Ayguen
+// mainId < 0 (-1) => don't check mainId
+// subId == -1 => deliver first available offset
+// subId == -2 => deliver coarse coordinates
+std::complex<float>
+	ficHandler::get_coordinates	(int16_t mainId,
+	                                 int16_t subId, bool *success,
+	                                 int16_t *pMainId, int16_t *pSubId,
+	                                 int16_t *pTD) {
+std::complex<float> result;
+
+        fibProtector. lock ();
+        result = fibProcessor. get_coordinates (mainId, subId, success,
+	                                        pMainId, pSubId, pTD);
+        fibProtector. unlock ();
+        return result;
+}
+
+uint8_t ficHandler::getECC	(bool *success) {
+uint8_t result;
+
+	fibProtector. lock ();
+	result = fibProcessor. getECC (success);
+	fibProtector. unlock ();
+	return result;
+}
+
+uint8_t ficHandler::getInterTabId	(bool *success) {
+uint8_t result;
+
+	fibProtector. lock ();
+	result = fibProcessor.getInterTabId(success);
+	fibProtector. unlock ();
+	return result;
+}
 
 int16_t	ficHandler::get_ficRatio (void) {
 	return ficRatio;

@@ -31,9 +31,12 @@
 #include        <cstdio>
 #include        <iostream>
 #include	<sndfile.h>
+#include	<complex>
+#include	<vector>
+#include	<mutex>
+#include	"dab-api.h"
 #include	"audiosink.h"
 #include	"filesink.h"
-#include	"dab-class.h"
 #include	"band-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
@@ -65,7 +68,7 @@ static
 std::atomic<bool> run;
 
 static
-dabClass	*theRadio	= NULL;
+void	*theRadio	= NULL;
 
 static
 std::atomic<bool>timeSynced;
@@ -445,23 +448,23 @@ bool	err;
 	}
 //
 //	and with a sound device we now can create a "backend"
-	theRadio	= new dabClass (theDevice,
-	                                theMode,
-	                                NULL,		// no spectrum shown
-	                                NULL,		// no constellations
-	                                syncsignalHandler,
-	                                systemData,
-	                                ensemblenameHandler,
-	                                programnameHandler,
-	                                fibQuality,
-	                                pcmHandler,
-	                                dataOut_Handler,
-	                                bytesOut_Handler,
-	                                programdataHandler,
-	                                mscQuality,
-	                                motdataHandler,	// MOT in PAD
-	                                NULL		// Ctx
-	                               );
+	theRadio	= dabInit (theDevice,
+	                           theMode,
+	                           syncsignalHandler,
+	                           systemData,
+	                           ensemblenameHandler,
+	                           programnameHandler,
+	                           fibQuality,
+	                           pcmHandler,
+	                           dataOut_Handler,
+	                           bytesOut_Handler,
+	                           programdataHandler,
+	                           mscQuality,
+	                           motdataHandler,	// MOT in PAD
+	                           nullptr,		// spectrum buffer
+	                           nullptr,		// iqBuffer
+	                           nullptr		// Ctx
+	                          );
 	if (theRadio == NULL) {
 	   std::cerr << "sorry, no radio available, fatal\n";
 	   exit (4);
@@ -481,7 +484,7 @@ bool	err;
 
 	timesyncSet.		store (false);
 	ensembleRecognized.	store (false);
-	theRadio -> startProcessing ();
+	dabStartProcessing (theRadio);
 
 	while (!timeSynced. load () && (--timeSyncTime >= 0))
            sleep (1);
@@ -490,8 +493,8 @@ bool	err;
            cerr << "There does not seem to be a DAB signal here" << endl;
 	   theDevice -> stopReader ();
            sleep (1);
-           theRadio     -> stop ();
-           delete theRadio;
+           dabStop	(theRadio);
+	   dabExit	(theRadio);
            delete theDevice;
            exit (22);
 	}
@@ -509,22 +512,34 @@ bool	err;
 	   std::cerr << "no ensemble data found, fatal\n";
 	   theDevice -> stopReader ();
 	   sleep (1);
-	   theRadio	-> reset ();
-	   delete theRadio;
+	   dabStop	(theRadio);
+	   dabExit	(theRadio);
 	   delete theDevice;
 	   exit (22);
 	}
 
 	run. store (true);
 	if (serviceIdentifier != -1) 
-	   programName = theRadio -> dab_getserviceName (serviceIdentifier);
+	   programName = dab_getserviceName (theRadio, serviceIdentifier);
 	std::cerr << "we try to start program " <<
                                                  programName << "\n";
-	if (theRadio -> dab_service (programName) < 0) {
-	   std::cerr << "sorry  we cannot handle service " << 
-	                                         programName << "\n";
-	   run. store (false);
-	}
+        if (!is_audioService (theRadio, programName. c_str ())) {
+           std::cerr << "sorry  we cannot handle service " <<
+                                                 programName << "\n";
+           run. store (false);
+        }
+
+        audiodata ad;
+        dataforAudioService (theRadio,
+                             programName. c_str (), &ad, 0);
+        if (!ad. defined) {
+           std::cerr << "sorry  we cannot handle service " <<
+                                                 programName << "\n";
+           run. store (false);
+        }
+
+        dabReset_msc (theRadio);
+        set_audioChannel (theRadio, &ad);
 
 	while (run. load ()) {
 	   sleep (1);
@@ -541,10 +556,10 @@ bool	err;
 	}
 
 	theDevice	-> stopReader ();
-	theRadio	-> reset ();
+	dabReset	(theRadio);
 	if (audiofilePointer != NULL)
 	   sf_close (audiofilePointer);
-	delete theRadio;
+	dabExit		(theRadio);
 	delete theDevice;	
 	delete soundOut;
 }

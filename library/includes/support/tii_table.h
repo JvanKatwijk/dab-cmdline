@@ -27,6 +27,7 @@
 class	tii_element {
 public:
 	int16_t	subId;
+	int16_t	TD;		// time delay in usec, (Hayati Ayguen)
 	float	latitudeOffset;
 	float	longitudeOffset;
 	tii_element (int16_t subId,
@@ -41,7 +42,14 @@ public:
 	void	cleanUp			(void);
 	void	add_element		(tii_element *);
 	void	add_main		(int16_t, float, float);
-	std::complex<float>		get_coordinates (int16_t, int16_t, bool *);
+	std::complex<float>		get_coordinates (int16_t,
+	                                                 int16_t, bool *);
+	std::complex<float>		get_coordinates (int16_t, int16_t,
+	                                                 bool *,
+	                                                 int16_t *pMainId,
+	                                                 int16_t *pSubId,
+	                                                 int16_t *pTD);
+
 	void	print_coordinates	(void);
 	int16_t	mainId;
 	float	latitude;

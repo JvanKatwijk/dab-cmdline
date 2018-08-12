@@ -252,9 +252,9 @@ endif ()
 	     ./protocol.h
 	     ./tcp-writer.h
 	     ./config.h
+	     ../dab-api.h
 	     ../devices/device-handler.h
 	     ../library/includes/dab-constants.h
-	     ../library/includes/dab-class.h
 	     ../library/includes/dab-processor.h
 	     ../library/includes/ofdm/phasereference.h
 	     ../library/includes/ofdm/phasetable.h
@@ -302,7 +302,7 @@ endif ()
 	     ./tcp-writer.cpp
 	     ./config.cpp
 	     ../devices/device-handler.cpp
-	     ../library/src/dab-class.cpp
+	     ../library/dab-api.cpp
 	     ../library/src/dab-processor.cpp
 	     ../library/src/ofdm/ofdm-decoder.cpp
 	     ../library/src/ofdm/phasereference.cpp

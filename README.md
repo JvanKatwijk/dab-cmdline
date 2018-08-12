@@ -13,7 +13,7 @@ The library interface is given in dab-api.h
 
 To show the use of the library, several example programs are included:
 
-	- The example programs example-1, example-2, exmple-2a,
+	- The example programs example-1, example-2, example-2a,
 	   example-3, example-4,
 	  example-5 and example-6 are regular C (C++) programs. 
 	  
@@ -31,27 +31,48 @@ IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
 It is most likely necessary that you adapt a program to your
 own needs or you might have to rewrite it completely, feel free to do so.
 
-=======================================================================
+----------------------------------------------------------------------
 
-LIBRARY CONFIGURATION PARAMETER (IMPORTANT)
+The API
 
-For e.g. the RPI 2/3, where the CPU has more cores, but the capacity
-of each core is limited, the best option is to split the processing
-of the frontend into two parts. 
-A configuration parameter in the CMakeLists.txt file controls this
+-----------------------------------------------------------------------
 
-If __THREADED_DECODING is defined, either in the file
-"library/includes/ofdm/ofdm-decoder.h" or with a line
-add_definitions (-D__THREADED_DECODING) in the CMakeLists.txt file,
+The full API description is given in the file dab-api.h
 
-The "ofdm_decoding" (involving a lot of FFT's) then will be done in a
-separate thread. This is the way I run it on an RPI2.
+Initialization of the library is by a call to "dabInit". The call returns
+a pointer (type void *) to structures internal to the library.
 
-The drawback is that synchronization might take longer.
+"dabInit" gets pointers to callback functions as parameter.
 
 
-========================================================================
- 
+At the end a call to "dabExit" has to be made, to clean up all resource
+use of the library.
+
+Start of the processing done is by "dabStartProcessing", the function returns
+immediately but will have created a few threads running in the background.
+
+As soon as an ensemble is recognized, a callback function will be
+called. On recognition of the services within the ensemble also
+leads to calling a callback function, with the service name as parameter.
+
+Selecting a(n audio) service is in two steps. 
+The data, describing the audioservice can be obtained using a call to
+"dataforAudioService".
+
+The function fills a structure, indicating whether or not theservice is a
+valid audio service and containing the data decribing the audostream
+in the DAB data stream.
+
+Passing the function to "set-audioChannel" will create a new handler
+for the selected service.
+
+The function "dataforAudioservice" has a parameter that - when > 0 -
+tells the system to look for the subservice with that number.
+
+Note that since more thaan one (sub)service may be active, each with its own
+handler, it is wise to call "dabReset_msc" prior to selecting a service,
+this function stops all running service handlers.
+
 =======================================================================
 
 The C (C++) example programs
