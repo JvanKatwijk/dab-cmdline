@@ -816,6 +816,8 @@ bool	err;
 	   for (auto & it : globals.channels ) {
 	      serviceIdentifier = it.first;
 	      const bool callbackDataOnly = true;
+	      fprintf (stderr, "going to check %s\n",
+	                              it. second -> programName. c_str ());
 	      if (is_audioService (theRadio,
 	                               it. second -> programName. c_str ()) ||
 	          is_dataService  (theRadio,
@@ -824,8 +826,9 @@ bool	err;
 	                      "\nchecked program '%s' with SId %X\n",
 		               it. second -> programName.c_str(),
 	                       serviceIdentifier);
-
-	         if (it. second -> gotAudio) {
+	 
+	         if (is_audioService (theRadio,
+	                              it. second -> programName. c_str ())) {
 	            audiodata * d = &(it.second->audio);
 	            uint8_t countryId =
 	                        (serviceIdentifier >> 12) & 0xF;  // audio
@@ -905,7 +908,8 @@ bool	err;
 	                         int (d -> appType),
 	                         getUserApplicationType (d -> appType));
                     }
-                    if (it. second -> gotPacket) {
+                    if (is_dataService (theRadio,
+	                               it. second -> programName. c_str ())) {
                         packetdata *d = &(it. second -> packet);
                         uint8_t countryId = (serviceIdentifier >> (5 * 4)) & 0xF;     // packet
                         fprintf(infoStrm, "\tpacket:\n");
