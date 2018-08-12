@@ -1,4 +1,4 @@
-
+#
 /*
  *    Copyright (C) 2015, 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -68,10 +68,13 @@ static FILE * infoStrm = stderr;
 
 struct MyServiceData {
     MyServiceData (void) {
-        SId = 0;
-        gotAudio = false;
-        gotAudioPacket[0] = gotAudioPacket[1] = gotAudioPacket[2] = gotAudioPacket[3] = false;
-        gotPacket = false;
+	SId		= 0;
+	gotAudio	= false;
+	gotAudioPacket[0] = false;
+	gotAudioPacket[1] = false;
+	gotAudioPacket[2] = false;
+	gotAudioPacket[3] = false;
+	gotPacket = false;
     }
 
     int SId;
@@ -86,13 +89,13 @@ struct MyServiceData {
 };
 
 struct MyGlobals {
-    std::unordered_map<int, MyServiceData*> channels;
+	std::unordered_map<int, MyServiceData*> channels;
 };
 
 MyGlobals globals;
 
 #define PRINT_COLLECTED_STAT_AND_TIME  0
-#define PRINT_LOOPS    0
+#define PRINT_LOOPS    1
 #define PRINT_DURATION 1
 
 #define T_UNITS		"ms"
@@ -107,17 +110,18 @@ inline void sleepMillis(unsigned ms) {
 inline uint64_t currentMSecsSinceEpoch() {
 struct timeval te;
 
-	gettimeofday(&te, 0); // get current time
+	gettimeofday (&te, 0); // get current time
 uint64_t milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
 //	printf("milliseconds: %lld\n", milliseconds);
-    return milliseconds;
+	return milliseconds;
 }
 
 uint64_t msecs_progStart = 0;
 
-inline long sinceStart() {
-    uint64_t n = currentMSecsSinceEpoch();
-    return long(n - msecs_progStart);
+inline long sinceStart (void) {
+uint64_t n = currentMSecsSinceEpoch();
+
+	return long (n - msecs_progStart);
 }
 
 void    printOptions (void);	// forward declaration
@@ -169,24 +173,28 @@ void	syncsignalHandler (bool b, void *userData) {
 //	ensemble
 static
 void	ensemblenameHandler (std::string name, int Id, void *userData) {
-	fprintf (stderr, "\nensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n",
-	                          name. c_str (), (uint32_t)Id);
+	fprintf (stderr,
+	         "\nensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n",
+	         name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
 static
 void	programnameHandler (std::string s, int SId, void * userdata) {
-	fprintf (stderr, "programnameHandler: '%s' (SId %X) is part of the ensemble\n", s. c_str (), SId);
-    MyServiceData * d = new MyServiceData();
-    d->SId = SId;
-    d->programName = s;
-    globals.channels[SId] = d;
+	fprintf (stderr,
+	         "programnameHandler: '%s' (SId %X) is part of the ensemble\n",
+	                          s. c_str (), SId);
+	MyServiceData * d = new MyServiceData();
+	d -> SId = SId;
+	d -> programName = s;
+	globals. channels [SId] = d;
 }
 
 static
 void	programdataHandler (audiodata *d, void *ctx) {
+auto	p = globals.channels.find (serviceIdentifier);
 	(void)ctx;
-auto p = globals.channels.find (serviceIdentifier);
+
 	if (p != globals.channels.end () && d != NULL) {
 	   p -> second -> audio = *d;
 	   p -> second -> gotAudio = true;
@@ -199,12 +207,15 @@ auto p = globals.channels.find (serviceIdentifier);
 
 static
 void programPacketHandler (packetdata *d, int subidx /* 1 .. 4*/, void * ctx) {
-    (void)ctx;
-    auto p = globals.channels.find(serviceIdentifier);
+(void)ctx;
+auto p = globals.channels.find(serviceIdentifier);
+
 	if (p != globals.channels.end () && d ) {
-	   p -> second -> audiopacket    [subidx-1] = *d;
-	   p -> second -> gotAudioPacket [subidx-1] = true;
-	   fprintf (stderr, "programPacketHandler(%d) for SID %X called. stored packetdata\n", subidx, serviceIdentifier );
+	   p -> second -> audiopacket    [subidx - 1] = *d;
+	   p -> second -> gotAudioPacket [subidx - 1] = true;
+	   fprintf (stderr,
+	            "programPacketHandler(%d) for SID %X called. stored packetdata\n",
+	             subidx, serviceIdentifier );
 	}
 	else {
 	   fprintf (stderr, "programPacketHandler(%d) for SID %X called. cannot save packetdata\n", subidx, serviceIdentifier );
@@ -212,11 +223,11 @@ void programPacketHandler (packetdata *d, int subidx /* 1 .. 4*/, void * ctx) {
 }
 
 static
-void packetdataHandler (packetdata *d, void * ctx) {
+void	packetdataHandler (packetdata *d, void * ctx) {
+auto	p = globals.channels. find(serviceIdentifier);
 	(void)ctx;
-auto p = globals.channels.find(serviceIdentifier);
 
-	if (p != globals.channels.end() && d) {
+	if (p != globals. channels.end () && d) {
 	   p -> second -> packet = *d;
 	   p -> second -> gotPacket = true;
 	   fprintf (stderr, "packetdataHandler for SID %X called. stored packetdata\n", serviceIdentifier  );
@@ -381,36 +392,35 @@ void printCollectedCallbackStat (const char * txt,
 	   fprintf (infoStrm, "  systemData(): %s: everSynced %s, snr min/max: %d/%d. # %ld avg %ld\n"
 	                 , stat_gotSysData ? "yes" : "no"
 	                 , stat_everSynced ? "yes" : "no"
-	                 , int(stat_minSnr), int(stat_maxSnr)
+	                 , int (stat_minSnr)
+	                 , int(stat_maxSnr)
 	                 , numSnr, avgSnr );
 	   fprintf (infoStrm, "  fibQuality(): %s: q min/max: %d/%d. # %ld avg %ld\n"
 	                 , stat_gotFic ? "yes" : "no"
 	                 , int(stat_minFic), int(stat_maxFic), numFic, avgFic);
 
-	   fprintf ( infoStrm, "  mscQuality(): %s: fe min/max: %d/%d, rsE min/max: %d/%d, aacE min/max: %d/%d\n"
+	   fprintf (infoStrm,
+	            "  mscQuality(): %s: fe min/max: %d/%d, rsE min/max: %d/%d, aacE min/max: %d/%d\n"
 	                 , stat_gotMsc ? "yes" : "no"
 	                 , int(stat_minFe), int(stat_maxFe)
 	                 , int(stat_minRsE), int(stat_maxRsE)
 	                 , int(stat_minAacE), int(stat_maxAacE) );
 
-	   fprintf( infoStrm, "\n");
+	   fprintf (infoStrm, "\n");
 	}
 }
-
 
 static
-bool	repeater		= true;
+bool	repeater		= false;
 
-void device_eof_callback(void * userData)
-{
+void device_eof_callback (void * userData) {
 	(void)userData;
-	if ( !repeater ) {
+	if (!repeater ) {
 	   fprintf (stderr, "\nEnd-of-File reached, triggering termination!\n");
 	   run. store (false);
+	   exit (30);
 	}
 }
-
-
 
 int	main (int argc, char **argv) {
 
@@ -439,8 +449,8 @@ int32_t		basePort = 1234;		// default
 #endif
 bool	err;
 
-	fprintf (stderr, "dab_cmdline V 1.0alfa,\n \
-	                  Copyright 2017 J van Katwijk/Hayati Ayguen\n");
+	fprintf (stderr, "dab_cmdline example-10 V 1.0alfa,\n \
+	                  Copyright 2018 Hayati Ayguen/Jan van Katwijk\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
@@ -531,11 +541,11 @@ bool	err;
 #endif
 
 	      case 'S': {
-                 std::stringstream ss;
-                 ss << std::hex << optarg;
-                 ss >> serviceIdentifier;
-                 break;
-              }
+	         std::stringstream ss;
+	         ss << std::hex << optarg;
+	         ss >> serviceIdentifier;
+	         break;
+	      }
 
 	      default:
 	         printOptions ();
@@ -567,9 +577,9 @@ bool	err;
 	                                     theGain,
 	                                     autogain);
 #elif	HAVE_WAVFILES
-	   theDevice	= new wavFiles (fileName, repeater, fileOffset, device_eof_callback, nullptr );
+	   theDevice	= new wavFiles (fileName, fileOffset, device_eof_callback, nullptr );
 #elif	HAVE_RAWFILES
-	   theDevice	= new rawFiles (fileName, repeater, fileOffset, device_eof_callback, nullptr );
+	   theDevice	= new rawFiles (fileName, fileOffset, device_eof_callback, nullptr );
 #elif	HAVE_RTL_TCP
 	   theDevice	= new rtl_tcp_client (hostname,
 	                                      basePort,
@@ -583,7 +593,7 @@ bool	err;
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
 #if PRINT_DURATION
-           fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
 #endif
 	   exit (32);
 	}
@@ -611,7 +621,7 @@ bool	err;
 	   nextOut = timeOut;
 	   printCollectedCallbackStat ("A: no radio");
 #if PRINT_DURATION
-           fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf (stderr, "\n%5ld: exiting main()\n", sinceStart());
 #endif
 	   exit (4);
 	}
@@ -624,24 +634,29 @@ bool	err;
 //
 //	The device should be working right now
 
-        timesyncSet.		store (false);
-        ensembleRecognized.	store (false);
-        dabStartProcessing (theRadio);
+	timesyncSet.		store (false);
+	ensembleRecognized.	store (false);
+	dabStartProcessing (theRadio);
 
-        bool abortForSnr = false;
-        bool continueForFullEnsemble = false;
+	bool abortForSnr = false;
+	bool continueForFullEnsemble = false;
 
 #if PRINT_LOOPS
-        fprintf(stderr, "\nbefore while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-          , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
-          , int(timeOut), int(waitingTime) );
+	fprintf (stderr,
+	         "\nbefore while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	         , continueForFullEnsemble ? "true":"false"
+	         , abortForSnr ? "true":"false"
+	         , int (timeOut), int (waitingTime) );
 #endif
-        while ( (timeOut += T_GRANULARITY) < waitingTime && !abortForSnr) {
-	   if ((!ensembleRecognized. load () || continueForFullEnsemble) && timeOut > T_GRANULARITY )
-	      sleepMillis(T_GRANULARITY);		// sleep (1);  // skip 1st sleep if possible
-	   printCollectedCallbackStat("wait for timeSync ..");
+	while ((timeOut += T_GRANULARITY) < waitingTime && !abortForSnr) {
+	   if ((!ensembleRecognized. load () || continueForFullEnsemble) &&
+	             timeOut > T_GRANULARITY )
+	      sleepMillis (T_GRANULARITY);	// sleep (1);  // skip 1st sleep if possible
+	   printCollectedCallbackStat ("wait for timeSync ..");
 	   if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-	      fprintf (stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	      fprintf (stderr,
+	               "abort because minSNR %d is not met. # is %ld avg %ld\n",
+	                int (minSNRtoExit), numSnr, avgSnr );
 	      abortForSnr = true;
 	      break;
 	   }
@@ -660,7 +675,7 @@ bool	err;
 	         }
 	      }
 	      else
-	      if ( waitAfterEnsemble == 0 ) {
+	      if (waitAfterEnsemble == 0 ) {
 	         fprintf (stderr, "t=%d: abort directly because already got ensemble data.\n", timeOut);
 	         fprintf (stderr, "waitAfterEnsemble == 0  ==> break\n");
 	         break;
@@ -668,99 +683,104 @@ bool	err;
 	   }
 
 #if PRINT_LOOPS
-          fprintf(stderr, "in while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-            , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
-            , int(timeOut), int(waitingTime) );
+	  fprintf (stderr, "in while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	                   , continueForFullEnsemble ? "true":"false"
+	                   , abortForSnr ? "true":"false"
+	                   , int (timeOut), int (waitingTime) );
 #endif
 	}
 
 #if PRINT_LOOPS
-        fprintf(stderr, "\nbefore while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-          , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
-          , int(timeOut), int(waitingTime) );
+	fprintf (stderr, "\nbefore while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	                 , continueForFullEnsemble ? "true":"false"
+	                 , abortForSnr ? "true":"false"
+	                 , int (timeOut)
+	                 , int (waitingTime) );
 #endif
 
-        while (continueForFullEnsemble &&
+	while (continueForFullEnsemble &&
 	       !abortForSnr && (timeOut += T_GRANULARITY) < waitingTime) {
-          sleepMillis (T_GRANULARITY);
-          printCollectedCallbackStat ("wait for full ensemble info..");
-          if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-            fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
-            abortForSnr = true;
-            break;
-          }
+	  sleepMillis (T_GRANULARITY);
+	  printCollectedCallbackStat ("wait for full ensemble info..");
+	  if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
+	    fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	    abortForSnr = true;
+	    break;
+	  }
 #if PRINT_LOOPS
-          fprintf(stderr, "in while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-            , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
-            , int(timeOut), int(waitingTime) );
+	  fprintf(stderr, "in while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	    , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
+	    , int(timeOut), int(waitingTime) );
 #endif
-        }
-
-        if (!timeSynced. load ()) {
-           cerr << "There does not seem to be a DAB signal here" << endl;
-	   theDevice -> stopReader ();
-           dabStop (theRadio);
-           nextOut = timeOut;
-           printCollectedCallbackStat("B: no DAB signal");
-           dabExit (theRadio);
-           delete theDevice;
-#if PRINT_DURATION
-           fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
-#endif
-           exit (22);
 	}
 
-#if PRINT_LOOPS
-        fprintf(stderr, "\nbefore while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-          , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
-          , int(timeOut), int(waitingTime) );
-#endif
-        while (!ensembleRecognized. load () && (timeOut += T_GRANULARITY) < waitingTime && !abortForSnr) {
-          sleepMillis(T_GRANULARITY);
-          printCollectedCallbackStat("C: collecting ensembleData ..");
-          if ( scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-            fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
-            abortForSnr = true;
-            break;
-          }
-#if PRINT_LOOPS
-          fprintf(stderr, "in while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-            , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
-            , int(timeOut), int(waitingTime) );
-#endif
-        }
-	fprintf (stderr, "\n");
-
-	if (!ensembleRecognized. load ()) {
-	   fprintf (stderr, "no ensemble data found, fatal\n");
+	if (!timeSynced. load ()) {
+	   cerr << "There does not seem to be a DAB signal here" << endl;
 	   theDevice -> stopReader ();
-	   dabReset (theRadio);
+	   dabStop (theRadio);
 	   nextOut = timeOut;
-	   printCollectedCallbackStat("D: no ensembleData");
+	   printCollectedCallbackStat("B: no DAB signal");
 	   dabExit (theRadio);
 	   delete theDevice;
 #if PRINT_DURATION
-           fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
 #endif
 	   exit (22);
 	}
 
-        if (ensembleRecognized. load ()) {
-          nextOut = timeOut;
-          printCollectedCallbackStat("summmary for found ensemble", 1);
-        }
+#if PRINT_LOOPS
+	fprintf(stderr, "\nbefore while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
+	  , int(timeOut), int(waitingTime) );
+#endif
+	while (!ensembleRecognized. load () &&
+	       ((timeOut += T_GRANULARITY) < waitingTime) && !abortForSnr) {
+	  sleepMillis (T_GRANULARITY);
+	  printCollectedCallbackStat ("C: collecting ensembleData ..");
+	  if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
+	    fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	    abortForSnr = true;
+	    break;
+	  }
+#if PRINT_LOOPS
+	  fprintf(stderr, "in while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	    , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
+	    , int(timeOut), int(waitingTime) );
+#endif
+	}
+	fprintf (stderr, "\n");
+	if (abortForSnr)
+	   exit (24);
+static	int count	= 10;
+	
+	while (!ensembleRecognized && (--count > 0))
+	  sleep (1);
+	if (!ensembleRecognized. load ()) {
+	   fprintf (stderr, "no ensemble data found, fatal\n");
+	   theDevice -> stopReader ();
+	   dabStop (theRadio);
+	   nextOut = timeOut;
+	   printCollectedCallbackStat ("D: no ensembleData");
+	   dabExit (theRadio);
+	   delete theDevice;
+#if PRINT_DURATION
+	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+#endif
+	   exit (22);
+	}
+
+	if (ensembleRecognized. load ()) {
+	  nextOut = timeOut;
+	  printCollectedCallbackStat("summmary for found ensemble", 1);
+	}
 
 	if (!scanOnly) {
 	   audiodata ad;
+	   packetdata pd;
 	   run. store (true);
-	   std::cerr << "we try to start program " <<
-                                                 programName << "\n";
-	   if (!is_audioService (theRadio, programName. c_str ())) {
-	      std::cerr << "sorry  we cannot handle service " <<
-	                                           programName << "\n";
-	      run. store (false);
-	   }
-	   else {
+	   std::cerr << "we try to start service " <<
+	                                         programName << "\n";
+	   if (is_audioService (theRadio, programName. c_str ())) {
 	      dataforAudioService (theRadio, programName. c_str (), &ad, 0);
 	      if (!ad. defined) {
 	         std::cerr << "sorry  we cannot handle service " <<
@@ -768,29 +788,46 @@ bool	err;
 	         run. store (false);
 	      }
 	   }
-
+	   else
+	   if (is_dataService (theRadio, programName. c_str ())) {
+	      dataforDataService (theRadio, programName. c_str (), &pd, 0);
+	      if (!pd. defined) {
+	         std::cerr << "sorry  we cannot handle service " <<
+	         programName << "\n";
+	         run. store (false);
+	      }
+	   }
+	   else {
+	      std::cerr << "sorry, we cannot handle service " << 
+		         programName << "\n";
+	      run. store (false);
+	   }
+	
 	   if (run. load ()) {
 	      dabReset_msc (theRadio);
-	      set_audioChannel (theRadio, &ad);
+	      if (is_audioService (theRadio, programName. c_str ()))
+	         set_audioChannel (theRadio, &ad);
+	      else
+	         set_dataChannel  (theRadio, &pd);
 	      while (run. load ()) {
 	         timeOut += T_GRANULARITY;
 	         sleepMillis (T_GRANULARITY);
 	         printCollectedCallbackStat("E: loading ..");
 	      }
 	   }
-        }
-        else {	// scan only
-           bool gotECC = false;
-           bool gotInterTabId = false;
-           const uint8_t eccCode =
+	}
+	else {	// scan only
+	   bool gotECC = false;
+	   bool gotInterTabId = false;
+	   const uint8_t eccCode =
 	               dab_getExtendedCountryCode (theRadio, &gotECC);
-           const uint8_t interTabId =
+	   const uint8_t interTabId =
 	               dab_getInternationalTabId (theRadio, &gotInterTabId);
 
-           int16_t mainId, subId, TD;
-           float gps_latitude, gps_longitude;
-           bool gps_success = false;
-           dab_getCoordinates (theRadio,
+	   int16_t mainId, subId, TD;
+	   float gps_latitude, gps_longitude;
+	   bool gps_success = false;
+	   dab_getCoordinates (theRadio,
 	                       -1, -1,
 	                       &gps_latitude,
 	                       &gps_longitude,
@@ -807,7 +844,7 @@ bool	err;
 	         if (gps_success)
 	            fprintf (infoStrm,
 	                     "\ttransmitter gps coordinate (latitude / longitude) for\ttii %04d\t=%f / %f\tTD=%d us\n",
-                             mainId * 100 + subId,
+	                     mainId * 100 + subId,
 	                     gps_latitude,
 	                     gps_longitude, int(TD) );
 	      }	// end for
@@ -815,122 +852,130 @@ bool	err;
 
 	   for (auto & it : globals.channels ) {
 	      serviceIdentifier = it.first;
-	      const bool callbackDataOnly = true;
-	      fprintf (stderr, "going to check %s\n",
-	                              it. second -> programName. c_str ());
+//	      fprintf (stderr, "going to check %s\n",
+//	                              it. second -> programName. c_str ());
 	      if (is_audioService (theRadio,
 	                               it. second -> programName. c_str ()) ||
-	          is_dataService  (theRadio,
+	          is_dataService (theRadio,
 	                               it. second -> programName. c_str ())) {
 	         fprintf (infoStrm,
 	                      "\nchecked program '%s' with SId %X\n",
 		               it. second -> programName.c_str(),
 	                       serviceIdentifier);
-	 
-	         if (is_audioService (theRadio,
-	                              it. second -> programName. c_str ())) {
-	            audiodata * d = &(it.second->audio);
-	            uint8_t countryId =
+	         for (int i = 0; i < 5; i ++) {
+	            audiodata ad;
+	            packetdata pd;
+	            dataforAudioService (theRadio, 
+	                                 it. second -> programName. c_str (),
+	                                 &ad,
+	                                 i);
+	
+	            if (ad. defined) {
+	               uint8_t countryId =
 	                        (serviceIdentifier >> 12) & 0xF;  // audio
-	            fprintf (infoStrm, "\taudioData:\n");
-	            fprintf (infoStrm, "\t\tsubchId\t=%d\n",
-	                                             int(d->subchId));
-		    fprintf (infoStrm, "\t\tstartAddr\t=%d\n",
-	                                             int(d->startAddr));
-	            fprintf (infoStrm, "\t\tshortForm\t=%s\n",
-	                                   d->shortForm ? "true":"false");
-	            fprintf (infoStrm, "\t\tprotLevel\t=%d: '%s'\n",
-	                                   int(d->protLevel),
-	                                   getProtectionLevel (d->shortForm, d->protLevel));
-	            fprintf (infoStrm, "\t\tcodeRate\t=%d: '%s'\n",
-	                               int (d->protLevel),
-	                               getCodeRate (d -> shortForm,
-	                                            d -> protLevel));
-	            fprintf (infoStrm, "\t\tlength\t=%d\n", int (d -> length));
-	            fprintf (infoStrm, "\t\tbitRate\t=%d\n", int (d ->bitRate));
-	            fprintf (infoStrm, "\t\tASCTy\t=%d: '%s'\n", int(d->ASCTy), getASCTy(d->ASCTy));
-	            if (gotECC)
+	               fprintf (infoStrm, "\taudioData:\n");
+	               fprintf (infoStrm, "\t\tsubchId\t=%d\n",
+	                                             int (ad. subchId));
+		       fprintf (infoStrm, "\t\tstartAddr\t=%d\n",
+	                                             int (ad. startAddr));
+	               fprintf (infoStrm, "\t\tshortForm\t=%s\n",
+	                                   ad. shortForm ? "true":"false");
+	               fprintf (infoStrm, "\t\tprotLevel\t=%d: '%s'\n",
+	                                   int (ad. protLevel),
+	                                   getProtectionLevel (ad. shortForm,
+	                                                       ad. protLevel));
+	               fprintf (infoStrm, "\t\tcodeRate\t=%d: '%s'\n",
+	                               int (ad. protLevel),
+	                               getCodeRate (ad. shortForm,
+	                                            ad. protLevel));
+	               fprintf (infoStrm, "\t\tlength\t\t=%d\n",
+	                               int (ad. length));
+	               fprintf (infoStrm, "\t\tbitRate\t\t=%d\n",
+	                               int (ad. bitRate));
 	               fprintf (infoStrm,
-	                        "\t\tcountry\tECC %X, Id %X: '%s'\n", 
-	                        int (eccCode), int(countryId),
-	                        getCountry (eccCode, countryId));
-	            fprintf (infoStrm,
-	                     "\t\tlanguage\t=%d: '%s'\n",
-	                     int(d->language), getLanguage(d->language));
-	            fprintf (infoStrm,
-	                     "\t\tprogramType\t=%d: '%s'\n",
-	                     int (d -> programType),
-	                     getProgramType (gotInterTabId,
-	                                     interTabId, d->programType) );
-                    }
-                    for (int k = 0; k < 4; ++k ) {
-                        if (!it. second -> gotAudioPacket [k])
-                            continue;
-                        packetdata *d = &(it. second -> audiopacket [k]);
-                        uint8_t countryId =
-	                    (serviceIdentifier >> (5 * 4)) & 0xF;     // packet
-                        fprintf (infoStrm, "\taudioPacket[%d]:\n", k+1);
-                        fprintf (infoStrm, "\t\tsubchId\t=%d\n",
-	                                                 int (d -> subchId));
-                        fprintf (infoStrm, "\t\tstartAddr\t=%d\n",
-	                                         int (d -> startAddr));
-                        fprintf (infoStrm, "\t\tshortForm\t=%s\n",
-	                                    d->shortForm ? "true":"false");
-                        fprintf (infoStrm, "\t\tprotLevel\t=%d: '%s'\n",
-	                                   int (d->protLevel),
-	                                    getProtectionLevel (d ->shortForm,
-	                                                        d->protLevel));
-                        fprintf (infoStrm, "\t\tcodeRate\t=%d: '%s'\n",
-	                                    int (d->protLevel),
-	                                    getCodeRate (d -> shortForm,
-	                                                 d -> protLevel));
-                        fprintf (infoStrm, "\t\tDSCTy\t=%d: '%s'\n",
-	                                      int (d -> DSCTy),
-	                                      getDSCTy (d -> DSCTy));
-                        fprintf (infoStrm, "\t\tlength\t=%d\n",
-	                                      int (d -> length));
-                        fprintf (infoStrm, "\t\tbitRate\t=%d\n",
-	                                      int (d -> bitRate));
-                        fprintf (infoStrm, "\t\tFEC_scheme\t=%d: '%s'\n",
-	                                   int (d -> FEC_scheme),
-	                                   getFECscheme (d -> FEC_scheme));
-                        fprintf (infoStrm, "\t\tDGflag\t=%d\n",
-	                                   int (d -> DGflag));
-                        fprintf (infoStrm, "\t\tpacketAddress\t=%d\n",
-	                                   int (d -> packetAddress));
-                        if (gotECC )
-                            fprintf (infoStrm,
-	                            "\t\tcountry\tECC %X, Id %X: '%s'\n",
-	                            int (eccCode), int (countryId),
-	                            getCountry (eccCode, countryId));
-                        fprintf (infoStrm,
-	                         "\t\tappType\t=%d: '%s'\n",
-	                         int (d -> appType),
-	                         getUserApplicationType (d -> appType));
-                    }
-                    if (is_dataService (theRadio,
-	                               it. second -> programName. c_str ())) {
-                        packetdata *d = &(it. second -> packet);
-                        uint8_t countryId = (serviceIdentifier >> (5 * 4)) & 0xF;     // packet
-                        fprintf(infoStrm, "\tpacket:\n");
-                        fprintf(infoStrm, "\t\tsubchId\t=%d\n", int(d->subchId));
-                        fprintf(infoStrm, "\t\tstartAddr\t=%d\n", int(d->startAddr));
-                        fprintf(infoStrm, "\t\tshortForm\t=%s\n", d->shortForm ? "true":"false");
-                        fprintf(infoStrm, "\t\tprotLevel\t=%d: '%s'\n", int(d->protLevel), getProtectionLevel(d->shortForm, d->protLevel));
-                        fprintf(infoStrm, "\t\tcodeRate\t=%d: '%s'\n", int(d->protLevel), getCodeRate(d->shortForm, d->protLevel));
-                        fprintf(infoStrm, "\t\tDSCTy\t=%d: '%s'\n", int(d->DSCTy), getDSCTy(d->DSCTy));
-                        fprintf(infoStrm, "\t\tlength\t=%d\n", int(d->length));
-                        fprintf(infoStrm, "\t\tbitRate\t=%d\n", int(d->bitRate));
-                        fprintf(infoStrm, "\t\tFEC_scheme\t=%d: '%s'\n", int(d->FEC_scheme), getFECscheme(d->FEC_scheme));
-                        fprintf(infoStrm, "\t\tDGflag\t=%d\n", int(d->DGflag));
-                        fprintf(infoStrm, "\t\tpacketAddress\t=%d\n", int(d->packetAddress));
-                        if ( gotECC )
-                            fprintf(infoStrm, "\t\tcountry\tECC %X, Id %X: '%s'\n", int(eccCode), int(countryId), getCountry(eccCode, countryId));
-                        fprintf(infoStrm, "\t\tappType\t=%d: '%s'\n", int(d->appType), getUserApplicationType(d->appType) );
-                        fprintf(infoStrm, "\t\tis_madePublic\t=%s\n", d->is_madePublic ? "true":"false");
+	                        "\t\tASCTy\t\t=%d: '%s'\n",
+	                               int (ad. ASCTy),
+	                               getASCTy (ad. ASCTy));
+	               if (gotECC)
+	                  fprintf (infoStrm,
+	                           "\t\tcountry\tECC %X, Id %X: '%s'\n", 
+	                           int (eccCode), int(countryId),
+	                           getCountry (eccCode, countryId));
+	               fprintf (infoStrm,
+	                        "\t\tlanguage\t=%d: '%s'\n",
+	                        int (ad. language),
+	                        getLanguage (ad. language));
+	               fprintf (infoStrm,
+	                        "\t\tprogramType\t=%d: '%s'\n",
+	                        int (ad. programType),
+	                        getProgramType (gotInterTabId,
+	                                        interTabId,
+	                                        ad. programType) );
+	            }
+	            else {
+	               dataforDataService (theRadio, 
+	                                   it. second -> programName. c_str (),
+	                                   &pd,
+	                                   i);
+	      
+	               if (pd. defined) {
+	                  uint8_t countryId =
+	                            (serviceIdentifier >> (5 * 4)) & 0xF;
+	                  fprintf (infoStrm, "\tpacket:\n");
+	                  fprintf (infoStrm,
+	                              "\t\tsubchId\t=%d\n",
+	                                      int (pd. subchId));
+	                  fprintf (infoStrm,
+	                              "\t\tstartAddr\t=%d\n",
+	                                      int (pd. startAddr));
+	                  fprintf (infoStrm,
+	                              "\t\tshortForm\t=%s\n",
+	                                      pd. shortForm ? "true":"false");
+	                  fprintf (infoStrm,
+	                              "\t\tprotLevel\t=%d: '%s'\n",
+	                                      int (pd. protLevel),
+	                                      getProtectionLevel (pd. shortForm,
+	                                                          pd. protLevel));
+	                  fprintf (infoStrm,
+	                              "\t\tcodeRate\t=%d: '%s'\n",
+	                                      int (pd. protLevel),
+	                                      getCodeRate (pd. shortForm,
+	                                                   pd. protLevel));
+	                  fprintf (infoStrm,
+	                              "\t\tDSCTy\t=%d: '%s'\n",
+	                                     int (pd. DSCTy),
+	                                     getDSCTy (pd. DSCTy));
+	                  fprintf (infoStrm,
+	                              "\t\tlength\t\t=%d\n", int (pd. length));
+	                  fprintf (infoStrm,
+	                              "\t\tbitRate\t=%d\n", int (pd. bitRate));
+	                  fprintf (infoStrm,
+	                              "\t\tFEC_scheme\t=%d: '%s'\n",
+	                                   int (pd. FEC_scheme),
+	                                   getFECscheme (pd. FEC_scheme));
+	                  fprintf (infoStrm,
+	                              "\t\tDGflag\t=%d\n", int (pd. DGflag));
+	                  fprintf (infoStrm,
+	                              "\t\tpacketAddress\t=%d\n",
+	                                      int (pd. packetAddress));
+	                  if (gotECC)
+	                     fprintf (infoStrm,
+	                                 "\t\tcountry\tECC %X, Id %X: '%s'\n",
+	                                       int (eccCode),
+	                                       int (countryId),
+	                                       getCountry (eccCode, countryId));
+	                  fprintf (infoStrm,
+	                           "\t\tappType\t=%d: '%s'\n",
+	                                int (pd. appType),
+	                                getUserApplicationType (pd. appType));
+	                  fprintf (infoStrm,
+	                           "\t\tis_madePublic\t=%s\n",
+	                                pd. is_madePublic ? "true":"false");
+	               }
+	            }
 	         }
 	      }
-           }
+	   }
 
 	   nextOut = timeOut;
 	   printCollectedCallbackStat("D: quit without loading");
@@ -946,16 +991,16 @@ bool	err;
 }
 
 void    printOptions (void) {
-        fprintf (stderr,
+	fprintf (stderr,
 "        dab-cmdline options are\n\
-        -W number   amount of time to look for a time sync in %s\n\
-        -A number   amount of time to look for an ensemble in %s\n\
-        -E minSNR   activates scan mode: if set, quit after loading scan data\n\
-                    also quit, if SNR is below minSNR\n\
-        -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
-        -B Band     Band is either L_BAND or BAND_III (default)\n\
-        -P name     program to be selected in the ensemble\n\
-        -p ppmCorr  ppm correction\n"
+	-W number   amount of time to look for a time sync in %s\n\
+	-A number   amount of time to look for an ensemble in %s\n\
+	-E minSNR   activates scan mode: if set, quit after loading scan data\n\
+	            also quit, if SNR is below minSNR\n\
+	-M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
+	-B Band     Band is either L_BAND or BAND_III (default)\n\
+	-P name     program to be selected in the ensemble\n\
+	-p ppmCorr  ppm correction\n"
 #if	defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
 "        -F filename in case the input is from file\n"
 "        -o offset   offset in seconds from where to start file playback\n"
@@ -963,11 +1008,11 @@ void    printOptions (void) {
 
 #else
 "        -C channel  channel to be used\n\
-        -G Gain     gain for device (range 1 .. 100)\n\
-        -Q          if set, set autogain for device true\n"
+	-G Gain     gain for device (range 1 .. 100)\n\
+	-Q          if set, set autogain for device true\n"
 #ifdef	HAVE_RTL_TCP
 "        -H hostname  hostname for rtl_tcp\n\
-        -I port      port number to rtl_tcp\n"
+	-I port      port number to rtl_tcp\n"
 #endif
 #endif
 "        -S hexnumber use hexnumber to identify program\n\n", T_UNITS, T_UNITS );
