@@ -112,8 +112,10 @@ bool	wavFiles::restartReader	(void) {
 }
 
 void	wavFiles::stopReader	(void) {
-	if (running. load ())
+	if (running. load ()) {
+	   running. store (false);
            workerHandle. join ();
+	}
 	running. store (false);
 }
 //

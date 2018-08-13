@@ -23,7 +23,7 @@
  *
  *	E X A M P L E  P R O G R A M
  *	This program might (or might not) be used to mould the interface to
- *	your wishes. Do not take it as a definitive and "ready: program
+ *	your wishes. Do not take it as a definitive and "ready" program
  *	for the DAB-library
  */
 #include	<unistd.h>
@@ -95,7 +95,7 @@ struct MyGlobals {
 MyGlobals globals;
 
 #define PRINT_COLLECTED_STAT_AND_TIME  0
-#define PRINT_LOOPS    1
+#define PRINT_LOOPS    0
 #define PRINT_DURATION 1
 
 #define T_UNITS		"ms"
@@ -152,7 +152,6 @@ static int32_t		serviceIdentifier	= -1;
 static bool scanOnly = false;
 static int16_t minSNRtoExit = -32768;
 static deviceHandler	*theDevice = nullptr;
-
 
 static void sighandler (int signum) {
 	fprintf (stderr, "Signal caught, terminating!\n");
@@ -539,7 +538,6 @@ bool	err;
 	         break;
 #endif
 #endif
-
 	      case 'S': {
 	         std::stringstream ss;
 	         ss << std::hex << optarg;
@@ -723,7 +721,7 @@ bool	err;
 	   dabExit (theRadio);
 	   delete theDevice;
 #if PRINT_DURATION
-	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf (stderr, "\n%5ld: exiting main()\n", sinceStart());
 #endif
 	   exit (22);
 	}
@@ -874,26 +872,26 @@ static	int count	= 10;
 	               uint8_t countryId =
 	                        (serviceIdentifier >> 12) & 0xF;  // audio
 	               fprintf (infoStrm, "\taudioData:\n");
-	               fprintf (infoStrm, "\t\tsubchId\t=%d\n",
+	               fprintf (infoStrm, "\t\tsubchId\t\t= %d\n",
 	                                             int (ad. subchId));
-		       fprintf (infoStrm, "\t\tstartAddr\t=%d\n",
+		       fprintf (infoStrm, "\t\tstartAddr\t= %d\n",
 	                                             int (ad. startAddr));
-	               fprintf (infoStrm, "\t\tshortForm\t=%s\n",
+	               fprintf (infoStrm, "\t\tshortForm\t= %s\n",
 	                                   ad. shortForm ? "true":"false");
-	               fprintf (infoStrm, "\t\tprotLevel\t=%d: '%s'\n",
+	               fprintf (infoStrm, "\t\tprotLevel\t= %d: '%s'\n",
 	                                   int (ad. protLevel),
 	                                   getProtectionLevel (ad. shortForm,
 	                                                       ad. protLevel));
-	               fprintf (infoStrm, "\t\tcodeRate\t=%d: '%s'\n",
+	               fprintf (infoStrm, "\t\tcodeRate\t= %d: '%s'\n",
 	                               int (ad. protLevel),
 	                               getCodeRate (ad. shortForm,
 	                                            ad. protLevel));
-	               fprintf (infoStrm, "\t\tlength\t\t=%d\n",
+	               fprintf (infoStrm, "\t\tlength\t\t= %d\n",
 	                               int (ad. length));
-	               fprintf (infoStrm, "\t\tbitRate\t\t=%d\n",
+	               fprintf (infoStrm, "\t\tbitRate\t\t= %d\n",
 	                               int (ad. bitRate));
 	               fprintf (infoStrm,
-	                        "\t\tASCTy\t\t=%d: '%s'\n",
+	                        "\t\tASCTy\t\t= %d: '%s'\n",
 	                               int (ad. ASCTy),
 	                               getASCTy (ad. ASCTy));
 	               if (gotECC)
@@ -902,11 +900,11 @@ static	int count	= 10;
 	                           int (eccCode), int(countryId),
 	                           getCountry (eccCode, countryId));
 	               fprintf (infoStrm,
-	                        "\t\tlanguage\t=%d: '%s'\n",
+	                        "\t\tlanguage\t= %d: '%s'\n",
 	                        int (ad. language),
 	                        getLanguage (ad. language));
 	               fprintf (infoStrm,
-	                        "\t\tprogramType\t=%d: '%s'\n",
+	                        "\t\tprogramType\t= %d: '%s'\n",
 	                        int (ad. programType),
 	                        getProgramType (gotInterTabId,
 	                                        interTabId,
@@ -923,40 +921,40 @@ static	int count	= 10;
 	                            (serviceIdentifier >> (5 * 4)) & 0xF;
 	                  fprintf (infoStrm, "\tpacket:\n");
 	                  fprintf (infoStrm,
-	                              "\t\tsubchId\t=%d\n",
+	                              "\t\tsubchId\t\t= %d\n",
 	                                      int (pd. subchId));
 	                  fprintf (infoStrm,
-	                              "\t\tstartAddr\t=%d\n",
+	                              "\t\tstartAddr\t= %d\n",
 	                                      int (pd. startAddr));
 	                  fprintf (infoStrm,
-	                              "\t\tshortForm\t=%s\n",
+	                              "\t\tshortForm\t= %s\n",
 	                                      pd. shortForm ? "true":"false");
 	                  fprintf (infoStrm,
-	                              "\t\tprotLevel\t=%d: '%s'\n",
+	                              "\t\tprotLevel\t= %d: '%s'\n",
 	                                      int (pd. protLevel),
 	                                      getProtectionLevel (pd. shortForm,
 	                                                          pd. protLevel));
 	                  fprintf (infoStrm,
-	                              "\t\tcodeRate\t=%d: '%s'\n",
+	                              "\t\tcodeRate\t= %d: '%s'\n",
 	                                      int (pd. protLevel),
 	                                      getCodeRate (pd. shortForm,
 	                                                   pd. protLevel));
 	                  fprintf (infoStrm,
-	                              "\t\tDSCTy\t=%d: '%s'\n",
+	                              "\t\tDSCTy\t\t= %d: '%s'\n",
 	                                     int (pd. DSCTy),
 	                                     getDSCTy (pd. DSCTy));
 	                  fprintf (infoStrm,
-	                              "\t\tlength\t\t=%d\n", int (pd. length));
+	                              "\t\tlength\t\t= %d\n", int (pd. length));
 	                  fprintf (infoStrm,
-	                              "\t\tbitRate\t=%d\n", int (pd. bitRate));
+	                              "\t\tbitRate\t\t= %d\n", int (pd. bitRate));
 	                  fprintf (infoStrm,
-	                              "\t\tFEC_scheme\t=%d: '%s'\n",
+	                              "\t\tFEC_scheme\t= %d: '%s'\n",
 	                                   int (pd. FEC_scheme),
 	                                   getFECscheme (pd. FEC_scheme));
 	                  fprintf (infoStrm,
-	                              "\t\tDGflag\t=%d\n", int (pd. DGflag));
+	                              "\t\tDGflag\t= %d\n", int (pd. DGflag));
 	                  fprintf (infoStrm,
-	                              "\t\tpacketAddress\t=%d\n",
+	                              "\t\tpacketAddress\t= %d\n",
 	                                      int (pd. packetAddress));
 	                  if (gotECC)
 	                     fprintf (infoStrm,
@@ -965,7 +963,7 @@ static	int count	= 10;
 	                                       int (countryId),
 	                                       getCountry (eccCode, countryId));
 	                  fprintf (infoStrm,
-	                           "\t\tappType\t=%d: '%s'\n",
+	                           "\t\tappType\t\t= %d: '%s'\n",
 	                                int (pd. appType),
 	                                getUserApplicationType (pd. appType));
 	                  fprintf (infoStrm,
@@ -981,6 +979,7 @@ static	int count	= 10;
 	   printCollectedCallbackStat("D: quit without loading");
 	}
 
+	dabStop	(theRadio);
 	theDevice	-> stopReader ();
 	dabExit (theRadio);
 	delete theDevice;

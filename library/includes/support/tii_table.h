@@ -1,6 +1,5 @@
 #
 /*
- *
  *    Copyright (C) 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
@@ -30,7 +29,7 @@ public:
 	int16_t	TD;		// time delay in usec, (Hayati Ayguen)
 	float	latitudeOffset;
 	float	longitudeOffset;
-	tii_element (int16_t subId,
+	tii_element (int16_t subId, int16_t TD,
 	             float latitudeOffset, float longitudeOffset);
 	~tii_element (void) {}
 };

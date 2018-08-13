@@ -24,9 +24,10 @@
 #include	"tii_table.h"
 
 
-	tii_element::tii_element (int16_t subId,
+	tii_element::tii_element (int16_t subId, int16_t TD,
 	                     float latitudeOffset, float longitudeOffset) {
 	this	-> subId	= subId;
+	this	-> TD		= TD;
 	this	-> latitudeOffset = latitudeOffset;
 	this	-> longitudeOffset = longitudeOffset;
 }

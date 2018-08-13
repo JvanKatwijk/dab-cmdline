@@ -899,10 +899,12 @@ int	i;
 	noSubfields = getBits_3 (d, used * 8 + 13);
 	for (i = 0; i < noSubfields; i ++) {
 	   int16_t subId = getBits_5 (d, used * 8 + 16 + i * 48);
+	   int16_t TD    = getBits   (d, used * 8 + 16 + i * 48 +  5, 11);
 	   int16_t latOff = getBits  (d, used * 8 + 16 + i * 48 + 16, 16);
 	   int16_t lonOff = getBits  (d, used * 8 + 16 + i * 48 + 32, 16);
-	   tii_element s (subId, latOff * 90 / (16 * 32768.0),
-	                         lonOff * 180 / (16 * 32768.0));
+	   tii_element s (subId, TD,
+	                        latOff * 90 / (16 * 32768.0),
+	                        lonOff * 180 / (16 * 32768.0));
 	   coordinates. add_element (&s);
 	}
 	   
