@@ -75,6 +75,7 @@
 	this	-> T_s			= params. get_T_s ();
 	this	-> T_u			= params. get_T_u ();
 	this	-> T_F			= params. get_T_F ();
+	this	-> T_g			= params. get_T_g();
 	this	-> nrBlocks		= params. get_L ();
 	this	-> carriers		= params. get_carriers ();
 	this	-> carrierDiff		= params. get_carrierDiff ();
