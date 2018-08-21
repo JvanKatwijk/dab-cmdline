@@ -4,19 +4,19 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the Qt-DAB
- *    Qt-DAB is free software; you can redistribute it and/or modify
+ *    This file is part of the dab library
+ *    dab library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    Qt-DAB is distributed in the hope that it will be useful,
+ *    dab library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with Qt-DAB; if not, write to the Free Software
+ *    along with dab library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *	MOT handling is a crime, here we have a single class responsible
@@ -85,10 +85,6 @@ int32_t pointer = 7;
                  pointer += length;
            }
 	}
-
-//	no segments as yet
-	for (int i = 0; i < 128; i ++)
-	   marked [i] = false;
 }
 
 	motObject::~motObject	(void) {
@@ -109,17 +105,22 @@ void	motObject::addBodySegment (uint8_t	*bodySegment,
 	                           bool		lastFlag) {
 int32_t i;
 
-        if (marked [segmentNumber])   // we already have the segment
+	if ((segmentNumber < 0) || (segmentNumber >= 8192))
+	   return;
+
+        if (motMap. find (segmentNumber) != motMap. end ())
            return;
+
 
 //      Note that the last segment may have a different size
         if (!lastFlag && (this -> segmentSize == -1))
            this -> segmentSize = segmentSize;
-//
-        segments [segmentNumber]. resize (segmentSize);
-        for (i = 0; i < segmentSize; i ++)
-           segments [segmentNumber][i] = bodySegment [i];
-        marked [segmentNumber] = true;
+
+	std::vector<uint8_t> segment;
+	segment. resize (segmentSize);
+	for (i = 0; i < segmentSize; i ++)
+	   segment [i] = bodySegment [i];
+        motMap. insert (std::make_pair (segmentNumber, segment));
 //
         if (lastFlag)
            numofSegments = segmentNumber + 1;
@@ -127,15 +128,15 @@ int32_t i;
 	if (numofSegments == -1)
 	   return;
 //
-//	once we know how many segments there are/should be,
-//	we check for completeness
-	for (i = 0; i < numofSegments; i ++) 
-           if (!(marked [i])) {
-	      return;
-	   }
+//      once we know how many segments there are/should be,
+//      we check for completeness
+        for (i = 0; i < numofSegments; i ++) {
+           if (motMap. find (i) == motMap. end ())
+              return;
+        }
 
-//	The motObject is (seems to be) complete
-	handleComplete ();
+//      The motObject is (seems to be) complete
+        handleComplete ();
 }
 
 
@@ -143,10 +144,10 @@ void	motObject::handleComplete (void) {
 int	i;
 std::vector<uint8_t> result;
 
-	for (i = 0; i < numofSegments; i ++)
+        for (const auto &it : motMap)
 	   result. insert (result. end (),
-	                   (segments [i]). begin (),
-	                   (segments [i]). end ());
+	                   (it. second). begin (),
+	                   (it. second). end ());
 
 	if (contentType == 7) {		// epg data
 	   return;

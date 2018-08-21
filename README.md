@@ -42,36 +42,59 @@ The full API description is given in the file dab-api.h
 Initialization of the library is by a call to "dabInit". The call returns
 a pointer (type void *) to structures internal to the library.
 
-"dabInit" gets pointers to callback functions as parameter.
+	"dabInit" gets pointers to callback functions as parameter and returns
+	a "Handle", to be used in the other functions
 
 
-At the end a call to "dabExit" has to be made, to clean up all resource
-use of the library.
+	"dabExit" cleans up all resource use of the library.
 
-Start of the processing done is by "dabStartProcessing", the function returns
-immediately but will have created a few threads running in the background.
+	"dabReset" cleans up resource use and restarts the library
+
+	"dabStartProcessing" returns immediately after being called
+	 but will have created a few threads running in the background.
 
 As soon as an ensemble is recognized, a callback function will be
 called. On recognition of the services within the ensemble also
 leads to calling a callback function, with the service name as parameter.
 
-Selecting a(n audio) service is in two steps. 
-The data, describing the audioservice can be obtained using a call to
-"dataforAudioService".
+	"is_audioService" can be used to enquire whether or not a service
+	with a given name is a recognized audio service,
 
-The function fills a structure, indicating whether or not theservice is a
-valid audio service and containing the data decribing the audostream
-in the DAB data stream.
+	"is_dataService" can be used to enquire whether or not a service
+	with a given name is a recognized data service,
 
-Passing the function to "set-audioChannel" will create a new handler
-for the selected service.
+	"dataforAudioService" is the function with which the (relevant) data,
+	describing an audio service with a given name is fetched.
+	The function fills a structure of type "audiodata", 
+	it contains a field "defined" telling whether or not the
+	data is the structure is valid or not.
+	Note that if the last parameter is a 0-value, the main service
+	is looked for, otherwise, the i-th subservice.
 
-The function "dataforAudioservice" has a parameter that - when > 0 -
-tells the system to look for the subservice with that number.
+	"dataforDataService" is the function with which the (relevant) data,
+	describing a data service with a given name is fetched.
+	The function fills a structure of type "packetdata", 
+	it contains a field "defined" telling whether or not the
+	data is the structure is valid or not.
+	Note that if the last parameter is a 0-value, the main service
+        is looked for, otherwise, the i-th subservice.
 
-Note that since more thaan one (sub)service may be active, each with its own
-handler, it is wise to call "dabReset_msc" prior to selecting a service,
-this function stops all running service handlers.
+	"set-audioChannel", when provided with a structure of type "audiodata",
+	with valid data, will open and add an audio stream.
+
+	"set-dataChannel", when provided with a structure of type "packetdata",
+	with valid data, will open and add a data stream.
+
+	Note that there is no built-in limit on the amount of open streams,
+	although from a practical point of view there may be limitations,
+	i.e two audiostreams may compete for a single library.
+
+	What might be useful is to enquire for subservices such as MOT
+	when opening an audio stream.
+
+	"dabReset_msc", when called, will stop all open handlers for services
+	and subservices.
+
 
 =======================================================================
 

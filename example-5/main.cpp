@@ -109,7 +109,6 @@ void	ensemblenameHandler (std::string name, int Id, void *userData) {
 	ensembleRecognized. store (true);
 }
 
-
 std::vector<std::string> programNames;
 std::vector<int> programSIds;
 

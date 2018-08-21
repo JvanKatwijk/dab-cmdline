@@ -22,7 +22,7 @@
  *
  *	E X A M P L E  P R O G R A M
  *	This program might (or might not) be used to mould the interface to
- *	your wishes. Do not take it as a definitive and "ready: program
+ *	your wishes. Do not take it as a definitive and "ready" program
  *	for the DAB-library
  */
 #include	<unistd.h>
@@ -443,7 +443,7 @@ bool	err;
 	                           NULL,		// no spectrum shown
 	                           NULL,		// no constellations
 	                           NULL		// Ctx
-	                               );
+	                          );
 	if (theRadio == NULL) {
 	   std::cerr << "sorry, no radio available, fatal\n";
 	   exit (4);
