@@ -203,7 +203,7 @@ deviceHandler	*theDevice;
 bool	err;
 
 	fprintf (stderr, "dab_scanner V 1.0alfa,\n\
-	                  Copyright 2018 J van Katwijk, Lazy Chair Computing\n\	                            2018 Hayati Ayguen");
+	                  Copyright 2018 J van Katwijk, Lazy Chair Computing\n\	                            2018 Hayati Ayguen\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
