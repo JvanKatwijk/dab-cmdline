@@ -59,6 +59,7 @@ public:
 		get_coordinates		(int16_t, int16_t, bool *,
                                          int16_t *pMainId, int16_t *,
 	                                 int16_t *pTD);
+	void	reset			(void);
 	uint8_t getECC			(bool *);
 	uint8_t getInterTabId		(bool *);
 private:

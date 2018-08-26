@@ -108,7 +108,8 @@ public:
 	void	dataforDataService	(std::string &, packetdata *, int16_t);
 	std::complex<float>
 		get_coordinates	(int16_t, int16_t, bool *);
-//
+
+	void	reset			(void);
 //	Extended functions, contributed by Hayati Ayguen
 	std::complex<float>
 		get_coordinates     (int16_t, int16_t, bool *,

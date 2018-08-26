@@ -304,3 +304,7 @@ void	ficHandler::show_ficCRC (bool b) {
 	}
 }
 
+void	ficHandler::reset	(void) {
+	fibProcessor. reset ();
+}
+

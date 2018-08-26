@@ -104,11 +104,8 @@
 	this	-> programnameHandler	= programnameHandler;
 	this	-> userData		= userData;
 	memset (dateTime, 0, 8 * sizeof (uint8_t));
-	dateFlag		= false;
-	ecc_Present             = false;
-        interTab_Present        = false;
-	clearEnsemble	();
-	coordinates. cleanUp ();
+
+	reset	();
 }
 	
 	fib_processor::~fib_processor (void) {
@@ -139,7 +136,7 @@ uint8_t	*d		= p;
 	         break;
 
 	      default:
-//	         fprintf (stderr, "FIG%d aanwezig\n", FIGtype);
+	         fprintf (stderr, "FIG%d aanwezig\n", FIGtype);
 	         break;
 	   }
 //
@@ -1272,7 +1269,6 @@ int16_t	i;
 	isSynced	= false;
 	for (i = 0; i < 64; i ++)
 	   ServiceComps [i]. inUse = false;
-	
 }
 
 void	fib_processor::clearEnsemble (void) {
@@ -1290,6 +1286,7 @@ int16_t i;
 	   subChannels [i]. inUse	= false;
 	}
 	firstTime	= true;
+	fprintf (stderr, "clearEnsemble done\n");
 }
 
 std::string fib_processor::nameFor (int32_t serviceId) {
@@ -1539,5 +1536,12 @@ uint8_t	fib_processor::getECC	(bool *success) {
 uint8_t	fib_processor::getInterTabId	(bool *success) {
 	*success = interTab_Present;
 	return interTabId;
+}
+
+void	fib_processor::reset	(void) {
+	dateFlag		= false;
+	ecc_Present             = false;
+        interTab_Present        = false;
+	clearEnsemble	();
 }
 

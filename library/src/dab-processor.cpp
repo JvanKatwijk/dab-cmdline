@@ -114,7 +114,7 @@ int		index_attempts		= 0;
 
 	isSynced	= false;
 	running. store (true);
-	my_ficHandler. clearEnsemble ();
+	my_ficHandler. reset ();
 	myReader. setRunning (true);
 	my_mscHandler. start ();
 	try {
@@ -340,7 +340,7 @@ void    dabProcessor::set_dataChannel (packetdata *d) {
 }
 
 void    dabProcessor::clearEnsemble     (void) {
-        my_ficHandler. clearEnsemble ();
+        my_ficHandler. reset ();
 }
 
 

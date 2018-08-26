@@ -102,8 +102,8 @@ void	mscHandler::start	(void) {
 	   fprintf (stderr, "cannot restart mscHandler, still active\n");
 	   return;
 	}
-	else
-	   fprintf (stderr, "starting mscHandler\n");
+//	else
+//	   fprintf (stderr, "starting mscHandler\n");
 	threadHandle = std::thread (&mscHandler::run, this);
 }
 

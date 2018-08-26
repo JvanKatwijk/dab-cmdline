@@ -221,7 +221,6 @@ int	localGRed	= 102 - theGain;
 	if (running. load ())
 	   return true;
 
-	fprintf (stderr, "frequency = %d localGred = %d\n", frequency, localGRed);
 	err	= mir_sdr_StreamInit (&localGRed,
 	                              double (inputRate) / 1000000.0,
 	                              double (frequency) / 1000000.0,
