@@ -6,7 +6,7 @@ dab-scanner-xxx
 
 --------------------------------------------------------------------------
 
-![dab scanner with sdrplay input](/dab-scanner.png?raw=true)
+![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 
 dab-scanner-xxx is a simple command line program, based on the DAB library.
 It will perform a scan over all channels in the selected band and
