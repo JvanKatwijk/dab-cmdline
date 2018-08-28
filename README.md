@@ -171,11 +171,8 @@ leads to calling a callback function, with the service name as parameter.
 	and subservices.
 
 
-=======================================================================
-=======================================================================
-
+-----------------------------------------------------------------------
 A note on the callback functions
-
 -----------------------------------------------------------------------
 
 The library (whether separate or compiled in) sends its data to the
@@ -283,38 +280,10 @@ of a hostname. Default is "127.0.0.1".
 If rtl_tcp is selected as input device, the -I option allows selection
 of a port. Default is 1234.
 
-For each of the parameters there is a default, i.e., if the command
 
-	dab-cmdline-x
-	
-is given, the assumptions are 
-
-1. the Mode is "1",
-2. the band is "BAND III", that the channel selected is "11C",
-3. the program we are looking for is "Classic FM", and 
-4. the device to send the output to is "default". 
- 
-Note again, that the choice for the input device was fixed when creating the dab-library.
-
-An example of a full specification of the command line is
-
-	dab-cmdline -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
-
-The program - when started - will try to identify a DAB datastream in the selected channel (here channel 12C). If a valid DAB datastream is found, the names of the programs in the ensemble will be printed. If - after a given amount of time - no ensemble could be found, execution will halt, if the ensemble was identified, the data for the selected program (here Radio 4) will be decoded.
-
-
-========================================================================
-
-The API
--------------------------------------------------------------------------
-
-The API specification, in dab-api.h, contains a specification of the
-types for the callback functions and a specification for the real API functions.
-
-===============================================================================
-
+----------------------------------------------------------------------------
 E X P E R I M E N T A L
---------------------------------------------------------------------------------
+----------------------------------------------------------------------------
 
 One of the issues still to be resolved is the handling of data. As an
 experiment a callback function was added that is called from within the
@@ -327,11 +296,9 @@ Install the server by adding "-DSERVER" to the cmake command line.
 
 A simple "reader" (client), using qt is included in the sources.
 
-===============================================================================
-
+-------------------------------------------------------------------------
 Copyrights
-
------------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 	
 	Copyright (C)  2016, 2017
 	Jan van Katwijk (J.vanKatwijk@gmail.com)
