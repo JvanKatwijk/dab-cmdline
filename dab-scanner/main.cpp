@@ -38,6 +38,8 @@
 #include	"airspy-handler.h"
 #elif	HAVE_RTLSDR
 #include	"rtlsdr-handler.h"
+#elif	HAVE_HACKRF
+#include	"hackrf-handler.h"
 #endif
 
 #include	<atomic>
@@ -79,11 +81,6 @@ void	syncsignalHandler (bool b, void *userData) {
 	(void)userData;
 }
 //
-//	This function is called whenever the dab engine has taken
-//	some time to gather information from the FIC bloks
-//	the Boolean b tells whether or not an ensemble has been
-//	recognized, the names of the programs are in the 
-//	ensemble
 std::string	ensembleName;
 uint32_t	ensembleId;
 static
@@ -138,24 +135,8 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 static
 void	bytesOut_Handler (uint8_t *data, int16_t amount,
 	                  uint8_t type, void *ctx) {
-#ifdef DATA_STREAMER
-uint8_t localBuf [amount + 8];
-int16_t i;
-	localBuf [0] = 0xFF;
-	localBuf [1] = 0x00;
-	localBuf [2] = 0xFF;
-	localBuf [3] = 0x00;
-	localBuf [4] = (amount >> 8) & 0xFF;
-	localBuf [5] = amount & 0xFF;
-	localBuf [6] = 0x00;
-	localBuf [7] = type == 0 ? 0 : 0xFF;
-	for (i = 0; i < amount; i ++)
-	   localBuf [8 + i] = data;
-	tdcServer. sendData (localBuf, amount + 8);
-#else
 	(void)data;
 	(void)amount;
-#endif
 	(void)ctx;
 }
 //
@@ -192,6 +173,10 @@ std::string	startChannel	= "5A";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
 int		theGain		= 35;	// scale = 0 .. 100
+#ifdef	HAVE_HACKRF
+int		lnaGain		= 40;
+int		vgaGain		= 40;
+#endif
 int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 10;
@@ -213,7 +198,7 @@ bool	err;
 	   exit (1);
 	}
 
-	while ((opt = getopt (argc, argv, "F:D:d:M:B:p:G:QC:")) != -1) {
+	while ((opt = getopt (argc, argv, "F:D:d:M:B:p:G:g:QC:")) != -1) {
 	   switch (opt) {
 	      case 'F':
 	         outFile	= fopen (optarg, "w");
@@ -244,6 +229,7 @@ bool	err;
 	         ppmCorrection	= atoi (optarg);
 	         break;
 
+#ifndef	HAVE_HACKRF
 	      case 'G':
 	         theGain	= atoi (optarg);
 	         break;
@@ -251,7 +237,16 @@ bool	err;
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#else
+	      case 'G':
+	         lnaGain	= atoi (optarg);
+	         break;
 
+	      case 'g':
+	         vgaGain	= atoi (optarg);
+	         break;
+
+#endif
 	      case 'C':
 	         theChannel	= std::string (optarg);
 	         startChannel	= theChannel;
@@ -285,8 +280,12 @@ bool	err;
 	                                     ppmCorrection,
 	                                     theGain,
 	                                     autogain);
+#elif	HAVE_HACKRF
+	   theDevice	= new hackrfHandler (frequency,
+	                                     ppmCorrection,
+	                                     lnaGain,
+	                                     vgaGain);
 #endif
-
 	}
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
