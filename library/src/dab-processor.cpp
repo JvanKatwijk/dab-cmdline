@@ -227,6 +227,17 @@ SyncOnPhase:
 //	at the end of the frame, just skip Tnull samples
 	   myReader. getSamples (ofdmBuffer. data (),
 	                         T_null, coarseOffset + fineOffset);
+	   float sum	= 0;
+	   for (i = 0; i < T_null; i ++)
+	      sum += abs (ofdmBuffer [i]);
+	   sum /= T_null;
+
+	   float sum2 = myReader. get_sLevel ();
+	static int ccc	= 0;
+	if (++ccc > 10) {
+	   ccc = 0;
+//	   fprintf (stderr, "%f\n", 20 * log10 ((sum2 + 0.005) / sum));
+	}
 	   if (fineOffset > carrierDiff / 2) {
 	      coarseOffset += carrierDiff;
 	      fineOffset -= carrierDiff;

@@ -2,39 +2,114 @@
 DAB COMMAND LINE and DAB LIBRARY
 
 ======================================================================
-
-
+Introduction
 ======================================================================
 
-There is an obvious need - at least felt by me - to experiment with other (forms of) GUI(s) for a DAB handling program, using the same mechanism - preferably the same code - to handle the DAB data stream. That is why a choice was made to pack the full DAB handling as a library. 
-
-The library provides entries for the functionality through some simple calls, while a few callback functions provide the communication back from the library to the gui.
+The DAB library provides entries for the functionality
+to handle DAB/DAB+ through some simple calls.
+A few callback functions provide the communication back from the
+library to the caller.
 The library interface is given in dab-api.h
 
-To show the use of the library, several example programs are included:
+----------------------------------------------------------------------
+The C (C++) example programs
+------------------------------------------------------------------------
 
-	- The example programs example-1, example-2, example-2a,
-	   example-3, example-4,
-	  example-5 and example-6 are regular C (C++) programs. 
-	  
-	- python-example contains an example program in python to use (an
-	  extended form of) the library.
-	  An additional file, dab-python.cpp, contains
-	  the sources for binding C and Python for this linbrary.
+A number of example programs is included in the source tree, they are meant to
+give an idea on how to use the library code, either as library or
+as "built-in" sources.
 
-Note that the basic idea of providing these example is to provide
-examples of how to use the library and/or the sources of the library. 
+Note that the library depends on a device, but does not include that device.
+The main program is responsible for ensuring that something is available
+to deliver input samples and something is available for handling the output.
 
 THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
 IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
 
-It is most likely necessary that you adapt a program to your
-own needs or you might have to rewrite it completely, feel free to do so.
 
-----------------------------------------------------------------------
+Invocation of the example programs, with some parameters specified, is
+somthing like
+     
+	dab-sdrplay-x -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
 
+In this case, the example program was built with the SDRplay as device (other
+possibilities are DABsticks, AIRspy devices and HACKRF devices (and some
+of the example programs can be configured to take file input).
+Furthermore, the example program will set the tuner to Band III, channel 12C,
+will select the service "Radio 4". The Gain of the tuner is set to 80 (on 
+a scale from 1 .. 100), the main program will select "default" as
+audio output device.
+The Library code will be set to interpret the input as being of Mode 1.
+
+The examples 1 to 6 are basically simple variations on a single theme:
+
+	- example 1 is the example where the main program is linked to
+	  a precompiled shared library, 
+	  i.e. the DAB library should be pre-installed
+
+	- example 2 has the same functionality as example 1, the sources
+          of the library are "compiled-in", however.
+
+	- example 3 has the same functionality as example 2, and here
+	  the library sources are "compiled in" as well. However, the
+	  PCM samples are being sent out to stdout.
+	  One might use one of the available programs to make the sound
+	  audible
+	  dab-example-3 .... | aplay -r 48000 -f S16_LE -t raw -c 2
+
+	- example 4 has the sample functionality as examples 2 and 3, and
+	  here the library sources are "compiled in" as well. However,
+	  no sound decoding takes place. The MP2 frames (in case of DAB)
+	  or the AAC frames (in case of DAB+) are just emitted through stdout.
+	  (Note that the AAC frames have 960 rather than 1024 samples)
+
+	- example 5 is a small experimental extension to example 2,
+	  It contains a simple "keyboard listener", that will react
+	  on entering a stroke on the return key. It will cause the
+	  "next" (audio) service to be selected.
+
+	- example 6 is an experimental version where control is
+	  through an IP port. 
+
+dab-scanner is a simple program that just scans all channels of the given
+band (BAND III by default) and collects and emits data about the ensembles
+and services encountered. Output can be sent to a file - ASCII - that
+can be interpreted by Libre Office Calc or similar programs.
+
+---------------------------------------------------------------------------
+
+![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
+
+----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+Building an executable
+----------------------------------------------------------------------------
+
+For each of the programs, a CMakeLists.txt file exists with which a
+Makefile can be generated using Cmake.
+
+The standard way to create an executable is
+
+	cd X   (replace X by the appropriate name of the example)
+	mkdir build
+        cd build
+        cmake .. -DXXX=ON
+        make
+        sudo make install
+
+where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY,
+RTLSDR, WAVFILES (".sdr"), or RTL_TCP. The name of the generated executable
+is dab-xxx-y for the examples 1 - 6, and dab-scanner-xxx for the dab-scanner
+program, where xxx is the device name, and y the number
+of the example to which the executable belongs.
+
+The executable will  be installed (make install) in /usr/local/bin, so yo need to have
+permissions (you can obviously also just run the generated program
+from the build directory).
+
+------------------------------------------------------------------------
 The API
-
 -----------------------------------------------------------------------
 
 The full API description is given in the file dab-api.h
@@ -97,82 +172,6 @@ leads to calling a callback function, with the service name as parameter.
 
 
 =======================================================================
-
-The C (C++) example programs
-------------------------------------------------------------------------
-
-As said, there are 6 versions of an example dab command line program,
-they are written in C, communicate with the library functions through callbacks.
-The programs are all more or less the same, with some differences in
-the functionality provided.
-
-For each of the programs, a CMakeLists.txt file exists with which a
-Makefile can be generated using Cmake.
-
-The standard way to create an executable is
-
-	cd example-X   (replace X by the appropriate digit)
-	mkdir build
-        cd build
-        cmake .. -DXXX=ON
-        make
-        sudo make install
-
-where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY,
-RTLSDR, WAVFILES (".sdr"), or RTL_TCP. The name of the generated executable
-is dab-xxx-y, where xxx is the device name, and y the number
-of the example to which the executable belongs.
-
-(An ".sdr" file is a regular ".wav" file, however, 
-generated by the qt-dab program).
-
-The executable will be installed in /usr/local/bin, so yo need to have
-permissions (you can obviously also just run the generated program
-from the build directory).
-
-Invocation of the program, with some parameters specified, then is
-     
-	dab-sdrplay-x -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
-
-The example programs are different though:
-
-	- example 1 is the example that dynamically links to the DAB library,
-	  i.e. the DAB library should be pre-installed
-	  example 1 does provide support for neither WAVFILES nor RTL_TCP.
-	  Note that compiling the main program requires the availability
-	  of both the portaudio library (version 19 rather than 18)
-	  and libsamplerate. It goes without saying that the library
-	  for supporting the selected device also should be available.
-
-	- example 2 has the same functionality as example 1, the sources
-          of the library are "compiled-in", however. Additionally it provides
-	  support for sending the Tpeg data to a server (if so configured).
-	  Note that compiling the main program requires the availability
-	  of both the portaudio library (version 19 rather than 18)
-	  and libsamplerate. It goes without saying that the library
-	  for supporting the selected device also should be available.
-
-	- example 3 has the same functionality as example 2, and here
-	  the library sources are "compiled in" as well. However, the
-	  PCM samples are being sent out to stdout.
-	  One might use one of the available programs to make the sound
-	  audible
-	  dab-example-3 .... | aplay -r 48000 -f S16_LE -t raw -c 2
-
-	- example 4 has the sample functionality as examples 2 and 3, and
-	  here the library sources are "compiled in" as well. However,
-	  no sound decoding takes place. The MP2 frames (in case of DAB)
-	  or the AAC frames (in case of DAB+) are just emitted through stdout.
-	  (Note that the AAC frames have 960 rather than 1024 samples)
-
-	- example 5 is a small experimental extension to example 2,
-	  It contains a simple "keyboard listener", that will react
-	  on entering a stroke on the return key. It will cause the
-	  "next" (audio) service to be selected.
-
-	- example 6 is an experimental version where control is
-	  through an IP port. 
-
 =======================================================================
 
 A note on the callback functions

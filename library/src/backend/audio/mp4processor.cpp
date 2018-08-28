@@ -59,8 +59,8 @@
 	this	-> ctx		= ctx;
 	superFramesize		= 110 * (bitRate / 8);
 	RSDims			= bitRate / 8;
-	frameBytes		= new uint8_t [RSDims * 120];	// input
-	outVector		= new uint8_t [RSDims * 110];
+	frameBytes. resize (RSDims * 120);	// input
+	outVector.  resize (RSDims * 110);
 	blockFillIndex	= 0;
 	blocksInBuffer	= 0;
 
@@ -79,8 +79,6 @@
 }
 
 	mp4Processor::~mp4Processor (void) {
-	delete[]	frameBytes;
-	delete[]	outVector;
 }
 //
 //	we add vector for vector to the superframe. Once we have
@@ -114,7 +112,7 @@ int16_t	nbits	= 24 * bitRate;
 
 //	OK, we give it a try, check the fire code
 	   if (fc. check (&frameBytes [blockFillIndex * nbits / 8]) &&
-	       (processSuperframe (frameBytes,
+	       (processSuperframe (frameBytes. data (),
 	                           blockFillIndex * nbits / 8))) {
 //	since we processed a full cycle of 5 blocks, we just start a
 //	new sequence, beginning with block blockFillIndex
@@ -224,7 +222,7 @@ stream_parms	streamParameters;
 	   }
 
 //	but first the crc check
-	   if (check_crc_bytes (&outVector [au_start [i]],
+	   if (check_crc_bytes (&(outVector. data ()) [au_start [i]],
 	                        aac_frame_length)) {
 	      bool err;
 //

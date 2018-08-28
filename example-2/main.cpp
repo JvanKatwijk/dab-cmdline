@@ -48,6 +48,8 @@
 #include	"rawfiles.h"
 #elif	HAVE_RTL_TCP
 #include	"rtl_tcp-client.h"
+#elif	HAVE_HACKRF
+#include	"hackrf-handler.h"
 #endif
 #include	<locale>
 #include	<codecvt>
@@ -238,6 +240,10 @@ std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
 int		theGain		= 45;	// scale = 0 .. 100
+#ifdef	HAVE_HACKRF
+int		lnaGain		= 40;
+int		vgaGain		= 40;
+#endif
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
@@ -275,7 +281,7 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:g:A:L:S:QO:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #else
@@ -329,6 +335,7 @@ bool	err;
 	         theChannel	= std::string (optarg);
 	         break;
 
+#ifndef	HAVE_HACKRF
 	      case 'G':
 	         theGain	= atoi (optarg);
 	         break;
@@ -336,7 +343,15 @@ bool	err;
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#else
+	      case 'G':
+	         lnaGain	= atoi (optarg);
+	         break;
 
+	      case 'g':
+	         vgaGain	= atoi (optarg);
+	         break;
+#endif
 #ifdef	HAVE_RTL_TCP
 	      case 'H':
 	         hostname	= std::string (optarg);
@@ -399,6 +414,11 @@ bool	err;
 	                                     ppmCorrection,
 	                                     theGain,
 	                                     autogain);
+#elif	HAVE_HACKRF
+	   theDevice	= new hackrfHandler	(frequency,
+	                                         ppmCorrection,
+	                                         lnaGain,
+	                                         vgaGain);
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName, repeater);
 #elif	defined (HAVE_RAWFILES)

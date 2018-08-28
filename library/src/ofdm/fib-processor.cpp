@@ -136,7 +136,7 @@ uint8_t	*d		= p;
 	         break;
 
 	      default:
-	         fprintf (stderr, "FIG%d aanwezig\n", FIGtype);
+//	         fprintf (stderr, "FIG%d aanwezig\n", FIGtype);
 	         break;
 	   }
 //
@@ -1286,7 +1286,6 @@ int16_t i;
 	   subChannels [i]. inUse	= false;
 	}
 	firstTime	= true;
-	fprintf (stderr, "clearEnsemble done\n");
 }
 
 std::string fib_processor::nameFor (int32_t serviceId) {

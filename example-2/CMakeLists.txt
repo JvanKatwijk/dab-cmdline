@@ -44,6 +44,11 @@ if(DEFINED RTLSDR)
    set(objectName dab-rtlsdr-2)
 endif ()
 
+if(DEFINED HACKRF)
+   set(HACKRF true)
+   set(objectName dab-hackrf-2)
+endif ()
+
 if(DEFINED WAVFILES)
    set(WAVFILES true)
    set(objectName dab-files-2)
@@ -188,6 +193,39 @@ endif ()
 
 	   add_definitions (-DHAVE_RTLSDR)
 	endif()
+
+	if (HACKRF)
+	   find_path (HACKLIB_INCLUDE_DIR
+                      NAMES mirsdrapi-rsp.h
+                      PATHS
+	              ../devices/hackrf-handler/libhackrf/
+                       /usr/local/include/
+	   )
+           include_directories (${HACKLIB_INCLUDE_DIR})
+
+           find_library (HACKLIB hackrf)
+           if(NOT(HACKLIB))
+              message(FATAL_ERROR "please install -lhackrf")
+           else(NOT(HACKLIB))
+              list (APPEND extraLibs ${HACKLIB})
+           endif(NOT(HACKLIB))
+
+	   include_directories (
+	     ../devices/hackrf-handler
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/hackrf-handler/hackrf-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/hackrf-handler/hackrf-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_HACKRF)
+	endif (HACKRF)
 
         find_package(Portaudio)
         if (NOT PORTAUDIO_FOUND)
