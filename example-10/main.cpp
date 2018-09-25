@@ -774,7 +774,7 @@ bool	err;
 	   exit (24);
 static	int count	= 10;
 	
-	while (!ensembleRecognized && (--count > 0))
+	while (!scanOnly && !ensembleRecognized. load () && (--count > 0))
 	  sleep (1);
 
 	if (!ensembleRecognized. load ()) {
