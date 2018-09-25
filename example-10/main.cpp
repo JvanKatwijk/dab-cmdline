@@ -102,6 +102,22 @@ MyGlobals globals;
 #define T_UNIT_MUL	1000
 #define T_GRANULARITY	10
 
+#define ENABLE_FAST_EXIT 1
+
+#if ENABLE_FAST_EXIT
+  #define FAST_EXIT( N )  exit( N )
+#else
+  #define FAST_EXIT( N )  do { } while (0)
+#endif
+
+#if PRINT_DURATION
+  #define FMT_DURATION  "%5ld: "
+  #define SINCE_START   , sinceStart()
+#else
+  #define FMT_DURATION  ""
+  #define SINCE_START   
+#endif
+
 
 inline void sleepMillis(unsigned ms) {
 	usleep (ms * 1000);
@@ -173,8 +189,8 @@ void	syncsignalHandler (bool b, void *userData) {
 static
 void	ensemblenameHandler (std::string name, int Id, void *userData) {
 	fprintf (stderr,
-	         "\nensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n",
-	         name. c_str (), (uint32_t)Id);
+	         "\n" FMT_DURATION "ensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n"
+	         SINCE_START , name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
@@ -387,7 +403,7 @@ void printCollectedCallbackStat (const char * txt,
 
 	if (timeOut >= nextOut) {	// force output with nextOut = timeOut
 	   nextOut = timeOut + 500;	// output every 500 ms
-	   fprintf (stderr, "\n%5ld: %s:\n", sinceStart(), txt);
+	   fprintf (stderr, "\n" FMT_DURATION "%s:\n" SINCE_START , txt);
 	   fprintf (infoStrm, "  systemData(): %s: everSynced %s, snr min/max: %d/%d. # %ld avg %ld\n"
 	                 , stat_gotSysData ? "yes" : "no"
 	                 , stat_everSynced ? "yes" : "no"
@@ -591,7 +607,7 @@ bool	err;
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
 #if PRINT_DURATION
-	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf(stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (32);
 	}
@@ -619,7 +635,7 @@ bool	err;
 	   nextOut = timeOut;
 	   printCollectedCallbackStat ("A: no radio");
 #if PRINT_DURATION
-	   fprintf (stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf (stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (4);
 	}
@@ -634,6 +650,7 @@ bool	err;
 
 	timesyncSet.		store (false);
 	ensembleRecognized.	store (false);
+	fprintf (stderr, "\n" FMT_DURATION "starting DAB processing ..\n" SINCE_START );
 	dabStartProcessing (theRadio);
 
 	bool abortForSnr = false;
@@ -641,7 +658,8 @@ bool	err;
 
 #if PRINT_LOOPS
 	fprintf (stderr,
-	         "\nbefore while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	         "\n" FMT_DURATION "before while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	         SINCE_START
 	         , continueForFullEnsemble ? "true":"false"
 	         , abortForSnr ? "true":"false"
 	         , int (timeOut), int (waitingTime) );
@@ -653,8 +671,8 @@ bool	err;
 	   printCollectedCallbackStat ("wait for timeSync ..");
 	   if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
 	      fprintf (stderr,
-	               "abort because minSNR %d is not met. # is %ld avg %ld\n",
-	                int (minSNRtoExit), numSnr, avgSnr );
+	               FMT_DURATION "abort because minSNR %d is not met. # is %ld avg %ld\n"
+	                SINCE_START , int (minSNRtoExit), numSnr, avgSnr );
 	      abortForSnr = true;
 	      break;
 	   }
@@ -667,21 +685,22 @@ bool	err;
 	         if (!prevContinueForFullEnsemble) {  // increase waitingTime only once
 	            fprintf (stderr, "t=%d: abort later because already got ensemble data.\n", timeOut);
 	            waitingTime = timeOut + waitAfterEnsemble;
-	            fprintf (stderr, "waitAfterEnsemble = %d > 0  ==> waitingTime = timeOut + waitAfterEnsemble = %d + %d = %d\n"
-	                           , waitAfterEnsemble
+	            fprintf (stderr, FMT_DURATION "waitAfterEnsemble = %d > 0  ==> waitingTime = timeOut + waitAfterEnsemble = %d + %d = %d\n"
+	                           SINCE_START , waitAfterEnsemble
 	                           , timeOut, waitAfterEnsemble, waitingTime);
 	         }
 	      }
 	      else
 	      if (waitAfterEnsemble == 0 ) {
 	         fprintf (stderr, "t=%d: abort directly because already got ensemble data.\n", timeOut);
-	         fprintf (stderr, "waitAfterEnsemble == 0  ==> break\n");
+	         fprintf (stderr, FMT_DURATION "waitAfterEnsemble == 0  ==> break\n" SINCE_START );
 	         break;
 	      }
 	   }
 
 #if PRINT_LOOPS
-	  fprintf (stderr, "in while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  fprintf (stderr, FMT_DURATION "in while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	                   SINCE_START
 	                   , continueForFullEnsemble ? "true":"false"
 	                   , abortForSnr ? "true":"false"
 	                   , int (timeOut), int (waitingTime) );
@@ -689,7 +708,8 @@ bool	err;
 	}
 
 #if PRINT_LOOPS
-	fprintf (stderr, "\nbefore while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	fprintf (stderr, "\n" FMT_DURATION "before while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	                 SINCE_START
 	                 , continueForFullEnsemble ? "true":"false"
 	                 , abortForSnr ? "true":"false"
 	                 , int (timeOut)
@@ -701,19 +721,21 @@ bool	err;
 	  sleepMillis (T_GRANULARITY);
 	  printCollectedCallbackStat ("wait for full ensemble info..");
 	  if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-	    fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	    fprintf(stderr, FMT_DURATION "abort because minSNR %d is not met. # is %ld avg %ld\n" SINCE_START , int(minSNRtoExit), numSnr, avgSnr );
 	    abortForSnr = true;
 	    break;
 	  }
 #if PRINT_LOOPS
-	  fprintf(stderr, "in while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  fprintf(stderr, FMT_DURATION "in while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	    SINCE_START
 	    , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
 	    , int(timeOut), int(waitingTime) );
 #endif
 	}
 
 	if (!timeSynced. load ()) {
-	   cerr << "There does not seem to be a DAB signal here" << endl;
+	   fprintf(stderr, FMT_DURATION "There does not seem to be a DAB signal here\n" SINCE_START );
+	   FAST_EXIT( 22 );
 	   theDevice -> stopReader ();
 	   dabStop (theRadio);
 	   nextOut = timeOut;
@@ -721,13 +743,14 @@ bool	err;
 	   dabExit (theRadio);
 	   delete theDevice;
 #if PRINT_DURATION
-	   fprintf (stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf (stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (22);
 	}
 
 #if PRINT_LOOPS
-	fprintf(stderr, "\nbefore while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	fprintf(stderr, "\n" FMT_DURATION "before while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  SINCE_START
 	  , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
 	  , int(timeOut), int(waitingTime) );
 #endif
@@ -736,13 +759,13 @@ bool	err;
 	  sleepMillis (T_GRANULARITY);
 	  printCollectedCallbackStat ("C: collecting ensembleData ..");
 	  if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-	    fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	    fprintf(stderr, FMT_DURATION "abort because minSNR %d is not met. # is %ld avg %ld\n" SINCE_START , int(minSNRtoExit), numSnr, avgSnr );
 	    abortForSnr = true;
 	    break;
 	  }
 #if PRINT_LOOPS
-	  fprintf(stderr, "in while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-	    , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
+	  fprintf(stderr, FMT_DURATION "in while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	    SINCE_START , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
 	    , int(timeOut), int(waitingTime) );
 #endif
 	}
@@ -753,8 +776,10 @@ static	int count	= 10;
 	
 	while (!ensembleRecognized && (--count > 0))
 	  sleep (1);
+
 	if (!ensembleRecognized. load ()) {
-	   fprintf (stderr, "no ensemble data found, fatal\n");
+	   fprintf (stderr, FMT_DURATION "no ensemble data found, fatal\n" SINCE_START );
+	   FAST_EXIT( 22 );
 	   theDevice -> stopReader ();
 	   dabStop (theRadio);
 	   nextOut = timeOut;
@@ -762,7 +787,7 @@ static	int count	= 10;
 	   dabExit (theRadio);
 	   delete theDevice;
 #if PRINT_DURATION
-	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf(stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (22);
 	}
@@ -857,7 +882,8 @@ static	int count	= 10;
 	          is_dataService (theRadio,
 	                               it. second -> programName. c_str ())) {
 	         fprintf (infoStrm,
-	                      "\nchecked program '%s' with SId %X\n",
+	                      "\n" FMT_DURATION "checked program '%s' with SId %X\n"
+		               SINCE_START ,
 		               it. second -> programName.c_str(),
 	                       serviceIdentifier);
 	         for (int i = 0; i < 5; i ++) {
@@ -979,13 +1005,18 @@ static	int count	= 10;
 	   printCollectedCallbackStat("D: quit without loading");
 	}
 
+#if PRINT_DURATION
+	fprintf(stderr, "\n" FMT_DURATION "at dabStop()\n" SINCE_START );
+#endif
+
+	FAST_EXIT( 123 );
 	dabStop	(theRadio);
 	theDevice	-> stopReader ();
 	dabExit (theRadio);
 	delete theDevice;
 
 #if PRINT_DURATION
-	fprintf(stderr, "\n%5ld: end of main()\n", sinceStart ());
+	fprintf(stderr, "\n" FMT_DURATION "end of main()\n" SINCE_START );
 #endif
 }
 
