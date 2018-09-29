@@ -62,6 +62,18 @@ using std::endl;
 #include <unistd.h>
 
 #include <unordered_map>
+#include <algorithm>
+
+
+std::string prepCsvStr( const std::string & s ) {
+	std::string r = "\"";
+	std::string c = s;
+	std::replace( c.begin(), c.end(), '"', '\'' );
+	std::replace( c.begin(), c.end(), ',', ';' );
+	r += c + "\"";
+	return r;
+}
+
 
 /* where to output program/scan infos, when using option '-E' */
 static FILE * infoStrm = stderr;
@@ -101,6 +113,22 @@ MyGlobals globals;
 #define T_UNITS		"ms"
 #define T_UNIT_MUL	1000
 #define T_GRANULARITY	10
+
+#define ENABLE_FAST_EXIT 1
+
+#if ENABLE_FAST_EXIT
+  #define FAST_EXIT( N )  exit( N )
+#else
+  #define FAST_EXIT( N )  do { } while (0)
+#endif
+
+#if PRINT_DURATION
+  #define FMT_DURATION  "%5ld: "
+  #define SINCE_START   , sinceStart()
+#else
+  #define FMT_DURATION  ""
+  #define SINCE_START   
+#endif
 
 
 inline void sleepMillis(unsigned ms) {
@@ -149,6 +177,9 @@ tcpServer	tdcServer (8888);
 static std::string	programName		= "Sky";
 static int32_t		serviceIdentifier	= -1;
 
+static std::string	ensembleName;
+static uint32_t		ensembleIdentifier	= -1;
+
 static bool scanOnly = false;
 static int16_t minSNRtoExit = -32768;
 static deviceHandler	*theDevice = nullptr;
@@ -173,8 +204,10 @@ void	syncsignalHandler (bool b, void *userData) {
 static
 void	ensemblenameHandler (std::string name, int Id, void *userData) {
 	fprintf (stderr,
-	         "\nensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n",
-	         name. c_str (), (uint32_t)Id);
+	         "\n" FMT_DURATION "ensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n"
+	         SINCE_START , name. c_str (), (uint32_t)Id);
+	ensembleName = name;
+	ensembleIdentifier = (uint32_t)Id;
 	ensembleRecognized. store (true);
 }
 
@@ -387,7 +420,7 @@ void printCollectedCallbackStat (const char * txt,
 
 	if (timeOut >= nextOut) {	// force output with nextOut = timeOut
 	   nextOut = timeOut + 500;	// output every 500 ms
-	   fprintf (stderr, "\n%5ld: %s:\n", sinceStart(), txt);
+	   fprintf (stderr, "\n" FMT_DURATION "%s:\n" SINCE_START , txt);
 	   fprintf (infoStrm, "  systemData(): %s: everSynced %s, snr min/max: %d/%d. # %ld avg %ld\n"
 	                 , stat_gotSysData ? "yes" : "no"
 	                 , stat_everSynced ? "yes" : "no"
@@ -436,6 +469,7 @@ int32_t         waitingTimeInit = 10 * T_UNIT_MUL;
 int32_t         waitAfterEnsemble = -1;
 
 bool		autogain	= false;
+bool		printAsCSV	= false;
 int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
@@ -462,11 +496,11 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Q")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Qc")) != -1) {
 #elif   HAVE_RTL_TCP
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Q")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Qc")) != -1) {
 #else
-    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:c")) != -1) {
 #endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
@@ -486,6 +520,10 @@ bool	err;
 	         infoStrm = stdout;
 	         minSNRtoExit = int16_t( atoi(optarg) );
 	         fprintf(stderr, "read option -E : scanOnly .. with minSNR %d\n", minSNRtoExit);
+	         break;
+
+	      case 'c':
+	         printAsCSV	= true;
 	         break;
 
 	      case 'M':
@@ -591,7 +629,7 @@ bool	err;
 	catch (int e) {
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
 #if PRINT_DURATION
-	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf(stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (32);
 	}
@@ -619,7 +657,7 @@ bool	err;
 	   nextOut = timeOut;
 	   printCollectedCallbackStat ("A: no radio");
 #if PRINT_DURATION
-	   fprintf (stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf (stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (4);
 	}
@@ -634,6 +672,7 @@ bool	err;
 
 	timesyncSet.		store (false);
 	ensembleRecognized.	store (false);
+	fprintf (stderr, "\n" FMT_DURATION "starting DAB processing ..\n" SINCE_START );
 	dabStartProcessing (theRadio);
 
 	bool abortForSnr = false;
@@ -641,7 +680,8 @@ bool	err;
 
 #if PRINT_LOOPS
 	fprintf (stderr,
-	         "\nbefore while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	         "\n" FMT_DURATION "before while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	         SINCE_START
 	         , continueForFullEnsemble ? "true":"false"
 	         , abortForSnr ? "true":"false"
 	         , int (timeOut), int (waitingTime) );
@@ -653,8 +693,8 @@ bool	err;
 	   printCollectedCallbackStat ("wait for timeSync ..");
 	   if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
 	      fprintf (stderr,
-	               "abort because minSNR %d is not met. # is %ld avg %ld\n",
-	                int (minSNRtoExit), numSnr, avgSnr );
+	               FMT_DURATION "abort because minSNR %d is not met. # is %ld avg %ld\n"
+	                SINCE_START , int (minSNRtoExit), numSnr, avgSnr );
 	      abortForSnr = true;
 	      break;
 	   }
@@ -667,21 +707,22 @@ bool	err;
 	         if (!prevContinueForFullEnsemble) {  // increase waitingTime only once
 	            fprintf (stderr, "t=%d: abort later because already got ensemble data.\n", timeOut);
 	            waitingTime = timeOut + waitAfterEnsemble;
-	            fprintf (stderr, "waitAfterEnsemble = %d > 0  ==> waitingTime = timeOut + waitAfterEnsemble = %d + %d = %d\n"
-	                           , waitAfterEnsemble
+	            fprintf (stderr, FMT_DURATION "waitAfterEnsemble = %d > 0  ==> waitingTime = timeOut + waitAfterEnsemble = %d + %d = %d\n"
+	                           SINCE_START , waitAfterEnsemble
 	                           , timeOut, waitAfterEnsemble, waitingTime);
 	         }
 	      }
 	      else
 	      if (waitAfterEnsemble == 0 ) {
 	         fprintf (stderr, "t=%d: abort directly because already got ensemble data.\n", timeOut);
-	         fprintf (stderr, "waitAfterEnsemble == 0  ==> break\n");
+	         fprintf (stderr, FMT_DURATION "waitAfterEnsemble == 0  ==> break\n" SINCE_START );
 	         break;
 	      }
 	   }
 
 #if PRINT_LOOPS
-	  fprintf (stderr, "in while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  fprintf (stderr, FMT_DURATION "in while1: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	                   SINCE_START
 	                   , continueForFullEnsemble ? "true":"false"
 	                   , abortForSnr ? "true":"false"
 	                   , int (timeOut), int (waitingTime) );
@@ -689,7 +730,8 @@ bool	err;
 	}
 
 #if PRINT_LOOPS
-	fprintf (stderr, "\nbefore while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	fprintf (stderr, "\n" FMT_DURATION "before while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	                 SINCE_START
 	                 , continueForFullEnsemble ? "true":"false"
 	                 , abortForSnr ? "true":"false"
 	                 , int (timeOut)
@@ -701,19 +743,21 @@ bool	err;
 	  sleepMillis (T_GRANULARITY);
 	  printCollectedCallbackStat ("wait for full ensemble info..");
 	  if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-	    fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	    fprintf(stderr, FMT_DURATION "abort because minSNR %d is not met. # is %ld avg %ld\n" SINCE_START , int(minSNRtoExit), numSnr, avgSnr );
 	    abortForSnr = true;
 	    break;
 	  }
 #if PRINT_LOOPS
-	  fprintf(stderr, "in while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  fprintf(stderr, FMT_DURATION "in while2: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	    SINCE_START
 	    , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
 	    , int(timeOut), int(waitingTime) );
 #endif
 	}
 
 	if (!timeSynced. load ()) {
-	   cerr << "There does not seem to be a DAB signal here" << endl;
+	   fprintf(stderr, FMT_DURATION "There does not seem to be a DAB signal here\n" SINCE_START );
+	   FAST_EXIT( 22 );
 	   theDevice -> stopReader ();
 	   dabStop (theRadio);
 	   nextOut = timeOut;
@@ -721,13 +765,14 @@ bool	err;
 	   dabExit (theRadio);
 	   delete theDevice;
 #if PRINT_DURATION
-	   fprintf (stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf (stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (22);
 	}
 
 #if PRINT_LOOPS
-	fprintf(stderr, "\nbefore while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	fprintf(stderr, "\n" FMT_DURATION "before while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	  SINCE_START
 	  , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
 	  , int(timeOut), int(waitingTime) );
 #endif
@@ -736,13 +781,13 @@ bool	err;
 	  sleepMillis (T_GRANULARITY);
 	  printCollectedCallbackStat ("C: collecting ensembleData ..");
 	  if (scanOnly && numSnr >= 5 && avgSnr < minSNRtoExit ) {
-	    fprintf(stderr, "abort because minSNR %d is not met. # is %ld avg %ld\n", int(minSNRtoExit), numSnr, avgSnr );
+	    fprintf(stderr, FMT_DURATION "abort because minSNR %d is not met. # is %ld avg %ld\n" SINCE_START , int(minSNRtoExit), numSnr, avgSnr );
 	    abortForSnr = true;
 	    break;
 	  }
 #if PRINT_LOOPS
-	  fprintf(stderr, "in while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
-	    , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
+	  fprintf(stderr, FMT_DURATION "in while3: cont=%s, abort=%s, timeout=%d, waitTime=%d\n"
+	    SINCE_START , continueForFullEnsemble ? "true":"false", abortForSnr ? "true":"false"
 	    , int(timeOut), int(waitingTime) );
 #endif
 	}
@@ -751,10 +796,12 @@ bool	err;
 	   exit (24);
 static	int count	= 10;
 	
-	while (!ensembleRecognized && (--count > 0))
+	while (!scanOnly && !ensembleRecognized. load () && (--count > 0))
 	  sleep (1);
+
 	if (!ensembleRecognized. load ()) {
-	   fprintf (stderr, "no ensemble data found, fatal\n");
+	   fprintf (stderr, FMT_DURATION "no ensemble data found, fatal\n" SINCE_START );
+	   FAST_EXIT( 22 );
 	   theDevice -> stopReader ();
 	   dabStop (theRadio);
 	   nextOut = timeOut;
@@ -762,14 +809,15 @@ static	int count	= 10;
 	   dabExit (theRadio);
 	   delete theDevice;
 #if PRINT_DURATION
-	   fprintf(stderr, "\n%5ld: exiting main()\n", sinceStart());
+	   fprintf(stderr, "\n" FMT_DURATION "exiting main()\n" SINCE_START );
 #endif
 	   exit (22);
 	}
 
 	if (ensembleRecognized. load ()) {
 	  nextOut = timeOut;
-	  printCollectedCallbackStat("summmary for found ensemble", 1);
+	  if (!printAsCSV)
+	    printCollectedCallbackStat("summmary for found ensemble", 1);
 	}
 
 	if (!scanOnly) {
@@ -815,12 +863,47 @@ static	int count	= 10;
 	   }
 	}
 	else {	// scan only
+	   uint64_t secsEpoch = msecs_progStart / 1000;
 	   bool gotECC = false;
 	   bool gotInterTabId = false;
 	   const uint8_t eccCode =
 	               dab_getExtendedCountryCode (theRadio, &gotECC);
 	   const uint8_t interTabId =
 	               dab_getInternationalTabId (theRadio, &gotInterTabId);
+	   const std::string comma = ",";
+
+	   std::string ensembleCols;
+	   {
+	      std::stringstream sidStrStream;
+	      sidStrStream << std::hex << ensembleIdentifier;
+	      ensembleCols = comma + "0x" + sidStrStream.str();
+	      if ( ensembleRecognized. load () ) {
+	          ensembleCols += comma + prepCsvStr( ensembleName );
+	      } else {
+	          ensembleCols += comma + prepCsvStr( "unknown ensemble" );
+	      }
+	   }
+
+	   if (printAsCSV) {
+	      std::string outLine = std::to_string( secsEpoch );
+	      outLine += comma + "CSV_ENSEMBLE";
+	      outLine += comma + prepCsvStr( theChannel );
+	      outLine += ensembleCols;
+
+	      outLine += comma + prepCsvStr( "snr" );
+	      outLine += comma + std::to_string( int (stat_minSnr) );
+	      outLine += comma + std::to_string( int (stat_maxSnr) );
+	      outLine += comma + std::to_string( int (numSnr) );
+	      outLine += comma + std::to_string( int (avgSnr) );
+
+	      outLine += comma + prepCsvStr( "fic" );
+	      outLine += comma + std::to_string( int (stat_minFic) );
+	      outLine += comma + std::to_string( int (stat_maxFic) );
+	      outLine += comma + std::to_string( int (numFic) );
+	      outLine += comma + std::to_string( int (avgFic) );
+	      
+	      fprintf(infoStrm, "%s\n", outLine.c_str() );
+	   }
 
 	   int16_t mainId, subId, TD;
 	   float gps_latitude, gps_longitude;
@@ -840,13 +923,38 @@ static	int count	= 10;
 	                             &gps_success,
 	                             nullptr, nullptr, &TD );
 	         if (gps_success)
-	            fprintf (infoStrm,
-	                     "\ttransmitter gps coordinate (latitude / longitude) for\ttii %04d\t=%f / %f\tTD=%d us\n",
-	                     mainId * 100 + subId,
-	                     gps_latitude,
-	                     gps_longitude, int(TD) );
+	         {
+	             if (!printAsCSV) {
+	                fprintf (infoStrm,
+	                         "\ttransmitter gps coordinate (latitude / longitude) for\ttii %04d\t=%f / %f\tTD=%d us\n",
+	                         mainId * 100 + subId,
+	                         gps_latitude,
+	                         gps_longitude, int(TD) );
+	             } else {
+	                std::string outLine = std::to_string( secsEpoch );
+	                outLine += comma + "CSV_GPSCOOR";
+	                outLine += comma + prepCsvStr( theChannel );
+	                outLine += ensembleCols;
+
+	                outLine += comma + std::to_string( mainId * 100 + subId );
+	                outLine += comma + std::to_string( gps_latitude );
+	                outLine += comma + std::to_string( gps_longitude );
+	                outLine += comma + std::to_string( int(TD) );
+	                fprintf(infoStrm, "%s\n", outLine.c_str() );
+	             }
+	         }
 	      }	// end for
 	   }	// end if (gps_success)
+
+	   std::string outAudioBeg = std::to_string( secsEpoch );
+	   outAudioBeg += comma + "CSV_AUDIO";
+	   outAudioBeg += comma + prepCsvStr( theChannel );
+	   outAudioBeg += ensembleCols;
+
+	   std::string outPacketBeg = std::to_string( secsEpoch );
+	   outPacketBeg += comma + "CSV_PACKET";
+	   outPacketBeg += comma + prepCsvStr( theChannel );
+	   outPacketBeg += ensembleCols;
 
 	   for (auto & it : globals.channels ) {
 	      serviceIdentifier = it.first;
@@ -854,12 +962,13 @@ static	int count	= 10;
 //	                              it. second -> programName. c_str ());
 	      if (is_audioService (theRadio,
 	                               it. second -> programName. c_str ()) ||
-	          is_dataService (theRadio,
+	         is_dataService (theRadio,
 	                               it. second -> programName. c_str ())) {
-	         fprintf (infoStrm,
-	                      "\nchecked program '%s' with SId %X\n",
-		               it. second -> programName.c_str(),
-	                       serviceIdentifier);
+	         if (!printAsCSV) {
+	             fprintf (infoStrm,
+	                      "\n" FMT_DURATION "checked program '%s' with SId %X\n"
+	                   SINCE_START , it. second -> programName.c_str(), serviceIdentifier);
+	         }
 	         for (int i = 0; i < 5; i ++) {
 	            audiodata ad;
 	            packetdata pd;
@@ -871,44 +980,79 @@ static	int count	= 10;
 	            if (ad. defined) {
 	               uint8_t countryId =
 	                        (serviceIdentifier >> 12) & 0xF;  // audio
-	               fprintf (infoStrm, "\taudioData:\n");
-	               fprintf (infoStrm, "\t\tsubchId\t\t= %d\n",
-	                                             int (ad. subchId));
-		       fprintf (infoStrm, "\t\tstartAddr\t= %d\n",
-	                                             int (ad. startAddr));
-	               fprintf (infoStrm, "\t\tshortForm\t= %s\n",
-	                                   ad. shortForm ? "true":"false");
-	               fprintf (infoStrm, "\t\tprotLevel\t= %d: '%s'\n",
+	               if (!printAsCSV) {
+	                   fprintf (infoStrm, "\taudioData:\n");
+	                   fprintf (infoStrm, "\t\tsubchId\t\t= %d\n",
+	                                                 int (ad. subchId));
+	                   fprintf (infoStrm, "\t\tstartAddr\t= %d\n",
+	                                                 int (ad. startAddr));
+	                   fprintf (infoStrm, "\t\tshortForm\t= %s\n",
+	                                       ad. shortForm ? "true":"false");
+	                   fprintf (infoStrm, "\t\tprotLevel\t= %d: '%s'\n",
+	                                       int (ad. protLevel),
+	                                       getProtectionLevel (ad. shortForm,
+	                                                           ad. protLevel));
+	                   fprintf (infoStrm, "\t\tcodeRate\t= %d: '%s'\n",
 	                                   int (ad. protLevel),
-	                                   getProtectionLevel (ad. shortForm,
-	                                                       ad. protLevel));
-	               fprintf (infoStrm, "\t\tcodeRate\t= %d: '%s'\n",
-	                               int (ad. protLevel),
-	                               getCodeRate (ad. shortForm,
-	                                            ad. protLevel));
-	               fprintf (infoStrm, "\t\tlength\t\t= %d\n",
-	                               int (ad. length));
-	               fprintf (infoStrm, "\t\tbitRate\t\t= %d\n",
-	                               int (ad. bitRate));
-	               fprintf (infoStrm,
-	                        "\t\tASCTy\t\t= %d: '%s'\n",
-	                               int (ad. ASCTy),
-	                               getASCTy (ad. ASCTy));
-	               if (gotECC)
-	                  fprintf (infoStrm,
-	                           "\t\tcountry\tECC %X, Id %X: '%s'\n", 
-	                           int (eccCode), int(countryId),
-	                           getCountry (eccCode, countryId));
-	               fprintf (infoStrm,
-	                        "\t\tlanguage\t= %d: '%s'\n",
-	                        int (ad. language),
-	                        getLanguage (ad. language));
-	               fprintf (infoStrm,
-	                        "\t\tprogramType\t= %d: '%s'\n",
-	                        int (ad. programType),
-	                        getProgramType (gotInterTabId,
-	                                        interTabId,
-	                                        ad. programType) );
+	                                   getCodeRate (ad. shortForm,
+	                                                ad. protLevel));
+	                   fprintf (infoStrm, "\t\tlength\t\t= %d\n",
+	                                   int (ad. length));
+	                   fprintf (infoStrm, "\t\tbitRate\t\t= %d\n",
+	                                   int (ad. bitRate));
+	                   fprintf (infoStrm,
+	                            "\t\tASCTy\t\t= %d: '%s'\n",
+	                                   int (ad. ASCTy),
+	                                   getASCTy (ad. ASCTy));
+	                   if (gotECC)
+	                      fprintf (infoStrm,
+	                               "\t\tcountry\tECC %X, Id %X: '%s'\n", 
+	                               int (eccCode), int(countryId),
+	                               getCountry (eccCode, countryId));
+	                   fprintf (infoStrm,
+	                            "\t\tlanguage\t= %d: '%s'\n",
+	                            int (ad. language),
+	                            getLanguage (ad. language));
+	                   fprintf (infoStrm,
+	                            "\t\tprogramType\t= %d: '%s'\n",
+	                            int (ad. programType),
+	                            getProgramType (gotInterTabId,
+	                                            interTabId,
+	                                            ad. programType) );
+	                                            
+	               } else {
+	                   std::string outLine = outAudioBeg;
+	                   std::stringstream sidStrStream;
+	                   sidStrStream << std::hex << serviceIdentifier;
+	                   outLine += comma + "0x" + sidStrStream.str();
+	                   outLine += comma + prepCsvStr( it. second -> programName.c_str() );
+	                   outLine += comma + std::to_string( i );
+	                   outLine += comma + std::to_string( countryId );
+	                   outLine += comma + prepCsvStr( getProtectionLevel(ad. shortForm, ad. protLevel) );
+	                   outLine += comma + std::to_string( int (ad. protLevel) );
+	                   outLine += comma + prepCsvStr( getCodeRate(ad. shortForm, ad. protLevel) );
+	                   outLine += comma + std::to_string( int (ad. bitRate) );
+	                   outLine += comma + std::to_string( int (ad. ASCTy) );
+	                   outLine += comma + prepCsvStr( getASCTy(ad. ASCTy) );
+	                   if (gotECC) {
+	                       std::stringstream eccStrStream;
+	                       std::stringstream countryStrStream;
+	                       eccStrStream << std::hex << int (eccCode);
+	                       countryStrStream << std::hex << int(countryId);
+	                       outLine += comma + "0x" + eccStrStream.str();
+	                       outLine += comma + "0x" + countryStrStream.str();
+	                       const char * countryStr = getCountry(eccCode, countryId);
+	                       outLine += comma + ( countryStr ? prepCsvStr( countryStr ) : prepCsvStr( "unknown country" ) );
+	                   } else {
+	                       outLine += comma + comma + comma;
+	                   }
+	                   outLine += comma + std::to_string( int (ad. language) );
+	                   outLine += comma + prepCsvStr( getLanguage (ad. language) );
+	                   outLine += comma + std::to_string( int (ad. programType) );
+	                   outLine += comma + prepCsvStr( getProgramType(gotInterTabId, interTabId, ad. programType) );
+
+	                   fprintf(infoStrm, "%s\n", outLine.c_str() );
+	               }
 	            }
 	            else {
 	               dataforDataService (theRadio, 
@@ -919,56 +1063,90 @@ static	int count	= 10;
 	               if (pd. defined) {
 	                  uint8_t countryId =
 	                            (serviceIdentifier >> (5 * 4)) & 0xF;
-	                  fprintf (infoStrm, "\tpacket:\n");
-	                  fprintf (infoStrm,
-	                              "\t\tsubchId\t\t= %d\n",
-	                                      int (pd. subchId));
-	                  fprintf (infoStrm,
-	                              "\t\tstartAddr\t= %d\n",
-	                                      int (pd. startAddr));
-	                  fprintf (infoStrm,
-	                              "\t\tshortForm\t= %s\n",
-	                                      pd. shortForm ? "true":"false");
-	                  fprintf (infoStrm,
-	                              "\t\tprotLevel\t= %d: '%s'\n",
-	                                      int (pd. protLevel),
-	                                      getProtectionLevel (pd. shortForm,
-	                                                          pd. protLevel));
-	                  fprintf (infoStrm,
-	                              "\t\tcodeRate\t= %d: '%s'\n",
-	                                      int (pd. protLevel),
-	                                      getCodeRate (pd. shortForm,
-	                                                   pd. protLevel));
-	                  fprintf (infoStrm,
-	                              "\t\tDSCTy\t\t= %d: '%s'\n",
-	                                     int (pd. DSCTy),
-	                                     getDSCTy (pd. DSCTy));
-	                  fprintf (infoStrm,
-	                              "\t\tlength\t\t= %d\n", int (pd. length));
-	                  fprintf (infoStrm,
-	                              "\t\tbitRate\t\t= %d\n", int (pd. bitRate));
-	                  fprintf (infoStrm,
-	                              "\t\tFEC_scheme\t= %d: '%s'\n",
-	                                   int (pd. FEC_scheme),
-	                                   getFECscheme (pd. FEC_scheme));
-	                  fprintf (infoStrm,
-	                              "\t\tDGflag\t= %d\n", int (pd. DGflag));
-	                  fprintf (infoStrm,
-	                              "\t\tpacketAddress\t= %d\n",
-	                                      int (pd. packetAddress));
-	                  if (gotECC)
-	                     fprintf (infoStrm,
-	                                 "\t\tcountry\tECC %X, Id %X: '%s'\n",
-	                                       int (eccCode),
-	                                       int (countryId),
-	                                       getCountry (eccCode, countryId));
-	                  fprintf (infoStrm,
-	                           "\t\tappType\t\t= %d: '%s'\n",
-	                                int (pd. appType),
-	                                getUserApplicationType (pd. appType));
-	                  fprintf (infoStrm,
-	                           "\t\tis_madePublic\t=%s\n",
-	                                pd. is_madePublic ? "true":"false");
+	                  if (!printAsCSV) {
+	                      fprintf (infoStrm, "\tpacket:\n");
+	                      fprintf (infoStrm,
+	                                  "\t\tsubchId\t\t= %d\n",
+	                                          int (pd. subchId));
+	                      fprintf (infoStrm,
+	                                  "\t\tstartAddr\t= %d\n",
+	                                          int (pd. startAddr));
+	                      fprintf (infoStrm,
+	                                  "\t\tshortForm\t= %s\n",
+	                                          pd. shortForm ? "true":"false");
+	                      fprintf (infoStrm,
+	                                  "\t\tprotLevel\t= %d: '%s'\n",
+	                                          int (pd. protLevel),
+	                                          getProtectionLevel (pd. shortForm,
+	                                                              pd. protLevel));
+	                      fprintf (infoStrm,
+	                                  "\t\tcodeRate\t= %d: '%s'\n",
+	                                          int (pd. protLevel),
+	                                          getCodeRate (pd. shortForm,
+	                                                       pd. protLevel));
+	                      fprintf (infoStrm,
+	                                  "\t\tDSCTy\t\t= %d: '%s'\n",
+	                                         int (pd. DSCTy),
+	                                         getDSCTy (pd. DSCTy));
+	                      fprintf (infoStrm,
+	                                  "\t\tlength\t\t= %d\n", int (pd. length));
+	                      fprintf (infoStrm,
+	                                  "\t\tbitRate\t\t= %d\n", int (pd. bitRate));
+	                      fprintf (infoStrm,
+	                                  "\t\tFEC_scheme\t= %d: '%s'\n",
+	                                       int (pd. FEC_scheme),
+	                                       getFECscheme (pd. FEC_scheme));
+	                      fprintf (infoStrm,
+	                                  "\t\tDGflag\t= %d\n", int (pd. DGflag));
+	                      fprintf (infoStrm,
+	                                  "\t\tpacketAddress\t= %d\n",
+	                                          int (pd. packetAddress));
+	                      if (gotECC)
+	                         fprintf (infoStrm,
+	                                     "\t\tcountry\tECC %X, Id %X: '%s'\n",
+	                                           int (eccCode),
+	                                           int (countryId),
+	                                           getCountry (eccCode, countryId));
+	                      fprintf (infoStrm,
+	                               "\t\tappType\t\t= %d: '%s'\n",
+	                                    int (pd. appType),
+	                                    getUserApplicationType (pd. appType));
+	                      fprintf (infoStrm,
+	                               "\t\tis_madePublic\t=%s\n",
+	                                    pd. is_madePublic ? "true":"false");
+	                  } else {
+	                   std::string outLine = outPacketBeg;
+	                   std::stringstream sidStrStream;
+	                   sidStrStream << std::hex << serviceIdentifier;
+	                   outLine += comma + "0x" + sidStrStream.str();
+	                   outLine += comma + prepCsvStr( it. second -> programName.c_str() );
+	                   outLine += comma + std::to_string( i );
+	                   outLine += comma + std::to_string( int (pd. protLevel) );
+	                   outLine += comma + prepCsvStr( getProtectionLevel (pd. shortForm, pd. protLevel) );
+	                   outLine += comma + prepCsvStr( getCodeRate(pd. shortForm, pd. protLevel) );
+	                   outLine += comma + std::to_string( int (pd. DSCTy) );
+	                   outLine += comma + prepCsvStr( getDSCTy (pd. DSCTy) );
+	                   outLine += comma + std::to_string( int (pd. bitRate) );
+	                   outLine += comma + std::to_string( int (pd. FEC_scheme) );
+	                   outLine += comma + prepCsvStr( getFECscheme (pd. FEC_scheme) );
+	                   outLine += comma + std::to_string( int (pd. DGflag) );
+	                   if (gotECC) {
+	                       std::stringstream eccStrStream;
+	                       std::stringstream countryStrStream;
+	                       eccStrStream << std::hex << int (eccCode);
+	                       countryStrStream << std::hex << int(countryId);
+	                       outLine += comma + "0x" + eccStrStream.str();
+	                       outLine += comma + "0x" + countryStrStream.str();
+	                       const char * countryStr = getCountry(eccCode, countryId);
+	                       outLine += comma + ( countryStr ? prepCsvStr( countryStr ) : prepCsvStr( "unknown country" ) );
+	                   } else {
+	                       outLine += comma + comma + comma;
+	                   }
+	                   outLine += comma + std::to_string( int (pd. appType) );
+	                   outLine += comma + prepCsvStr( getUserApplicationType (pd. appType) );
+
+	                   fprintf(infoStrm, "%s\n", outLine.c_str() );
+	                  }
 	               }
 	            }
 	         }
@@ -979,13 +1157,18 @@ static	int count	= 10;
 	   printCollectedCallbackStat("D: quit without loading");
 	}
 
+#if PRINT_DURATION
+	fprintf(stderr, "\n" FMT_DURATION "at dabStop()\n" SINCE_START );
+#endif
+
+	FAST_EXIT( 123 );
 	dabStop	(theRadio);
 	theDevice	-> stopReader ();
 	dabExit (theRadio);
 	delete theDevice;
 
 #if PRINT_DURATION
-	fprintf(stderr, "\n%5ld: end of main()\n", sinceStart ());
+	fprintf(stderr, "\n" FMT_DURATION "end of main()\n" SINCE_START );
 #endif
 }
 
@@ -996,6 +1179,7 @@ void    printOptions (void) {
 	-A number   amount of time to look for an ensemble in %s\n\
 	-E minSNR   activates scan mode: if set, quit after loading scan data\n\
 	            also quit, if SNR is below minSNR\n\
+	-c          activates CSV output mode\n\
 	-M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
 	-B Band     Band is either L_BAND or BAND_III (default)\n\
 	-P name     program to be selected in the ensemble\n\
