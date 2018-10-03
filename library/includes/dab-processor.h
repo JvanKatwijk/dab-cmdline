@@ -37,6 +37,7 @@
 #include	"msc-handler.h"
 #include	"ringbuffer.h"
 #include	"dab-api.h"
+#include	"tii_detector.h"
 #include	"sample-reader.h"
 //
 class	deviceHandler;
@@ -82,6 +83,9 @@ public:
 	std::string	get_ensembleName        (void);
 	void		clearEnsemble           (void);
 	void		reset_msc		(void);
+
+	void		setTII_handler		(tii_t tii_Handler, int tii_framedelay, float alfa, int resetFrameCount);
+
 	std::complex<float>
 			 get_coordinates (int16_t, int16_t, bool *);
 	std::complex<float>
@@ -93,10 +97,18 @@ public:
         uint8_t         getInterTabId           (bool *);
 
 private:
+	int		tii_framedelay;
+	int		tii_counter;
+	tii_t		my_tiiHandler;
+	float		tii_alfa;
+	int		tii_resetFrameCount;
+	unsigned	tii_num;
+
 	deviceHandler	*inputDevice;
 	dabParams	params;
 	sampleReader	myReader;
 	phaseReference	phaseSynchronizer;
+	TII_Detector	my_TII_Detector;
 	ofdmDecoder	my_ofdmDecoder;
 	ficHandler	my_ficHandler;
 	mscHandler	my_mscHandler;
@@ -115,6 +127,8 @@ private:
 	int32_t		nrBlocks;
 	int32_t		carriers;
 	int32_t		carrierDiff;
+
+	bool		wasSecond		(int16_t, dabParams *);
 
 virtual	void		run		(void);
 };

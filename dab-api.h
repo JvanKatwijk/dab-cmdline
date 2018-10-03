@@ -137,6 +137,11 @@ typedef	struct {
 //	function registered as
 	typedef void (*motdata_t)(std::string, int, void *);
 //	is invoked (if not specified as NULL)
+
+//	TII
+	typedef void (*tii_t)(int16_t mainId, int16_t subId, unsigned num, void *);
+
+
 /////////////////////////////////////////////////////////////////////////
 //
 //	The API functions
@@ -221,6 +226,10 @@ int32_t dab_getSId		(void *, const char*);
 //
 //	and the other way around, mapping the service identifier to a name
 std::string dab_getserviceName	(void *, int32_t);
+
+//	set/activate TII processing - not with dabInit() - for compatiblity
+void	dab_setTII_handler(void *, tii_t tii_Handler, int tii_framedelay, float alfa, int resetFrameCount);
+
 }
 //
 //	Additions, suggested by Hayati

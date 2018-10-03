@@ -313,7 +313,8 @@ endif ()
 	     ../library/includes/ofdm/freq-interleaver.h
 	     ../library/includes/ofdm/timesyncer.h
 	     ../library/includes/ofdm/fic-handler.h
-	     ../library/includes/ofdm/fib-processor.cpp
+	     ../library/includes/ofdm/fib-processor.h
+	     ../library/includes/ofdm/tii_detector.h
 	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/backend-base.h
@@ -361,6 +362,7 @@ endif ()
 	     ../library/src/ofdm/sample-reader.cpp
 	     ../library/src/ofdm/fib-processor.cpp
 	     ../library/src/ofdm/fic-handler.cpp
+	     ../library/src/ofdm/tii_detector.cpp
 	     ../library/src/backend/firecode-checker.cpp
 	     ../library/src/backend/backend-base.cpp
 	     ../library/src/backend/charsets.cpp

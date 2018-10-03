@@ -46,6 +46,12 @@
 	                                 RingBuffer<std::complex<float>> *spectrumBuffer,
 	                                 RingBuffer<std::complex<float>> *iqBuffer,
 	                                 void		*userData):
+	                                    tii_framedelay(20),
+	                                    tii_counter(0),
+	                                    my_tiiHandler(nullptr),
+	                                    tii_alfa(-1.0F),
+	                                    tii_resetFrameCount(-1),
+	                                    tii_num( 0 ),
 	                                    params (dabMode),
 	                                    myReader (this,
 	                                              inputDevice,
@@ -53,6 +59,7 @@
 	                                    phaseSynchronizer (dabMode,
 	                                                       THRESHOLD,
 	                                                       DIFF_LENGTH),
+	                                    my_TII_Detector (dabMode),
 	                                    my_ofdmDecoder (dabMode,
 	                                                    iqBuffer),
 	                                    my_ficHandler (dabMode,
@@ -240,6 +247,32 @@ SyncOnPhase:
 	   ccc = 0;
 //	   fprintf (stderr, "%f\n", 20 * log10 ((sum2 + 0.005) / sum));
 	}
+
+/*
+ *	The TII data is encoded in the null period of the
+ *	odd frames 
+ */
+	   if (params. get_dabMode () == 1 && my_tiiHandler) {
+	      if (wasSecond (my_ficHandler. get_CIFcount (), &params)) {
+	         my_TII_Detector. addBuffer (ofdmBuffer, tii_alfa );	// forward tii_algo to addBuffer()
+	         ++tii_num;	// number of incremented buffer entries
+	         ++tii_counter;
+	         if ( tii_counter >= tii_framedelay ) {
+	            int16_t mainId	= -1;
+	            int16_t subId	= -1;
+	            my_TII_Detector. processNULL (&mainId, &subId);		// forward tii_algo to processNULL()
+	            my_tiiHandler( mainId, subId, tii_num, userData );
+	         }
+	         if (tii_counter >= tii_framedelay)
+	            tii_counter = 0;
+	         if (tii_num >= tii_resetFrameCount && tii_resetFrameCount > 0) {
+	            my_TII_Detector. reset();
+	            tii_num = 0;
+	         }
+	      }
+	   }
+
+
 	   if (fineOffset > carrierDiff / 2) {
 	      coarseOffset += carrierDiff;
 	      fineOffset -= carrierDiff;
@@ -320,6 +353,14 @@ void    dabProcessor::reset_msc (void) {
         my_mscHandler. reset ();
 }
 
+void    dabProcessor::setTII_handler(tii_t tii_Handler, int framedelay, float alfa, int resetFrameCount) {
+	if ( framedelay > 0 )
+		tii_framedelay = framedelay;
+	my_tiiHandler = tii_Handler;
+	tii_alfa = alfa;
+	tii_resetFrameCount = resetFrameCount;
+}
+
 std::complex<float>
 	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
 	                                 bool *success) {
@@ -354,6 +395,19 @@ void    dabProcessor::set_dataChannel (packetdata *d) {
 
 void    dabProcessor::clearEnsemble     (void) {
         my_ficHandler. reset ();
+}
+
+bool	dabProcessor::wasSecond (int16_t cf, dabParams *p) {
+	switch (p -> get_dabMode ()) {
+	   default:
+	   case 1:
+	      return (cf & 07) >= 4;
+	   case 2:
+	   case 3:
+	      return (cf & 02);
+	   case 4:
+	      return (cf & 03) >= 2;
+	}
 }
 
 

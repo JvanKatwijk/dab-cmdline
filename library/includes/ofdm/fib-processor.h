@@ -110,6 +110,9 @@ public:
 		get_coordinates	(int16_t, int16_t, bool *);
 
 	void	reset			(void);
+	int32_t	get_CIFcount		(void);
+	void	newFrame		(void);
+
 //	Extended functions, contributed by Hayati Ayguen
 	std::complex<float>
 		get_coordinates     (int16_t, int16_t, bool *,
@@ -133,6 +136,7 @@ private:
         void            bind_packetService (int8_t,
                                             uint32_t, int16_t,
                                             int16_t, int16_t, int16_t);
+	int32_t		CIFcount;
 	void		process_FIG0		(uint8_t *);
 	void		process_FIG1		(uint8_t *);
 	void		FIG0Extension0		(uint8_t *);

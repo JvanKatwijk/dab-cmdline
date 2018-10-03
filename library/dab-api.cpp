@@ -90,6 +90,10 @@ bool	is_dataService	(void *Handle, const char *name) {
 	                               PACKET_SERVICE;
 }
 
+void	dab_setTII_handler(void *Handle, tii_t tii_Handler, int tii_framedelay, float alfa, int resetFrameCount) {
+	return ((dabProcessor *)Handle) -> setTII_handler (tii_Handler, tii_framedelay, alfa, resetFrameCount);
+}
+
 //	functions contributed by Hayati Ayguen
 //	mainId < 0 (-1) => don't check mainId
 //	subId == -1 => deliver first available offset

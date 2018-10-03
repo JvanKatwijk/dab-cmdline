@@ -53,6 +53,9 @@ public:
 	uint8_t	kindofService		(std::string &);
 	void	dataforDataService	(std::string &, packetdata *, int);
 	void	dataforAudioService	(std::string &, audiodata *, int);
+
+	int32_t	get_CIFcount		(void);
+
 	std::complex<float>
 		get_coordinates		(int16_t, int16_t, bool *);
 	std::complex<float>

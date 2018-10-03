@@ -37,6 +37,8 @@ public:
 			~fft_handler	(void);
 	complex<float>	*getVector	(void);
 	void		do_FFT		(fftDirection);
+	inline void	do_FFT		(void) { do_FFT(fftForward); }
+	inline void	do_IFFT		(void) { do_FFT(fftBackwards); }
 private:
 	dabParams	p;
 	int32_t		fftSize;

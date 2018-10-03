@@ -62,6 +62,7 @@ using std::endl;
 #include <unistd.h>
 
 #include <unordered_map>
+#include <map>
 #include <algorithm>
 
 
@@ -105,6 +106,9 @@ struct MyGlobals {
 };
 
 MyGlobals globals;
+std::map<int, int> tiiMap;
+int numAllTii = 0;
+
 
 #define PRINT_COLLECTED_STAT_AND_TIME  0
 #define PRINT_LOOPS    0
@@ -376,6 +380,19 @@ void	systemData (bool flag, int16_t snr, int32_t freqOff, void *ctx) {
 }
 
 static
+void tii(int16_t mainId, int16_t subId, unsigned tii_num, void *ctx)
+{
+	++numAllTii;
+	if (mainId >= 0) {
+	   int combinedId = mainId * 100 + subId;
+	   fprintf(stderr, "tii, %d, %u\n", combinedId, tii_num );
+	   if (scanOnly)
+	      tiiMap[ combinedId ] ++;
+	}
+}
+
+
+static
 void	fibQuality	(int16_t q, void *ctx) {
 	if (stat_gotFic) {
 	   stat_minFic = q < stat_minFic ? q : stat_minFic;
@@ -470,6 +487,10 @@ int32_t         waitAfterEnsemble = -1;
 
 bool		autogain	= false;
 bool		printAsCSV	= false;
+int		tii_framedelay	= 10;
+float		tii_alfa	= 0.9F;
+int		tii_resetFrames	= 10;
+
 int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
@@ -496,11 +517,11 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Qc")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Qct:a:r:")) != -1) {
 #elif   HAVE_RTL_TCP
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Qc")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Qct:a:r:")) != -1) {
 #else
-    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:c")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:ct:a:r:")) != -1) {
 #endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
@@ -524,6 +545,21 @@ bool	err;
 
 	      case 'c':
 	         printAsCSV	= true;
+	         break;
+
+	      case 't':
+	         tii_framedelay = atoi(optarg);
+	         fprintf(stderr, "read option -t : tii framedelay %d\n", tii_framedelay);
+	         break;
+
+	      case 'a':
+	         tii_alfa = atof(optarg);
+	         fprintf(stderr, "read option -a : tii alfa %f\n", tii_alfa);
+	         break;
+
+	      case 'r':
+	         tii_resetFrames = atoi(optarg);
+	         fprintf(stderr, "read option -r : tii resetFrames %d\n", tii_resetFrames);
 	         break;
 
 	      case 'M':
@@ -661,6 +697,8 @@ bool	err;
 #endif
 	   exit (4);
 	}
+
+	dab_setTII_handler(theRadio, tii, tii_framedelay, tii_alfa, tii_resetFrames );
 
 	theDevice	-> setGain (theGain);
 	if (autogain)
@@ -884,6 +922,15 @@ static	int count	= 10;
 	      }
 	   }
 
+	   int mostTii = -1;
+	   int numMostTii = 0;
+	   for (auto const& x : tiiMap) {
+	      if ( x.second > numMostTii && x.first > 0 ) {
+	         numMostTii = x.second;
+	         mostTii = x.first;
+	      }
+	   }
+
 	   if (printAsCSV) {
 	      std::string outLine = std::to_string( secsEpoch );
 	      outLine += comma + "CSV_ENSEMBLE";
@@ -901,6 +948,11 @@ static	int count	= 10;
 	      outLine += comma + std::to_string( int (stat_maxFic) );
 	      outLine += comma + std::to_string( int (numFic) );
 	      outLine += comma + std::to_string( int (avgFic) );
+	      
+	      outLine += comma + prepCsvStr( "tii" );
+	      outLine += comma + std::to_string( int (numMostTii) );
+	      outLine += comma + std::to_string( int (numAllTii) );
+	      outLine += comma + std::to_string( int (mostTii) );
 	      
 	      fprintf(infoStrm, "%s\n", outLine.c_str() );
 	   }
@@ -1179,6 +1231,10 @@ void    printOptions (void) {
 	-A number   amount of time to look for an ensemble in %s\n\
 	-E minSNR   activates scan mode: if set, quit after loading scan data\n\
 	            also quit, if SNR is below minSNR\n\
+	-t number   determine tii every number frames. default is 10\n\
+	-a alfa     update tii spectral power with factor alfa in 0 to 1. default: 0.9\n\
+	-r number   reset tii spectral power every number frames. default: 10\n\
+	            tii statistics is output in scan mode\n\
 	-c          activates CSV output mode\n\
 	-M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
 	-B Band     Band is either L_BAND or BAND_III (default)\n\

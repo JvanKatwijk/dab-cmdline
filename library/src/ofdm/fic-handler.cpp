@@ -133,6 +133,7 @@ int32_t	i;
 	if (blkno == 1) {
 	   index = 0;
 	   ficno = 0;
+	   fibProcessor.newFrame ();
 	}
 //
 	if ((1 <= blkno) && (blkno <= 3)) {
@@ -227,6 +228,13 @@ void	ficHandler::dataforDataService	(std::string &s, packetdata *d, int c) {
 	fibProtector. lock ();
 	fibProcessor. dataforDataService (s, d, c);
 	fibProtector. unlock ();
+}
+
+int32_t	ficHandler::get_CIFcount	(void) {
+	fibProtector. lock ();
+	int32_t r = fibProcessor. get_CIFcount();
+	fibProtector. unlock ();
+	return r;
 }
 
 std::complex<float>	ficHandler::get_coordinates (int16_t mainId,

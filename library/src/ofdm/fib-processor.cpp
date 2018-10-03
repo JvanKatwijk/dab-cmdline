@@ -110,6 +110,11 @@
 	
 	fib_processor::~fib_processor (void) {
 }
+
+void	fib_processor::newFrame (void) {
+	   CIFcount ++;
+	}
+
 //
 //	FIB's are segments of 256 bits. When here, they already
 //	passed the crc and we start unpacking into FIGs
@@ -297,6 +302,8 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 
 	if (getBits (d, 34, 1))         // only alarm, just ignore
 	   return;
+
+	CIFcount = highpart * 250 + lowpart;
 
 //	if (changeflag == 1) {
 //	   fprintf (stderr, "Changes in sub channel organization\n");
@@ -1542,5 +1549,11 @@ void	fib_processor::reset	(void) {
 	ecc_Present             = false;
         interTab_Present        = false;
 	clearEnsemble	();
+	CIFcount	= 0;
 }
+
+int32_t		fib_processor::get_CIFcount (void) {
+	return CIFcount;
+}
+
 
