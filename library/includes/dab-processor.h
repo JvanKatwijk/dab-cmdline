@@ -84,7 +84,7 @@ public:
 	void		clearEnsemble           (void);
 	void		reset_msc		(void);
 
-	void		setTII_handler		(tii_t tii_Handler, int tii_framedelay, float alfa, int resetFrameCount);
+	void		setTII_handler		(tii_t tii_Handler, tii_ex_t tii_ExHandler, int tii_framedelay, float alfa, int resetFrameCount);
 
 	std::complex<float>
 			 get_coordinates (int16_t, int16_t, bool *);
@@ -100,6 +100,7 @@ private:
 	int		tii_framedelay;
 	int		tii_counter;
 	tii_t		my_tiiHandler;
+	tii_ex_t	my_tiiExHandler;
 	float		tii_alfa;
 	int		tii_resetFrameCount;
 	unsigned	tii_num;

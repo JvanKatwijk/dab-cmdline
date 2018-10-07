@@ -25,6 +25,10 @@
 #include	<cstring>
 #include	"charsets.h"
 #include	"ensemble-handler.h"
+
+#define OUT_CIF_COUNTER		0
+
+
 //
 //
 // Tabelle ETSI EN 300 401 Page 50
@@ -112,8 +116,11 @@
 }
 
 void	fib_processor::newFrame (void) {
-	   CIFcount ++;
-	}
+	++CIFcount;
+#if OUT_CIF_COUNTER
+	fprintf(stderr, "+\n");
+#endif
+}
 
 //
 //	FIB's are segments of 256 bits. When here, they already
@@ -288,8 +295,6 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 
 	(void)CN;
 	changeflag	= getBits_2 (d, 16 + 16);
-	if (changeflag == 0)
-	   return;
 
 	EId			= getBits (d, 16, 16);
 	(void)EId;
@@ -297,13 +302,27 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 	(void)highpart;
 	lowpart			= getBits_8 (d, 16 + 24) % 250;
 	(void)lowpart;
+
+	CIFcount = highpart * 250 + lowpart;
+	hasCIFcount = true;
+#if OUT_CIF_COUNTER
+fprintf(stderr, "FIG0Extension0: CIFcount %d\n", CIFcount);
+#endif
+
+	if (changeflag == 0) {
+//fprintf(stderr, "FIG0Extension0: change return\n");
+	   return;
+	}
+
 	occurrenceChange	= getBits_8 (d, 16 + 32);
 	(void)occurrenceChange;
 
-	if (getBits (d, 34, 1))         // only alarm, just ignore
+	if (getBits (d, 34, 1)) {         // only alarm, just ignore
+//fprintf(stderr, "FIG0Extension0: alarm return\n");
 	   return;
+	}
 
-	CIFcount = highpart * 250 + lowpart;
+	return;
 
 //	if (changeflag == 1) {
 //	   fprintf (stderr, "Changes in sub channel organization\n");
@@ -1550,10 +1569,18 @@ void	fib_processor::reset	(void) {
         interTab_Present        = false;
 	clearEnsemble	();
 	CIFcount	= 0;
+#if OUT_CIF_COUNTER
+	   fprintf(stderr, "fib_processor::reset() => CIFcount := 0\n");
+#endif
+	hasCIFcount	= false;
 }
 
-int32_t		fib_processor::get_CIFcount (void) {
+int32_t		fib_processor::get_CIFcount (void) const {
 	return CIFcount;
+}
+
+bool		fib_processor::has_CIFcount (void) const {
+	return hasCIFcount;
 }
 
 

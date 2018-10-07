@@ -49,9 +49,9 @@
 	                                    tii_framedelay(20),
 	                                    tii_counter(0),
 	                                    my_tiiHandler(nullptr),
+	                                    my_tiiExHandler(nullptr),
 	                                    tii_alfa(-1.0F),
 	                                    tii_resetFrameCount(-1),
-	                                    tii_num( 0 ),
 	                                    params (dabMode),
 	                                    myReader (this,
 	                                              inputDevice,
@@ -131,6 +131,8 @@ int		index_attempts		= 0;
 
 //Initing:
 notSynced:
+           my_TII_Detector.reset();
+
            switch (myTimeSyncer. sync (T_null, T_F)) {
               case TIMESYNC_ESTABLISHED:
                  break;                 // yes, we are ready
@@ -242,32 +244,45 @@ SyncOnPhase:
 	   sum /= T_null;
 
 	   float sum2 = myReader. get_sLevel ();
+	   (void)sum2;	// avoid compiler warning
+#if 0
 	static int ccc	= 0;
 	if (++ccc > 10) {
 	   ccc = 0;
 //	   fprintf (stderr, "%f\n", 20 * log10 ((sum2 + 0.005) / sum));
 	}
+#endif
 
 /*
  *	The TII data is encoded in the null period of the
  *	odd frames 
  */
-	   if (params. get_dabMode () == 1 && my_tiiHandler) {
-	      if (wasSecond (my_ficHandler. get_CIFcount (), &params)) {
-	         my_TII_Detector. addBuffer (ofdmBuffer, tii_alfa );	// forward tii_algo to addBuffer()
-	         ++tii_num;	// number of incremented buffer entries
+	   if (( my_tiiHandler || my_tiiExHandler ) && my_ficHandler. has_CIFcount () && params. get_dabMode () == 1) {
+	      int32_t cifCounter = my_ficHandler. get_CIFcount ();
+	      if (wasSecond (cifCounter, &params)) {
+	         my_TII_Detector. addBuffer (ofdmBuffer, tii_alfa, cifCounter);	// forward tii_algo to addBuffer()
 	         ++tii_counter;
 	         if ( tii_counter >= tii_framedelay ) {
-	            int16_t mainId	= -1;
-	            int16_t subId	= -1;
-	            my_TII_Detector. processNULL (&mainId, &subId);		// forward tii_algo to processNULL()
-	            my_tiiHandler( mainId, subId, tii_num, userData );
+	            if (my_tiiHandler) {
+	               int16_t mainId	= -1;
+	               int16_t subId	= -1;
+	               my_TII_Detector. processNULL (&mainId, &subId);		// forward tii_algo to processNULL()
+	               my_tiiHandler( mainId, subId, my_TII_Detector.getNumBuffers(), userData );
+	            } else {
+	               int numOut = 0;
+	               int outTii[24];
+	               float outAvgSNR[24];
+	               float outMinSNR[24];
+	               float outNxtSNR[24];
+	               my_TII_Detector. processNULL_ex( &numOut, outTii, outAvgSNR, outMinSNR, outNxtSNR );
+	               if ( numOut > 0 )
+	                  my_tiiExHandler( numOut, outTii, outAvgSNR, outMinSNR, outNxtSNR, my_TII_Detector.getNumBuffers(), my_TII_Detector.P_allAvg, (int)T_u, userData );
+	            }
 	         }
 	         if (tii_counter >= tii_framedelay)
 	            tii_counter = 0;
-	         if (tii_num >= tii_resetFrameCount && tii_resetFrameCount > 0) {
+	         if (my_TII_Detector.getNumBuffers() >= tii_resetFrameCount && tii_resetFrameCount > 0) {
 	            my_TII_Detector. reset();
-	            tii_num = 0;
 	         }
 	      }
 	   }
@@ -353,10 +368,11 @@ void    dabProcessor::reset_msc (void) {
         my_mscHandler. reset ();
 }
 
-void    dabProcessor::setTII_handler(tii_t tii_Handler, int framedelay, float alfa, int resetFrameCount) {
+void    dabProcessor::setTII_handler(tii_t tii_Handler, tii_ex_t tii_ExHandler, int framedelay, float alfa, int resetFrameCount) {
 	if ( framedelay > 0 )
 		tii_framedelay = framedelay;
 	my_tiiHandler = tii_Handler;
+	my_tiiExHandler = tii_ExHandler;
 	tii_alfa = alfa;
 	tii_resetFrameCount = resetFrameCount;
 }

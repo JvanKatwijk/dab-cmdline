@@ -54,7 +54,8 @@ public:
 	void	dataforDataService	(std::string &, packetdata *, int);
 	void	dataforAudioService	(std::string &, audiodata *, int);
 
-	int32_t	get_CIFcount		(void);
+	int32_t	get_CIFcount		(void) const;
+	bool	has_CIFcount		(void) const;
 
 	std::complex<float>
 		get_coordinates		(int16_t, int16_t, bool *);
@@ -71,8 +72,8 @@ private:
 	void		*userData;
 	void		process_ficInput	(int16_t);
 	uint8_t		bitBuffer_out	[768];
-        int16_t		ofdm_input	[2304];
-        bool		punctureTable	[4 * 768 + 24];
+	int16_t		ofdm_input	[2304];
+	bool		punctureTable	[4 * 768 + 24];
 
 	int16_t		index;
 	int16_t		BitsperBlock;
@@ -81,7 +82,7 @@ private:
 	int16_t		ficMissed;
 	int16_t		ficRatio;
 	uint16_t	convState;
-	mutex		fibProtector;
+	mutable mutex		fibProtector;
 	fib_processor	fibProcessor;
 	uint8_t		PRBS [768];
 	uint8_t		shiftRegister [9];

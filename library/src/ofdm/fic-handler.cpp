@@ -230,10 +230,15 @@ void	ficHandler::dataforDataService	(std::string &s, packetdata *d, int c) {
 	fibProtector. unlock ();
 }
 
-int32_t	ficHandler::get_CIFcount	(void) {
-	fibProtector. lock ();
+int32_t	ficHandler::get_CIFcount	(void) const {
+	// no lock, because using std::atomic<> in fib_processor class
 	int32_t r = fibProcessor. get_CIFcount();
-	fibProtector. unlock ();
+	return r;
+}
+
+bool	ficHandler::has_CIFcount	(void) const {
+	// no lock, because using std::atomic<> in fib_processor class
+	bool r = fibProcessor. has_CIFcount();
 	return r;
 }
 
@@ -268,18 +273,16 @@ std::complex<float> result;
 uint8_t ficHandler::getECC	(bool *success) {
 uint8_t result;
 
-	fibProtector. lock ();
+	// no lock, because using std::atomic<> in fib_processor class
 	result = fibProcessor. getECC (success);
-	fibProtector. unlock ();
 	return result;
 }
 
 uint8_t ficHandler::getInterTabId	(bool *success) {
 uint8_t result;
 
-	fibProtector. lock ();
+	// no lock, because using std::atomic<> in fib_processor class
 	result = fibProcessor.getInterTabId(success);
-	fibProtector. unlock ();
 	return result;
 }
 

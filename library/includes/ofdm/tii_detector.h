@@ -34,13 +34,16 @@ public:
 		TII_Detector	(uint8_t dabMode);
 		~TII_Detector	(void);
 	void	reset		(void);
-	void	addBuffer	(std::vector<std::complex<float>>, float alfa = -1.0F);
+	void	addBuffer	(std::vector<std::complex<float>>, float alfa = -1.0F, int32_t cifCounter =-1);
+	inline unsigned	getNumBuffers() const { return numUsedBuffers; }
 	int16_t	find_C		(int16_t);
 	void	processNULL	(int16_t *, int16_t *);
+	void	processNULL_ex (int *pNumOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *outNxtSNR);
 
 private:
 	dabParams		params;
 	fft_handler		my_fftHandler;
+	unsigned		numUsedBuffers;
 	int16_t			T_u;
 	int16_t			carriers;
 	bool			ind;
@@ -48,6 +51,12 @@ private:
 	std::vector<complex<float> >	theBuffer;
 	std::vector<float>	window;
 	std::vector<complex<float> >	refTable;
+public:
+	float		P_allAvg[2048];
+private:
+	float		P_tmpNorm[2048];
+	float		P_avg[384];		// 8 groups per 24*2 carriers = 384 carriers
+
 	bool		isFirstAdd;
 	int16_t		fillCount;
 	int16_t		A		(uint8_t, uint8_t c,

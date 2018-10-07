@@ -21,8 +21,31 @@
  */
 
 #include	"tii_detector.h"
+
+#include <utility>
+#include <numeric>
+
 #include	<stdio.h>
 #include	<inttypes.h>
+
+// configure / adapt these
+#define MIN_SNR_POWER_RATIO		3.0F	/* 3.0 == 4.7 dB */
+#define MAX_NUM_TII				7		/* evaluate up to 7 TII-IDs */
+#define NUM_MINS_FOR_NOISE		4		/* use lowest 4 carrier pairs to determine noise level */
+
+#define OUT_STAT			0
+#define LOG_WIN_SUM			0
+
+
+// NOT for configuration - just avoid magic numbers in code
+#define NUM_GROUPS				8
+#define NUM_SUBIDS				24
+#define NUM_TII_EVAL_CARRIERS	( NUM_GROUPS * NUM_SUBIDS * 2 )		/* = 384 */
+#define NUM_SUBIDS_IN_PATTERN	4		/* 8 groups in total. but only 4 active */
+#define MIN_SNR				1E-20F	/* -200 dB */
+#define MAX_SNR				1E20F	/* +200 dB */
+
+
 //
 //	Transmitter Identification Info is carrier in the null period
 //	of a DAB frame. In case the FIB's carry information on the
@@ -49,26 +72,46 @@
 //
 //	The constructor of the class generates the patterns, according
 //	to the algorithm in the standard.
+
+// forward declaration
+static void initInvTable();
+
+
 		TII_Detector::TII_Detector (uint8_t dabMode):
 	                                          phaseTable (dabMode),
 	                                          params (dabMode),
 	                                          my_fftHandler (dabMode) {
-int16_t	p, c, k;
 int16_t	i;
 float	Phi_k;
+double	winSum = 0.0;
+double	winElem;
 
 	this	-> T_u		= params. get_T_u ();
 	carriers		= params. get_carriers ();
 	theBuffer. resize	(T_u);
+
 	fillCount		= 0;
 	fft_buffer		= my_fftHandler. getVector ();	
 	isFirstAdd = true;
+	numUsedBuffers = 0;
 
 	window. resize 		(T_u);
-	for (i = 0; i < T_u; i ++)
-	   window [i]  = (0.42 -
+
+	for (i = 0; i < T_u; i ++) {
+	   winElem  = (0.42 -
                     0.5 * cos (2 * M_PI * (float)i / T_u) +
                     0.08 * cos (4 * M_PI * (float)i / T_u));
+	   winSum += winElem;
+	}
+	for (i = 0; i < T_u; i ++) {
+	   winElem  = (0.42 -
+                    0.5 * cos (2 * M_PI * (float)i / T_u) +
+                    0.08 * cos (4 * M_PI * (float)i / T_u));
+	   window [i] = winElem / winSum;
+	}
+#if LOG_WIN_SUM
+	fprintf(stderr, "TII_Detector: T_u %d, window sum was: %f\n", T_u, winSum);
+#endif
 
         refTable.               resize (T_u);
 
@@ -81,6 +124,8 @@ float	Phi_k;
         }
 
 	createPattern (dabMode);
+
+	initInvTable();
 }
 
 		TII_Detector::~TII_Detector (void) {
@@ -96,8 +141,10 @@ float	Phi_k;
 //
 //	a (b, p) = getBit (table [p], b);
 
+// groupPattern_bitset = table[ mainId ]
 static
 uint8_t table [] = {
+	// octal	binary					index
 	0017,		// 0 0 0 0 1 1 1 1		0
 	0027,		// 0 0 0 1 0 1 1 1		1
 	0033,		// 0 0 0 1 1 0 1 1		2
@@ -176,6 +223,22 @@ uint8_t table [] = {
 	0360		// 1 1 1 1 0 0 0 0		69
 };
 
+
+// groupPattern_bitset = table[ mainId ]
+// mainId = invTable[ groupPattern_bitset ]
+static
+uint8_t invTable [256];
+
+static
+void initInvTable() {
+	int	i;
+	for (i = 0; i < 256; ++i)
+	    invTable[i] = 0;
+	for (i = 0; i < 70; ++i)
+	    invTable[ table[i] ] = i;
+}
+
+
 static
 uint8_t bits [] = {128, 64, 32, 16, 8, 4, 2, 1};
 static inline
@@ -214,6 +277,7 @@ int16_t	b;
 }
 
 int16_t	TII_Detector::A_mode_4 (uint8_t c, uint8_t p, int16_t k) {
+	return 0;	// avoid compiler warning
 }
 
 int16_t	TII_Detector::A_mode_1 (uint8_t c, uint8_t p, int16_t k) {
@@ -245,28 +309,72 @@ int16_t res	= 0;
 //	the pattern and compute the C
 
 void	TII_Detector::reset (void) {
-	memset (theBuffer. data (), 0, T_u * sizeof (std::complex<float>));
 	isFirstAdd = true;
+	numUsedBuffers = 0;
 }
 
 //	To eliminate (reduce?) noise in the input signal, we might
 //	add a few spectra before computing (up to the user)
-void	TII_Detector::addBuffer (std::vector<std::complex<float>> v, float alfa) {
+void	TII_Detector::addBuffer (std::vector<std::complex<float>> v, float alfa, int32_t cifCounter) {
 int	i;
 
+	// apply reset()
+	if (isFirstAdd) {
+	   memset (theBuffer. data (), 0, T_u * sizeof (std::complex<float>));
+	   memset (&P_allAvg[0], 0, 2048 * sizeof(float));
+	}
+
+#if OUT_STAT
+	float timeMaxNorm = std::norm( v[0] );
+	for ( int j = 1; j < T_u; ++j ) {
+	   float n = std::norm( v[j] );
+	   if ( n > timeMaxNorm )
+	      timeMaxNorm = n;
+	}
+#endif
+
+	// windowing + FFT
 	for (i = 0; i < T_u; i ++)
 	   fft_buffer [i] = cmul (v [i], window [i]);
 	my_fftHandler. do_FFT ();
 
+
+	for ( int j = 0; j < T_u; ++j ) {
+	   P_tmpNorm[j] = std::norm( fft_buffer[j] );
+	}
+
+#if OUT_STAT
+	float specMaxNorm = std::norm( P_tmpNorm[0] );
+	for ( int j = 1; j < T_u; ++j ) {
+	   if ( P_tmpNorm[j] > specMaxNorm )
+	      specMaxNorm = P_tmpNorm[j];
+	}
+
+	float timeMag = sqrt( timeMaxNorm );
+	float specMag = sqrt( specMaxNorm );
+	fprintf(stderr, "TII_Detector addBuffer(): %d / %u: timeMax = %f  specMax = %f\n", cifCounter, numUsedBuffers, timeMag, specMag);
+	
+	if ( specMaxNorm > (32768.0F) ) {	// must be an error!  ( 128*128 *2 )
+	   fprintf(stderr, "TII_Detector addBuffer(): OVERFLOW! %d / %u: max norm() = %f\n", cifCounter, numUsedBuffers, specMaxNorm );
+	   return;		// do NOT use this spectrum
+	}
+#endif
+
 	if ( alfa < 0.0F || isFirstAdd ) {
+	    for ( int j = 0; j < T_u; ++j )
+	        P_allAvg[j] += P_tmpNorm[j];
 	    for (i = 0; i < T_u; i ++)
 	        theBuffer [i] += fft_buffer [(T_u / 2 + i) % T_u];
 	    isFirstAdd = false;
+	    ++numUsedBuffers;
 	} else {
 	    const float alpha = alfa;
 	    const float beta = 1.0F - alpha;
+	    for ( int j = 0; j < T_u; ++j )
+	        P_allAvg[j] = alpha * P_allAvg[j] + beta * P_tmpNorm[j];
 	    for (i = 0; i < T_u; i ++)
 	        theBuffer [i] = alpha * theBuffer [i] + beta * fft_buffer [(T_u / 2 + i) % T_u];
+	    ++numUsedBuffers;
 	}
 }
 
@@ -368,7 +476,7 @@ int16_t	altCarrier	= -1;
 //	fprintf (stderr, "startCarrier is %d, altCarrier %d\n",
 //	                         startCarrier, altCarrier);
 
-L1:
+
 	float  maxCorr = -1;
         *mainId = -1;
         *subId  = -1;
@@ -394,6 +502,187 @@ L1:
 //	                                 theTable [*mainId]. pattern);
 }
 
+
+static inline float powerRatio( float s, float n ) {
+	if ( s > n ) {
+	    if ( s > n * 1E20F )
+	        return 1E20F;
+	} else {
+	    if ( s * 1E20F < n )
+	        return 1E-20F;
+	}
+	return s / n;
+}
+
+static inline float powerLevel( float snr ) {
+	if ( snr >= 1E20 )
+	    return 200.0F;
+	else if ( snr <= 1E-20 )
+	    return -200.0;
+	return 10.0F * log10(snr);
+}
+
+
+void	TII_Detector::processNULL_ex (int *pNumOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *outNxtSNR) {
+	float	Psub[NUM_GROUPS][NUM_SUBIDS];	// power per subID per group
+	int		Csub[NUM_GROUPS][NUM_SUBIDS];	// subID in 0 .. 23 per group - when sorting powers Psub[][]
+	float	P_grpPairNoise[NUM_GROUPS];		// avg noise power per carrier-pair
+	int		numSubIDsInGroup[NUM_GROUPS];	// counter for possible subIDs in group
+	int		num_subIDs[NUM_SUBIDS];			// counter for possible subIDs over all groups
+	int		groupNo, i, j;
+
+	*pNumOut = 0;
+	if ( params.get_dabMode() != 1 )
+	    return;
+
+	// sum 4 times repeated spectrum of 384 carriers into P_avg[]
+	//   don't intermix with exponential averaging ..
+	{
+	   static int modeOneCarrierFFTidx[5] = {
+	      (-768 +2048) % 2048,
+	      (-384 +2048) % 2048,
+	      // center carrier 0 unused!
+	      (1 +2048) % 2048,
+	      (385 +2048) % 2048,
+	      (769 +2048) % 2048
+	   };
+
+	   for ( i = 0; i < 1; ++i ) {
+	      const int k = modeOneCarrierFFTidx[i];
+	      for ( int j = 0; j < NUM_TII_EVAL_CARRIERS; ++j )
+	         P_avg[j] = P_allAvg[k + j];
+	   }
+	   for ( i = 1; i < 4; ++i ) {
+	      const int k = modeOneCarrierFFTidx[i];
+	      for ( int j = 0; j < NUM_TII_EVAL_CARRIERS; ++j )
+	         P_avg[j] += P_allAvg[k + j];
+	   }
+	}
+
+	// initialize num_subIDs[]
+	for ( i = 0; i < NUM_SUBIDS; ++i )
+	    num_subIDs[i] = 0;
+
+	// determine possible subIDs per group
+	for ( groupNo = 0; groupNo < NUM_GROUPS; ++groupNo ) {
+	    const int grpCarrierOff = groupNo * ( NUM_SUBIDS * 2 );
+	    float	* P = &Psub[groupNo][0];
+	    int		* C = &Csub[groupNo][0];
+	    // sum power for possible carrier pairs per group
+	    for ( i = 0; i < NUM_SUBIDS; ++i ) {
+	        P[i] = P_avg[ grpCarrierOff +2*i ] + P_avg[ grpCarrierOff +2*i +1 ];
+	        C[i] = grpCarrierOff +2*i;
+	    }
+	    // bubble sort 4 smallest elements to the end
+	    //   using bubble sort cause we don't want to sort all
+	    for ( j = 0; j < NUM_MINS_FOR_NOISE; ++j ) {
+	        for ( i = 0; i < NUM_SUBIDS -2 -j; ++i ) {
+	            if ( P[i] < P[i+1] ) {
+	                std::swap( P[i], P[i+1] );
+	                std::swap( C[i], C[i+1] );
+	            }
+	        }
+	    }
+	    // avg noise power per carrier-pair - of sorted 4 least powers
+	    P_grpPairNoise[groupNo] = std::accumulate( P +(NUM_SUBIDS -NUM_MINS_FOR_NOISE), P +NUM_SUBIDS, 0.0F ) / NUM_MINS_FOR_NOISE;
+	    
+	    numSubIDsInGroup[groupNo] = 0;	// init counter for possible subIDs in group
+	    // bubble sort 7 biggest elements to the begin
+	    for ( j = 0; j < MAX_NUM_TII; ++j ) {
+	        // array size is 20, cause lowest 4 elements are already at the tail (of 24 elements)
+	        for ( i = NUM_SUBIDS -NUM_MINS_FOR_NOISE -2; i >= j; --i ) {
+	            if ( P[i+1] > P[i] ) {
+	                std::swap( P[i], P[i+1] );
+	                std::swap( C[i], C[i+1] );
+	            }
+	        }
+	        if ( ( P[j] <  MIN_SNR_POWER_RATIO * P_grpPairNoise[groupNo] )
+	          || ( P_avg[ C[j]    ] < (MIN_SNR_POWER_RATIO / 2.0F) * P_grpPairNoise[groupNo] )
+	          || ( P_avg[ C[j] +1 ] < (MIN_SNR_POWER_RATIO / 2.0F) * P_grpPairNoise[groupNo] ) )
+	            break;
+	        ++numSubIDsInGroup[groupNo];
+	        C[j] = ( C[j] - grpCarrierOff ) / 2;	// => C[j] in 0 .. 23
+	        ++num_subIDs[ C[j] ];
+	    }
+	}
+
+	// per possible subID .. determine mainID from energy pattern over groups
+	for ( int subID = 0; subID < NUM_SUBIDS; ++subID ) {
+	    if ( num_subIDs[subID] < NUM_SUBIDS_IN_PATTERN )	// skip if not found minimum 4 times
+	        continue;
+
+	    float	subP[NUM_GROUPS];			// power of subID in group with subID
+	    int		subGrpNo[NUM_GROUPS];		// groupNo with subID
+	    int		numGroupsWithSubID = 0;
+
+	    for ( groupNo = 0; groupNo < NUM_GROUPS; ++groupNo ) {
+	        for ( i = 0; i < numSubIDsInGroup[groupNo]; ++i ) {
+	            if ( Csub[groupNo][i] == subID ) {
+	                // add groups to list of candidates for subID
+	                subP[numGroupsWithSubID] = Psub[groupNo][i];
+	                subGrpNo[numGroupsWithSubID] = groupNo;
+	                ++numGroupsWithSubID;
+	                break;
+	            }
+	        }
+	    }
+
+	    if ( numGroupsWithSubID < NUM_SUBIDS_IN_PATTERN )
+	        continue;
+
+	    int groupPatternBits = 0;
+	    float sumPsig = 0.0F;
+	    float sumPnoise = 0.0F;
+	    float maxPnoise = -1.0F;
+	    float minGrpSNR = - MIN_SNR;
+	    // bubble sort 4 + 1 maxima to begin
+	    for ( j = 0; j <= NUM_SUBIDS_IN_PATTERN; ++j ) {
+	        for ( i = numGroupsWithSubID -2; i >= j; --i ) {
+	            if ( subP[i+1] > subP[i] ) {
+	                std::swap( subP[i], subP[i+1] );
+	                std::swap( subGrpNo[i], subGrpNo[i+1] );
+	            }
+	        }
+	        if ( j < NUM_SUBIDS_IN_PATTERN ) {
+	            groupNo = subGrpNo[j];
+	            groupPatternBits |= ( 1 << ( NUM_GROUPS -1 -groupNo ) );
+	            sumPsig += subP[j];
+	            sumPnoise += P_grpPairNoise[ groupNo ];
+	            if ( P_grpPairNoise[ groupNo ] > maxPnoise )
+	                maxPnoise = P_grpPairNoise[ groupNo ];
+#if 1
+                float grpSNR = powerRatio( subP[j], P_grpPairNoise[ groupNo ] );
+	            if ( grpSNR < minGrpSNR || minGrpSNR < 0.0F )
+	                minGrpSNR = grpSNR;
+#endif
+	        }
+	    }
+	    const float minPsig = subP[NUM_SUBIDS_IN_PATTERN -1];
+
+	    // output if above minimum SNR
+	    float minSNR = powerRatio( minPsig, maxPnoise );
+	    //float minSNR = minGrpSNR;
+	    if ( minSNR >= MIN_SNR_POWER_RATIO ) {
+	
+	        // outTii[ *pNumOut ] = 1000 * groupPatternBits + subID;
+	        outTii[ *pNumOut ] = 100 * int(invTable[ groupPatternBits ]) + subID;
+	        
+	        float avgSNR = powerRatio( sumPsig, sumPnoise );
+	        
+	        float nextMainSNR = MAX_SNR;	// max +200 dB as default, if there is no other group
+	        if ( numGroupsWithSubID > NUM_SUBIDS_IN_PATTERN )
+	            nextMainSNR = powerRatio( subP[NUM_SUBIDS_IN_PATTERN], P_grpPairNoise[ subGrpNo[NUM_SUBIDS_IN_PATTERN] ] );
+
+	        outAvgSNR[ *pNumOut ] = powerLevel(avgSNR);
+	        //outMinSNR[ *pNumOut ] = powerLevel(minSNR);
+	        outMinSNR[ *pNumOut ] = powerLevel(minGrpSNR);
+	        outNxtSNR[ *pNumOut ] = powerLevel(nextMainSNR);
+	        ++(*pNumOut);
+	    }
+	}
+}
+
+
 //
 //
 //	It turns out that the location "startIndex + k * 48"
@@ -407,12 +696,10 @@ L1:
 float	TII_Detector::correlate (std::vector<complex<float>> v,
 	                         int16_t	startCarrier,
 	                         uint64_t	pattern) {
-static bool flag = true;
 int16_t	realIndex;
 int16_t	i;
 int16_t	carrier;
 float	s1	= 0;
-float	avg	= 0;
 
 	if (pattern == 0)
 	   return 0;

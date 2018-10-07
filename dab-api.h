@@ -140,7 +140,7 @@ typedef	struct {
 
 //	TII
 	typedef void (*tii_t)(int16_t mainId, int16_t subId, unsigned num, void *);
-
+	typedef void (*tii_ex_t)(int numOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *outNxtSNR, unsigned numAvg, const float *Pavg, int Pavg_T_u, void *userData);
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -228,9 +228,10 @@ int32_t dab_getSId		(void *, const char*);
 std::string dab_getserviceName	(void *, int32_t);
 
 //	set/activate TII processing - not with dabInit() - for compatiblity
-void	dab_setTII_handler(void *, tii_t tii_Handler, int tii_framedelay, float alfa, int resetFrameCount);
+void	dab_setTII_handler(void *, tii_t tii_Handler, tii_ex_t tii_ExHandler, int tii_framedelay, float alfa, int resetFrameCount);
 
 }
+
 //
 //	Additions, suggested by Hayati
 void	dab_getCoordinates (void *, int16_t mainId, int16_t subId,

@@ -90,8 +90,8 @@ bool	is_dataService	(void *Handle, const char *name) {
 	                               PACKET_SERVICE;
 }
 
-void	dab_setTII_handler(void *Handle, tii_t tii_Handler, int tii_framedelay, float alfa, int resetFrameCount) {
-	return ((dabProcessor *)Handle) -> setTII_handler (tii_Handler, tii_framedelay, alfa, resetFrameCount);
+void	dab_setTII_handler(void *Handle, tii_t tii_Handler, tii_ex_t tii_ExHandler, int tii_framedelay, float alfa, int resetFrameCount) {
+	return ((dabProcessor *)Handle) -> setTII_handler (tii_Handler, tii_ExHandler, tii_framedelay, alfa, resetFrameCount);
 }
 
 //	functions contributed by Hayati Ayguen

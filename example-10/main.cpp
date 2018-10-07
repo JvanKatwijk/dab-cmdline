@@ -65,6 +65,8 @@ using std::endl;
 #include <map>
 #include <algorithm>
 
+#define LOG_EX_TII_SPECTRUM		0
+#define MAX_EX_TII_BUFFER_SIZE		16
 
 std::string prepCsvStr( const std::string & s ) {
 	std::string r = "\"";
@@ -106,7 +108,19 @@ struct MyGlobals {
 };
 
 MyGlobals globals;
+
+
+struct ExTiiInfo {
+	ExTiiInfo() : numOccurences(0), maxAvgSNR(-200.0F), maxMinSNR(-200.0F), maxNxtSNR(-200.0F) { }
+
+	int numOccurences;
+	float	maxAvgSNR;
+	float	maxMinSNR;
+	float	maxNxtSNR;
+};
+
 std::map<int, int> tiiMap;
+std::map<int, ExTiiInfo> tiiExMap;
 int numAllTii = 0;
 
 
@@ -392,6 +406,79 @@ void tii(int16_t mainId, int16_t subId, unsigned tii_num, void *ctx)
 }
 
 
+#if LOG_EX_TII_SPECTRUM
+static FILE * powerFile = nullptr;
+static float bufferedP[MAX_EX_TII_BUFFER_SIZE][2048];
+static int numBufferedP = 0;
+static int gPavg_T_u = 0;
+#endif
+
+static
+void tiiEx( int numOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *outNxtSNR, unsigned numAvg, const float *Pavg, int Pavg_T_u, void *ctx)
+{
+	int i;
+	if (!numOut)
+	   return;
+	for ( i = 0; i < numOut; ++i ) {
+	   ++numAllTii;
+	   fprintf(stderr, "%s no %d: %d (avg %.1f dB, min %.1f, next %.1f dB, # %u)"
+	      , (i==0 ? "tii:":","), i+1, outTii[i], outAvgSNR[i], outMinSNR[i], outNxtSNR[i], numAvg );
+	}
+	if (scanOnly) {
+	   fprintf(stderr, "  =>  ");
+	   for ( i = 0; i < numOut; ++i ) {
+	      ExTiiInfo & ei = tiiExMap[ outTii[i] ];
+	      ++ ei.numOccurences;
+	      if ( outAvgSNR[i] > ei.maxAvgSNR )
+	         ei.maxAvgSNR = outAvgSNR[i];
+	      if ( outMinSNR[i] > ei.maxMinSNR )
+	         ei.maxMinSNR = outMinSNR[i];
+	      if ( outNxtSNR[i] > ei.maxNxtSNR )
+	         ei.maxNxtSNR = outNxtSNR[i];
+	      fprintf(stderr, "# %d (%d)%s", ei.numOccurences, outTii[i], (i==(numOut -1) ? "\n":", ") );
+	   }
+#if LOG_EX_TII_SPECTRUM
+	   if ( Pavg && numBufferedP < MAX_EX_TII_BUFFER_SIZE ) {
+	      for (int i = 0; i < Pavg_T_u; ++i)
+	         bufferedP[numBufferedP][i] = Pavg[i];
+	      gPavg_T_u = Pavg_T_u;
+	      ++numBufferedP;
+	   }
+#endif
+	} else {
+	   fprintf(stderr, "\n");
+	}
+}
+
+#if LOG_EX_TII_SPECTRUM
+
+static void writeTiiExBuffer() {
+	if (!powerFile) {
+	   powerFile = fopen("power.csv", "w");
+	}
+	if (powerFile) {
+	   if ( !numBufferedP ) {
+	      fprintf(powerFile, "#0\n");
+	   } else {
+	      for (int i = 0; i < gPavg_T_u; ++i) {
+	         int j = ( i + gPavg_T_u / 2 ) % gPavg_T_u;	// 1024 .. 2048, 0 .. 1023
+	         int k = ( j < gPavg_T_u / 2 ) ? j : ( j - gPavg_T_u);	// -1024 .. +1024
+	         fprintf(powerFile, "%d, ", k);
+	         for (int col = 0; col < numBufferedP; ++col) {
+	            float level = 10.0*log10(bufferedP[col][j]);
+	            fprintf(powerFile, "%f,", level );
+	         }
+	         fprintf(powerFile, "\n");
+	      }
+	   }
+	   fflush(powerFile);
+	   fclose(powerFile);
+	}
+}
+
+#endif
+
+
 static
 void	fibQuality	(int16_t q, void *ctx) {
 	if (stat_gotFic) {
@@ -490,6 +577,7 @@ bool		printAsCSV	= false;
 int		tii_framedelay	= 10;
 float		tii_alfa	= 0.9F;
 int		tii_resetFrames	= 10;
+bool		useExTii	= false;
 
 int	opt;
 struct sigaction sigact;
@@ -517,11 +605,11 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Qct:a:r:")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Qct:a:r:x")) != -1) {
 #elif   HAVE_RTL_TCP
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Qct:a:r:")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Qct:a:r:x")) != -1) {
 #else
-    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:ct:a:r:")) != -1) {
+    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:ct:a:r:x")) != -1) {
 #endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
@@ -560,6 +648,11 @@ bool	err;
 	      case 'r':
 	         tii_resetFrames = atoi(optarg);
 	         fprintf(stderr, "read option -r : tii resetFrames %d\n", tii_resetFrames);
+	         break;
+
+	      case 'x':
+	         useExTii = !useExTii;
+	         fprintf(stderr, "read option -x : using %s Tii algorithm\n", (useExTii ? "extended" : "Jan's") );
 	         break;
 
 	      case 'M':
@@ -698,7 +791,11 @@ bool	err;
 	   exit (4);
 	}
 
-	dab_setTII_handler(theRadio, tii, tii_framedelay, tii_alfa, tii_resetFrames );
+	if ( useExTii )
+	   dab_setTII_handler(theRadio, nullptr, tiiEx, tii_framedelay, tii_alfa, tii_resetFrames );
+	else
+	   dab_setTII_handler(theRadio, tii, nullptr, tii_framedelay, tii_alfa, tii_resetFrames );
+
 
 	theDevice	-> setGain (theGain);
 	if (autogain)
@@ -898,6 +995,12 @@ static	int count	= 10;
 	         sleepMillis (T_GRANULARITY);
 	         printCollectedCallbackStat("E: loading ..");
 	      }
+	      
+#if LOG_EX_TII_SPECTRUM
+	      if (useExTii)
+	         writeTiiExBuffer();
+#endif
+
 	   }
 	}
 	else {	// scan only
@@ -909,17 +1012,25 @@ static	int count	= 10;
 	   const uint8_t interTabId =
 	               dab_getInternationalTabId (theRadio, &gotInterTabId);
 	   const std::string comma = ",";
-
+	
+#if LOG_EX_TII_SPECTRUM
+	   if (useExTii)
+	      writeTiiExBuffer();
+#endif
+	
 	   std::string ensembleCols;
+	   std::string ensembleComm;
 	   {
 	      std::stringstream sidStrStream;
 	      sidStrStream << std::hex << ensembleIdentifier;
 	      ensembleCols = comma + "0x" + sidStrStream.str();
+	      ensembleComm = comma + "SID";
 	      if ( ensembleRecognized. load () ) {
 	          ensembleCols += comma + prepCsvStr( ensembleName );
 	      } else {
 	          ensembleCols += comma + prepCsvStr( "unknown ensemble" );
 	      }
+	      ensembleComm = comma + "ensembleName";
 	   }
 
 	   int mostTii = -1;
@@ -933,27 +1044,62 @@ static	int count	= 10;
 
 	   if (printAsCSV) {
 	      std::string outLine = std::to_string( secsEpoch );
+	      std::string outComm = std::to_string( secsEpoch );
 	      outLine += comma + "CSV_ENSEMBLE";
+	      outComm += comma + "#CSV_ENSEMBLE";
 	      outLine += comma + prepCsvStr( theChannel );
+	      outComm += comma + "channel";
 	      outLine += ensembleCols;
+	      outComm += ensembleComm;
 
 	      outLine += comma + prepCsvStr( "snr" );
+	      outComm += comma + "snr";
 	      outLine += comma + std::to_string( int (stat_minSnr) );
+	      outComm += comma + "min_snr";
 	      outLine += comma + std::to_string( int (stat_maxSnr) );
+	      outComm += comma + "max_snr";
 	      outLine += comma + std::to_string( int (numSnr) );
+	      outComm += comma + "num_snr";
 	      outLine += comma + std::to_string( int (avgSnr) );
+	      outComm += comma + "avg_snr";
 
 	      outLine += comma + prepCsvStr( "fic" );
+	      outComm += comma + "fic";
 	      outLine += comma + std::to_string( int (stat_minFic) );
+	      outComm += comma + "min_fic";
 	      outLine += comma + std::to_string( int (stat_maxFic) );
+	      outComm += comma + "max_fic";
 	      outLine += comma + std::to_string( int (numFic) );
+	      outComm += comma + "num_fic";
 	      outLine += comma + std::to_string( int (avgFic) );
+	      outComm += comma + "avg_fic";
 	      
 	      outLine += comma + prepCsvStr( "tii" );
-	      outLine += comma + std::to_string( int (numMostTii) );
-	      outLine += comma + std::to_string( int (numAllTii) );
-	      outLine += comma + std::to_string( int (mostTii) );
-	      
+	      outComm += comma + "tii";
+	      if (useExTii) {
+	         for (auto const& x : tiiExMap) {
+	            outLine += comma + std::to_string( x.first );
+	            outComm += comma + "tii_id";
+	            outLine += comma + std::to_string( x.second.numOccurences );
+	            outComm += comma + "num";
+	            outLine += comma + std::to_string( int( ( x.second.maxAvgSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.second.maxAvgSNR ) );
+	            outComm += comma + "max(avg_snr)";
+	            outLine += comma + std::to_string( int( ( x.second.maxMinSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.second.maxMinSNR ) );
+	            outComm += comma + "max(min_snr)";
+	            outLine += comma + std::to_string( int( ( x.second.maxNxtSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.second.maxNxtSNR ) );
+	            outComm += comma + "max(next_snr)";
+	            outLine += comma;
+	            outComm += comma;
+	         }
+	      } else {
+	         outLine += comma + std::to_string( int (numMostTii) );
+	         outComm += comma + "tii_id";
+	         outLine += comma + std::to_string( int (numAllTii) );
+	         outComm += comma + "num_all";
+	         outLine += comma + std::to_string( int (mostTii) );
+	         outComm += comma + "num_id";
+	      }
+	      fprintf(infoStrm, "%s\n", outComm.c_str() );
 	      fprintf(infoStrm, "%s\n", outLine.c_str() );
 	   }
 

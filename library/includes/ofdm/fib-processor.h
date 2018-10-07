@@ -28,6 +28,7 @@
 #include	<stdio.h>
 #include	<string>
 #include	<mutex>
+#include	<atomic>
 #include	"dab-api.h"
 #include	"dab-constants.h"
 #include	"tii_table.h"
@@ -110,7 +111,8 @@ public:
 		get_coordinates	(int16_t, int16_t, bool *);
 
 	void	reset			(void);
-	int32_t	get_CIFcount		(void);
+	int32_t	get_CIFcount		(void) const;
+	bool	has_CIFcount		(void) const;
 	void	newFrame		(void);
 
 //	Extended functions, contributed by Hayati Ayguen
@@ -136,7 +138,8 @@ private:
         void            bind_packetService (int8_t,
                                             uint32_t, int16_t,
                                             int16_t, int16_t, int16_t);
-	int32_t		CIFcount;
+	std::atomic<int32_t>		CIFcount;
+	std::atomic<bool>		hasCIFcount;
 	void		process_FIG0		(uint8_t *);
 	void		process_FIG1		(uint8_t *);
 	void		FIG0Extension0		(uint8_t *);
@@ -146,26 +149,26 @@ private:
 	void		FIG0Extension4		(uint8_t *);
 	void		FIG0Extension5		(uint8_t *);
 	void		FIG0Extension6		(uint8_t *);
-	void            FIG0Extension7          (uint8_t *);
-        void            FIG0Extension8          (uint8_t *);
-        void            FIG0Extension9          (uint8_t *);
-        void            FIG0Extension10         (uint8_t *);
-        void            FIG0Extension11         (uint8_t *);
-        void            FIG0Extension12         (uint8_t *);
-        void            FIG0Extension13         (uint8_t *);
-        void            FIG0Extension14         (uint8_t *);
-        void            FIG0Extension15         (uint8_t *);
-        void            FIG0Extension16         (uint8_t *);
-        void            FIG0Extension17         (uint8_t *);
-        void            FIG0Extension18         (uint8_t *);
-        void            FIG0Extension19         (uint8_t *);
-        void            FIG0Extension20         (uint8_t *);
-        void            FIG0Extension21         (uint8_t *);
-        void            FIG0Extension22         (uint8_t *);
-        void            FIG0Extension23         (uint8_t *);
-        void            FIG0Extension24         (uint8_t *);
-        void            FIG0Extension25         (uint8_t *);
-        void            FIG0Extension26         (uint8_t *);
+	void		FIG0Extension7		(uint8_t *);
+	void		FIG0Extension8		(uint8_t *);
+	void		FIG0Extension9		(uint8_t *);
+	void		FIG0Extension10		(uint8_t *);
+	void		FIG0Extension11		(uint8_t *);
+	void		FIG0Extension12		(uint8_t *);
+	void		FIG0Extension13		(uint8_t *);
+	void		FIG0Extension14		(uint8_t *);
+	void		FIG0Extension15		(uint8_t *);
+	void		FIG0Extension16		(uint8_t *);
+	void		FIG0Extension17		(uint8_t *);
+	void		FIG0Extension18		(uint8_t *);
+	void		FIG0Extension19		(uint8_t *);
+	void		FIG0Extension20		(uint8_t *);
+	void		FIG0Extension21		(uint8_t *);
+	void		FIG0Extension22		(uint8_t *);
+	void		FIG0Extension23		(uint8_t *);
+	void		FIG0Extension24		(uint8_t *);
+	void		FIG0Extension25		(uint8_t *);
+	void		FIG0Extension26		(uint8_t *);
 
 	int16_t		HandleFIG0Extension1	(uint8_t *,
 	                                         int16_t, uint8_t);
@@ -184,13 +187,13 @@ private:
 	serviceId	listofServices [64];
 	tii_table	coordinates;
 
-	uint8_t         ecc_byte;
-        uint8_t         interTabId;
+	std::atomic<uint8_t>	ecc_byte;
+	std::atomic<uint8_t>	interTabId;
 
-        bool            dateFlag;
-        bool            firstTime;
-        bool            ecc_Present;
-        bool            interTab_Present;
+	bool	dateFlag;
+	bool	firstTime;
+	std::atomic<bool>	ecc_Present;
+	std::atomic<bool>	interTab_Present;
 
 	bool		isSynced;
 	mutex		fibLocker;
