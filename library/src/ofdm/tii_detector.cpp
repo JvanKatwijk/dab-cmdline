@@ -233,7 +233,7 @@ static
 void initInvTable() {
 	int	i;
 	for (i = 0; i < 256; ++i)
-	    invTable[i] = 0;
+	    invTable[i] = 100;		// initialize with an invalid mainId!
 	for (i = 0; i < 70; ++i)
 	    invTable[ table[i] ] = i;
 }
