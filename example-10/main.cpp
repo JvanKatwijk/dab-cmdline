@@ -63,6 +63,7 @@ using std::endl;
 
 #include <unordered_map>
 #include <map>
+#include <vector>
 #include <algorithm>
 
 #define LOG_EX_TII_SPECTRUM		0
@@ -111,12 +112,24 @@ MyGlobals globals;
 
 
 struct ExTiiInfo {
-	ExTiiInfo() : numOccurences(0), maxAvgSNR(-200.0F), maxMinSNR(-200.0F), maxNxtSNR(-200.0F) { }
+	ExTiiInfo() : tii(100), numOccurences(0), maxAvgSNR(-200.0F), maxMinSNR(-200.0F), maxNxtSNR(-200.0F) { }
 
+	int tii;
 	int numOccurences;
 	float	maxAvgSNR;
 	float	maxMinSNR;
 	float	maxNxtSNR;
+
+	bool operator < ( const ExTiiInfo & b ) const {
+	   const ExTiiInfo & a = *this;
+	   const int minSNR_a = int( ( a.maxMinSNR < 0.0F ? -0.5F : 0.5F ) + a.maxMinSNR * 10.0F );
+	   const int minSNR_b = int( ( b.maxMinSNR < 0.0F ? -0.5F : 0.5F ) + b.maxMinSNR * 10.0F );
+	   if (minSNR_a != minSNR_b)
+	      return (minSNR_a > minSNR_b);
+	   const int avgSNR_a = int( ( a.maxAvgSNR < 0.0F ? -0.5F : 0.5F ) + a.maxAvgSNR * 10.0F );
+	   const int avgSNR_b = int( ( b.maxAvgSNR < 0.0F ? -0.5F : 0.5F ) + b.maxAvgSNR * 10.0F );
+	   return (avgSNR_a > avgSNR_b);
+	}
 };
 
 std::map<int, int> tiiMap;
@@ -428,6 +441,7 @@ void tiiEx( int numOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *
 	   fprintf(stderr, "  =>  ");
 	   for ( i = 0; i < numOut; ++i ) {
 	      ExTiiInfo & ei = tiiExMap[ outTii[i] ];
+	      ei.tii = outTii[i];
 	      ++ ei.numOccurences;
 	      if ( outAvgSNR[i] > ei.maxAvgSNR )
 	         ei.maxAvgSNR = outAvgSNR[i];
@@ -1077,16 +1091,22 @@ static	int count	= 10;
 	      outLine += comma + prepCsvStr( "tii" );
 	      outComm += comma + "tii";
 	      if (useExTii) {
+	         std::vector<ExTiiInfo> tiiExVec;
+	         tiiExVec.reserve( tiiExMap.size() ); 
 	         for (auto const& x : tiiExMap) {
-	            outLine += comma + std::to_string( x.first );
+	             tiiExVec.push_back(x.second);
+	         }
+	         std::sort(tiiExVec.begin(), tiiExVec.end());
+	         for (auto const& x : tiiExVec) {
+	            outLine += comma + std::to_string( x.tii );
 	            outComm += comma + "tii_id";
-	            outLine += comma + std::to_string( x.second.numOccurences );
+	            outLine += comma + std::to_string( x.numOccurences );
 	            outComm += comma + "num";
-	            outLine += comma + std::to_string( int( ( x.second.maxAvgSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.second.maxAvgSNR ) );
+	            outLine += comma + std::to_string( int( ( x.maxAvgSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.maxAvgSNR ) );
 	            outComm += comma + "max(avg_snr)";
-	            outLine += comma + std::to_string( int( ( x.second.maxMinSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.second.maxMinSNR ) );
+	            outLine += comma + std::to_string( int( ( x.maxMinSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.maxMinSNR ) );
 	            outComm += comma + "max(min_snr)";
-	            outLine += comma + std::to_string( int( ( x.second.maxNxtSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.second.maxNxtSNR ) );
+	            outLine += comma + std::to_string( int( ( x.maxNxtSNR < 0.0F ? -0.5F : 0.5F ) + 10.0F * x.maxNxtSNR ) );
 	            outComm += comma + "max(next_snr)";
 	            outLine += comma;
 	            outComm += comma;
