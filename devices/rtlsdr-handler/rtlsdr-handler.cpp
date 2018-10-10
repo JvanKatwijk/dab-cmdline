@@ -68,7 +68,8 @@ void	controlThread (rtlsdrHandler *theStick) {
 	                              int16_t	ppmCorrection,
 	                              int16_t	gain,
 	                              bool	autogain,
-	                              uint16_t	deviceIndex) {
+	                              uint16_t	deviceIndex,
+	                              const char *	deviceSerial ) {
 int16_t	deviceCount;
 int32_t	r;
 int16_t	i;
@@ -118,6 +119,15 @@ int16_t	i;
 	}
 //
 //	OK, now open the hardware
+	if ( deviceSerial ) {
+		int		resultDevIdx = this -> rtlsdr_get_index_by_serial(deviceSerial);
+		if ( resultDevIdx >= 0 ) {
+			this	-> deviceIndex	= resultDevIdx;
+			deviceIndex		= resultDevIdx;
+		}
+		else
+			this	-> deviceIndex	= uint16_t(-1);
+	}
 	r			= this -> rtlsdr_open (&device, deviceIndex);
 	if (r < 0) {
 	   fprintf (stderr, "Opening rtlsdr failed, fatal\n");
@@ -263,6 +273,12 @@ int32_t	rtlsdrHandler::Samples	(void) {
 bool	rtlsdrHandler::load_rtlFunctions (void) {
 //
 //	link the required procedures
+	rtlsdr_get_index_by_serial = (pfnrtlsdr_get_index_by_serial)
+	                       GETPROCADDRESS (Handle, "rtlsdr_get_index_by_serial");
+	if (rtlsdr_get_index_by_serial == NULL) {
+	   fprintf (stderr, "Could not find rtlsdr_get_index_by_serial\n");
+	   return false;
+	}
 	rtlsdr_open	= (pfnrtlsdr_open)
 	                       GETPROCADDRESS (Handle, "rtlsdr_open");
 	if (rtlsdr_open == NULL) {

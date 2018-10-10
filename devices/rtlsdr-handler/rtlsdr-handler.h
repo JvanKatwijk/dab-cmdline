@@ -34,7 +34,8 @@ typedef	void *HINSTANCE;
 typedef	struct rtlsdr_dev rtlsdr_dev_t;
 extern "C"  {
 typedef	void (*rtlsdr_read_async_cb_t) (uint8_t *buf, uint32_t len, void *ctx);
-typedef	 int (*  pfnrtlsdr_open )(rtlsdr_dev_t **, uint32_t);
+typedef	int (*  pfnrtlsdr_get_index_by_serial )(const char *serial);
+typedef	int (*  pfnrtlsdr_open )(rtlsdr_dev_t **, uint32_t);
 typedef	int (*  pfnrtlsdr_close) (rtlsdr_dev_t *);
 typedef	int (*  pfnrtlsdr_set_center_freq) (rtlsdr_dev_t *, uint32_t);
 typedef uint32_t (*  pfnrtlsdr_get_center_freq) (rtlsdr_dev_t *);
@@ -66,7 +67,8 @@ public:
 	                                 int16_t	ppmCorrection,
 	                                 int16_t	gain,
 	                                 bool		autogain,
-	                                 uint16_t	deviceIndex = 0);
+	                                 uint16_t	deviceIndex = 0,
+	                                 const char *	deviceSerial = 0 );
 			~rtlsdrHandler	(void);
 //	interface to the reader
 	bool		restartReader	(int32_t);
@@ -100,6 +102,7 @@ private:
 	int		frequency;
 //	here we need to load functions from the dll
 	bool		load_rtlFunctions	(void);
+	pfnrtlsdr_get_index_by_serial	rtlsdr_get_index_by_serial;
 	pfnrtlsdr_open	rtlsdr_open;
 	pfnrtlsdr_close	rtlsdr_close;
 

@@ -37,7 +37,7 @@
 #include	"sdrplay-handler.h"
 #elif	HAVE_AIRSPY
 #include	"airspy-handler.h"
-#elif	HAVE_RTLSDR
+#elif	defined(HAVE_RTLSDR)
 #include	"rtlsdr-handler.h"
 #elif	HAVE_WAVFILES
 #include	"wavfiles.h"
@@ -603,6 +603,11 @@ double fileOffset = 0.0;
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
 #endif
+#if defined(HAVE_RTLSDR)
+int		deviceIndex = 0;
+const char	* deviceSerial = nullptr;
+#endif
+
 bool	err;
 
 	fprintf (stderr, "dab_cmdline example-10 V 1.0alfa,\n \
@@ -618,13 +623,27 @@ bool	err;
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:E:Qct:a:r:x")) != -1) {
-#elif   HAVE_RTL_TCP
-    while ((opt = getopt (argc, argv, "W:A:M:B:C:P:p:G:S:H:I:E:Qct:a:r:x")) != -1) {
+#if	defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
+	#define FILE_OPTS		"F:Ro:"
+	#define NON_FILE_OPTS
+	#define RTL_TCP_OPTS
+	#define RTLSDR_OPTS
 #else
-    while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:F:E:Ro:ct:a:r:x")) != -1) {
+	#define FILE_OPTS
+	#define NON_FILE_OPTS	"C:G:Q"
+	#if   defined(HAVE_RTLSDR)
+		#define RTLSDR_OPTS		"d:s:"
+	#else
+		#define RTLSDR_OPTS
+	#endif
+	#ifdef	HAVE_RTL_TCP
+		#define RTL_TCP_OPTS	"H:I:"
+	#else
+		#define RTL_TCP_OPTS
+	#endif
 #endif
+
+	while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:E:ct:a:r:x" FILE_OPTS NON_FILE_OPTS RTLSDR_OPTS RTL_TCP_OPTS )) != -1) {
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
 
@@ -687,6 +706,7 @@ bool	err;
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
 	         break;
+
 #if	defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
 	      case 'F':
 	         fileName	= std::string (optarg);
@@ -709,6 +729,15 @@ bool	err;
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#if defined(HAVE_RTLSDR)
+	      case 'd':
+	         deviceIndex	= atoi (optarg);
+	         break;
+
+	      case 's':
+	         deviceSerial	= optarg;
+	         break;
+#endif
 #ifdef	HAVE_RTL_TCP
 	      case 'H':
 	         hostname	= std::string (optarg);
@@ -750,11 +779,13 @@ bool	err;
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmCorrection,
 	                                     theGain);
-#elif	HAVE_RTLSDR
+#elif	defined(HAVE_RTLSDR)
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     ppmCorrection,
 	                                     theGain,
-	                                     autogain);
+	                                     autogain,
+	                                     (uint16_t)deviceIndex,
+	                                     deviceSerial );
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName, fileOffset, device_eof_callback, nullptr );
 #elif	HAVE_RAWFILES
@@ -1392,7 +1423,7 @@ static	int count	= 10;
 
 void    printOptions (void) {
 	fprintf (stderr,
-"        dab-cmdline options are\n\
+"	dab-cmdline options are\n\
 	-W number   amount of time to look for a time sync in %s\n\
 	-A number   amount of time to look for an ensemble in %s\n\
 	-E minSNR   activates scan mode: if set, quit after loading scan data\n\
@@ -1406,13 +1437,17 @@ void    printOptions (void) {
 	-B Band     Band is either L_BAND or BAND_III (default)\n\
 	-P name     program to be selected in the ensemble\n\
 	-p ppmCorr  ppm correction\n"
+#if defined(HAVE_RTLSDR)
+"	-d index    set RTLSDR device index\n\
+	-s serial   set RTLSDR device serial\n"
+#endif
 #if	defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
-"        -F filename in case the input is from file\n"
-"        -o offset   offset in seconds from where to start file playback\n"
-"        -R          deactivates repetition of file playback\n"
+"	-F filename in case the input is from file\n"
+"	-o offset   offset in seconds from where to start file playback\n"
+"	-R          deactivates repetition of file playback\n"
 
 #else
-"        -C channel  channel to be used\n\
+"	-C channel  channel to be used\n\
 	-G Gain     gain for device (range 1 .. 100)\n\
 	-Q          if set, set autogain for device true\n"
 #ifdef	HAVE_RTL_TCP
@@ -1420,6 +1455,6 @@ void    printOptions (void) {
 	-I port      port number to rtl_tcp\n"
 #endif
 #endif
-"        -S hexnumber use hexnumber to identify program\n\n", T_UNITS, T_UNITS );
+"	-S hexnumber use hexnumber to identify program\n\n", T_UNITS, T_UNITS );
 }
 
