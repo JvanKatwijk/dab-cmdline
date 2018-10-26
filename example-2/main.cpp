@@ -265,7 +265,7 @@ int32_t		basePort = 1234;		// default
 #endif
 bool	err;
 
-	std::cerr << "dab_cmdline V 1.0alfa,\n \
+	std::cerr << "dab_cmdline example II,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
@@ -280,7 +280,7 @@ bool	err;
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
+#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES) && !defined (HAVE_RTL_TCP))
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:g:A:L:S:QO:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {

@@ -141,7 +141,8 @@ notSynced:
            }
 
 SyncOnPhase:
-//	We arrive here when time synchronized, either from above
+//	We arrive here when - it seems we are time synchronized,
+//	either from above
 //	or after having processed a frame
 //	Now read in Tu samples. The precise number is not really important
 //	as long as we can be sure that the first sample to be identified
@@ -151,7 +152,7 @@ SyncOnPhase:
 	   int startIndex = phaseSynchronizer. findIndex (ofdmBuffer. data ());
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
-	      if (++index_attempts > 10) {
+	      if (++index_attempts > 5) {
 	         syncsignalHandler (false, userData);
 	         index_attempts	= 0;
 	      }
@@ -159,6 +160,7 @@ SyncOnPhase:
 	   }
 
 	   index_attempts	= 0;
+	   dip_attempts		= 0;
 	   isSynced		= true;
 	   syncsignalHandler (isSynced, userData);
 

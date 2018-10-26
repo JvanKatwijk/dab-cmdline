@@ -67,7 +67,7 @@ static
 std::atomic<bool>ensembleRecognized;
 
 static
-FILE	*outFile	= stderr;
+FILE	*outFile	= stdout;
 
 static void sighandler (int signum) {
 	fprintf (stderr, "Signal caught, terminating!\n");
@@ -335,8 +335,8 @@ bool	err;
 	                                          theChannel. c_str ());
 	   timesyncSet.		store (false);
 	   timeSynced. 		store (false);
-	   timeSyncTime		= 5;
-	   freqSyncTime		= 10;
+	   timeSyncTime		= 4;
+	   freqSyncTime		= 5;
 
 	   while (!timesyncSet. load () && (--timeSyncTime >= 0))
 	      sleep (1);
@@ -348,7 +348,8 @@ bool	err;
 	      else
 	         continue;
 	   }
-
+//
+//	we might have data here, not sure yet
 	   while (!ensembleRecognized. load () &&
 	                             (--freqSyncTime >= 0)) {
 	       fprintf (stderr, "%d\r", freqSyncTime);
