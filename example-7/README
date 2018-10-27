@@ -1,0 +1,67 @@
+
+		EX A M P L E  6
+
+
+Example 7 is the bluetooth controlled version of the cmdline version for dab.
+
+It is derived from example 2, so for configuing see example 2.
+
+===========================================================================
+FEEL FREE TO IMPROVE THE PROGRAM AND TO CONTRIBUTE
+===========================================================================
+
+The basic idea is that the program is started - as a server (for a single client
+though).
+
+The structure of the packages is simple a sequence of PACKET_SIZE bytes
+   K L payload filler
+
+where L is the length of the payload,
+where K is the KEY, one on Q_GAIN, Q_CHANNEL and Q_SERVICE.
+where payload is the data (0-terminated strings) to be carrier.
+
+All three commands take a 0-terminated (i.e. C) string.
+
+Q_GAIN string will set the gain of the connected device to the value "string" is a representation of, a value in the range 0 .. 100;
+
+Q_CHANNEL string will set the frequency of the receiver to the frequency for
+channel "string", - note that the setting of the Band cannot be done (yet?)
+it is programmed in as a default.
+
+Q_SERVICE string will select the service "string" in the current ensemble.
+If no ensemble is detected, or the string is not recognized the behaviour
+is not completely defined.
+
+The program on its turn will send data out
+in all cases the format of the message is
+the same as for the receiving packages:
+	K L payload filler
+
+where the key (K) is one of Q_ENSEMBLE, Q_SERVICE_NAME, Q_TEXT_MESSAGE 
+Q_PROGRAM_DATA.
+
+the packet with key Q_ENSEMBLE is sent as an ensemble identifier is recognized
+in the DAB stream. Each of the service identifiers is sent with a key
+Q_SERVICE_NAME, text messages (i.e. the "dynamic label") is sent using
+Q_TEXT_MESSAGE as key and some data describing the selected service (e.g.
+length, startaddress, bitRate) is sent with Q_PROGRAM_DATA as key.
+
+Two notes
+a. Support for charactersets is limited (still work to be done)
+b. the "client" is not implemented yet
+
+===============================================================================
+
+Copyrights
+
+-----------------------------------------------------------------------------------
+	
+	Copyright (C)  2016, 2017
+	Jan van Katwijk (J.vanKatwijk@gmail.com)
+	Lazy Chair Programming
+
+All SDR-J software is made available under the GPL-2.0.
+The dab-library uses a number of GPL-ed libraries, all
+rights are gratefully acknowledged.
+All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
