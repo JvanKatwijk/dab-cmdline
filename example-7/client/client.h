@@ -27,59 +27,47 @@
  *	show the tdc data
  */
 
-#ifndef	__TDC_CLIENT__
-#define	__TDC_CLIENT__
+#ifndef	__BLUETOOTH_CLIENT__
+#define	__BLUETOOTH_CLIENT__
 #include	"constants.h"
 #include	<QDialog>
 #include	<QSettings>
 #include	<QLabel>
 #include	<QMessageBox>
-#include	<QTcpSocket>
-#include	<QHostAddress>
-#include	<QTimer>
 #include	"ui_widget.h"
-#include	"header-test.h"
 #include	"ringbuffer.h"
 #include	<QStringList>
 #include	<QStringListModel>
 #include	<QModelIndex>
+class	bluetoothHandler;
 
-class	Client:public QDialog, public Ui_widget {
+class   Client:public QDialog, public Ui_widget {
 Q_OBJECT
 public:
 		Client	(QWidget *parent = NULL);
 		~Client	(void);
 
-	bool		connected;
 private	slots:
-	void		wantConnect	(void);
-	void		setConnection	(void);
-	void		readData	(void);
 	void		terminate	(void);
-	void		timerTick	(void);
 	void		selectChannel	(const QString &);
 	void		selectService	(QModelIndex);
 	void		setGain		(int);
 	void		handle_quit	(void);
+public	slots:
+	void		set_ensembleLabel (const QString &s);
+	void		set_serviceName	(const QString &s);
+	void		set_textMessage	(const QString &s);
+	void		set_programData	(const QString &s);
+	void		set_connectionLost (void);
 private:
-	void		handle		(void);
-	RingBuffer<uint8_t>	*buffer;
+
 	QStringListModel        ensemble;
-	QStringList     Services;
-	QString         ensembleName;
+	QStringList		Services;
+	QString			ensembleName;
 
 	QStringListModel	programData;
-	QStringList	programDesc;
-
-	QTcpSocket	streamer;
-	QTcpSocket	writer;
-	QTimer		*connectionTimer;
-	headerTest	headertester;
-	int16_t		toRead;
-	int16_t		dataLength;
-	uint8_t		*dataBuffer;
-	uint8_t		frameType;
-	int16_t		dataIndex;
+	QStringList		programDesc;
+	bluetoothHandler	*bluetooth;
 };
 #endif
 

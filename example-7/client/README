@@ -1,3 +1,9 @@
 
-Very simple client, for use with the tcpServer that emits the tdc data.
+
+The c file should not be compiled with g++, as being used in the
+qmake env. 
+My approach is
+	gcc -fPIC -shared libwrapper.so bluetooth.c -lbluetooth
+
+
 

@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2015
+ *    Copyright (C) 2015-2018
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -22,19 +22,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with SDR-J; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *	Communication via network to a DAB receiver to 
- *	show the tdc data
  */
 
 #include	<QSettings>
 #include	<QLabel>
 #include	<QMessageBox>
-#include	<QtNetwork>
-#include	<QTcpSocket>
-#include	<QHostAddress>
-#include	"client.h"
 #include	"protocol.h"
+#include	"client.h"
+#include	"bluetooth-handler.h"
 //
 
 static
@@ -50,167 +45,42 @@ const char *channelTable [] =  {"5A",  "5B",  "5C",  "5D",
 
 	Client::Client (QWidget *parent):QDialog (parent) {
 int16_t	i;
+
 	setupUi (this);
-	connected	= false;
-	connect (connectButton, SIGNAL (clicked (void)),
-	         this, SLOT (wantConnect (void)));
 	connect (terminateButton, SIGNAL (clicked (void)),
 	         this, SLOT (terminate (void)));
 
 	for (i = 0; channelTable [i] != NULL; i ++)
 	   channelSelector -> addItem (channelTable [i]);
 
-	buffer	= new RingBuffer<uint8_t> (1024);
-	connectionTimer	= new QTimer ();
-	connectionTimer	-> setInterval (1000);
-	connect (connectionTimer, SIGNAL (timeout (void)),
-	         this, SLOT (timerTick (void)));
+	try {
+	   bluetooth	= new bluetoothHandler ();
+	} catch (int e) {
+	   fprintf (stderr, "Could not connect to a server\n");
+	   exit (21);
+	}
+
 	connect (channelSelector, SIGNAL (activated (const QString &)),
                  this, SLOT (selectChannel (const QString &)));
 	connect (ensembleDisplay, SIGNAL (clicked (QModelIndex)),
                  this, SLOT (selectService (QModelIndex)));
 	connect (gainSlider, SIGNAL (valueChanged (int)),
 	         this, SLOT (setGain (int)));
-	connect (terminateButton, SIGNAL (clicked (void)),
-	         this, SLOT (handle_quit (void)));
-	state	-> setText ("waiting to start");
+
+	connect (bluetooth, SIGNAL (ensembleLabel (const QString &)),
+	         this, SLOT (set_ensembleLabel (const QString &)));
+	connect (bluetooth, SIGNAL (serviceName (const QString &)),
+	         this, SLOT (set_serviceName (const QString &)));
+	connect (bluetooth, SIGNAL (textMessage (const QString &)),
+	         this, SLOT (set_textMessage (const QString &)));
+	connect (bluetooth, SIGNAL (programData (const QString &)),
+	         this, SLOT (set_programData (const QString &)));
+	connect (bluetooth, SIGNAL (connectionLost (void)),
+	         this, SLOT (set_connectionLost (void)));
 }
 //
 
 	Client::~Client	(void) {
-	connected	= false;
-}
-//
-void	Client::wantConnect (void) {
-QString ipAddress;
-int16_t	i;
-QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
-
-	if (connected)
-	   return;
-	// use the first non-localhost IPv4 address
-	for (i = 0; i < ipAddressesList.size(); ++i) {
-	   if (ipAddressesList.at (i) != QHostAddress::LocalHost &&
-	      ipAddressesList. at (i). toIPv4Address ()) {
-	      ipAddress = ipAddressesList. at(i). toString();
-	      break;
-	   }
-	}
-	// if we did not find one, use IPv4 localhost
-	if (ipAddress. isEmpty())
-	   ipAddress = QHostAddress (QHostAddress::LocalHost).toString ();
-	hostLineEdit -> setText (ipAddress);
-
-	hostLineEdit -> setInputMask ("000.000.000.000");
-//	Setting default IP address
-	state	-> setText ("Give IP address, return");
-	connect (hostLineEdit, SIGNAL (returnPressed (void)),
-	         this, SLOT (setConnection (void)));
-}
-
-//	if / when a return is pressed in the line edit,
-//	a signal appears and we are able to collect the
-//	inserted text. The format is the IP-V4 format.
-//	Using this text, we try to connect,
-void	Client::setConnection (void) {
-QString s	= hostLineEdit -> text ();
-QHostAddress theAddress	= QHostAddress (s);
-int32_t	basePort;
-	basePort	= 8765;
-	disconnect (hostLineEdit, SIGNAL (returnPressed (void)),
-	            this, SLOT (setConnection (void)));
-//
-//	The streamer will provide us with the raw data
-	streamer. connectToHost (theAddress, basePort + 1);
-	if (!streamer. waitForConnected (2000)) {
-	   QMessageBox::warning (this, tr ("client"),
-	                                   tr ("setting up streamer failed\n"));
-	   return;
-	}
-	writer. connectToHost (theAddress, basePort);
-	if (!writer. waitForConnected (2000)) {
-	   QMessageBox::warning (this, tr ("client"),
-	                                   tr ("setting up writer failed\n"));
-	   return;
-	}
-
-	connected	= true;
-	state -> setText ("Connected");
-	connect (&streamer, SIGNAL (readyRead (void)),
-	         this, SLOT (readData (void)));
-	connectionTimer	-> start (1000);
-}
-
-//	These functions are typical for network use
-void	Client::readData	(void) {
-QByteArray d;
-
-	while (streamer. bytesAvailable () > 3) {
-	d. resize (3);
-	streamer. read (d. data (), 3);
-	int length = d [1];
-	d. resize (3 + length + 1);
-	streamer. read (&(d. data () [3]), length + 1);
-	buffer -> putDataIntoBuffer (d. data (), d. size ());
-	handle ();
-	}
-}
-
-void	Client::handle (void) {
-uint8_t header [3];
-std::vector<uint8_t> lBuf;
-
-	buffer -> getDataFromBuffer (header, 3);
-	if (header [0] != 0xFF)
-	   return;
-	int	length	= header [1];
-	uint8_t	key	= header [2];
-	lBuf. resize (length + 1);
-	buffer -> getDataFromBuffer (lBuf. data (), length + 1);
-	const char *v	= (char *)(lBuf. data ());
-	switch (key) {
-	   case Q_SERVICE_NAME:
-	      Services << QString (v); 
-	      Services. removeDuplicates ();
-	      ensemble. setStringList (Services);
-	      ensembleDisplay -> setModel (&ensemble);
-	      break;
-
-	   case Q_PROGRAM_DATA:
-	      programDesc << QString (v);
-	      programDesc. removeDuplicates ();
-	      programData. setStringList (programDesc);
-	      programView	-> setModel (&programData);
-	      break;
-
-	   case Q_ENSEMBLE:
-	      ensembleName	= QString (v);
-	      ensembleLabel	-> setText (ensembleName);
-	      dynamicLabel	-> setText ("");
-	      break;
-
-	   case Q_TEXT_MESSAGE:
-	      dynamicLabel	-> setText (QString (v));
-	      break;
-	      
-	   default:
-	      break;
-	}
-}
-
-void	Client::terminate	(void) {
-	if (connected) {
-	   streamer. close ();
-	}
-	accept ();
-}
-
-void	Client::timerTick (void) {
-	if (streamer. state () == QAbstractSocket::UnconnectedState) {
-	   state	-> setText ("not connected");
-	   connected	= false;
-	   connectionTimer	-> stop ();
-	}
 }
 
 int	slength (const char *s) {
@@ -222,22 +92,23 @@ int	i;
 void	Client::selectChannel (const QString &s) {
 const char *ss = s. toLatin1 (). data ();
 QByteArray message;
-int length	= 3 + slength (ss);
+int length	= strlen (ss);
 int	i;
 
-	if (writer. state() == QAbstractSocket::ConnectedState) {
-	   message. resize (PACKET_SIZE);
-	   for (i = 0; i < length - 2; i ++) {
-	      message [3 + i] = ss [i];
-	   }
-	   message [0] = 0xFF;
-	   message [1] = length;
-	   message [2] = Q_CHANNEL;
-	   writer. write (message);
+	message. resize (length + 4);
+	for (i = 0; i < length; i ++) {
+	  message [3 + i] = ss [i];
 	}
+	fprintf (stderr, "selected %s\n", &(message. data () [3]));
+	message [3 + length] = 0;
+	message [0] = Q_CHANNEL;
+	message [1] = (length >> 8) & 0xFF;
+	message [2] = length & 0xFF;
+	bluetooth -> write (message. data (), length + 3 + 1);
+
 	ensembleLabel	-> setText ("");
 	dynamicLabel	-> setText ("");
-	Services = QStringList ();
+	Services	= QStringList ();
 	ensemble. setStringList (Services);
 	ensembleDisplay -> setModel (&ensemble);
 	programDesc	= QStringList ();
@@ -248,20 +119,21 @@ int	i;
 
 void    Client::selectService (QModelIndex s) {
 QString currentProgram = ensemble. data (s, Qt::DisplayRole). toString ();
+const char *ss 	= currentProgram. toLatin1 (). data ();
 QByteArray message;
-const char *ss = currentProgram. toLatin1 (). data ();
-int length	= 3 + slength (ss);
+int length	= strlen (ss);
 int	i;
 
-	if (writer. state() == QAbstractSocket::ConnectedState) {
-	   message. resize (PACKET_SIZE);
-	   message [0] = 0xFF;
-	   message [1] = length;
-	   message [2] = Q_SERVICE;
-	   for (i = 0; i < length - 2; i ++)
-	      message [3 + i] = ss [i];
-	   writer. write (message);
+	for (i = 0; i < length; i ++) {
+	   message [3 + i] = ss [i];
+	   fprintf (stderr, "%c ", ss [i]);
 	}
+	message [0] = Q_SERVICE;
+	message [1] = (length >> 8) & 0xFF;
+	message [2] = length & 0xFF;
+	fprintf (stderr, "\n");
+	message [length + 3] = 0;
+	bluetooth -> write (message. data (), length + 3 + 1);
 
 	programDesc	= QStringList ();
 	programDesc	<< currentProgram;
@@ -271,32 +143,52 @@ int	i;
 }
 
 void	Client::setGain (int g) {
-QByteArray message;
 QString gain	= QString::number (g);
 const char *ss = gain. toLatin1 (). data ();
-int length	= 3 + slength (ss);
+int length	= strlen (ss);
+QByteArray message;
 int	i;
 
-	if (writer. state() == QAbstractSocket::ConnectedState) {
-	   message. resize (PACKET_SIZE);
-	   message [0] = 0xFF;
-	   message [1] = length;
-	   message [2] = Q_GAIN;
-	   for (i = 0; i < length - 2; i ++)
-	      message [3 + i] = ss [i];
-	   writer. write (message);
-	}
+	message. resize (length + 4);
+	for (i = 0; i < length; i ++)
+	   message [3 + i] = ss [i];
+	message [3 + length] = 0;
+	message [0] = Q_GAIN;
+	message [1] = (length >> 8) & 0xFF;
+	message [2] = length & 0xFF;
+	bluetooth -> write (message. data (), length + 4);
 }
 
 void	Client::handle_quit	(void) {
-QByteArray message;
-//	if (writer. state() == QAbstractSocket::ConnectedState) {
-//	   message. resize (PACKET_SIZE);
-//	   message [0] = 0xFF;
-//	   message [1] = 3;
-//	   message [2] = Q_QUIT;
-//	   writer. write (message);
-//	}
 	accept ();
+}
+
+void	Client::set_ensembleLabel (const QString &s) {
+	ensembleLabel	-> setText (s);
+	dynamicLabel	-> setText (" ");
+}
+
+void	Client::set_serviceName (const QString &s) {
+	Services << QString (s);
+        Services. removeDuplicates ();
+        ensemble. setStringList (Services);
+        ensembleDisplay -> setModel (&ensemble);
+}
+
+void	Client::set_textMessage (const QString &s) {
+	dynamicLabel	-> setText (s);
+}
+
+void	Client::set_programData (const QString &s) {
+	programDesc << QString (s);
+        programDesc. removeDuplicates ();
+        programData. setStringList (programDesc);
+	programView       -> setModel (&programData);
+}
+
+void	Client::set_connectionLost (void) {
+}
+
+void	Client::terminate	(void) {
 }
 

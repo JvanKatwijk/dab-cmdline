@@ -13,29 +13,6 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QPushButton" name="connectButton">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>131</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>connect</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="hostLineEdit">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>30</y>
-     <width>131</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="state">
    <property name="geometry">
     <rect>
@@ -52,7 +29,7 @@
   <widget class="QPushButton" name="terminateButton">
    <property name="geometry">
     <rect>
-     <x>140</x>
+     <x>10</x>
      <y>10</y>
      <width>71</width>
      <height>41</height>
@@ -101,7 +78,7 @@
   <widget class="QComboBox" name="channelSelector">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>80</x>
      <y>10</y>
      <width>98</width>
      <height>41</height>
