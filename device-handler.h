@@ -48,7 +48,10 @@ virtual		int16_t	bitDepth	(void) { return 10;}
 virtual		void	setGain		(int32_t);
 virtual		bool	has_autogain	(void);
 virtual		void	set_autogain	(bool);
-
+//
+//	for the sdrplay
+virtual		void	set_ifgainReduction (int);
+virtual		void	set_lnaState	(int);
 //
 protected:
 		int32_t	lastFrequency;

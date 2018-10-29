@@ -45,13 +45,7 @@
 #include	"band-handler.h"
 #include	"protocol.h"
 
-#ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
-#elif	HAVE_AIRSPY
-#include	"airspy-handler.h"
-#elif	HAVE_RTLSDR
-#include	"rtlsdr-handler.h"
-#endif
 
 using std::cerr;
 using std::endl;
@@ -107,7 +101,6 @@ audioBase	*soundOut	= NULL;
 static
 std::atomic<bool>running;
 void		handleSettings (radioData *rd);
-deviceHandler	*getDevice (int, radioData *rd);
 
 static void sighandler (int signum) {
         fprintf (stderr, "Signal caught, terminating!\n");
@@ -268,11 +261,15 @@ bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 	sigact.sa_flags = 0;
 
 	int32_t frequency	= 220000000;	// default
-
 	try {
-	   theDevice	= getDevice (frequency, &my_radioData);
+	   theDevice	=  new sdrplayHandler (frequency,
+	                                       my_radioData. ppmCorrection,
+	                                       my_radioData. GRdB,
+	                                       my_radioData. lnaState,
+	                                       my_radioData. autoGain);
 	}
 	catch (int e) {
+	   fprintf (stderr, "No device\n");
 	   exit (32);
 	}
 //
@@ -305,11 +302,6 @@ bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
 	   exit (4);
 	}
-
-	theDevice	-> setGain (my_radioData. theGain);
-	if (my_radioData. autogain)
-	   theDevice	-> set_autogain (my_radioData. autogain);
-	theDevice	-> setVFOFrequency (frequency);
 
 	running. store (true);
 	
@@ -357,11 +349,12 @@ std::string value;
 	rd	-> theChannel		= "11C";
 	rd	-> theBand		= BAND_III;
 	rd	-> ppmCorrection	= 0;
-	rd	-> theGain		= 35;	// scale = 0 .. 100
+	rd	-> GRdB			= 35;	
+	rd	-> lnaState		= 3;
+	rd	-> autoGain		= false;
 	rd	-> soundChannel		= "default";
 	rd	-> latency		= 10;
 	rd	-> waitingTime		= 10;
-	rd	-> autogain		= false;
 
 	try {
 	   my_config = new config ("home/jan/.radioconfig.conf");
@@ -383,12 +376,26 @@ void	handleRequest (char *lbuf, int bufLen) {
 	      fprintf (stderr, "quit request\n");
 	      break;
 
-	   case Q_GAIN:
-	      fprintf (stderr, "gain string is %s\n", &(lbuf [3]));
-	      my_radioData. theGain =
+	   case Q_IF_GAIN_REDUCTION:
+	      my_radioData. GRdB =
 	                stoi (std::string ((char *)(&(lbuf [3]))));
-	      theDevice      -> setGain (my_radioData. theGain);
+	      theDevice      -> set_ifgainReduction (my_radioData. GRdB);
 	      break;
+
+	   case Q_LNA_STATE:
+	      my_radioData. lnaState =
+	                stoi (std::string ((char *)(&(lbuf [3]))));
+	      theDevice      -> set_lnaState (my_radioData. lnaState);
+	      break;
+
+	   case Q_AUTOGAIN:
+	      my_radioData. autoGain =
+	                stoi (std::string ((char *)(&(lbuf [3])))) != 0;
+	      theDevice      -> set_autogain (my_radioData. autoGain);
+	      break;
+
+	   case Q_RESET:
+	      break;		// still to be done
 
 	   case Q_SERVICE:
 	      my_radioData. serviceName =
@@ -415,7 +422,6 @@ void	handleRequest (char *lbuf, int bufLen) {
 	      break;
 
 	   case Q_CHANNEL:
-	      fprintf (stderr, "channel request\n");
 	      dabStop (theRadio);
 	      theDevice      -> stopReader ();
 	      fprintf (stderr, "radio and device stopped\n");
@@ -439,38 +445,8 @@ void	handleRequest (char *lbuf, int bufLen) {
 	}
 }
 
-deviceHandler	*getDevice (int frequency, radioData *rd) {
-	try {
-#ifdef	HAVE_SDRPLAY
-	   return new sdrplayHandler (frequency,
-	                              rd  -> ppmCorrection,
-	                              rd  -> theGain,
-	                              rd  -> autogain,
-	                              0,
-	                              0);
-#elif	HAVE_AIRSPY
-	   return new airspyHandler (frequency,
-	                             rd  -> ppmCorrection,
-	                             rd  -> theGain);
-#elif	HAVE_RTLSDR
-	   return new rtlsdrHandler (frequency,
-	                             rd  -> ppmCorrection,
-	                             rd  -> theGain,
-	                             rd  -> autogain);
-#elif
-	   fprintf (stderr, "No device configured, fatal\n");
-	   throw (33);
-#endif
-	} catch (int e) {
-	   fprintf (stderr, "failing to get a device, fatal\n");
-	   throw (e);
-	}
-	return NULL;
-}
-
 static
 sdp_session_t *register_service (void) {
-//uint32_t service_uuid_int [] = {0, 0, 0, 0xABCD};
 uint8_t service_uuid_int [] =
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xab, 0xcd };
 
@@ -537,7 +513,9 @@ char str [256] = "";
 //	connect to the local SDP server, register the service record, and 
 //	disconnect
 //	session = sdp_connect (BDADDR_ANY, BDADDR_LOCAL, SDP_RETRY_IF_BUSY );
+
 //	C++ compiler does not like BDADDR_ANY and BDADDR_LOCAL
+//	so we had to reinvent a number of wheels
 	bdaddr_t tmp_1	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 	bdaddr_t tmp_2	= (bdaddr_t) {{0, 0, 0, 0xff, 0xff, 0xff}};
 	session = sdp_connect (&tmp_1, &tmp_2, SDP_RETRY_IF_BUSY );

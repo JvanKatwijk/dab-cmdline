@@ -30,11 +30,12 @@ typedef struct  {
 	std::string	serviceName;
 	uint8_t         theBand;
 	int16_t         ppmCorrection;
-	int             theGain;
+	int16_t		GRdB;
+	int16_t		lnaState;
+	bool            autoGain;
 	std::string     soundChannel;
 	int16_t         latency;
 	int16_t         waitingTime;
-	bool            autogain;
 	std::string	hostname;
 	int		basePort;
 	int		serverPort;

@@ -64,9 +64,14 @@ int16_t	i;
                  this, SLOT (selectChannel (const QString &)));
 	connect (ensembleDisplay, SIGNAL (clicked (QModelIndex)),
                  this, SLOT (selectService (QModelIndex)));
-	connect (gainSlider, SIGNAL (valueChanged (int)),
-	         this, SLOT (setGain (int)));
-
+	connect (ifgainReduction, SIGNAL (valueChanged (int)),
+	         this, SLOT (set_ifgainReduction (int)));
+	connect (lnaState, SIGNAL (valueChanged (int)),
+	         this, SLOT (set_lnaState (int)));
+	connect (autogainButton, SIGNAL (stateChanged (int)),
+	         this, SLOT (set_autoGain (int)));
+//
+//	the following signals arrive from the bluetooth handling
 	connect (bluetooth, SIGNAL (ensembleLabel (const QString &)),
 	         this, SLOT (set_ensembleLabel (const QString &)));
 	connect (bluetooth, SIGNAL (serviceName (const QString &)),
@@ -81,12 +86,6 @@ int16_t	i;
 //
 
 	Client::~Client	(void) {
-}
-
-int	slength (const char *s) {
-int	i;
-	for (i = 0; s [i] != 0; i ++);
-	return i + 1;
 }
 
 void	Client::selectChannel (const QString &s) {
@@ -142,23 +141,6 @@ int	i;
 	dynamicLabel	-> setText ("");
 }
 
-void	Client::setGain (int g) {
-QString gain	= QString::number (g);
-const char *ss = gain. toLatin1 (). data ();
-int length	= strlen (ss);
-QByteArray message;
-int	i;
-
-	message. resize (length + 4);
-	for (i = 0; i < length; i ++)
-	   message [3 + i] = ss [i];
-	message [3 + length] = 0;
-	message [0] = Q_GAIN;
-	message [1] = (length >> 8) & 0xFF;
-	message [2] = length & 0xFF;
-	bluetooth -> write (message. data (), length + 4);
-}
-
 void	Client::handle_quit	(void) {
 	accept ();
 }
@@ -190,5 +172,42 @@ void	Client::set_connectionLost (void) {
 }
 
 void	Client::terminate	(void) {
+}
+
+void	Client::set_ifgainReduction (int v) {
+QString val	= QString::number (v);
+const char *ss	= val. toLatin1 (). data ();
+int length	= strlen (ss);
+QByteArray message;
+int	i;
+
+	message. resize (length + 4);
+	for (i = 0; i < length; i ++)
+	   message [3 + i] = ss [i];
+	message [3 + length] = 0;
+	message [0] = Q_IF_GAIN_REDUCTION;
+	message [1] = (length >> 8) & 0xFF;
+	message [2] = length & 0xFF;
+	bluetooth -> write (message. data (), length + 4);
+}
+
+void	Client::set_lnaState (int v) {
+QString val	= QString::number (v);
+const char *ss	= val. toLatin1 (). data ();
+int length	= strlen (ss);
+QByteArray message;
+int	i;
+
+	message. resize (length + 4);
+	for (i = 0; i < length; i ++)
+	   message [3 + i] = ss [i];
+	message [3 + length] = 0;
+	message [0] = Q_LNA_STATE;
+	message [1] = (length >> 8) & 0xFF;
+	message [2] = length & 0xFF;
+	bluetooth -> write (message. data (), length + 4);
+}
+
+void	Client::set_autoGain (int state) {
 }
 

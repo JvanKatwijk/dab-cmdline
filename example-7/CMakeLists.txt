@@ -27,20 +27,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ######################################################################
 #
 ########################################################################
-if(DEFINED AIRSPY)
-   set(AIRSPY true)
-   set(objectName dab-airspy-7)
-endif ()
-
-if(DEFINED SDRPLAY)
    set(SDRPLAY true)
    set(objectName dab-sdrplay-7)
-endif ()
 
-if(DEFINED RTLSDR)
-   set(RTLSDR true)
-   set(objectName dab-rtlsdr-7)
-endif ()
 
 #########################################################################
 	find_package (PkgConfig)
@@ -105,17 +94,17 @@ endif ()
            endif(NOT(SDRPLAYLIB))
 
 	   include_directories (
-	     ../devices/sdrplay-handler
+	     ./sdrplay-handler-2
 	   )
 
 	   set ($(objectName)_HDRS
 	        ${${objectName}_HDRS}
-	        ../devices/sdrplay-handler/sdrplay-handler.h
+	        ./sdrplay-handler-2/sdrplay-handler.h
            )
 
 	   set (${objectName}_SRCS
 	        ${${objectName}_SRCS}
-	        ../devices/sdrplay-handler/sdrplay-handler.cpp
+	        ./sdrplay-handler-2/sdrplay-handler.cpp
 	   )
 
 	 add_definitions (-DHAVE_SDRPLAY)

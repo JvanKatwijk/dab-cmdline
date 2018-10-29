@@ -51,7 +51,9 @@ private	slots:
 	void		terminate	(void);
 	void		selectChannel	(const QString &);
 	void		selectService	(QModelIndex);
-	void		setGain		(int);
+	void		set_ifgainReduction		(int);
+	void		set_lnaState	(int);
+	void		set_autoGain	(int);
 	void		handle_quit	(void);
 public	slots:
 	void		set_ensembleLabel (const QString &s);

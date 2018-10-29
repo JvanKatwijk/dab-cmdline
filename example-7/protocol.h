@@ -1,4 +1,4 @@
-
+#
 /*
  *    Copyright (C) 2015, 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -27,18 +27,19 @@
 #ifndef	__PROTOCOL__
 #define	__PROTOCOL__
 
-#define	BASE_PORT	8765
-#define	PACKET_SIZE	32
-
 //	The radio will react on commands
 //	The commands consist of a package with two components
 //	the command identifier and a 0-terminated asci string
 //
 //	e.g. Q_GAIN "70" or Q_CHANNEL "11C"
 #define Q_QUIT		0100
-#define Q_GAIN		0101
-#define Q_CHANNEL       0102
-#define Q_SERVICE       0103
+#define Q_IF_GAIN_REDUCTION	0101
+#define Q_AUDIO_GAIN	0102
+#define Q_LNA_STATE	0103
+#define	Q_AUTOGAIN	0104
+#define Q_CHANNEL       0105
+#define Q_SERVICE       0106
+#define	Q_RESET		0107
 
 //	The radio will send some data back through port + 1
 //	in all cases the format of the message is
