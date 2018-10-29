@@ -74,7 +74,7 @@ static
 void    messageWriter (uint8_t code, std::string theText) {
 int     len     = theText. length ();
 int     i;
-int     message [len + 3 + 1];
+char	message [len + 3 + 1];
         message [0]     = (char)code;
         message [1]     = (len >> 8) & 0xFF;
         message [2]     = len & 0xFF;
