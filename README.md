@@ -2,6 +2,39 @@
 DAB COMMAND LINE and DAB LIBRARY
 
 ---------------------------------------------------------------------
+
+H E L P  N E E D E D
+
+---------------------------------------------------------------------
+
+I am working on an "example 7", a version of the command line software,
+a radio program that is to be used on e.g. an RPI 2/3 and controlled by a client
+using a bluetooth connection
+
+The current state is that I have a version running, with a "client"
+written in Qt/C++. The client can run on another RPI, or on a PC, and the client
+can find the server, the latter registered itself, among other bluetooth devices.
+
+It would be interesting (seems to me) if the client would be a java client
+running on android, such that you can control the radio by a tablet or phone.
+
+My experience with android is 0 (ZERO), so any help in setting up an android client that
+can communicate with a server would be helpful.
+
+Structure of the communication is simple, The client - once connected - selects a channel
+sets - if needed - gain parameters and receives - if any - the name of the ensemble and
+the names of the services. The user of the client then selects a service
+
+In the current set up, the audio connection is to the server, so the client is merely the remote control.
+
+Any pointer/code fragment outline would be welcome
+
+J
+
+
+
+
+---------------------------------------------------------------------
 Introduction
 ---------------------------------------------------------------------
 
