@@ -63,7 +63,7 @@ static
 int	client;
 
 static
-void    handleRequest (char *buf, int bufLen);
+int    handleRequest (char *buf, int bufLen);
 static
 sdp_session_t *register_service (void);
 
@@ -322,13 +322,16 @@ bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
               int bytes_read;
               char buf [1024];
               bytes_read = read (client, buf, sizeof (buf));
-              if (bytes_read > 0)
-                 handleRequest (buf, bytes_read);
-              else {
+              if (bytes_read > 0) {
+                 if (handleRequest (buf, bytes_read) == 0)
+	            break;
+	      } else {
                  fprintf (stderr, "read gives back %d\n", bytes_read);
                  break;
 	      }
 	   }
+	   theDevice	-> stopReader ();
+	   dabStop (theRadio);
 	}
 
 	theDevice	-> stopReader ();
@@ -370,32 +373,32 @@ std::string value;
 	   rd	-> theBand	= stoi (value);
 }
 
-void	handleRequest (char *lbuf, int bufLen) {
+int	handleRequest (char *lbuf, int bufLen) {
 	switch (lbuf [0]) {
 	   case Q_QUIT:
 	      fprintf (stderr, "quit request\n");
-	      break;
+	      return 0;
 
 	   case Q_IF_GAIN_REDUCTION:
 	      my_radioData. GRdB =
 	                stoi (std::string ((char *)(&(lbuf [3]))));
 	      theDevice      -> set_ifgainReduction (my_radioData. GRdB);
-	      break;
+	      return 1;
 
 	   case Q_LNA_STATE:
 	      my_radioData. lnaState =
 	                stoi (std::string ((char *)(&(lbuf [3]))));
 	      theDevice      -> set_lnaState (my_radioData. lnaState);
-	      break;
+	      return 1;
 
 	   case Q_AUTOGAIN:
 	      my_radioData. autoGain =
 	                stoi (std::string ((char *)(&(lbuf [3])))) != 0;
 	      theDevice      -> set_autogain (my_radioData. autoGain);
-	      break;
+	      return 1;
 
 	   case Q_RESET:
-	      break;		// still to be done
+	      return 1;
 
 	   case Q_SERVICE:
 	      my_radioData. serviceName =
@@ -419,7 +422,7 @@ void	handleRequest (char *lbuf, int bufLen) {
 	            set_audioChannel (theRadio, &ad);
 	         }
 	      }
-	      break;
+	      return 1;
 
 	   case Q_CHANNEL:
 	      dabStop (theRadio);
@@ -437,11 +440,11 @@ void	handleRequest (char *lbuf, int bufLen) {
 	      programNames. resize (0);
 	      programSIds . resize (0);
 	      theDevice      -> restartReader ();
-	      break;
+	      return 1;
 
 	   default:
 	      fprintf (stderr, "Message not understood\n");
-	      break;
+	      return 1;
 	}
 }
 

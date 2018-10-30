@@ -206,5 +206,18 @@ int	i;
 }
 
 void	Client::set_autoGain (int state) {
+QString val     = QString::number (state);
+const char *ss  = val. toLatin1 (). data ();
+int length      = strlen (ss);
+char    message [length + 4];
+int     i;
+
+        for (i = 0; i < length; i ++)
+           message [3 + i] = ss [i];
+        message [3 + length] = 0;
+        message [0] = Q_AUTOGAIN;
+        message [1] = (length >> 8) & 0xFF;
+        message [2] = length & 0xFF;
+        bluetooth -> write (message, length + 4);
 }
 
