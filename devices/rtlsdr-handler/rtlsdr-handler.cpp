@@ -19,7 +19,6 @@
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *
  * 	This particular driver is a very simple wrapper around the
  * 	librtlsdr.  In order to keep things simple, we dynamically
  * 	load the dll (or .so). The librtlsdr is osmocom software and all rights
@@ -77,7 +76,7 @@ int16_t	i;
 	fprintf (stderr, "going for rtlsdr %d %d\n", frequency, gain);
 	this	-> frequency	= frequency;
 	this	-> ppmCorrection	= ppmCorrection;
-	this	-> gain		= gain;
+	this	-> theGain	= gain;
 	this	-> autogain	= autogain;
 	this	-> deviceIndex	= deviceIndex;
 
@@ -86,7 +85,6 @@ int16_t	i;
 	open			= false;
 	_I_Buffer		= NULL;
 	this	-> sampleCounter= 0;
-	this	-> vfoOffset	= 0;
 	gains			= NULL;
 	running			= false;
 
@@ -147,7 +145,7 @@ int16_t	i;
 
 	r			= this -> rtlsdr_get_sample_rate (device);
 	fprintf (stderr, "samplerate set to %d\n", r);
-	rtlsdr_set_tuner_gain_mode (device, 1);
+	rtlsdr_set_tuner_gain_mode (device, 0);
 
 	gainsCount	= rtlsdr_get_tuner_gains (device, NULL);
 	fprintf (stderr, "Supported gain values (%d): ", gainsCount);
@@ -156,14 +154,16 @@ int16_t	i;
 	for (i = 0; i < gainsCount; i ++)
 	   fprintf (stderr, "%d.%d ", gains [i] / 10, gains [i] % 10);
 	fprintf (stderr, "\n");
-	gain		= gain * gainsCount / 100;
+	theGain		= gain;
 	if (ppmCorrection != 0)
 	   rtlsdr_set_freq_correction (device, ppmCorrection);
 	if (autogain)
 	   rtlsdr_set_agc_mode (device, 1);
-	fprintf (stderr, "effective gain: index %d, gain %d\n",
-	                                   gain, gains [gain]);
-	rtlsdr_set_tuner_gain (device, gains [gain]);
+	(void)(this -> rtlsdr_set_center_freq (device, frequency));
+	fprintf (stderr, "effective gain: gain %d.%d\n",
+	                              gains [theGain * gainsCount / 100] / 10,
+	                              gains [theGain * gainsCount / 100] % 10);
+	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
 	_I_Buffer		= new RingBuffer<uint8_t>(1024 * 1024);
 }
 
@@ -189,15 +189,6 @@ int16_t	i;
 	open = false;
 }
 
-void	rtlsdrHandler::setVFOFrequency	(int32_t f) {
-	frequency	= f;
-	(void)(this -> rtlsdr_set_center_freq (device, f + vfoOffset));
-}
-
-int32_t	rtlsdrHandler::getVFOFrequency	(void) {
-	return (int32_t)(this -> rtlsdr_get_center_freq (device)) - vfoOffset;
-}
-//
 //
 bool	rtlsdrHandler::restartReader	(void) {
 int32_t	r;
@@ -210,7 +201,7 @@ int32_t	r;
            return false;
 
 	workerHandle = std::thread (controlThread, this);
-	rtlsdr_set_tuner_gain (device, theGain);
+	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
 	if (autogain)
 	   rtlsdr_set_agc_mode (device, 1);
 	running	= true;
@@ -225,23 +216,6 @@ void	rtlsdrHandler::stopReader	(void) {
 	workerHandle. join ();
 	running	= false;
 }
-//
-//	when selecting with an integer in the range 0 .. 100
-//	first find the table value
-void	rtlsdrHandler::setGain	(int32_t g) {
-	theGain	= gains [g * gainsCount / 100];
-	rtlsdr_set_tuner_gain (device, theGain);
-}
-
-bool	rtlsdrHandler::has_autogain	(void) {
-	return true;
-}
-
-void	rtlsdrHandler::set_autogain	(bool b) {
-	rtlsdr_set_tuner_gain_mode (device, b);
-	rtlsdr_set_tuner_gain (device, theGain);
-}
-
 //
 //	we only have 8 bits, so rather than doing a float division to get
 //	the float value we want, we precompute the possibilities

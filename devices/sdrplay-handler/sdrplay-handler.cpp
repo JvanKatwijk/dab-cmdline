@@ -23,22 +23,25 @@
 
 #include	"sdrplay-handler.h"
 
-#define	DEFAULT_GAIN	40
-
 	sdrplayHandler::sdrplayHandler  (int32_t	frequency,
 	                                 int16_t	ppm,
-	                                 int16_t	gain,
+	                                 int16_t	GRdB,
+	                                 int16_t	lnaState,
 	                                 bool		autoGain,
 	                                 uint16_t	deviceIndex,
 	                                 int16_t	antenna) {
 int	err;
 float	ver;
 mir_sdr_DeviceT devDesc [4];
+int	maxlna;
 
 	this	-> inputRate		= 2048000;
         this    -> frequency            = frequency;
         this    -> ppmCorrection        = ppm;
-        this    -> theGain              = gain;
+        this    -> GRdB			= GRdB;
+	if ((GRdB < 20) || (GRdB > 59))
+	   GRdB = 30;
+	this	-> lnaState		= lnaState;
         this    -> deviceIndex          = deviceIndex;
         this    -> agcMode		= autoGain ?
 	                                     mir_sdr_AGC_100HZ :
@@ -73,19 +76,39 @@ mir_sdr_DeviceT devDesc [4];
 	if (hwVersion == 255) {
 	   nrBits	= 14;
 	   denominator	= 8192.0;
+	   maxlna	= 9;
 	}
-        else {
+        else 
+	if (hwVersion == 1) {
            nrBits	= 12;
 	   denominator	= 2048.0;
+	   maxlna	= 3;
+	}
+	else
+	if (hwVersion == 2) {
+           nrBits	= 12;
+	   denominator	= 2048.0;
+	   maxlna	= 8;
+	}
+	else {
+           nrBits	= 12;
+	   denominator	= 2048.0;
+	   maxlna	= 9;
 	}
 
+	if (lnaState < 0) 
+	   lnaState = 0;
+	if (lnaState > maxlna)
+	   lnaState = maxlna;
+	
 	_I_Buffer	= new RingBuffer<std::complex<float>>(1024 * 1024);
-//
-//	mir_sdr_AgcControl (autoGain ?
-//	                 mir_sdr_AGC_100HZ :
-//	                 mir_sdr_AGC_DISABLE, - (102 - theGain), 0, 0, 0, 0, 0);
-	if (!autoGain)
-	   mir_sdr_SetGr (102 - theGain, 1, 0);
+
+        mir_sdr_AgcControl (autoGain ?
+                         mir_sdr_AGC_100HZ :
+                         mir_sdr_AGC_DISABLE, - GRdB, 0, 0, 0, 0, lnaState);
+        if (!autoGain)
+           mir_sdr_RSP_SetGr (GRdB, lnaState, 1, 0);
+
 	running. store (false);
 }
 
@@ -97,84 +120,6 @@ mir_sdr_DeviceT devDesc [4];
 	   delete _I_Buffer;
 }
 //
-//	Not really needed as long as we only use the starting frequency
-#define	kHz(x)	(x * 1000)
-#define	mHz(x)	(kHz (x) * 1000)
-static inline
-int16_t	bankFor_sdr (int32_t freq) {
-	if (freq < 10 * kHz (1))
-	   return -1;
-	if (freq < 12 * mHz (1))
-	   return 1;
-	if (freq < 30 * mHz (1))
-	   return 2;
-	if (freq < 60 * mHz (1))
-	   return 3;
-	if (freq < 120 * mHz (1))
-	   return 4;
-	if (freq < 250 * mHz (1))
-	   return 5;
-	if (freq < 420 * mHz (1))
-	   return 6;
-	if (freq < 1000 * mHz (1))
-	   return 7;
-	if (freq < 2000 * mHz (1))
-	   return 8;
-	return -1;
-}
-
-void	sdrplayHandler::setVFOFrequency	(int32_t newFrequency) {
-mir_sdr_ErrT	err;
-int32_t	realFreq = newFrequency;
-int	gRdBSystem;
-int	samplesPerPacket;
-
-	if (bankFor_sdr (realFreq) == -1)
-	   return;
-
-	if (!running. load ()) {
-	   frequency = newFrequency;
-	   return;
-	}
-
-	if (bankFor_sdr (realFreq) == bankFor_sdr (frequency)) {
-	   mir_sdr_SetRf (double (realFreq), 1, 0);
-	   frequency	= realFreq;
-	   fprintf (stderr, "freq gezet op %d\n", realFreq);
-	   return;
-	}
-	stopReader	();
-	restartReader	();
-}
-
-int32_t	sdrplayHandler::getVFOFrequency	(void) {
-	return frequency - vfoOffset;
-}
-
-int16_t	sdrplayHandler::maxGain	(void) {
-	return 101;
-}
-//
-//	For the setting of gain, not using a widget, we map the
-//	gain value upon an attenation value and set setexternal Gain
-void	sdrplayHandler::setGain		(int32_t g) {
-	theGain		= g;
-	fprintf (stderr, "gain reducction wordt %d\n", 102 - g);
-	mir_sdr_SetGr (102 - theGain, 1, 0);
-}
-
-bool	sdrplayHandler::has_autogain	(void) {
-	return true;
-}
-
-void	sdrplayHandler::set_agcControl	(bool b) {
-	mir_sdr_AgcControl (b ?
-	                 mir_sdr_AGC_100HZ :
-	                 mir_sdr_AGC_DISABLE, - (102 - theGain), 0, 0, 0, 0, 0);
-	if (!b)
-	   mir_sdr_SetGr ((102 - theGain), 1, 0);
-}
-
 static
 void myStreamCallback (int16_t		*xi,
 	               int16_t		*xq,
@@ -216,7 +161,7 @@ bool	sdrplayHandler::restartReader	(void) {
 int	gRdBSystem;
 int	samplesPerPacket;
 mir_sdr_ErrT	err;
-int	localGRed	= 102 - theGain;
+int	localGRed	= GRdB;
 
 	if (running. load ())
 	   return true;
@@ -226,9 +171,9 @@ int	localGRed	= 102 - theGain;
 	                              double (frequency) / 1000000.0,
 	                              mir_sdr_BW_1_536,
 	                              mir_sdr_IF_Zero,
-	                              1,	// lnaEnable do not know yet
+	                              lnaState,	// lnaEnable do not know yet
 	                              &gRdBSystem,
-	                              mir_sdr_USE_SET_GR,
+	                              mir_sdr_USE_RSP_SET_GR,
 	                              &samplesPerPacket,
 	                              (mir_sdr_StreamCallback_t)myStreamCallback,
 	                              (mir_sdr_GainChangeCallback_t)myGainChangeCallback,
@@ -267,6 +212,6 @@ void	sdrplayHandler::resetBuffer	(void) {
 }
 
 int16_t	sdrplayHandler::bitDepth	(void) {
-	return 12;
+	return nrBits;
 }
 

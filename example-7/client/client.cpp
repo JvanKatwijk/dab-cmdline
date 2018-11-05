@@ -98,7 +98,7 @@ int	i;
 	  message [3 + i] = ss [i];
 	}
 	message [3 + length] = 0;
-	fprintf (stderr, "selected %s\n", &(message. data () [3]));
+	fprintf (stderr, "selected %s\n", &(message [3]));
 	message [0] = Q_CHANNEL;
 	message [1] = (length >> 8) & 0xFF;
 	message [2] = length & 0xFF;
@@ -131,7 +131,7 @@ int	i;
 	message [0] = Q_SERVICE;
 	message [1] = (length >> 8) & 0xFF;
 	message [2] = length & 0xFF;
-	bluetooth -> write (message. data (), length + 3 + 1);
+	bluetooth -> write (message, length + 3 + 1);
 
 	programDesc	= QStringList ();
 	programDesc	<< currentProgram;
@@ -219,5 +219,16 @@ int     i;
         message [1] = (length >> 8) & 0xFF;
         message [2] = length & 0xFF;
         bluetooth -> write (message, length + 4);
+}
+
+void	Client::set_resetButton (void) {
+char    message [4];
+int     i;
+
+        message [3 + 1] = 0;
+        message [0] = Q_RESET;
+        message [1] = 0;
+        message [2] = 0;
+        bluetooth -> write (message, 0);
 }
 

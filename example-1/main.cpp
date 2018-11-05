@@ -171,7 +171,12 @@ uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
+#ifndef	HAVE_SDRPLAY
 int		theGain		= 35;	// scale = 0 .. 100
+#else
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 2;
+#endif
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 bool		autogain	= false;
@@ -211,21 +216,30 @@ deviceHandler	*theDevice;
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
 	         break;
+#ifdef	HAVE_SDRPLAY
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
 
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+#else
 	      case 'G':
 	         theGain	= atoi (optarg);
 	         break;
 
+	      case 'L':
+	         latency	= atoi (optarg);
+	         break;
+
+#endif
 	      case 'Q':
 	         autogain	= true;
 	         break;
 
 	      case 'A':
 	         soundChannel	= optarg;
-	         break;
-
-	      case 'L':
-	         latency	= atoi (optarg);
 	         break;
 
 	      case 'S': {
@@ -253,7 +267,8 @@ deviceHandler	*theDevice;
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
-	                                      theGain,
+	                                      GRdB,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);

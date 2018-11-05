@@ -50,25 +50,20 @@ class	sdrplayHandler: public deviceHandler {
 public:
 		sdrplayHandler          (int32_t        frequency,
 	                                 int16_t        ppmCorrection,
-	                                 int16_t        gain,
+	                                 int16_t	GRdB,
+	                                 int16_t	lnaState,
 	                                 bool		autogain,
 	                                 uint16_t       deviceIndex,
 	                                 int16_t        antenna);
 
 		~sdrplayHandler		(void);
-	void	setVFOFrequency		(int32_t);
-	int32_t	getVFOFrequency		(void);
 
 	bool	restartReader		(void);
 	void	stopReader		(void);
 	int32_t	getSamples		(std::complex<float> *, int32_t);
 	int32_t	Samples			(void);
 	void	resetBuffer		(void);
-	int16_t	maxGain			(void);
 	int16_t	bitDepth		(void);
-	void	setGain			(int32_t);
-	bool	has_autogain		(void);
-	void	set_agcControl		(bool);
 //
 //	need to be visible, since being accessed from 
 //	within the callback
@@ -83,7 +78,8 @@ private:
 	int32_t		inputRate;
 	int32_t		frequency;
 	int16_t		ppmCorrection;
-	int		theGain;
+	int16_t		GRdB;
+	int16_t		lnaState;
 	std::atomic<bool>	running;
 	mir_sdr_AgcControlT agcMode;
 };

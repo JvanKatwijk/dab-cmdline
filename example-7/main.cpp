@@ -374,77 +374,79 @@ std::string value;
 }
 
 int	handleRequest (char *lbuf, int bufLen) {
-	switch (lbuf [0]) {
-	   case Q_QUIT:
-	      fprintf (stderr, "quit request\n");
-	      return 0;
+int	starter	= 0;
+	while (starter < bufLen) {
+	   switch (lbuf [starter + 0]) {
+	      case Q_QUIT:
+	         fprintf (stderr, "quit request\n");
+	         return 0;
 
-	   case Q_IF_GAIN_REDUCTION:
-	      my_radioData. GRdB =
-	                stoi (std::string ((char *)(&(lbuf [3]))));
-	      theDevice      -> set_ifgainReduction (my_radioData. GRdB);
-	      return 1;
+	      case Q_IF_GAIN_REDUCTION:
+	         my_radioData. GRdB = lbuf [starter + 3];
+	         theDevice      -> set_ifgainReduction (my_radioData. GRdB);
+	         break;
 
-	   case Q_LNA_STATE:
-	      my_radioData. lnaState =
-	                stoi (std::string ((char *)(&(lbuf [3]))));
-	      theDevice      -> set_lnaState (my_radioData. lnaState);
-	      return 1;
+	      case Q_LNA_STATE:
+	         my_radioData. lnaState = lbuf [starter + 3];
+	         theDevice      -> set_lnaState (my_radioData. lnaState);
+	         break;
 
-	   case Q_AUTOGAIN:
-	      my_radioData. autoGain =
-	                stoi (std::string ((char *)(&(lbuf [3])))) != 0;
-	      theDevice      -> set_autogain (my_radioData. autoGain);
-	      return 1;
+	      case Q_AUTOGAIN:
+	         my_radioData. autoGain = lbuf [starter + 3] != 0;
+	         theDevice      -> set_autogain (my_radioData. autoGain);
+	         break;
 
-	   case Q_RESET:
-	      return 1;
+	      case Q_RESET:
+	         return 1;
 
-	   case Q_SERVICE:
-	      my_radioData. serviceName =
-	                          std::string ((char *)(&(lbuf [3])));
-	      fprintf (stderr, "service request for %s\n",
+	      case Q_SERVICE:
+	         my_radioData. serviceName =
+	                          std::string ((char *)(&(lbuf [starter + 3])));
+	         fprintf (stderr, "service request for %s\n",
 	                              my_radioData. serviceName. c_str ());
 
-	      if (is_audioService (theRadio,
+	         if (is_audioService (theRadio,
 	                              my_radioData. serviceName. c_str ())) {
-	      audiodata ad;
-	         dataforAudioService (theRadio,
-	                              my_radioData. serviceName. c_str (),
-	                              &ad, 0);
-	         if (!ad. defined) {
-	            std::cerr << "sorry  we cannot handle service " <<
+	            audiodata ad;
+	            dataforAudioService (theRadio,
+	                                 my_radioData. serviceName. c_str (),
+	                                 &ad, 0);
+	            if (!ad. defined) {
+	               std::cerr << "sorry  we cannot handle service " <<
 	                                    my_radioData. serviceName << "\n";
-	            running. store (false);
+	               running. store (false);
+	            }
+	            else {
+	               dabReset_msc (theRadio);
+	               set_audioChannel (theRadio, &ad);
+	            }
 	         }
-	         else {
-	            dabReset_msc (theRadio);
-	            set_audioChannel (theRadio, &ad);
-	         }
-	      }
-	      return 1;
+	         break;
 
-	   case Q_CHANNEL:
-	      dabStop (theRadio);
-	      theDevice      -> stopReader ();
-	      fprintf (stderr, "radio and device stopped\n");
-	      my_radioData. theChannel = std::string ((char *)(&(lbuf [3])));
-	      fprintf (stderr, "selecting channel %s\n",
-	                                      (char *)(&(lbuf [3])));
-	      {  int frequency =
+	      case Q_CHANNEL:
+	         dabStop (theRadio);
+	         theDevice      -> stopReader ();
+	         fprintf (stderr, "radio and device stopped\n");
+	         my_radioData. theChannel =
+		                std::string ((char *)(&(lbuf [starter + 3])));
+	         fprintf (stderr, "selecting channel %s\n",
+	                                      (char *)(&(lbuf [starter + 3])));
+	         {  int frequency =
 	                 theBandHandler -> Frequency (my_radioData. theBand,
 	                                              my_radioData. theChannel);
-	         theDevice   -> setVFOFrequency (frequency);
-	      }
-	      dabStartProcessing (theRadio);
-	      programNames. resize (0);
-	      programSIds . resize (0);
-	      theDevice      -> restartReader ();
-	      return 1;
+	            theDevice   -> setVFOFrequency (frequency);
+	         }
+	         dabStartProcessing (theRadio);
+	         programNames. resize (0);
+	         programSIds . resize (0);
+	         theDevice      -> restartReader ();
+	         break;
 
-	   default:
-	      fprintf (stderr, "Message not understood\n");
-	      return 1;
+	      default:
+	         fprintf (stderr, "Message not understood\n");
+	         break;
+	   }
+	   starter += lbuf [3];
 	}
 }
 

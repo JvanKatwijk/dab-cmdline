@@ -68,8 +68,6 @@ public:
 	                                 bool		autogain,
 	                                 uint16_t	deviceIndex = 0);
 			~rtlsdrHandler	(void);
-	void		setVFOFrequency	(int32_t);
-	int32_t		getVFOFrequency	(void);
 //	interface to the reader
 	bool		restartReader	(void);
 	void		stopReader	(void);
@@ -78,10 +76,6 @@ public:
 	void		resetBuffer	(void);
 	int16_t		maxGain		(void);
 	int16_t		bitDepth	(void);
-//
-	void		setGain		(int32_t);
-	bool		has_autogain	(void);
-	void		set_autogain	(bool);
 //
 //	These need to be visible for the separate usb handling thread
 	RingBuffer<uint8_t>	*_I_Buffer;

@@ -239,11 +239,16 @@ uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
-int		theGain		= 45;	// scale = 0 .. 100
+int		deviceGain	= 45;	// scale = 0 .. 100
 #ifdef	HAVE_HACKRF
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 #endif
+#ifdef	HAVE_SDRPLAY	
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 2;
+#endif
+
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
@@ -281,7 +286,7 @@ bool	err;
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
 #if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES) && !defined (HAVE_RTL_TCP))
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:g:A:L:S:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:L:g:A:L:S:QO:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #else
@@ -335,15 +340,7 @@ bool	err;
 	         theChannel	= std::string (optarg);
 	         break;
 
-#ifndef	HAVE_HACKRF
-	      case 'G':
-	         theGain	= atoi (optarg);
-	         break;
-
-	      case 'Q':
-	         autogain	= true;
-	         break;
-#else
+#ifdef	HAVE_HACKRF
 	      case 'G':
 	         lnaGain	= atoi (optarg);
 	         break;
@@ -351,6 +348,28 @@ bool	err;
 	      case 'g':
 	         vgaGain	= atoi (optarg);
 	         break;
+#else
+#ifdef	HAVE_SDRPLAY
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+#else
+	      case 'G':
+	         deviceGain	= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+#endif
 #endif
 #ifdef	HAVE_RTL_TCP
 	      case 'H':
@@ -375,10 +394,6 @@ bool	err;
 	         soundChannel	= optarg;
 	         break;
 
-	      case 'L':
-	         latency	= atoi (optarg);
-	         break;
-
 	      case 'S': {
                  std::stringstream ss;
                  ss << std::hex << optarg;
@@ -401,18 +416,19 @@ bool	err;
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
-	                                      theGain,
+	                                      GRdB,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmCorrection,
-	                                     theGain);
+	                                     deviceGain);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     ppmCorrection,
-	                                     theGain,
+	                                     deviceGain,
 	                                     autogain);
 #elif	HAVE_HACKRF
 	   theDevice	= new hackrfHandler	(frequency,
@@ -427,7 +443,7 @@ bool	err;
 	   theDevice	= new rtl_tcp_client (hostname,
 	                                      basePort,
 	                                      frequency,
-	                                      theGain,
+	                                      deviceGain,
 	                                      autogain,
 	                                      ppmCorrection);
 #endif
@@ -469,15 +485,7 @@ bool	err;
 	   exit (4);
 	}
 
-	theDevice	-> setGain (theGain);
-	if (autogain)
-	   theDevice	-> set_autogain (autogain);
-	theDevice	-> setVFOFrequency (frequency);
 	theDevice	-> restartReader ();
-	theDevice	-> setGain (theGain);
-	if (autogain)
-	   theDevice	-> set_autogain (autogain);
-	theDevice	-> setVFOFrequency (frequency);
 //
 //	The device should be working right now
 
@@ -561,10 +569,11 @@ void    printOptions (void) {
                           -P name     program to be selected in the ensemble\n\
                           -C channel  channel to be used\n\
                           -G Gain     gain for device (range 1 .. 100)\n\
+	                  -G GRdB     Gain Reduction in dB for SDRplay (20 .. 29)\n\
+	                  -L lnaState lnaState for SDRplay\n\
                           -Q          if set, set autogain for device true\n\
 	                  -F filename in case the input is from file\n\
                           -A name     select the audio channel (portaudio)\n\
-                          -L number   latency for audiobuffer\n\
                           -S hexnumber use hexnumber to identify program\n\n\
 	                  -O filename put the output into a file rather than through portaudio\n";
 }

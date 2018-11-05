@@ -197,7 +197,12 @@ uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
+#ifdef	HAVE_SDRPLAY
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 2;
+#else
 int		theGain		= 35;	// scale = 0 .. 100
+#endif
 int16_t		waitingTime	= 10;
 bool		autogain	= false;
 int	opt;
@@ -227,12 +232,12 @@ bool	err;
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-#if    (!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
-#elif   HAVE_RTL_TCP
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
-#else
+#if    (defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES))
 	while ((opt = getopt (argc, argv, "W:M:B:P:A:L:S:F:O:")) != -1) {
+#elif   HAVE_RTL_TCP
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:QO:")) != -1) {
+#else
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
@@ -259,6 +264,7 @@ bool	err;
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
 	         break;
+
 #if	defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
 	      case 'F':
 	         fileName	= std::string (optarg);
@@ -268,10 +274,19 @@ bool	err;
 	         theChannel	= std::string (optarg);
 	         break;
 
+#ifdef	HAVE_SDRPLAY
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+#else
 	      case 'G':
 	         theGain	= atoi (optarg);
 	         break;
-
+#endif
 	      case 'Q':
 	         autogain	= true;
 	         break;
@@ -309,7 +324,8 @@ bool	err;
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
-	                                      theGain,
+	                                      GRdB,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);

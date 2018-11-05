@@ -55,6 +55,7 @@ private	slots:
 	void		set_lnaState	(int);
 	void		set_autoGain	(int);
 	void		handle_quit	(void);
+	void		set_resetButton	(void);
 public	slots:
 	void		set_ensembleLabel (const QString &s);
 	void		set_serviceName	(const QString &s);

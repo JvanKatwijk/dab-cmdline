@@ -76,7 +76,7 @@ std::atomic<bool>ensembleRecognized;
 tcpServer	tdcServer (8888);
 #endif
 
-std::string	programName		= "Classic FM";
+std::string	programName		= "Sky Radio";
 int32_t		serviceIdentifier	= -1;
 
 static void sighandler (int signum) {
@@ -196,6 +196,8 @@ std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
 int		theGain		= 35;	// scale = 0 .. 100
+int		GRdB		= 30;
+int		lnaState	= 2;
 int16_t		waitingTime	= 10;
 bool		autogain	= false;
 int	opt;
@@ -225,12 +227,12 @@ bool	err;
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES))
-	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:S:Q")) != -1) {
+#if	(defined (HAVE_WAVFILES) ||defined (HAVE_RAWFILES))
+	while ((opt = getopt (argc, argv, "W:M:B:P:S:F:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:S:H:I:Q")) != -1) {
 #else
-	while ((opt = getopt (argc, argv, "W:M:B:P:S:F:")) != -1) {
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:L:S:Q")) != -1) {
 #endif
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
@@ -266,10 +268,19 @@ bool	err;
 	         theChannel	= std::string (optarg);
 	         break;
 
+#ifdef	HAVE_SDRPLAY
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+#else
 	      case 'G':
 	         theGain	= atoi (optarg);
 	         break;
-
+#endif
 	      case 'Q':
 	         autogain	= true;
 	         break;
@@ -307,7 +318,8 @@ bool	err;
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
-	                                      theGain,
+	                                      GRdB,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);

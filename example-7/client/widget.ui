@@ -54,7 +54,7 @@
     <rect>
      <x>10</x>
      <y>70</y>
-     <width>241</width>
+     <width>311</width>
      <height>16</height>
     </rect>
    </property>
@@ -104,7 +104,7 @@
   <widget class="QSpinBox" name="lnaState">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>340</x>
      <y>40</y>
      <width>108</width>
      <height>36</height>
@@ -117,7 +117,7 @@
   <widget class="QSpinBox" name="ifgainReduction">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>340</x>
      <y>80</y>
      <width>108</width>
      <height>36</height>
@@ -133,7 +133,7 @@
   <widget class="QCheckBox" name="autogainButton">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>350</x>
      <y>10</y>
      <width>94</width>
      <height>26</height>
@@ -141,6 +141,19 @@
    </property>
    <property name="text">
     <string>autoGain</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="resetButton">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>10</y>
+     <width>88</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>reset</string>
    </property>
   </widget>
  </widget>
