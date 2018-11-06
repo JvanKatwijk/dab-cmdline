@@ -71,7 +71,7 @@ sdp_session_t *register_service (void);
 //      This function is called from - most likely -
 //      different threads from within the library
 static
-void    messageWriter (uint8_t code, std::string theText) {
+void    string_Writer (uint8_t code, std::string theText) {
 int     len     = theText. length ();
 int     i;
 char	message [len + 3 + 1];
@@ -83,6 +83,19 @@ char	message [len + 3 + 1];
         message [len + 3] = (uint8_t)0;
 //	locker. lock ();
         write (client, message, len + 3 + 1);
+//	locker. unlock ();
+}
+//
+//	for some keys we only send a small integer value
+static
+void	int_Writer (uint8_t code, int8_t v) {
+char	message [5];
+	message [0]	= (char)code;
+	message [1]	= 0;
+	message [2]	= 2;
+	message [3]	= v;
+//	locker. lock ();
+	write (client, message, 5);
 //	locker. unlock ();
 }
 
@@ -112,7 +125,7 @@ void	syncsignalHandler (bool b, void *userData) {
 	timeSynced. store (b);
 	timesyncSet. store (true);
 	if (!b)
-	   messageWriter (Q_TEXT_MESSAGE,
+	   string_Writer (Q_TEXT_MESSAGE,
 	                             std::string ("no dab signal yet"));
 	(void)userData;
 }
@@ -127,7 +140,7 @@ void	ensemblenameHandler (std::string name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
 	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
-	messageWriter (Q_ENSEMBLE, name);
+	string_Writer (Q_ENSEMBLE, name);
 }
 
 
@@ -142,7 +155,7 @@ void	programnameHandler (std::string s, int SId, void *userdata) {
 	      return;
 	programNames. push_back (s);
 	programSIds . push_back (SId);
-	messageWriter (Q_SERVICE_NAME, s);
+	string_Writer (Q_SERVICE_NAME, s);
 }
 
 static
@@ -151,15 +164,15 @@ char storage [256];
 
 	(void)ctx;
 	sprintf (storage, "startaddress= %d", d -> startAddr);
-	messageWriter (Q_PROGRAM_DATA, std::string (storage));
+	string_Writer (Q_PROGRAM_DATA, std::string (storage));
 	sprintf (storage, "length      = %d",     d -> length);
-	messageWriter (Q_PROGRAM_DATA, std::string (storage));
+	string_Writer (Q_PROGRAM_DATA, std::string (storage));
 	sprintf (storage, "subChId     = %d",    d -> subchId);
-	messageWriter (Q_PROGRAM_DATA, std::string (storage));
+	string_Writer (Q_PROGRAM_DATA, std::string (storage));
 	sprintf (storage, "protection  = %d",   d -> protLevel);
-	messageWriter (Q_PROGRAM_DATA, std::string (storage));
+	string_Writer (Q_PROGRAM_DATA, std::string (storage));
 	sprintf (storage, "bitrate     = %d",    d -> bitRate);
-	messageWriter (Q_PROGRAM_DATA, std::string (storage));
+	string_Writer (Q_PROGRAM_DATA, std::string (storage));
 }
 
 //
@@ -171,7 +184,7 @@ static
 void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 	localString = dynamicLabel;
 	(void)ctx;
-	messageWriter (Q_TEXT_MESSAGE, localString);
+	string_Writer (Q_TEXT_MESSAGE, localString);
 }
 //
 static
@@ -212,7 +225,7 @@ void	systemData (bool flag, int16_t snr, int32_t freqOff, void *ctx) {
 
 static
 void	fibQuality	(int16_t q, void *ctx) {
-//	fprintf (stderr, "fic quality = %d\n", q);
+	int_Writer (Q_SIGNAL_QUALITY, (char)q);
 }
 
 static

@@ -29,9 +29,10 @@
 
 //	The radio will react on commands
 //	The commands consist of a package with two components
-//	the command identifier and a 0-terminated asci string
+//	the command identifier and a value.
+//	Value is either a null-terminated string or an char value
 //
-//	e.g. Q_GAIN "70" or Q_CHANNEL "11C"
+//	e.g. Q_GAIN 70 or Q_CHANNEL "11C"
 #define Q_QUIT		0100
 #define Q_IF_GAIN_REDUCTION	0101
 #define Q_AUDIO_GAIN	0102
@@ -41,22 +42,17 @@
 #define Q_SERVICE       0106
 #define	Q_RESET		0107
 
-//	The radio will send some data back through port + 1
-//	in all cases the format of the message is
-//	a one byte identifier followed by a 0-terminated string
-
+//	The radio sends messages to the (connected) client
 #define Q_ENSEMBLE      0100
 #define Q_SERVICE_NAME  0101
 #define Q_TEXT_MESSAGE  0102
 #define	Q_PROGRAM_DATA	0103
-
+#define	Q_SIGNAL_QUALITY	0104
 //
 //	packetstructure
-//	byte 0	0xfF
-//	byte 1	length  of the payload (including the header,
-//	                                so the shortest one is 3)
-//	byte 2	key (see above)
+//	byte 0	key
+//	byte 1	high order byte of 16 bit data length 
+//	byte 2  low order byte of 16 bit data length
 //	byte 3 .. 3 + length payload
-//	byte 3 + length .. PACKET_SIZE - 1 usused
 #endif
 

@@ -24,10 +24,12 @@
 #include	<cstring>
 
 	fft_handler::fft_handler (uint8_t dabMode): p (dabMode) {
+	int i;
 	this	-> fftSize	= p. get_T_u ();
 	vector	= (complex<float> *)
 	                fftwf_malloc (sizeof (complex<float>) * fftSize);
-	memset (vector, 0, sizeof (complex<float>) * fftSize);
+	for (i = 0; i < fftSize; i ++)
+	   vector [i] = std::complex<float> (0, 0);
 	plan	= fftwf_plan_dft_1d (fftSize,
 	                            reinterpret_cast <fftwf_complex *>(vector),
 	                            reinterpret_cast <fftwf_complex *>(vector),
