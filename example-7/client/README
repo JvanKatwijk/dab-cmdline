@@ -6,4 +6,6 @@ My approach is
 	gcc -fPIC -shared libwrapper.so bluetooth.c -lbluetooth
 
 
+DOES NOT WORK< TOO MANY CHANGES IN communication
+
 

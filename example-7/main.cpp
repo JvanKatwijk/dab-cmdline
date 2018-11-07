@@ -66,7 +66,8 @@ static
 int    handleRequest (char *buf, int bufLen);
 static
 sdp_session_t *register_service (void);
-
+static
+void	set_audioLevel	(int);
 //
 //      This function is called from - most likely -
 //      different threads from within the library
@@ -77,7 +78,7 @@ int     i;
 char	message [len + 3 + 1];
         message [0]     = (char)code;
         message [1]     = (len >> 8) & 0xFF;
-        message [2]     = len & 0xFF;
+        message [2]     = (len + 1) & 0xFF;
         for (i = 0; i < len; i ++)
            message [3 + i] = theText [i];
         message [len + 3] = (uint8_t)0;
@@ -108,6 +109,8 @@ std::atomic<bool>timesyncSet;
 static
 std::atomic<bool>ensembleRecognized;
 
+static
+std::atomic<bool> newEnsemble;
 static
 audioBase	*soundOut	= NULL;
 
@@ -155,6 +158,10 @@ void	programnameHandler (std::string s, int SId, void *userdata) {
 	      return;
 	programNames. push_back (s);
 	programSIds . push_back (SId);
+	if (newEnsemble. load ()) {
+	   newEnsemble. store (false);
+	   int_Writer (Q_NEW_ENSEMBLE, 0);
+	}
 	string_Writer (Q_SERVICE_NAME, s);
 }
 
@@ -409,6 +416,10 @@ int	starter	= 0;
 	         theDevice      -> set_autogain (my_radioData. autoGain);
 	         break;
 
+	      case Q_SOUND_LEVEL:
+	         set_audioLevel (lbuf [starter + 3]);
+	         break;
+
 	      case Q_RESET:
 	         return 1;
 
@@ -452,15 +463,21 @@ int	starter	= 0;
 	         dabStartProcessing (theRadio);
 	         programNames. resize (0);
 	         programSIds . resize (0);
+	         ensembleRecognized. store (false);
+	         newEnsemble. store (true);
 	         theDevice      -> restartReader ();
+	         fprintf (stderr, "Now sending a clear screen\n");
+	         int_Writer (Q_NEW_ENSEMBLE, 0);
 	         break;
 
 	      default:
-	         fprintf (stderr, "Message not understood\n");
+	         fprintf (stderr, "Message %o not understood\n",
+	                                lbuf [starter + 0]);
 	         break;
 	   }
-	   starter += lbuf [3];
+	   starter += 3 + lbuf [2];
 	}
+	return 1;
 }
 
 static
@@ -550,3 +567,14 @@ char str [256] = "";
 
 	return session;
 }
+
+static
+void	set_audioLevel (int offset) {
+char	command [255];
+	if (offset == 0)
+	   return;
+
+	sprintf (command, "amixer set PCM -- %d%%", (offset + 10) * 5);
+	system (command);
+}
+

@@ -248,6 +248,7 @@ void	sdrplayHandler::stopReader	(void) {
 	   return;
 
 	mir_sdr_StreamUninit	();
+	_I_Buffer       -> FlushRingBuffer ();
 	running. store (false);
 }
 

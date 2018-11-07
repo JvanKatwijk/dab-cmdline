@@ -35,7 +35,7 @@
 //	e.g. Q_GAIN 70 or Q_CHANNEL "11C"
 #define Q_QUIT		0100
 #define Q_IF_GAIN_REDUCTION	0101
-#define Q_AUDIO_GAIN	0102
+#define Q_SOUND_LEVEL	0102
 #define Q_LNA_STATE	0103
 #define	Q_AUTOGAIN	0104
 #define Q_CHANNEL       0105
@@ -48,6 +48,7 @@
 #define Q_TEXT_MESSAGE  0102
 #define	Q_PROGRAM_DATA	0103
 #define	Q_SIGNAL_QUALITY	0104
+#define	Q_NEW_ENSEMBLE	0105
 //
 //	packetstructure
 //	byte 0	key
