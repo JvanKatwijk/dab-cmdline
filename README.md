@@ -80,13 +80,16 @@ The examples 1 to 6 are basically simple variations on a single theme:
 
 	- example 6 is an experimental version where control is
 	  through an IP port. 
+	  
+--------------------------------------------------------------------------------------
+A DAB scanner
+--------------------------------------------------------------------------------------
 
 Next to these examples, a simple dab-scanner is an example program that just
 scans all channels of the given band (BAND III by default) and collects and
 emits data about the ensembles 	  and services encountered. Output can be sent
 to a file - ASCII - that can be interpreted by Libre Office Calc or similar programs.
 
----------------------------------------------------------------------------
 
 ![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 
@@ -101,7 +104,8 @@ java client connecting to the server using bluetooth.
 The current "server" scans on program start the channels in Band III, and collects
 the service names. Once the client connects, these names are passed on and the "user"
 can select a service. The server will then - if needed - select the channel on
-which the service is transmitted and select the service.
+which the service is transmitted and select the service. Obviously, the client
+has on its GUI a "reset" button to refresh the scan over the channels.
 
 
 ----------------------------------------------------------------------------
