@@ -122,7 +122,10 @@ std::atomic<bool> newEnsemble;
 static
 audioBase	*soundOut	= NULL;
 
+static
 void		handleSettings (radioData *rd);
+static
+void		saveSettings (radioData *rd);
 
 static void sighandler (int signum) {
         fprintf (stderr, "Signal caught, terminating!\n");
@@ -131,11 +134,10 @@ static void sighandler (int signum) {
 
 static
 void	syncsignalHandler (bool b, void *userData) {
-	timeSynced. store (b);
+	timeSynced.  store (b);
 	timesyncSet. store (true);
 	if (!b)
-	   string_Writer (Q_TEXT_MESSAGE,
-	                             std::string ("no dab signal yet"));
+	   fprintf (stderr, " no dab signal yet\n");
 	(void)userData;
 }
 //
@@ -155,8 +157,6 @@ static
 bool	scanning	= false;
 static
 void	programnameHandler (std::string s, int SId, void *userdata) {
-audiodata ad;
-
 	if (!scanning)
 	   return;
 	for (std::map<std::string, std::string>
@@ -165,11 +165,8 @@ audiodata ad;
 	   if (it -> first == s)
 	      return;
 
-	dataforAudioService (theRadio, s. c_str (), &ad, 0);
-	if (ad. defined) {
-	   serviceMap. insert (mapElement (s,
+	serviceMap. insert (mapElement (s,
 	                        theBandHandler -> currentChannel ()));
-	}
 }
 
 static
@@ -191,10 +188,7 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 static
 void	bytesOut_Handler (uint8_t *data, int16_t amount,
 	                  uint8_t type, void *ctx) {
-	(void)data;
-	(void)amount;
-	(void)type;
-	(void)ctx;
+	(void)data; (void)amount; (void)type; (void)ctx;
 }
 //
 static
@@ -241,25 +235,54 @@ char buf [1024] = { 0 };
 int s;
 socklen_t opt = sizeof (rem_addr);
 bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
+int	optie;
+
 	theBandHandler	= new bandHandler ();
 	handleSettings (&my_radioData);
 
+	while ((optie = getopt (argc, argv, "G:L:AS:D:W:")) != -1) {
+	   switch (optie) {
+	      case 'G':
+	         my_radioData. GRdB	= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         my_radioData. lnaState	= atoi (optarg);
+	         break;
+
+	      case 'A':
+	         my_radioData. autoGain	= true;
+	         break;
+
+	      case 'S':
+	         my_radioData. soundChannel	= std::string (optarg);
+	         break;
+
+	      case 'D':
+	         my_radioData. latency	= atoi (optarg);
+	         break;
+
+	      case 'W':
+	         my_radioData. waitingTime	= atoi (optarg);
+	         break;
+
+	      default:;
+	   }
+	}
+
+	saveSettings (&my_radioData);
+	
         register_service ();
 //      allocate socket
-        s = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-
+        s = socket (AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 //      bind socket to port 1 of the first available
+
 //      local bluetooth adapter
         loc_addr.rc_family = AF_BLUETOOTH;
-	
         loc_addr.rc_bdaddr = tmp;
 //	loc_addr.rc_bdaddr = *BDADDR_ANY;
         loc_addr.rc_channel = (uint8_t) 1;
         bind (s, (struct sockaddr *)&loc_addr, sizeof(loc_addr));
-	
-	timeSynced.	store (false);
-	timesyncSet.	store (false);
-
 	
 	sigact.sa_handler = sighandler;
 	sigemptyset(&sigact.sa_mask);
@@ -311,6 +334,7 @@ bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 	scanning	= true;
 	buildServiceList (true);
 	scanning	= false;
+
 	while (true) {
 //      put socket into listening mode
            fprintf (stderr, "server is listening\n");
@@ -329,7 +353,7 @@ bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 	                              ::iterator it = serviceMap. begin ();
 	             it != serviceMap. end(); ++it) {
 	      string_Writer (Q_SERVICE_NAME, it -> first);
-	      usleep (1);
+	      usleep (100);
 	   }
 	   
            while (true) {
@@ -357,6 +381,17 @@ bdaddr_t tmp	= (bdaddr_t) {{0, 0, 0, 0, 0, 0}};
 	close (s);
 }
 
+static
+void	saveSettings (radioData *rd) {
+config *my_config;
+	try {
+	   my_config = new config ("home/jan/.radioconfig.conf");
+	} catch (...) {
+	   return;		// no config file
+	}
+}
+
+static
 void	handleSettings (radioData *rd) {
 config *my_config;
 std::string value;
@@ -366,8 +401,8 @@ std::string value;
 	rd	-> theChannel		= "11C";
 	rd	-> theBand		= BAND_III;
 	rd	-> ppmCorrection	= 0;
-	rd	-> GRdB			= 35;	
-	rd	-> lnaState		= 3;
+	rd	-> GRdB			= 30;
+	rd	-> lnaState		= 4;
 	rd	-> autoGain		= false;
 	rd	-> soundChannel		= "default";
 	rd	-> latency		= 10;
@@ -415,8 +450,23 @@ int	starter	= 0;
 	         break;
 
 	      case Q_RESET:
-	         return 1;
-
+	         theDevice	-> stopReader ();
+	         dabStop (theRadio);
+	         int_Writer (Q_NEW_ENSEMBLE, 0);
+	         scanning	= true;
+	         buildServiceList (true);
+//	send out the collected service names
+	
+	         for (std::map<std::string, std::string>
+	                              ::iterator it = serviceMap. begin ();
+	              it != serviceMap. end(); ++it) {
+	            string_Writer (Q_SERVICE_NAME, it -> first);
+	            usleep (100);
+	         }
+	         scanning	= false;
+	         break;
+//
+//	This is what the user most of the time will do mostly
 	      case Q_SERVICE:
 	         {  std::string channel	= "";
 	            my_radioData. serviceName =
@@ -437,17 +487,20 @@ int	starter	= 0;
 	               break;
 	            }
 
-	            if (channel !=  theBandHandler -> currentChannel ()) {
+	            if (channel != theBandHandler -> currentChannel ()) {
 	               theDevice -> stopReader ();
 	               dabStop (theRadio);
 	               theBandHandler -> setChannel (channel);
                        int32_t frequency =
                                 theBandHandler -> Frequency ();
+	               char temp [255];
+	               sprintf (temp, "switching to channel %s", channel. c_str ());
+	               string_Writer (Q_CHANNEL, temp);
                        theDevice    -> setVFOFrequency (frequency);
                        theDevice    -> restartReader ();
                        timesyncSet.         store (false);
                        timeSynced.          store (false);
-                       int timeSyncTime         = 4;
+                       int timeSyncTime         = my_radioData. waitingTime;
 	               ensembleRecognized.       store (false);
 	               dabStartProcessing (theRadio);
 	               while (!timesyncSet. load () && (--timeSyncTime >= 0))
@@ -456,6 +509,8 @@ int	starter	= 0;
 	                  string_Writer (Q_NO_SERVICE, "service not found");
 	                  break;
 	               }
+	               else
+	                  sleep (3);
 	            }
 
 	            if (is_audioService (theRadio,
@@ -599,14 +654,16 @@ std::string	theChannel	= "5A";
 std::string	startChannel	= "5A";
 //
 //	be sure that the serviceList is empty
+	fprintf (stderr, "we gaan de map clearen\n");
         serviceMap. clear ();
+	fprintf (stderr, "map is cleared\n");
 //
 //	here we really start
 	while (true) {
 	   if (fresh || searchable (theChannel)) {
 	      theDevice -> stopReader ();
 	      dabStop (theRadio);
-	
+
 	      theBandHandler -> setChannel (theChannel);
 	      int32_t frequency =
                        theBandHandler -> Frequency ();
@@ -616,16 +673,19 @@ std::string	startChannel	= "5A";
 	      timeSynced.          store (false);
 	      int timeSyncTime         = 4;
 	      ensembleRecognized.	store (false);
+	      fprintf (stderr, "scanning channel %s\n", theChannel. c_str ());
 	      dabStartProcessing (theRadio);
 	      while (!timesyncSet. load () && (--timeSyncTime >= 0))
 	         sleep (1);
-	      dabStop (theRadio);
 	      markChannels (ensembleRecognized. load (), theChannel);
+	      if (ensembleRecognized. load ())
+	         sleep (10);
 	   }
            theChannel = theBandHandler -> nextChannel ();
            if (theChannel == startChannel)
               break;
 	}
+	dabStop (theRadio);
 }
 
 
