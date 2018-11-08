@@ -38,7 +38,6 @@
 #define Q_SOUND_LEVEL	0102
 #define Q_LNA_STATE	0103
 #define	Q_AUTOGAIN	0104
-#define Q_CHANNEL       0105
 #define Q_SERVICE       0106
 #define	Q_RESET		0107
 
@@ -50,6 +49,7 @@
 #define	Q_SIGNAL_QUALITY	0104
 #define	Q_NEW_ENSEMBLE	0105
 #define	Q_NO_SERVICE	0106
+#define	Q_CHANNEL	0107
 //
 //	packetstructure
 //	byte 0	key
