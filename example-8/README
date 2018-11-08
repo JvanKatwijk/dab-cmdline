@@ -1,0 +1,35 @@
+
+		EX A M P L E  7
+
+	T H I S  I S  W O R K  I N  P R O G R E S S
+
+
+Example 7 is the bluetooth controlled version of the cmdline version for dab.
+
+The "radio" device is embedded in a controller module, this controller
+interfaces to bluetooth.
+
+The UUID is temporarily chosen to be abcd
+
+This embedded version will - for now - only work with the SDRplay device
+
+The real work is in the development of a client, a simple Qt-based
+version is in the "client" directory.
+
+A java version is in development, a final version should be
+runnable from an android phone
+
+
+Copyrights
+
+------------------------------------------------------------------------------
+	
+	Copyright (C)  2016, 2017, 2018
+	Jan van Katwijk (J.vanKatwijk@gmail.com)
+	Lazy Chair Programming
+
+All SDR-J software is made available under the GPL-2.0.
+The dab-library uses a number of GPL-ed libraries, all
+rights are gratefully acknowledged.
+All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+

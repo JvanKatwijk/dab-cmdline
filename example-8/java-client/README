@@ -1,0 +1,19 @@
+
+		Java Client
+
+This Java Client interfaces - using a bluetooth connection - to the
+"example 7" server.
+
+Bluetooth is a new area for me, so there are - most likely - lost
+of improvements possible.
+
+The communication protocol is described in the file protocol.h
+in the example-7 directory. While it is reasonable stable, changes
+are always possible.
+
+
+Compiling the java client is
+	javac -classpath .:./bluecove-2.1.0.jar JavaRadio.java 
+
+Running the client is
+	java -cp .:./bluecove-2.1.0.jar:./bluecove-gpl-2.1.0,jar JavaRadio 
