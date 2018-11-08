@@ -23,7 +23,6 @@ public class ClientModel extends Thread {
 	private	final int	Q_SOUND_LEVEL		= 0102;
 	private	final int	Q_LNA_STATE		= 0103;
 	private	final int	Q_AUTOGAIN		= 0104;
-	private	final int	Q_CHANNEL		= 0105;
 	private	final int	Q_SERVICE		= 0106;
 	private	final int	Q_RESET			= 0107;
 //
@@ -35,6 +34,7 @@ public class ClientModel extends Thread {
 	private	final int	Q_SIGNAL_QUALITY	= 0104;
 	private	final int	Q_NEW_ENSEMBLE		= 0105;
 	private	final int	Q_NO_SERVICE		= 0106;
+	private	final int	Q_CHANNEL		= 0107;
 //
 //	For the connection we need
 	private final StreamConnection thePlug;
@@ -143,6 +143,20 @@ public class ClientModel extends Thread {
 	         }
 	         break;
 
+	      case Q_CHANNEL:
+	         {  buffer [segSize] = 0;
+	            final String programData = String. valueOf (buffer);
+	            try {
+	               javax. swing. SwingUtilities.
+	                            invokeLater (new Runnable () {
+                             @Override
+                             public void run () {
+	                        show_dynamicLabel (programData);
+	                     }});
+                    } catch (Exception e) {}
+	         }
+	         break;
+
 	      case Q_SIGNAL_QUALITY:
 	         {  final int qualityInd = buffer [0];
 	            try {
@@ -169,7 +183,7 @@ public class ClientModel extends Thread {
 
 	      case Q_NO_SERVICE:
 	         try {
-	              final String s = "no service found"
+	              final String s = "no service found";
 	              javax. swing. SwingUtilities.
 	                         invokeLater (new Runnable () {
                           @Override
@@ -231,6 +245,19 @@ public class ClientModel extends Thread {
 	      bWriter. flush ();
 	   } catch (Exception e) {}
 	}
+
+	public	void	reset	() {
+	   char data [] = new char [4];
+	   data [0] = Q_RESET;
+	   data [1] = 0;
+	   data [2] = (char) (1);
+	   data [3] = 0;
+	   try {
+	      bWriter. write (data, 0, 4);
+	      bWriter. flush ();
+	   } catch (Exception e) {}
+	}
+
 
 	public void	channelSelect (String s) {
 	   char data [] = new char [s. length () + 4];

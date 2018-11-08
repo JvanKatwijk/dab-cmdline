@@ -29,7 +29,7 @@ public class ClientController implements modelSignals, viewSignals {
 //
 	@Override
 	public	void	reset		() {
-//	   m_model. reset	();
+	   m_model. reset	();
 	   m_view. clearScreen	();
 	}
 

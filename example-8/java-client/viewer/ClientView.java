@@ -63,10 +63,10 @@ public class ClientView extends JFrame {
 	   m_selectedService.	setOpaque (true);
 	   m_gainSlider.	setPreferredSize (new Dimension (150, 30));
 
-    //... Layout the components.      
+//... Layout the components.      
            JPanel row1 = new JPanel();
 	   row1.setLayout(new BoxLayout (row1, BoxLayout. X_AXIS));
-	   row1. add (m_channels);
+//	   row1. add (m_channels);
 	   row1. add (m_resetButton);
 	   row1. add (Box. createRigidArea (new Dimension (50, 0)));
 	   row1. add (m_channelLabel);
