@@ -81,20 +81,28 @@ The examples 1 to 6 are basically simple variations on a single theme:
 	- example 6 is an experimental version where control is
 	  through an IP port. 
 
-	- dab-scanner is a simple program that just scans all channels of the given
-	  band (BAND III by default) and collects and emits data about the ensembles
-	  and services encountered. Output can be sent to a file - ASCII - that
-	  can be interpreted by Libre Office Calc or similar programs.
-
-	- example 7 (Work in progress). The basic idea is to run a small
-	  server on e.g. an RPI3 and control the thing from a tablet or phone.
-	  That might happen in the future, right now there is a java client
+Next to these examples, a simple dab-scanner is an example program that just
+scans all channels of the given band (BAND III by default) and collects and
+emits data about the ensembles 	  and services encountered. Output can be sent
+to a file - ASCII - that can be interpreted by Libre Office Calc or similar programs.
 
 ---------------------------------------------------------------------------
 
 ![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 
 ----------------------------------------------------------------------------
+Bluetooth and a client/server
+-----------------------------------------------------------------------------
+
+Current work is on an example program (example-7) that acts as a server. 
+The basic idea is to run a small server on e.g. an RPI3 and control the thing 
+from a tablet or phone. That might happen in the future, right now there is a
+java client connecting to the server using bluetooth.
+The current "server" scans on program start the channels in Band III, and collects
+the service names. Once the client connects, these names are passed on and the "user"
+can select a service. The server will then - if needed - select the channel on
+which the service is transmitted and select the service.
+
 
 ----------------------------------------------------------------------------
 Building an executable
