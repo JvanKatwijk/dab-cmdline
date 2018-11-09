@@ -81,9 +81,9 @@ The examples 1 to 6 are basically simple variations on a single theme:
 	- example 6 is an experimental version where control is
 	  through an IP port. 
 	  
---------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 A DAB scanner
---------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 Next to these examples, a simple dab-scanner is an example program that just
 scans all channels of the given band (BAND III by default) and collects and
@@ -101,11 +101,8 @@ Current work is on an example program (example-7) that acts as a server.
 The basic idea is to run a small server on e.g. an RPI3 and control the thing 
 from a tablet or phone. That might happen in the future, right now there is a
 java client connecting to the server using bluetooth.
-The current "server" scans on program start the channels in Band III, and collects
-the service names. Once the client connects, these names are passed on and the "user"
-can select a service. The server will then - if needed - select the channel on
-which the service is transmitted and select the service. Obviously, the client
-has on its GUI a "reset" button to refresh the scan over the channels.
+
+The final version is being developed in a different project
 
 
 ----------------------------------------------------------------------------
