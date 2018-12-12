@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 2.8.11 )
 set (objectName dab_cmdline-7)
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
+#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -g")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -27,10 +29,8 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ######################################################################
 #
 ########################################################################
-   set(SDRPLAY true)
-   set(objectName dab-sdrplay-7)
 
-
+#add_definitions (-D__THREADED_DECODING)
 #########################################################################
 	find_package (PkgConfig)
 
@@ -44,20 +44,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
             message(FATAL_ERROR "please install libfaad")
         endif ()
 
-        find_package(zlib)
-	if (NOT ZLIB_FOUND)
-            message(FATAL_ERROR "please install libz")
-        endif ()
-	list(APPEND extraLibs ${ZLIB_LIBRARY})
-
-
-	find_library (PTHREADS pthread)
-	if (NOT(PTHREADS))
-	   message (FATAL_ERROR "please install libpthread")
-	else (NOT(PTHREADS))
-	   set (extraLibs ${extraLibs} ${PTHREADS})
-	endif (NOT(PTHREADS))
-
 
         find_package(LibSampleRate)
         if (NOT LIBSAMPLERATE_FOUND)
@@ -65,99 +51,45 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
         endif ()
         list(APPEND extraLibs ${LIBSAMPLERATE_LIBRARY})
 
+#########################################################################
+        find_package (PkgConfig)
+
+##########################################################################
+#	The device
+#
+
+	include_directories (
+	  ../devices/stdin-handler
+	)
+	set ($(objectName)_HDRS
+	     ${${objectName}_HDRS}
+	    ../devices/stdin-handler/stdin-handler.h
+        )
+
+	set (${objectName}_SRCS
+	     ${${objectName}_SRCS}
+	    ../devices/stdin-handler/stdin-handler.cpp
+	)
+
+
         find_package(Portaudio)
         if (NOT PORTAUDIO_FOUND)
             message(FATAL_ERROR "please install portaudio V19")
         endif ()
         list(APPEND extraLibs ${PORTAUDIO_LIBRARIES})
-#########################################################################
-        find_package (PkgConfig)
 
-##########################################################################
-#	The devices
-#
+        find_package(zlib)
+	if (NOT ZLIB_FOUND)
+            message(FATAL_ERROR "please install libz")
+        endif ()
+	list(APPEND extraLibs ${ZLIB_LIBRARY})
 
-
-	if (SDRPLAY)
-	   find_path (SDRPLAYLIB_INCLUDE_DIR
-                      NAMES mirsdrapi-rsp.h
-                      PATHS
-                      /usr/local/include/
-	   )
-           include_directories (${SDRPLAYLIB_INCLUDE_DIR})
-
-           find_library (SDRPLAYLIB mirsdrapi-rsp)
-           if(NOT(SDRPLAYLIB))
-              message(FATAL_ERROR "please install -lmirsdrapi-rsp")
-           else(NOT(SDRPLAYLIB))
-              list (APPEND extraLibs ${SDRPLAYLIB})
-           endif(NOT(SDRPLAYLIB))
-
-	   include_directories (
-	     ./sdrplay-handler-2
-	   )
-
-	   set ($(objectName)_HDRS
-	        ${${objectName}_HDRS}
-	        ./sdrplay-handler-2/sdrplay-handler.h
-           )
-
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ./sdrplay-handler-2/sdrplay-handler.cpp
-	   )
-
-	 add_definitions (-DHAVE_SDRPLAY)
-	endif (SDRPLAY)
-
-	if (AIRSPY)
-           find_package(LibAIRSPY)
-           if (NOT LIBAIRSPY_FOUND)
-               message(FATAL_ERROR "please install airspy library")
-           endif ()
-	   ### include_directories (${AIRSPYLIB_INCLUDE_DIR})
-
-	   include_directories (
-	     ../devices/airspy-handler
-	   )
-
-	   set ($(objectName)_HDRS
-	        ${${objectName}_HDRS}
-	        ../devices/airspy-handler/airspy-handler.h
-	   )
-
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ../devices/airspy-handler/airspy-handler.cpp
-	   )
-
-	   add_definitions (-DHAVE_AIRSPY)
-	endif (AIRSPY)
-
-
-	if (RTLSDR)
-           find_package(LibRTLSDR)
-           if (NOT LIBRTLSDR_FOUND)
-               message(FATAL_ERROR "please install librtlsdr")
-           endif ()
-	   ###include_directories (${RTLSDR_INCLUDE_DIR})
-
-	   include_directories (
-	        ../devices/rtlsdr-handler/
-	   )
-
-	   set (${objectName}_HDRS
-	        ${${objectName}_HDRS}
-	        ../devices/rtlsdr-handler/rtlsdr-handler.h
-	   )
-
-	   set (${objectName}_SRCS
-	        ${${objectName}_SRCS}
-	        ../devices/rtlsdr-handler/rtlsdr-handler.cpp
-	   )
-
-	   add_definitions (-DHAVE_RTLSDR)
-	endif()
+	find_library (PTHREADS pthread)
+	if (NOT(PTHREADS))
+	   message (FATAL_ERROR "please install libpthread")
+	else (NOT(PTHREADS))
+	   set (extraLibs ${extraLibs} ${PTHREADS})
+	endif (NOT(PTHREADS))
 
 #######################################################################
 #
@@ -189,8 +121,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./audiosink.h
 	     ./filesink.h
 	     ./newconverter.h
-	     ./protocol.h
-	     ./config.h
 	     ../dab-api.h
 	     ../devices/device-handler.h
 	     ../library/includes/dab-constants.h
@@ -217,10 +147,10 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ../library/includes/backend/data/virtual-datahandler.h 
 	     ../library/includes/backend/data/tdc-datahandler.h 
 	     ../library/includes/backend/data/pad-handler.h 
-	     ../library/includes/backend/data/data-processor.h
 	     ../library/includes/backend/data/mot/mot-handler.h 
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h 
+	     ../library/includes/backend/data/data-processor.h
 	     ../library/includes/support/viterbi_768/viterbi-768.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -236,9 +166,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./main.cpp
 	     ./audio-base.cpp
 	     ./audiosink.cpp
+	     ./filesink.cpp
 	     ./newconverter.cpp
 	     ./band-handler.cpp
-	     ./config.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
 	     ../library/src/dab-processor.cpp
@@ -264,10 +194,10 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ../library/src/backend/data/virtual-datahandler.cpp 
 	     ../library/src/backend/data/tdc-datahandler.cpp 
 	     ../library/src/backend/data/pad-handler.cpp 
-	     ../library/src/backend/data/data-processor.cpp
 	     ../library/src/backend/data/mot/mot-handler.cpp 
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp 
+	     ../library/src/backend/data/data-processor.cpp
 	     ../library/src/support/viterbi_768/viterbi-768.cpp
 	     ../library/src/support/viterbi_768/spiral-no-sse.c
 	     ../library/src/support/protTables.cpp
@@ -278,6 +208,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ../library/src/support/dab-params.cpp
 	     ../library/src/support/tii_table.cpp
 	)
+
 #
 	include_directories (
 	          ${FFTW_INCLUDE_DIRS}
@@ -297,7 +228,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	                       ${extraLibs}
 	                       ${FAAD_LIBRARIES}
 	                       ${CMAKE_DL_LIBS}
-	                       -lbluetooth
 	)
 
 	INSTALL (TARGETS ${objectName} DESTINATION .)
