@@ -51,6 +51,9 @@
 #include	"tcp-server.h"
 #endif
 
+#ifdef	STREAMER_OUTPUT
+#include	"streamer.h"
+#endif
 using std::cerr;
 using std::endl;
 
@@ -62,6 +65,11 @@ std::atomic<bool> run;
 
 static
 void	*theRadio	= NULL;
+
+#ifdef	STREAMER_OUTPUT
+static
+streamer	*theStreamer	= NULL;
+#endif
 
 static
 std::atomic<bool>timeSynced;
@@ -162,15 +170,25 @@ int16_t i;
 	(void)ctx;
 }
 //
-//	This function is overloaded. In the normal form it
-//	handles a buffer full of PCM samples. We pass them on to the
-//	audiohandler, based on portaudio. Feel free to modify this
-//	and send the samples elsewhere
+//
+//	In this example the PCM samples are written out to stdout.
+//	In order to fill "gaps" in the output, the output is send
+//	through a simple task, monitoring the amount of samples
+//	passing by and sending additional 0 samples in case
+//	of gaps
 //
 static
 void	pcmHandler (int16_t *buffer, int size, int rate,
 	                              bool isStereo, void *ctx) {
+#ifdef	STREAMER_OUTPUT
+	if (theStreamer == NULL)
+	   return;
+	if (!theStreamer -> isRunning ())
+	   theStreamer -> restart ();
+	theStreamer -> addBuffer (buffer, size, 2);
+#else
 	fwrite ((void *)buffer, size, 2, stdout);
+#endif
 }
 
 static
@@ -350,7 +368,9 @@ bool	err;
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
 	   exit (32);
 	}
-//
+#ifdef	STREAMER_OUTPUT
+	theStreamer	= new streamer ();
+#endif
 //	and with a sound device we can create a "backend"
 	theRadio	= (void *)dabInit (theDevice,
 	                                   theMode,

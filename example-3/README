@@ -8,6 +8,23 @@ All callbacks are defined, most of them with an empty body.
 In this version, we send the audio output directly to stdout rather than -
 using portaudio - sending it to the soundcard.
 
+>>>>>>>>>>>>>  NOTES <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+a. There is no rate conversion done, the pcm samples, as
+   arriving from the mp2 or aac decoder are just passed on
+   The pcmHandler has as one of its parameters the rate
+
+b. If you want to pipe the output to e.g. aplay then be aware that
+   there might be gaps. If a data fragment can not be decoded,
+   no PCM samples are emitted. For aac these are segments of 24 msec
+   In order to ensure a continuous stream of samples out
+   you may define STREAM_OUTPUT (see CMakeLists.txt) file,
+   in which case the samples are fed into a separate thread that
+   will fill in gaps with calues 0. Note however, that still
+   no rate conversion takes place. While the Dutch services as
+   as far as I know all 48000 samples/second, e.g. in Switzerland
+   theu are not.
+>>>>>>>>>>>>>>>>END OF NOTE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 See the file main.cpp for the command line options
 
 Feel free to improve the program

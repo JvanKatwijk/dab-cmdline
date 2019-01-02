@@ -60,6 +60,8 @@ if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 endif ()
 
+add_definitions (-DSTREAMER_OUTPUT)
+
 #########################################################################
 	find_package (PkgConfig)
 
@@ -262,6 +264,7 @@ endif ()
 	     ./ringbuffer.h
 	     ./band-handler.h
 	     ./server-thread/tcp-server.h
+	     ./streamer.h
 	     ../dab-api.h
 	     ../devices/device-handler.h
 	     ../library/includes/dab-constants.h
@@ -306,6 +309,7 @@ endif ()
 	     ${${objectName}_SRCS}
 	     ./main.cpp
 	     ./band-handler.cpp
+	     ./streamer.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
