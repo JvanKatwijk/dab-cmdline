@@ -1,14 +1,6 @@
 
 DAB COMMAND LINE and DAB LIBRARY
 
----------------------------------------------------------------------
-
-![java client for example 7](/java-client.png?raw=true)
-
-A simple Java Client for the server implemented in example 7,
-using bluetooth connection. Definitely work in progress.
-
-Note that the server is expected to run on an RPI 2/3 (Stretch)
 
 
 ---------------------------------------------------------------------
@@ -301,6 +293,14 @@ of a hostname. Default is "127.0.0.1".
 If rtl_tcp is selected as input device, the -I option allows selection
 of a port. Default is 1234.
 
+----------------------------------------------------------------------------
+Interfaces
+---------------------------------------------------------------------------
+
+In order to use the library, the main program has to deal with
+two interfaces, obviously the dab library, but also the device.
+
+The device interface is specified in "./device-handler.cpp".
 
 ----------------------------------------------------------------------------
 E X P E R I M E N T A L

@@ -41,7 +41,7 @@ public:
 	int32_t		getSamples	(std::complex<float> *, int32_t);
 	uint8_t		myIdentity	(void);
 	int32_t		Samples		(void);
-	bool		restartReader	(void);
+	bool		restartReader	(int32_t);
 	void		stopReader	(void);
 	
 private:

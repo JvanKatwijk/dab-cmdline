@@ -89,12 +89,12 @@ struct timeval  tv;
 	delete _I_Buffer;
 }
 
-bool	rawFiles::restartReader	(void) {
+bool	rawFiles::restartReader	(int32_t frequency) {
+	(void)frequency;
 	workerHandle = std::thread (&rawFiles::run, this);
 	running. store (true);
 	return true;
 }
-
 
 void	rawFiles::stopReader	(void) {
        if (running. load ())

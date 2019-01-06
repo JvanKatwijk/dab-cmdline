@@ -190,7 +190,7 @@ int16_t	i;
 }
 
 //
-bool	rtlsdrHandler::restartReader	(void) {
+bool	rtlsdrHandler::restartReader	(int32_t frequency) {
 int32_t	r;
 
 	if (running)
@@ -200,6 +200,8 @@ int32_t	r;
         if (r < 0)
            return false;
 
+	this	-> frequency	= frequency;
+        (void)(this -> rtlsdr_set_center_freq (device, frequency));
 	workerHandle = std::thread (controlThread, this);
 	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
 	if (autogain)

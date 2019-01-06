@@ -485,7 +485,7 @@ bool	err;
 	   exit (4);
 	}
 
-	theDevice	-> restartReader ();
+	theDevice	-> restartReader (frequency);
 //
 //	The device should be working right now
 

@@ -157,7 +157,7 @@ void	myGainChangeCallback (uint32_t	gRdB,
 	(void)cbContext;
 }
 
-bool	sdrplayHandler::restartReader	(void) {
+bool	sdrplayHandler::restartReader	(int32_t frequency) {
 int	gRdBSystem;
 int	samplesPerPacket;
 mir_sdr_ErrT	err;
@@ -166,6 +166,7 @@ int	localGRed	= GRdB;
 	if (running. load ())
 	   return true;
 
+	this	-> frequency = frequency;
 	err	= mir_sdr_StreamInit (&localGRed,
 	                              double (inputRate) / 1000000.0,
 	                              double (frequency) / 1000000.0,

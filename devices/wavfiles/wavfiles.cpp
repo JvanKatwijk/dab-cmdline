@@ -105,7 +105,8 @@ SF_INFO *sf_info;
 	delete _I_Buffer;
 }
 
-bool	wavFiles::restartReader	(void) {
+bool	wavFiles::restartReader	(int32_t frequency) {
+	(void)frequency;
 	workerHandle = std::thread (&wavFiles::run, this);
 	running. store (true);
 	return true;

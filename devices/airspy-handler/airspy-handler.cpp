@@ -194,20 +194,7 @@ err:
 	   delete theBuffer;
 }
 
-void	airspyHandler::setVFOFrequency (int32_t nf) {
-int result = my_airspy_set_freq (device, frequency = nf);
-
-	if (result != AIRSPY_SUCCESS) {
-	   printf ("my_airspy_set_freq() failed: %s (%d)\n",
-	            my_airspy_error_name((airspy_error)result), result);
-	}
-}
-
-int32_t	airspyHandler::getVFOFrequency (void) {
-	return frequency;
-}
-
-bool	airspyHandler::restartReader	(void) {
+bool	airspyHandler::restartReader	(int32_t frequency) {
 int	result;
 int32_t	bufSize	= EXTIO_NS * EXTIO_BASE_TYPE_SIZE * 2;
 
@@ -215,6 +202,13 @@ int32_t	bufSize	= EXTIO_NS * EXTIO_BASE_TYPE_SIZE * 2;
 	   return true;
 
 	theBuffer	-> FlushRingBuffer ();
+
+	this	-> frequency = frequency;
+	result = my_airspy_set_freq (device, frequency);
+	if (result != AIRSPY_SUCCESS) {
+	   printf ("my_airspy_set_freq() failed: %s (%d)\n",
+	            my_airspy_error_name((airspy_error)result), result);
+	}
 	result = my_airspy_set_sample_type (device, AIRSPY_SAMPLE_INT16_IQ);
 //	result = my_airspy_set_sample_type (device, AIRSPY_SAMPLE_FLOAT32_IQ);
 	if (result != AIRSPY_SUCCESS) {

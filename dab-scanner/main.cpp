@@ -268,6 +268,7 @@ bool	err;
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
 	                                      theGain,
+	                                      3,
 	                                      autogain,
 	                                      0,
 	                                      0);

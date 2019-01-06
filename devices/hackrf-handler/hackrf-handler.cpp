@@ -92,21 +92,6 @@ int	res;
 }
 //
 
-void	hackrfHandler::setVFOFrequency	(int32_t newFrequency) {
-int	res;
-	res	= hackrf_set_freq (theDevice, newFrequency);
-	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_set_freq: \n");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
-	   return;
-	}
-	vfoFrequency = newFrequency;
-}
-
-int32_t	hackrfHandler::getVFOFrequency	(void) {
-	return vfoFrequency;
-}
-
 void	hackrfHandler::setLNAGain	(int newGain) {
 int	res;
 	if ((newGain <= 40) && (newGain >= 0)) {
@@ -151,11 +136,19 @@ RingBuffer<std::complex<float> > * q = ctx -> _I_Buffer;
 	return 0;
 }
 
-bool	hackrfHandler::restartReader	(void) {
+bool	hackrfHandler::restartReader	(int32_t newFrequency) {
 int	res;
 
 	if (running. load ())
 	   return true;
+
+	res     = hackrf_set_freq (theDevice, newFrequency);
+        if (res != HACKRF_SUCCESS) {
+           fprintf (stderr, "Problem with hackrf_set_freq: \n");
+           fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
+           return;
+        }
+        vfoFrequency = newFrequency;
 
 	res	= hackrf_start_rx (theDevice, callback, this);	
 	if (res != HACKRF_SUCCESS) {

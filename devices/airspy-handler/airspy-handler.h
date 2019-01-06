@@ -89,9 +89,7 @@ class airspyHandler: public deviceHandler {
 public:
 			airspyHandler		(int32_t, int16_t, int16_t);
 			~airspyHandler		(void);
-	void		setVFOFrequency		(int32_t);
-	int32_t		getVFOFrequency		(void);
-	bool		restartReader		(void);
+	bool		restartReader		(int32_t);
 	void		stopReader		(void);
 	int32_t		getSamples		(std::complex<float> *v,
 	                                                     int32_t size);

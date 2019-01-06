@@ -63,7 +63,8 @@ struct timeval  tv;
 	delete _I_Buffer;
 }
 
-bool	stdinHandler::restartReader	(void) {
+bool	stdinHandler::restartReader	(int32_t frequency) {
+	(void)frequency;
 	workerHandle = std::thread (&stdinHandler::run, this);
 	running. store (true);
 	return true;

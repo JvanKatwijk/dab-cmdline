@@ -333,7 +333,7 @@ bool	err;
 	   exit (4);
 	}
 
-	theDevice	-> restartReader ();
+	theDevice	-> restartReader (MHz (220));	// freq is dummy here
 //
 //	The device should be working right now
 

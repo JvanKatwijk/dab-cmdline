@@ -219,7 +219,7 @@ bool	err;
 	my_radioData. theChannel	= "11C";
 	my_radioData. theBand		= BAND_III;
 	my_radioData. ppmCorrection	= 0;
-	my_radioData. theGain		= 35;	// scale = 0 .. 100
+	my_radioData. theGain	= 45;	// scale = 0 .. 100
 	my_radioData. soundChannel	= "default";
 	my_radioData. latency		= 10;
 	my_radioData. waitingTime	= 10;
@@ -246,6 +246,7 @@ bool	err;
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      my_radioData. ppmCorrection,
 	                                      my_radioData. theGain,
+	                                      3,	// lnaState
 	                                      my_radioData. autogain,
 	                                      0,
 	                                      0);
@@ -308,7 +309,6 @@ bool	err;
 	theDevice	-> setGain (my_radioData. theGain);
 	if (my_radioData. autogain)
 	   theDevice	-> set_autogain (my_radioData. autogain);
-	theDevice	-> setVFOFrequency (frequency);
 
 	running. store (true);
 	std::thread port_listener	= std::thread (listener);
@@ -418,6 +418,8 @@ void	listener (void) {
 }
 
 void	handleRequest (void) {
+int32_t	frequency;
+
 	fprintf (stderr, "handling requests\n");
 	fprintf (stderr, "bufferfill %d\n",
 	                buffer -> GetRingBufferReadAvailable ());
@@ -470,18 +472,17 @@ void	handleRequest (void) {
 	         my_radioData. theChannel = std::string ((char *)(&(lbuf [3])));
 	         fprintf (stderr, "selecting channel %s\n", 
 	                              (char *)(&(buffer [1])));
-	         {  int frequency = theBandHandler -> Frequency (my_radioData. theBand,
-	                                              my_radioData. theChannel);
-	            theDevice	-> setVFOFrequency (frequency);
-	         }
-	         dabStartProcessing (theRadio);
-	         theDevice	-> restartReader ();
 	         programNames. resize (0);
 	         programSIds . resize (0);
+	         frequency =
+	               theBandHandler -> Frequency (my_radioData. theBand,
+	                                            my_radioData. theChannel);
+	         dabStartProcessing (theRadio);
+	         theDevice	-> restartReader (frequency);
 	         break;
 
 	      default:
-	      break;
+	         break;
 	   }
 	}
 }
