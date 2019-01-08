@@ -174,7 +174,7 @@ int16_t		ppmCorrection	= 0;
 #ifndef	HAVE_SDRPLAY
 int		theGain		= 35;	// scale = 0 .. 100
 #else
-int16_t		GRdB		= 30;
+int16_t		theGain		= 30;
 int16_t		lnaState	= 2;
 #endif
 std::string	soundChannel	= "default";
@@ -218,7 +218,7 @@ deviceHandler	*theDevice;
 	         break;
 #ifdef	HAVE_SDRPLAY
 	      case 'G':
-	         GRdB		= atoi (optarg);
+	         theGain	= atoi (optarg);
 	         break;
 
 	      case 'L':
@@ -267,7 +267,7 @@ deviceHandler	*theDevice;
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
-	                                      GRdB,
+	                                      theGain,
 	                                      lnaState,
 	                                      autogain,
 	                                      0,
@@ -299,8 +299,6 @@ deviceHandler	*theDevice;
 //	and a sound device
 	theRadio	= dabInit (theDevice,
 	                           theMode,
-	                           NULL,		// no spectrum shown
-	                           NULL,		// no constellations
 	                           syncsignalHandler,
 	                           systemData,
 	                           ensemblenameHandler,
@@ -311,9 +309,9 @@ deviceHandler	*theDevice;
 	                           bytesOut_Handler,
 	                           programdataHandler,
 	                           mscQuality,
-	                           NULL,	// no MOT handling
-	                           NULL,	// no spectrum shown
-                                   NULL,	// no constellations
+	                           NULL,
+	                           NULL,
+	                           NULL,
 	                           NULL
 	                          );
 	if (theRadio == NULL) {
@@ -365,7 +363,7 @@ deviceHandler	*theDevice;
 
 	run. store (true);
 	if (serviceId != -1) 
-	   programName = dab_getserviceName (serviceId, theRadio);
+	   programName = dab_getserviceName (theRadio, serviceId);
 
 	std::cerr << "we try to start program " <<
                                                  programName << "\n";
