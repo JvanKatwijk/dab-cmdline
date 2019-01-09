@@ -26,8 +26,9 @@ The main program is responsible for ensuring that something is available
 to deliver input samples and something is available for handling the output.
 
 THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
-IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
-
+IDEA HOW TO USE THE LIBRARY OR ITS SOURCES. MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS
+TESTED ON ALL EXAMPLES, PLEASE CORRECT THEM IF YOU (THINK YOU) FIND AN ERROR AND DO NOT ASK
+ME.
 
 Invocation of the example programs, with some parameters specified, is
 somthing like
