@@ -43,6 +43,8 @@ a scale from 1 .. 100), the main program will select "default" as
 audio output device.
 The Library code will be set to interpret the input as being of Mode 1.
 
+![example 3 with sdrplay input](/example-3.png?raw=true)
+
 The examples 1 to 6 are basically simple variations on a single theme:
 
 	- example 1 is the example where the main program is linked to
