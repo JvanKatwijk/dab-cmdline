@@ -71,7 +71,7 @@ public:
 	                                 const char *	deviceSerial = 0 );
 			~rtlsdrHandler	(void);
 //	interface to the reader
-	bool		restartReader	(int32_t);
+	bool		restartReader	(int32_t	frequency);
 	void		stopReader	(void);
 	int32_t		getSamples	(std::complex<float> *, int32_t);
 	int32_t		Samples		(void);
