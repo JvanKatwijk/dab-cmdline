@@ -69,13 +69,15 @@ void	controlThread (rtlsdrHandler *theStick) {
 	                              int16_t	gain,
 	                              bool	autogain,
 	                              uint16_t	deviceIndex,
-	                              const char *	deviceSerial ) {
+	                              const char *	deviceSerial,
+	                              const char *	deviceOpts ) {
 int16_t	deviceCount;
 int32_t	r;
 int16_t	i;
 
 	fprintf (stderr, "going for rtlsdr %d %d\n", frequency, gain);
 	this	-> frequency	= frequency;
+	this	-> deviceOptions	= deviceOpts ? strdup(deviceOpts) : NULL;
 	this	-> ppmCorrection	= ppmCorrection;
 	this	-> theGain	= gain;
 	this	-> autogain	= autogain;
@@ -174,6 +176,10 @@ int16_t	i;
 	                              gains [theGain * gainsCount / 100] / 10,
 	                              gains [theGain * gainsCount / 100] % 10);
 	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
+
+	if ( this	-> deviceOptions && rtlsdr_set_opt_string )
+		rtlsdr_set_opt_string(device, deviceOptions, 1);
+
 	_I_Buffer		= new RingBuffer<uint8_t>(1024 * 1024);
 }
 
@@ -186,6 +192,8 @@ int16_t	i;
 	running	= false;
 	if (open)
 	   this -> rtlsdr_close (device);
+	if (this	-> deviceOptions)
+		free( this	-> deviceOptions );
 	if (Handle != NULL) 
 #ifdef __MINGW32__
 	   FreeLibrary (Handle);
@@ -216,6 +224,8 @@ int32_t	r;
 	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
 	if (autogain)
 	   rtlsdr_set_agc_mode (device, 1);
+	if ( this	-> deviceOptions && rtlsdr_set_opt_string )
+		rtlsdr_set_opt_string(device, deviceOptions, 1);
 	running	= true;
 	return true;
 }
@@ -402,6 +412,12 @@ bool	rtlsdrHandler::load_rtlFunctions (void) {
 	if (rtlsdr_get_device_name == NULL) {
 	   fprintf (stderr, "Could not find rtlsdr_get_device_name\n");
 	   return false;
+	}
+
+	rtlsdr_set_opt_string = (pfnrtlsdr_set_opt_string)
+	                  GETPROCADDRESS (Handle, "rtlsdr_set_opt_string");
+	if (rtlsdr_get_device_name == NULL) {
+	   fprintf (stderr, "Could not find rtlsdr_set_opt_string\n");
 	}
 
 	fprintf (stderr, "OK, functions seem to be loaded\n");

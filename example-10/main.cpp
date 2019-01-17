@@ -592,6 +592,7 @@ int		tii_framedelay	= 10;
 float		tii_alfa	= 0.9F;
 int		tii_resetFrames	= 10;
 bool		useExTii	= false;
+const char	* rtlOpts	= NULL;
 
 int	opt;
 struct sigaction sigact;
@@ -643,7 +644,7 @@ bool	err;
 	#endif
 #endif
 
-	while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:E:ct:a:r:x" FILE_OPTS NON_FILE_OPTS RTLSDR_OPTS RTL_TCP_OPTS )) != -1) {
+	while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:E:ct:a:r:xO:" FILE_OPTS NON_FILE_OPTS RTLSDR_OPTS RTL_TCP_OPTS )) != -1) {
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
 
@@ -705,6 +706,10 @@ bool	err;
 
 	      case 'p':
 	         ppmCorrection	= atoi (optarg);
+	         break;
+
+	      case 'O':
+	         rtlOpts = optarg;
 	         break;
 
 #if	defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES)
@@ -785,7 +790,8 @@ bool	err;
 	                                     theGain,
 	                                     autogain,
 	                                     (uint16_t)deviceIndex,
-	                                     deviceSerial );
+	                                     deviceSerial,
+	                                     rtlOpts );
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName, fileOffset, device_eof_callback, nullptr );
 #elif	HAVE_RAWFILES
@@ -1435,7 +1441,11 @@ void    printOptions (void) {
 	-M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
 	-B Band     Band is either L_BAND or BAND_III (default)\n\
 	-P name     program to be selected in the ensemble\n\
-	-p ppmCorr  ppm correction\n"
+	-p ppmCorr  ppm correction\n\
+	-O options  set device specific option string - seperated with ':'\n\
+	            currently only options for RTLSDR available:\n\
+	            f=<freqHz>:bw=<bw_in_kHz>:agc=<tuner_gain_mode>:gain=<tenth_dB>\n\
+	            dagc=<rtl_agc>:ds=<direct_sampling_mode>:T=<bias_tee>\n"
 #if defined(HAVE_RTLSDR)
 "	-d index    set RTLSDR device index\n\
 	-s serial   set RTLSDR device serial\n"
