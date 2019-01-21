@@ -143,7 +143,7 @@ bool	eofReached	= false;
 
 	   nextStop += period;
 	   t = readBuffer (bi, bufferSize);
-	   if (t <= bufferSize) {
+	   if (t < bufferSize) {
 	      for (i = 0; i < bufferSize; i ++)
 	          bi [i] = 0;
 	      t = bufferSize;
