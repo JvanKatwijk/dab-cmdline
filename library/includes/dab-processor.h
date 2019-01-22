@@ -85,6 +85,8 @@ public:
 	void		reset_msc		(void);
 
 	void		setTII_handler		(tii_t tii_Handler, tii_ex_t tii_ExHandler, int tii_framedelay, float alfa, int resetFrameCount);
+	void		setEId_handler		(ensembleid_t EId_Handler);
+
 
 	std::complex<float>
 			 get_coordinates (int16_t, int16_t, bool *);

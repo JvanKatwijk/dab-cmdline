@@ -96,8 +96,13 @@ typedef	struct {
 	typedef void (*fib_quality_t) (int16_t, void *);
 //
 //	the ensemblename is sent whenever the library detects the
-//	name of the ensemble
+//	name an ensemble
 	typedef void (*ensemblename_t)(std::string, int32_t, void *);
+
+//
+//	the ensembleId (EId) is sent whenever the library detects the
+//	ensemble's id
+	typedef void (*ensembleid_t)(int32_t, void *);
 //
 //	Each programname in the ensemble is sent once
 	typedef	void (*programname_t)(std::string, int32_t, void *);
@@ -229,6 +234,9 @@ std::string dab_getserviceName	(void *, int32_t);
 
 //	set/activate TII processing - not with dabInit() - for compatiblity
 void	dab_setTII_handler(void *, tii_t tii_Handler, tii_ex_t tii_ExHandler, int tii_framedelay, float alfa, int resetFrameCount);
+
+//	set/activate reporting of ensembleId EId - extra function for compatibility
+void	dab_setEId_handler(void *, ensembleid_t EId_Handler);
 
 }
 

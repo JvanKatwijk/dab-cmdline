@@ -377,6 +377,10 @@ void    dabProcessor::setTII_handler(tii_t tii_Handler, tii_ex_t tii_ExHandler, 
 	tii_resetFrameCount = resetFrameCount;
 }
 
+void    dabProcessor::setEId_handler(ensembleid_t EId_Handler) {
+	my_ficHandler.setEId_handler(EId_Handler);
+}
+
 std::complex<float>
 	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
 	                                 bool *success) {

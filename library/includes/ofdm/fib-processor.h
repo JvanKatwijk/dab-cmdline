@@ -124,7 +124,10 @@ public:
         uint8_t getECC			(bool *);
         uint8_t getInterTabId           (bool *);
 
+	void	setEId_handler(ensembleid_t EId_Handler);
+
 private:
+	ensembleid_t	ensembleidHandler;
 	ensemblename_t	ensemblenameHandler;
 	programname_t	programnameHandler;
 	void		*userData;
@@ -191,7 +194,8 @@ private:
 	std::atomic<uint8_t>	interTabId;
 
 	bool	dateFlag;
-	bool	firstTime;
+	bool	firstTimeEId;
+	bool	firstTimeEName;
 	std::atomic<bool>	ecc_Present;
 	std::atomic<bool>	interTab_Present;
 
@@ -201,6 +205,7 @@ private:
 //	these were signals
 	void		addtoEnsemble	(const std::string &, int32_t);
 	void		nameofEnsemble  (int, const std::string &);
+	void		idofEnsemble  (int32_t);
 	void		changeinConfiguration (void);
 };
 

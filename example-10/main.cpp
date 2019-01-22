@@ -233,14 +233,24 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	ensemblenameHandler (std::string name, int Id, void *userData) {
+void	ensemblenameHandler (std::string name, int EId, void *userData) {
+	if ( ensembleIdentifier != (uint32_t)EId || ensembleRecognized. load () )
+		return;
 	fprintf (stderr,
-	         "\n" FMT_DURATION "ensemblenameHandler: '%s' ensemble (Id %X) is recognized\n\n"
-	         SINCE_START , name. c_str (), (uint32_t)Id);
+	         "\n" FMT_DURATION "ensemblenameHandler: '%s' ensemble (EId %X) is recognized\n\n"
+	         SINCE_START , name. c_str (), (uint32_t)EId);
 	ensembleName = name;
-	ensembleIdentifier = (uint32_t)Id;
 	ensembleRecognized. store (true);
 }
+
+static
+void ensembleIdHandler(int EId, void *userData) {
+	fprintf (stderr,
+	         "\n" FMT_DURATION "ensembleIdHandler: ensemble (EId %X) is recognized\n\n"
+	         SINCE_START , (uint32_t)EId);
+	ensembleIdentifier = (uint32_t)EId;
+}
+
 
 static
 void	programnameHandler (std::string s, int SId, void * userdata) {
@@ -847,6 +857,7 @@ bool	err;
 	else
 	   dab_setTII_handler(theRadio, tii, nullptr, tii_framedelay, tii_alfa, tii_resetFrames );
 
+	dab_setEId_handler(theRadio, ensembleIdHandler );
 
 	theDevice	-> setGain (theGain);
 	if (autogain)

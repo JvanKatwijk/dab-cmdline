@@ -286,6 +286,11 @@ uint8_t result;
 	return result;
 }
 
+void	ficHandler::setEId_handler(ensembleid_t EId_Handler) {
+	fibProcessor.setEId_handler(EId_Handler);
+}
+
+
 int16_t	ficHandler::get_ficRatio (void) {
 	return ficRatio;
 }

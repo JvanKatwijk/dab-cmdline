@@ -66,6 +66,9 @@ public:
 	void	reset			(void);
 	uint8_t getECC			(bool *);
 	uint8_t getInterTabId		(bool *);
+
+	void	setEId_handler(ensembleid_t EId_Handler);
+
 private:
 	dabParams	params;
 	fib_quality_t	fib_qualityHandler;

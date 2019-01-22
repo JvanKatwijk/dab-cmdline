@@ -94,6 +94,11 @@ void	dab_setTII_handler(void *Handle, tii_t tii_Handler, tii_ex_t tii_ExHandler,
 	return ((dabProcessor *)Handle) -> setTII_handler (tii_Handler, tii_ExHandler, tii_framedelay, alfa, resetFrameCount);
 }
 
+void	dab_setEId_handler(void *Handle, ensembleid_t EId_Handler) {
+	return ((dabProcessor *)Handle) -> setEId_handler (EId_Handler);
+}
+
+
 //	functions contributed by Hayati Ayguen
 //	mainId < 0 (-1) => don't check mainId
 //	subId == -1 => deliver first available offset

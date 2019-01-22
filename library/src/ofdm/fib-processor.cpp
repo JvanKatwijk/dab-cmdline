@@ -101,7 +101,9 @@
 //
 	fib_processor::fib_processor (ensemblename_t ensemblenameHandler,
 	                              programname_t  programnameHandler,
-	                              void	*userData) {
+	                              void	*userData)
+	: ensembleidHandler( nullptr )
+{
 	this	-> ensemblenameHandler	= ensemblenameHandler;
 	if (programnameHandler == nullptr)
 	   fprintf (stderr, "NULL detected\n");
@@ -111,7 +113,7 @@
 
 	reset	();
 }
-	
+
 	fib_processor::~fib_processor (void) {
 }
 
@@ -297,17 +299,19 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 	changeflag	= getBits_2 (d, 16 + 16);
 
 	EId			= getBits (d, 16, 16);
-	(void)EId;
 	highpart		= getBits_5 (d, 16 + 19) % 20;
-	(void)highpart;
 	lowpart			= getBits_8 (d, 16 + 24) % 250;
-	(void)lowpart;
 
 	CIFcount = highpart * 250 + lowpart;
 	hasCIFcount = true;
 #if OUT_CIF_COUNTER
 fprintf(stderr, "FIG0Extension0: CIFcount %d\n", CIFcount);
 #endif
+
+	if (firstTimeEId) {
+	   idofEnsemble(EId);
+	   firstTimeEId = false;
+	}
 
 	if (changeflag == 0) {
 //fprintf(stderr, "FIG0Extension0: change return\n");
@@ -973,7 +977,7 @@ char		label [17];
 //
 //	from byte 1 we deduce:
 	charSet		= getBits_4 (d, 8);
-	Rfu		= getBits_1 (d, 8 + 4);
+	Rfu		= getBits_1 (d, 8 + 4);		// == OE = Other Ensemble
 	extension	= getBits_3 (d, 8 + 5); 
 	label [16] = 0;
 	(void)Rfu;
@@ -995,9 +999,10 @@ char		label [17];
 	            std::string name = toStringUsingCharset (
 	                                      (const char *) label,
 	                                      (CharacterSet) charSet);
-	            if (firstTime)
+	            // without idofEnsemble: just report one name
+	            if (ensembleidHandler != nullptr || firstTimeEName)
 	               nameofEnsemble (SId, name);
-	            firstTime	= false;
+	            firstTimeEName	= false;
 	            isSynced	= true;
 	         }
 	      }
@@ -1311,7 +1316,8 @@ int16_t i;
 	   ServiceComps [i]. inUse	= false;
 	   subChannels [i]. inUse	= false;
 	}
-	firstTime	= true;
+	firstTimeEId	= true;
+	firstTimeEName	= true;
 }
 
 std::string fib_processor::nameFor (int32_t serviceId) {
@@ -1527,6 +1533,13 @@ void	fib_processor::nameofEnsemble  (int id, const std::string &s) {
 	isSynced	= true;
 }
 
+void	fib_processor::idofEnsemble  (int32_t id) {
+	fibLocker. unlock ();
+	if (ensembleidHandler != nullptr)
+	   ensembleidHandler (id, userData);
+	fibLocker. lock ();
+}
+
 void	fib_processor::changeinConfiguration (void) {
 }
 
@@ -1561,6 +1574,10 @@ uint8_t	fib_processor::getECC	(bool *success) {
 uint8_t	fib_processor::getInterTabId	(bool *success) {
 	*success = interTab_Present;
 	return interTabId;
+}
+
+void	fib_processor::setEId_handler(ensembleid_t EId_Handler) {
+	ensembleidHandler = EId_Handler;
 }
 
 void	fib_processor::reset	(void) {
