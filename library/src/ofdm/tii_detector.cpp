@@ -335,7 +335,7 @@ int	i;
 
 	// windowing + FFT
 	for (i = 0; i < T_u; i ++)
-	   fft_buffer [i] = cmul (v [i], window [i]);
+	   fft_buffer [i] = v [i];  // cmul (v [i], window [i]);
 	my_fftHandler. do_FFT ();
 
 
