@@ -32,11 +32,11 @@
 
 class	fft_handler {
 public:
-	enum		fftDirection	{fftForward, fftBackwards};
 			fft_handler	(uint8_t);
 			~fft_handler	(void);
 	complex<float>	*getVector	(void);
-	void		do_FFT		(fftDirection);
+	void		do_FFT		(void);
+	void		do_iFFT		(void);
 private:
 	dabParams	p;
 	int32_t		fftSize;

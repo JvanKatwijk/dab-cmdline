@@ -63,7 +63,7 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *buffer) {
 	memcpy (fft_buffer, buffer,
 	                      T_u * sizeof (std::complex<float>));
 
-	my_fftHandler. do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT ();
 /**
   *	The SNR is determined by looking at a segment of bins
   *	within the signal region and bits outside.
@@ -89,7 +89,7 @@ fftlabel:
 /**
   *	first step: do the FFT
   */
-	my_fftHandler. do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT ();
 /**
   *	a little optimization: we do not interchange the
   *	positive/negative frequencies to their right positions.

@@ -141,7 +141,7 @@ std::vector<int16_t> ibits;
 
 //      block 3 and up are needed as basis for demodulation the "mext" block
 //      "our" msc blocks start with blkno 4
-	   my_fftHandler. do_FFT (fft_handler::fftForward);
+	   my_fftHandler. do_FFT ();
 	   if (currentBlock >= 4) {
 	      for (int i = 0; i < params. get_carriers (); i ++) {
 	         int16_t      index   = myMapper. mapIn (i);

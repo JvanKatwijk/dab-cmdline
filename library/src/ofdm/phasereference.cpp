@@ -78,12 +78,13 @@ float	sum		= 0;
 float	Max		= -10000;
 
 	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-	my_fftHandler. do_FFT (fft_handler::fftForward);
-//	 into the frequency domain, now correlate
+	my_fftHandler. do_FFT ();
+
+//	into the frequency domain, now correlate
 	for (i = 0; i < T_u; i ++) 
 	   fft_buffer [i] *= conj (refTable [i]);
 //	and, again, back into the time domain
-	my_fftHandler. do_FFT (fft_handler::fftBackwards);
+	my_fftHandler. do_iFFT ();
 /**
   *	We compute the average signal value ...
   */
@@ -126,7 +127,7 @@ int16_t i, j, index = 100;
 float   computedDiffs [SEARCH_RANGE + diff_length + 1];
 
 	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
-	my_fftHandler. do_FFT (fft_handler::fftForward);
+	my_fftHandler. do_FFT ();
 
 	for (i = T_u - SEARCH_RANGE / 2;
 	     i < T_u + SEARCH_RANGE / 2 + diff_length; i ++)

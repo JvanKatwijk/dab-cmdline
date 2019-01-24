@@ -45,17 +45,18 @@ complex<float>	*fft_handler::getVector () {
 	return vector;
 }
 //
+void	fft_handler::do_FFT (void) {
+	fftwf_execute (plan);
+}
+
 //	Note that we do not scale in case of backwards fft,
 //	not needed for our applications
-void	fft_handler::do_FFT (fftDirection direction) {
-int16_t i;
-
-	if (direction == fftBackwards)
-	   for (i = 0; i < fftSize; i ++)
-	      vector [i] = conj (vector [i]);
+void	fft_handler::do_iFFT (void) {
+int	i;
+	for (i = 0; i < fftSize; i ++)
+	   vector [i] = conj (vector [i]);
 	fftwf_execute (plan);
-	if (direction == fftBackwards)
-	   for (i = 0; i < fftSize; i ++)
-	      vector [i] = conj (vector [i]);
+	for (i = 0; i < fftSize; i ++)
+	   vector [i] = conj (vector [i]);
 }
 
