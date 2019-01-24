@@ -90,36 +90,6 @@ bool	is_dataService	(void *Handle, const char *name) {
 	                               PACKET_SERVICE;
 }
 
-//	functions contributed by Hayati Ayguen
-//	mainId < 0 (-1) => don't check mainId
-//	subId == -1 => deliver first available offset
-//	subId == -2 => deliver coarse coordinates
-void	dab_getCoordinates	(void *Handle,
-	                         int16_t mainId, int16_t subId,
-	                         float *latitude, float *longitude,
-	                         bool *success,
-	                         int16_t *pMainId, int16_t *pSubId,
-	                         int16_t *pTD) {
-        std::complex<float> r =
-	      ((dabProcessor *)Handle) -> get_coordinates (mainId,
-	                                                   subId,
-	                                                   success,
-	                                                   pMainId,
-	                                                   pSubId, pTD);
-        *latitude = r.real();
-        *longitude = r.imag();
-}
-
-uint8_t	dab_getExtendedCountryCode	(void *Handle,
-	                                 bool *success) {
-	return ((dabProcessor *)Handle) -> getECC(success);
-}
-
-uint8_t dab_getInternationalTabId	(void *Handle,
-	                                 bool *success) {
-	return ((dabProcessor *)Handle) -> getInterTabId(success);
-}
-
 void    dataforAudioService     (void *Handle,
 	                         const char *name,
 	                         audiodata *d, int o) {

@@ -32,7 +32,7 @@ typedef	void (*device_eof_callback_t)(void * userData);
  */
 class	rawFiles: public deviceHandler {
 public:
-			rawFiles	(std::string, bool);
+			rawFiles	(std::string, bool repeater = true);
 			rawFiles	(std::string,
 	                                 double fileOffset,
 	                                 device_eof_callback_t eofHandler,
@@ -47,6 +47,7 @@ private:
 	std::string	fileName;
 	double		fileOffset;
 	device_eof_callback_t	eofHandler;
+	bool		repeater;
 	void		*userData;
 virtual	void		run		(void);
 	RingBuffer<std::complex<float>>	*_I_Buffer;

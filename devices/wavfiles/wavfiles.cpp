@@ -170,11 +170,17 @@ bool	eofReached	= false;
 	      t = bufferSize;
 	   }
 	   _I_Buffer -> putDataIntoBuffer (bi, bufferSize);
-	   if (eofReached) {
-	      if (eofHandler != nullptr)
-	         eofHandler (userData);
+	   if (eofReached && this -> repeater) {
+	      sf_seek (filePointer, (sf_count_t)0, SEEK_SET);
+	      eofReached = false;
+	   }
+	   else
+	   if (eofReached && (eofHandler != nullptr)) {
+	      eofHandler (userData);
 	      eofReached	= false;
 	   }
+	   else
+	      break;
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
 	}

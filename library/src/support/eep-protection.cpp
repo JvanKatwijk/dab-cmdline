@@ -158,7 +158,7 @@ int16_t	inputCounter	= 0;
            if (indexTable [i])
               viterbiBlock [i] = v [inputCounter ++];
 
-	viterbi_768::deconvolve (viterbiBlock. data (), outBuffer);
+	viterbiHandler::deconvolve (viterbiBlock. data (), outBuffer);
 	return true;
 }
 

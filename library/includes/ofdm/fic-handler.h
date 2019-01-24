@@ -29,14 +29,14 @@
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<vector>
-#include	"viterbi-768.h"
+#include	"viterbi-handler.h"
 #include	"fib-processor.h"
 #include	<mutex>
 #include	<string>
 #include	"dab-api.h"
 #include	"dab-params.h"
 
-class ficHandler: public viterbi_768 {
+class ficHandler: public viterbiHandler {
 public:
 		ficHandler		(uint8_t,	// dabMode
 	                                 ensemblename_t,
@@ -55,13 +55,7 @@ public:
 	void	dataforAudioService	(std::string &, audiodata *, int);
 	std::complex<float>
 		get_coordinates		(int16_t, int16_t, bool *);
-	std::complex<float>
-		get_coordinates		(int16_t, int16_t, bool *,
-                                         int16_t *pMainId, int16_t *,
-	                                 int16_t *pTD);
 	void	reset			(void);
-	uint8_t getECC			(bool *);
-	uint8_t getInterTabId		(bool *);
 private:
 	dabParams	params;
 	fib_quality_t	fib_qualityHandler;

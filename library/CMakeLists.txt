@@ -66,7 +66,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	           ./includes/backend/data/mot
 	           ./includes/backend/data/journaline
 	           ./includes/support
-	           ./includes/support/viterbi_768
 	           /usr/include/
 	)
 
@@ -104,7 +103,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./includes/backend/data/mot/mot-dir.h
 	     ./includes/backend/data/mot/mot-object.h
 	     ./includes/support/protTables.h
-	     ./includes/support/viterbi_768/viterbi-768.h
+	     ./includes/support/viterbi-handler.h
 	     ./includes/support/protection.h
 	     ./includes/support/uep-protection.h
 	     ./includes/support/eep-protection.h
@@ -143,8 +142,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/backend/data/mot/mot-handler.cpp 
 	     ./src/backend/data/mot/mot-dir.cpp 
 	     ./src/backend/data/mot/mot-object.cpp 
-	     ./src/support/viterbi_768/viterbi-768.cpp
-	     ./src/support/viterbi_768/spiral-no-sse.c
+	     ./src/support/viterbi_handler.cpp
 	     ./src/support/protection.cpp
 	     ./src/support/protTables.cpp
 	     ./src/support/eep-protection.cpp

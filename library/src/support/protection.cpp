@@ -25,7 +25,7 @@
 #include	"protection.h"
 
      protection::protection  (int16_t bitRate, int16_t protLevel):
-                                        viterbi_768 (24 * bitRate, false),
+                                        viterbiHandler (24 * bitRate),
                                         outSize (24 * bitRate),
                                         indexTable   (outSize * 4 + 24),
                                         viterbiBlock (outSize * 4 + 24) {

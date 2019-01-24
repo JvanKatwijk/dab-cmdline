@@ -1,4 +1,5 @@
 
+>>>>>>>>>>>>>>>>>OBSOLETE<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 cmdline.py  is a simple command line interface for use with the dab library.
 Since we need an interface file between the DAB library and the python
 program, a CMakeLists.txt file is include with which a library can be

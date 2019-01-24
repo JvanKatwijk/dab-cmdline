@@ -46,7 +46,7 @@ struct timeval  tv;
 //
 	rawFiles::rawFiles (std::string f, bool repeater) {
 	fileName	= f;
-	(void) repeater;
+	this	-> repeater	= repeater;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
@@ -66,6 +66,7 @@ struct timeval  tv;
 	                    device_eof_callback_t eofHandler,
 	                    void * userData) {
 	fileName	= f;
+	this	-> repeater = false;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
@@ -143,7 +144,7 @@ bool	eofReached	= false;
 
 	   nextStop += period;
 	   t = readBuffer (bi, bufferSize);
-	   if (t <= bufferSize) {
+	   if (t < bufferSize) {
 	      for (i = 0; i < bufferSize; i ++)
 	          bi [i] = 0;
 	      t = bufferSize;
@@ -151,11 +152,18 @@ bool	eofReached	= false;
 	   }
 
 	   _I_Buffer -> putDataIntoBuffer (bi, t);
-	   if (eofReached) {
+	   if (eofReached && repeater) {
+	      fseek (filePointer, currPos, SEEK_SET);
 	      eofReached = false;
-	      if (eofHandler != nullptr) 
-	         eofHandler (userData);
 	   }
+	   else
+	   if (eofReached && eofHandler != nullptr) {
+	      eofReached = false;
+	      eofHandler (userData);
+	   }
+	   else
+	      break;
+
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
 	}

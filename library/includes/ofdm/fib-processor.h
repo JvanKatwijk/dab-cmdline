@@ -110,14 +110,6 @@ public:
 		get_coordinates	(int16_t, int16_t, bool *);
 
 	void	reset			(void);
-//	Extended functions, contributed by Hayati Ayguen
-	std::complex<float>
-		get_coordinates     (int16_t, int16_t, bool *,
-                                     int16_t *pMainId,
-	                             int16_t *pSubId,
-	                             int16_t *pTD);
-        uint8_t getECC			(bool *);
-        uint8_t getInterTabId           (bool *);
 
 private:
 	ensemblename_t	ensemblenameHandler;

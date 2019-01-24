@@ -1515,28 +1515,6 @@ std::complex<float>	fib_processor::get_coordinates (int16_t mainId,
 	return coordinates. get_coordinates (mainId, subId, success);
 }
 
-// mainId < 0 (-1) => don't check mainId
-// subId == -1 => deliver first available offset
-// subId == -2 => deliver coarse coordinates
-std::complex<float>
-	fib_processor::get_coordinates (int16_t mainId,
-	                                int16_t subId, bool *success,
-	                                int16_t *pMainId,
-	                                int16_t *pSubId, int16_t *pTD) {
-//coordinates. print_coordinates ();
-	return coordinates. get_coordinates (mainId, subId, success, pMainId, pSubId, pTD);
-}
-
-uint8_t	fib_processor::getECC	(bool *success) {
-	*success = ecc_Present;
-	return ecc_byte;
-}
-
-uint8_t	fib_processor::getInterTabId	(bool *success) {
-	*success = interTab_Present;
-	return interTabId;
-}
-
 void	fib_processor::reset	(void) {
 	dateFlag		= false;
 	ecc_Present             = false;

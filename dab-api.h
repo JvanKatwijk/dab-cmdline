@@ -222,16 +222,5 @@ int32_t dab_getSId		(void *, const char*);
 //	and the other way around, mapping the service identifier to a name
 std::string dab_getserviceName	(void *, int32_t);
 }
-//
-//	Additions, suggested by Hayati
-void	dab_getCoordinates (void *, int16_t mainId, int16_t subId,
-	                            float *latitude, float *longitude,
-	                            bool *success,
-                                    int16_t *pMainId = nullptr,
-	                            int16_t *pSubId = nullptr,
-	                            int16_t *pTD = nullptr);
-uint8_t	dab_getExtendedCountryCode	(void *, bool *success);
-uint8_t	dab_getInternationalTabId	(void *, bool *success);
-
 #endif
 

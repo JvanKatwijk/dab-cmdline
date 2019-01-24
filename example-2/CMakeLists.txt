@@ -305,7 +305,6 @@ endif ()
 	           ../library/includes/backend/data/mot
 	           ../library/includes/backend/data/journaline
 	           ../library/includes/support
-	           ../library/includes/support/viterbi_768
 	           /usr/include/
 	)
 
@@ -348,7 +347,7 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h 
 	     ../library/includes/backend/data/data-processor.h
-	     ../library/includes/support/viterbi_768/viterbi-768.h
+	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
@@ -396,8 +395,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp 
 	     ../library/src/backend/data/data-processor.cpp
-	     ../library/src/support/viterbi_768/viterbi-768.cpp
-	     ../library/src/support/viterbi_768/spiral-no-sse.c
+	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp

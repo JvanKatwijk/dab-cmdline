@@ -26,7 +26,6 @@
 #include	<stdio.h>
 #include	<stdint.h>
 #include	"protection.h"
-#include	"viterbi-768.h"
 
 
 	class eep_protection: public protection {

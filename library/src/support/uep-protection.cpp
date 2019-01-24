@@ -243,7 +243,7 @@ int16_t	inputCounter	= 0;
               viterbiBlock [i] = v [inputCounter ++];
 
 ///     The actual deconvolution is done by the viterbi decoder
-	viterbi_768::deconvolve (viterbiBlock. data (), outBuffer);
+	viterbiHandler::deconvolve (viterbiBlock. data (), outBuffer);
 	return true;
 }
 
