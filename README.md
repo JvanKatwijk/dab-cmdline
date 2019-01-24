@@ -24,9 +24,10 @@ Note that the library depends on a device, but does not include that device.
 The main program is responsible for ensuring that something is available
 to deliver input samples and something is available for handling the output.
 
-THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE
-TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
-FEEL FREE TO ADAPT OR CORRECT.
+THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
+IDEA HOW TO USE THE LIBRARY OR ITS SOURCES. MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS
+TESTED ON ALL EXAMPLES, PLEASE CORRECT THEM  YOURSELF IF YOU (THINK YOU)
+FIND AN ERROR BEFORE ASKING ME.
 
 Invocation of the example programs, with some parameters specified, is
 something like
