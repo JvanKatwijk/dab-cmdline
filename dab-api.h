@@ -137,6 +137,12 @@ typedef	struct {
 //	function registered as
 	typedef void (*motdata_t)(std::string, int, void *);
 //	is invoked (if not specified as NULL)
+//
+//	For Hayati's tii handling:
+//      TII
+        typedef void (*tii_t)(int16_t mainId, int16_t subId, unsigned num, void *);
+        typedef void (*tii_ex_t)(int numOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *outNxtSNR, unsigned numAvg, const float *Pavg, int Pavg_T_u, void *userData);
+
 /////////////////////////////////////////////////////////////////////////
 //
 //	The API functions

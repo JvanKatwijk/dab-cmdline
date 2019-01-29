@@ -34,7 +34,8 @@ typedef	void *HINSTANCE;
 typedef	struct rtlsdr_dev rtlsdr_dev_t;
 extern "C"  {
 typedef	void (*rtlsdr_read_async_cb_t) (uint8_t *buf, uint32_t len, void *ctx);
-typedef	 int (*  pfnrtlsdr_open )(rtlsdr_dev_t **, uint32_t);
+typedef	int (*  pfnrtlsdr_get_index_by_serial )(const char *serial);
+typedef	int (*  pfnrtlsdr_open )(rtlsdr_dev_t **, uint32_t);
 typedef	int (*  pfnrtlsdr_close) (rtlsdr_dev_t *);
 typedef	int (*  pfnrtlsdr_set_center_freq) (rtlsdr_dev_t *, uint32_t);
 typedef uint32_t (*  pfnrtlsdr_get_center_freq) (rtlsdr_dev_t *);
@@ -56,6 +57,7 @@ typedef int (*  pfnrtlsdr_set_direct_sampling) (rtlsdr_dev_t *, int);
 typedef uint32_t (*  pfnrtlsdr_get_device_count) (void);
 typedef	int (* pfnrtlsdr_set_freq_correction)(rtlsdr_dev_t *, int);
 typedef	char *(* pfnrtlsdr_get_device_name)(int);
+typedef	char *(* pfnrtlsdr_set_opt_string)(rtlsdr_dev_t *dev, const char *opts, int verbose);
 }
 //	This class is a simple wrapper around the
 //	rtlsdr library that is read is as dll
@@ -66,10 +68,12 @@ public:
 	                                 int16_t	ppmCorrection,
 	                                 int16_t	gain,
 	                                 bool		autogain,
-	                                 uint16_t	deviceIndex = 0);
+	                                 uint16_t	deviceIndex = 0,
+	                                 const char *	deviceSerial = 0,
+	                                 const char *	deviceOpts = 0 );
 			~rtlsdrHandler	(void);
 //	interface to the reader
-	bool		restartReader	(int32_t);
+	bool		restartReader	(int32_t	frequency);
 	void		stopReader	(void);
 	int32_t		getSamples	(std::complex<float> *, int32_t);
 	int32_t		Samples		(void);
@@ -98,8 +102,10 @@ private:
 	int		gain;
 	bool		running;
 	int		frequency;
+	char	* deviceOptions;
 //	here we need to load functions from the dll
 	bool		load_rtlFunctions	(void);
+	pfnrtlsdr_get_index_by_serial	rtlsdr_get_index_by_serial;
 	pfnrtlsdr_open	rtlsdr_open;
 	pfnrtlsdr_close	rtlsdr_close;
 
@@ -118,6 +124,7 @@ private:
 	pfnrtlsdr_get_device_count rtlsdr_get_device_count;
 	pfnrtlsdr_set_freq_correction rtlsdr_set_freq_correction;
 	pfnrtlsdr_get_device_name rtlsdr_get_device_name;
+	pfnrtlsdr_set_opt_string rtlsdr_set_opt_string;
 };
 #endif
 

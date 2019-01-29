@@ -46,6 +46,12 @@
 	                                 RingBuffer<std::complex<float>> *spectrumBuffer,
 	                                 RingBuffer<std::complex<float>> *iqBuffer,
 	                                 void		*userData):
+	                                    tii_framedelay  (20),
+                                            tii_counter     (0),
+                                            my_tiiHandler   (nullptr),
+                                            my_tiiExHandler (nullptr),
+                                            tii_alfa        (-1.0F),
+                                            tii_resetFrameCount (-1),
 	                                    params (dabMode),
 	                                    myReader (this,
 	                                              inputDevice,
@@ -55,6 +61,7 @@
 	                                                       DIFF_LENGTH),
 	                                    my_ofdmDecoder (dabMode,
 	                                                    iqBuffer),
+	                                    my_TII_Detector (dabMode),
 	                                    my_ficHandler (dabMode,
 	                                                   ensemblename_Handler,
                                                            programname_Handler,
@@ -124,6 +131,9 @@ int		index_attempts		= 0;
 
 //Initing:
 notSynced:
+
+	   my_TII_Detector. reset ();
+
            switch (myTimeSyncer. sync (T_null, T_F)) {
               case TIMESYNC_ESTABLISHED:
                  break;                 // yes, we are ready
@@ -240,6 +250,61 @@ SyncOnPhase:
 	   ccc = 0;
 //	   fprintf (stderr, "%f\n", 20 * log10 ((sum2 + 0.005) / sum));
 	}
+
+/*
+ *      The TII data is encoded in the null period of the
+ *      odd frames
+ */
+           if (params. get_dabMode () == 1) {
+              if ((my_tiiHandler || my_tiiExHandler)) {
+                 int32_t cifCounter = my_ficHandler. get_CIFcount ();
+                 if (wasSecond (cifCounter, &params)) {
+                    my_TII_Detector.
+                          addBuffer (ofdmBuffer,
+                                     tii_alfa, cifCounter);
+                    tii_counter ++;
+                    if (tii_counter >= tii_framedelay) {
+                       if (my_tiiHandler) {
+                          int16_t mainId        = -1;
+                          int16_t subId         = -1;
+                          my_TII_Detector. processNULL (&mainId, &subId);
+                          my_tiiHandler (mainId, subId,
+                                         my_TII_Detector. getNumBuffers(),
+	                                 userData);
+	                } else {
+                          int numOut = 0;
+                          int outTii [24];
+                          float outAvgSNR [24];
+                          float outMinSNR [24];
+                          float outNxtSNR [24];
+                          my_TII_Detector. processNULL_ex (&numOut,
+                                                           outTii,
+                                                           outAvgSNR,
+                                                           outMinSNR,
+                                                           outNxtSNR);
+	                  if (numOut > 0)
+                             my_tiiExHandler (numOut,
+                                              outTii,
+                                              outAvgSNR,
+                                              outMinSNR,
+                                              outNxtSNR,
+                                              my_TII_Detector.getNumBuffers(),
+                                              my_TII_Detector.P_allAvg,
+                                              (int)T_u,
+                                              userData);
+                       }
+                    }
+                    if (tii_counter >= tii_framedelay)
+                       tii_counter = 0;
+                    if (my_TII_Detector. getNumBuffers() >=
+                         tii_resetFrameCount &&
+                        (tii_resetFrameCount > 0)) {
+                       my_TII_Detector. reset ();
+                    }
+                 }
+              }
+
+	   }
 	   if (fineOffset > carrierDiff / 2) {
 	      coarseOffset += carrierDiff;
 	      fineOffset -= carrierDiff;
@@ -320,11 +385,42 @@ void    dabProcessor::reset_msc (void) {
         my_mscHandler. reset ();
 }
 
+void    dabProcessor::setTII_handler (tii_t tii_Handler,
+	                              tii_ex_t tii_ExHandler,
+	                              int framedelay,
+	                              float alfa, int resetFrameCount) {
+	if (framedelay > 0)
+	   tii_framedelay = framedelay;
+	my_tiiHandler		= tii_Handler;
+	my_tiiExHandler		= tii_ExHandler;
+	tii_alfa		= alfa;
+	tii_resetFrameCount	= resetFrameCount;
+}
+
 std::complex<float>
 	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
 	                                 bool *success) {
         return my_ficHandler. get_coordinates (mainId, subId, success);
 }
+
+std::complex<float>
+	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
+	                                 bool *success,
+	                                 int16_t *pMainId, int16_t *pSubId,
+	                                 int16_t *pTD) {
+        return my_ficHandler. get_coordinates (mainId, subId, success,
+	                                            pMainId, pSubId, pTD);
+}
+
+uint8_t dabProcessor::getECC    (bool *success) {
+        return my_ficHandler. getECC (success);
+}
+
+uint8_t dabProcessor::getInterTabId     (bool *success) {
+        return my_ficHandler. getInterTabId (success);
+}
+
+
 
 void    dabProcessor::set_audioChannel (audiodata *d) {
         my_mscHandler. set_audioChannel (d);
@@ -336,6 +432,19 @@ void    dabProcessor::set_dataChannel (packetdata *d) {
 
 void    dabProcessor::clearEnsemble     (void) {
         my_ficHandler. reset ();
+}
+
+bool    dabProcessor::wasSecond (int16_t cf, dabParams *p) {
+        switch (p -> get_dabMode ()) {
+           default:
+           case 1:
+              return (cf & 07) >= 4;
+           case 2:
+           case 3:
+              return (cf & 02);
+           case 4:
+              return (cf & 03) >= 2;
+        }
 }
 
 

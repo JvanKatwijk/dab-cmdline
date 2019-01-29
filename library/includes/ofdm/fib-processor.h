@@ -28,6 +28,7 @@
 #include	<stdio.h>
 #include	<string>
 #include	<mutex>
+#include	<atomic>
 #include	"dab-api.h"
 #include	"dab-constants.h"
 #include	"tii_table.h"
@@ -106,10 +107,24 @@ public:
 	void	dataforDataService	(std::string &, packetdata *);
 	void	dataforAudioService	(std::string &, audiodata *, int16_t);
 	void	dataforDataService	(std::string &, packetdata *, int16_t);
-	std::complex<float>
-		get_coordinates	(int16_t, int16_t, bool *);
 
+        std::complex<float>
+                get_coordinates (int16_t, int16_t, bool *);
 	void	reset			(void);
+//
+//	additional functions for ex-10
+	int32_t get_CIFcount            (void) const;
+        bool    has_CIFcount            (void) const;
+        void    newFrame                (void);
+
+//      Extended functions, contributed by Hayati Ayguen
+        std::complex<float>
+                get_coordinates     (int16_t, int16_t, bool *,
+                                     int16_t *pMainId,
+                                     int16_t *pSubId,
+                                     int16_t *pTD);
+        uint8_t getECC                  (bool *);
+        uint8_t getInterTabId           (bool *);
 
 private:
 	ensemblename_t	ensemblenameHandler;
@@ -171,15 +186,17 @@ private:
 	serviceComponent	ServiceComps [64];
 	serviceId	listofServices [64];
 	tii_table	coordinates;
-
+        bool            dateFlag;
+//
+//	additional data for ex-10 functions
 	uint8_t         ecc_byte;
         uint8_t         interTabId;
-
-        bool            dateFlag;
         bool            firstTime;
         bool            ecc_Present;
         bool            interTab_Present;
-
+	std::atomic<int32_t>  CIFcount;
+        std::atomic<bool>     hasCIFcount;
+//	end of additionall data for ex-10 functions
 	bool		isSynced;
 	mutex		fibLocker;
 //

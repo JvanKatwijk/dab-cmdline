@@ -180,6 +180,7 @@ bool	eofReached	= false;
 	      eofReached	= false;
 	   }
 	   else
+	   if (eofReached)
 	      break;
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());

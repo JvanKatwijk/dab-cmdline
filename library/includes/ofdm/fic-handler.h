@@ -53,9 +53,20 @@ public:
 	uint8_t	kindofService		(std::string &);
 	void	dataforDataService	(std::string &, packetdata *, int);
 	void	dataforAudioService	(std::string &, audiodata *, int);
-	std::complex<float>
-		get_coordinates		(int16_t, int16_t, bool *);
-	void	reset			(void);
+//
+//	additional functions for example 10
+        int32_t get_CIFcount            (void) const;
+        bool    has_CIFcount            (void) const;
+        std::complex<float>
+                get_coordinates         (int16_t, int16_t, bool *);
+        std::complex<float>
+                get_coordinates         (int16_t, int16_t, bool *,
+                                         int16_t *pMainId, int16_t *,
+                                         int16_t *pTD);
+        void    reset                   (void);
+        uint8_t getECC                  (bool *);
+        uint8_t getInterTabId           (bool *);
+
 private:
 	dabParams	params;
 	fib_quality_t	fib_qualityHandler;

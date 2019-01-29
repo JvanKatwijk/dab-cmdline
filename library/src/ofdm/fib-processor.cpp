@@ -295,6 +295,9 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 	occurrenceChange	= getBits_8 (d, 16 + 32);
 	(void)occurrenceChange;
 
+	CIFcount = highpart * 250 + lowpart;
+	hasCIFcount = true;
+
 	if (getBits (d, 34, 1))         // only alarm, just ignore
 	   return;
 
@@ -1515,10 +1518,46 @@ std::complex<float>	fib_processor::get_coordinates (int16_t mainId,
 	return coordinates. get_coordinates (mainId, subId, success);
 }
 
+
+//	mainId < 0 (-1) => don't check mainId
+//	subId == -1 => deliver first available offset
+//	subId == -2 => deliver coarse coordinates
+std::complex<float>
+	fib_processor::get_coordinates (int16_t mainId,
+	                                int16_t subId, bool *success,
+	                                int16_t *pMainId,
+	                                int16_t *pSubId, int16_t *pTD) {
+	return coordinates. get_coordinates (mainId, subId, success, pMainId, pSubId, pTD);
+}
+
+uint8_t	fib_processor::getECC	(bool *success) {
+	*success = ecc_Present;
+	return ecc_byte;
+}
+
+uint8_t	fib_processor::getInterTabId	(bool *success) {
+	*success = interTab_Present;
+	return interTabId;
+}
+
 void	fib_processor::reset	(void) {
 	dateFlag		= false;
 	ecc_Present             = false;
         interTab_Present        = false;
 	clearEnsemble	();
+	CIFcount	= 0;
+	hasCIFcount	= false;
+}
+
+int32_t		fib_processor::get_CIFcount (void) const {
+	return CIFcount;
+}
+
+bool		fib_processor::has_CIFcount (void) const {
+	return hasCIFcount;
+}
+
+void    fib_processor::newFrame (void) {
+        ++CIFcount;
 }
 

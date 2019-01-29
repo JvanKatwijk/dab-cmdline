@@ -2,6 +2,7 @@
 DAB COMMAND LINE and DAB LIBRARY
 
 
+
 ---------------------------------------------------------------------
 Introduction
 ---------------------------------------------------------------------
@@ -26,11 +27,11 @@ to deliver input samples and something is available for handling the output.
 
 THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
 IDEA HOW TO USE THE LIBRARY OR ITS SOURCES. MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS
-TESTED ON ALL EXAMPLES, PLEASE CORRECT THEM  YOURSELF IF YOU (THINK YOU)
-FIND AN ERROR BEFORE ASKING ME.
+TESTED ON ALL EXAMPLES, PLEASE CORRECT THEM IF YOU (THINK YOU) FIND AN ERROR AND DO NOT ASK
+ME.
 
 Invocation of the example programs, with some parameters specified, is
-something like
+somthing like
      
 	dab-sdrplay-x -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
 
@@ -45,7 +46,7 @@ The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
 
-The examples 1 to 7 are basically simple variations on a single theme:
+The examples 1 to 6 are basically simple variations on a single theme:
 
 	- example 1 is the example where the main program is linked to
 	  a precompiled shared library, 
@@ -75,35 +76,28 @@ The examples 1 to 7 are basically simple variations on a single theme:
 	- example 6 is an experimental version where control is
 	  through an IP port. 
 	  
-	- example 7 is an experimental version where stdin is
-	  used as input device (and the command line parameters are
-	  adapted to that)
+	- example 7 is an experimental version where stdin is used as input device
+	  (and the command line parameters are adapted to that)
 	  
 	- in a separate project a variant of the DAB library is used to create 
 	  a DAB server program, running as a service on an RPI 2/3 under Stretch and
 	  being controlled by an android app (which is part of the development)
-
-----------------------------------------------------------------------------
-Example 10
-----------------------------------------------------------------------------
-
-Example 10 is contributed by Hayati Ayguen and - when run - gives some
-information on the processing of a.o the TII
-
+	  
 -------------------------------------------------------------------------------
 A DAB scanner
 -------------------------------------------------------------------------------
 
-Next to these examples, a simple dab-scanner was made, an example program
-that just scans all channels of the given band (BAND III by default)
-and collects and emits data about the ensembles and services encountered.
-Output can be sent to a file - ASCII - that can be interpreted
-by Libre Office Calc or similar programs.
+Next to these examples, a simple dab-scanner was made, an example program that just
+scans all channels of the given band (BAND III by default) and collects and
+emits data about the ensembles 	  and services encountered. Output can be sent
+to a file - ASCII - that can be interpreted by Libre Office Calc or similar programs.
 
 
 ![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 
  
+
+
 ----------------------------------------------------------------------------
 Building an executable
 ----------------------------------------------------------------------------

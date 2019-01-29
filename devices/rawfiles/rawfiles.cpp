@@ -55,7 +55,7 @@ struct timeval  tv;
 	   delete _I_Buffer;
 	   throw (31);
 	}
-	currPos		= 0;
+
 	this	-> eofHandler	= nullptr;
 	this	-> userData	= nullptr;
 	running. store (false);
@@ -162,6 +162,7 @@ bool	eofReached	= false;
 	      eofHandler (userData);
 	   }
 	   else
+	   if (eofReached)
 	      break;
 
 	   if (nextStop - getMyTime () > 0)
