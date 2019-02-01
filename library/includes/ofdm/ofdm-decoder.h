@@ -40,12 +40,10 @@ public:
 		~ofdmDecoder		(void);
 	void	processBlock_0		(std::complex<float> *);
 	void	decode		(std::complex<float> *, int32_t n, int16_t *);
-	int16_t	get_snr			(void);
 private:
 	dabParams	params;
 	fft_handler	my_fftHandler;
 	interLeaver	myMapper;
-	int16_t		get_snr		(std::complex<float> *);
         RingBuffer<std::complex<float>> *iqBuffer;
 	int		cnt;
 	int32_t		T_s;
@@ -57,7 +55,6 @@ private:
 	std::vector <complex<float> >	phaseReference;
 	std::complex<float>	*fft_buffer;
 	int32_t		blockIndex;
-	float		current_snr;
 };
 
 #endif

@@ -38,7 +38,9 @@
 #include	"ringbuffer.h"
 #include	"dab-api.h"
 #include	"sample-reader.h"
+#ifdef	__TII_INCLUDED
 #include	"tii_detector.h"
+#endif
 //
 class	deviceHandler;
 
@@ -83,7 +85,7 @@ public:
 	std::string	get_ensembleName        (void);
 	void		clearEnsemble           (void);
 	void		reset_msc		(void);
-//
+#ifdef	__TII_INCLUDED__
 //	additions for example-10
 	void            setTII_handler          (tii_t tii_Handler,
 	                                         tii_ex_t tii_ExHandler,
@@ -99,7 +101,7 @@ public:
                                           int16_t *pTD);
         uint8_t         getECC                  (bool *);
         uint8_t         getInterTabId           (bool *);
-
+#endif
 private:
 //
 //	additions for example-10
@@ -115,7 +117,9 @@ private:
 	dabParams	params;
 	sampleReader	myReader;
 	phaseReference	phaseSynchronizer;
+#ifdef	__TII_INCLUDED__
 	TII_Detector	my_TII_Detector;
+#endif
 	ofdmDecoder	my_ofdmDecoder;
 	ficHandler	my_ficHandler;
 	mscHandler	my_mscHandler;
@@ -126,6 +130,7 @@ private:
 	void		*userData;
 	std::atomic<bool>	running;
 	bool		isSynced;
+	int		snr;
 	int32_t		T_null;
 	int32_t		T_u;
 	int32_t		T_s;

@@ -48,8 +48,10 @@
 	                                 void		*userData):
 	                                    tii_framedelay  (20),
                                             tii_counter     (0),
+#ifdef	__TII_INCLUDED__
                                             my_tiiHandler   (nullptr),
                                             my_tiiExHandler (nullptr),
+#endif
                                             tii_alfa        (-1.0F),
                                             tii_resetFrameCount (-1),
 	                                    params (dabMode),
@@ -61,7 +63,9 @@
 	                                                       DIFF_LENGTH),
 	                                    my_ofdmDecoder (dabMode,
 	                                                    iqBuffer),
+#ifdef	__TII_INCLUDED__
 	                                    my_TII_Detector (dabMode),
+#endif
 	                                    my_ficHandler (dabMode,
 	                                                   ensemblename_Handler,
                                                            programname_Handler,
@@ -87,6 +91,7 @@
 	this	-> carriers		= params. get_carriers ();
 	this	-> carrierDiff		= params. get_carrierDiff ();
 	isSynced	= false;
+	snr		= 0;
 	running. store (false);
 }
 
@@ -120,6 +125,7 @@ int		dip_attempts		= 0;
 int		index_attempts		= 0;
 
 	isSynced	= false;
+	snr		= 0;
 	running. store (true);
 	my_ficHandler. reset ();
 	myReader. setRunning (true);
@@ -131,9 +137,9 @@ int		index_attempts		= 0;
 
 //Initing:
 notSynced:
-
+#ifdef	__TII_INCLUDED__
 	   my_TII_Detector. reset ();
-
+#endif
            switch (myTimeSyncer. sync (T_null, T_F)) {
               case TIMESYNC_ESTABLISHED:
                  break;                 // yes, we are ready
@@ -245,12 +251,8 @@ SyncOnPhase:
 	   sum /= T_null;
 
 	   float sum2 = myReader. get_sLevel ();
-	static int ccc	= 0;
-	if (++ccc > 10) {
-	   ccc = 0;
-//	   fprintf (stderr, "%f\n", 20 * log10 ((sum2 + 0.005) / sum));
-	}
-
+	   snr	= 0.9 * snr + 0.1 * 20 * log10 ((sum2 + 0.005) / sum);
+#ifdef	__TII_INCLUDED__
 /*
  *      The TII data is encoded in the null period of the
  *      odd frames
@@ -305,6 +307,7 @@ SyncOnPhase:
               }
 
 	   }
+#endif
 	   if (fineOffset > carrierDiff / 2) {
 	      coarseOffset += carrierDiff;
 	      fineOffset -= carrierDiff;
@@ -346,7 +349,7 @@ void	dabProcessor::call_systemData (bool f, int16_t snr, int32_t freq) {
 void	dabProcessor::show_Corrector (int freqOffset) {
 	if (systemdataHandler != nullptr)
 	   systemdataHandler (isSynced,
-	                      my_ofdmDecoder. get_snr (),
+	                      snr,
 	                      freqOffset, userData);
 }
 
@@ -384,7 +387,7 @@ std::string dabProcessor::get_serviceName (int32_t SId) {
 void    dabProcessor::reset_msc (void) {
         my_mscHandler. reset ();
 }
-
+#ifdef	__TII_INCLUDED__
 void    dabProcessor::setTII_handler (tii_t tii_Handler,
 	                              tii_ex_t tii_ExHandler,
 	                              int framedelay,
@@ -420,7 +423,7 @@ uint8_t dabProcessor::getInterTabId     (bool *success) {
         return my_ficHandler. getInterTabId (success);
 }
 
-
+#endif
 
 void    dabProcessor::set_audioChannel (audiodata *d) {
         my_mscHandler. set_audioChannel (d);

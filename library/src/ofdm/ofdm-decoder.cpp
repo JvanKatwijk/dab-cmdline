@@ -51,8 +51,6 @@
 	this	-> T_g			= T_s - T_u;
 	fft_buffer			= my_fftHandler. getVector ();
 	phaseReference. resize (T_u);
-//
-	current_snr			= 0;	
 	cnt				= 0;
 }
 
@@ -64,12 +62,6 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *buffer) {
 	                      T_u * sizeof (std::complex<float>));
 
 	my_fftHandler. do_FFT ();
-/**
-  *	The SNR is determined by looking at a segment of bins
-  *	within the signal region and bits outside.
-  *	It is just an indication
-  */
-	current_snr	= 0.7 * current_snr + 0.3 * get_snr (fft_buffer);
 /**
   *	we are now in the frequency domain, and we keep the carriers
   *	as coming from the FFT as phase reference.
@@ -134,34 +126,5 @@ toBitsLabel:
 	      cnt = 0;
 	   }
 	}
-}
-//
-/**
-  *	for the snr we have a full T_u wide vector, with in the middle
-  *	K carriers.
-  *	Just get the strength from the selected carriers compared
-  *	to the strength of the carriers outside that region
-  */
-int16_t	ofdmDecoder::get_snr (std::complex<float> *v) {
-int16_t	i;
-float	noise 	= 0;
-float	signal	= 0;
-int16_t	low	= T_u / 2 -  carriers / 2;
-int16_t	high	= low + carriers;
-
-	for (i = 10; i < low - 20; i ++)
-	   noise += abs (v [(T_u / 2 + i) % T_u]);
-
-	for (i = high + 20; i < T_u - 10; i ++)
-	   noise += abs (v [(T_u / 2 + i) % T_u]);
-
-	noise	/= (low - 30 + T_u - high - 30);
-	for (i = T_u / 2 - carriers / 4;  i < T_u / 2 + carriers / 4; i ++)
-	   signal += abs (v [(T_u / 2 + i) % T_u]);
-	return get_db (signal / (carriers / 2)) - get_db (noise);
-}
-
-int16_t	ofdmDecoder::get_snr	(void) {
-	return (int16_t)current_snr;
 }
 
