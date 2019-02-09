@@ -41,6 +41,11 @@ if(DEFINED RTLSDR)
    set(objectName dab-rtlsdr-3)
 endif ()
 
+if(DEFINED HACKRF)
+   set(HACKRF true)
+   set(objectName dab-hackrf-3)
+endif ()
+
 if(DEFINED WAVFILES)
    set(WAVFILES true)
    set(objectName dab-files-3)
@@ -235,6 +240,39 @@ add_definitions (-DSTREAMER_OUTPUT)
 
            add_definitions (-DHAVE_RAWFILES)
         endif()
+
+	if (HACKRF)
+	   find_path (HACKLIB_INCLUDE_DIR
+                      NAMES hackrf.h
+                      PATHS
+	              ../devices/hackrf-handler/libhackrf/
+                       /usr/local/include/
+	   )
+           include_directories (${HACKLIB_INCLUDE_DIR})
+
+           find_library (HACKLIB hackrf)
+           if(NOT(HACKLIB))
+              message(FATAL_ERROR "please install -lhackrf")
+           else(NOT(HACKLIB))
+              list (APPEND extraLibs ${HACKLIB})
+           endif(NOT(HACKLIB))
+
+	   include_directories (
+	     ../devices/hackrf-handler
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/hackrf-handler/hackrf-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/hackrf-handler/hackrf-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_HACKRF)
+	endif (HACKRF)
 
 #######################################################################
 #

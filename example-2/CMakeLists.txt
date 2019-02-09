@@ -196,7 +196,7 @@ endif ()
 
 	if (HACKRF)
 	   find_path (HACKLIB_INCLUDE_DIR
-                      NAMES mirsdrapi-rsp.h
+                      NAMES hackrf.h
                       PATHS
 	              ../devices/hackrf-handler/libhackrf/
                        /usr/local/include/
