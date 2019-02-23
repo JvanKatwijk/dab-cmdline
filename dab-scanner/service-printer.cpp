@@ -56,19 +56,11 @@ bool	success;
 	std::string protL	= getProtectionLevel (d -> shortForm,
 	                                              d -> protLevel);
 	std::string codeRate	= getCodeRate (d -> shortForm, d -> protLevel);
-	uint8_t ecc_byte	= dab_getExtendedCountryCode (theRadio, &success);
 	uint32_t serviceId	= dab_getSId (theRadio, serviceName. c_str ());
 	uint8_t countryId = (serviceId >> 12) & 0xF;
-	const char *country	= getCountry (ecc_byte, countryId);
-	if (country == nullptr)
-	   country = " ";
-	uint8_t ITabId	=  dab_getInternationalTabId (theRadio, &success);
-	std::string programType	= getProgramType (success,
-	                                          ITabId, d -> programType);
 	                          
-	fprintf (f, "%s;%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
+	fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;\n",
 	             serviceName. c_str (),
-	             country,
 	             serviceId,
 	             d -> subchId,
 	             d -> startAddr,
@@ -77,8 +69,7 @@ bool	success;
 	             getASCTy  (d -> ASCTy),
 	             protL. c_str (),
 	             codeRate. c_str (),
-	             getLanguage (d -> language),
-	             programType. c_str () );
+	             getLanguage (d -> language));
 }
 
 void	print_dataHeader (FILE *f) {
@@ -99,15 +90,10 @@ bool	success;
 	                                              d -> protLevel);
 	std::string codeRate	= getCodeRate (d -> shortForm,
 	                                       d -> protLevel);
-	uint8_t ecc_byte	= dab_getExtendedCountryCode (theRadio, &success);
 	uint32_t serviceId	= dab_getSId (theRadio, serviceName. c_str ());
 	uint8_t countryId = (serviceId >> 12) & 0xF;
-	const char *country	= getCountry (ecc_byte, countryId);
-	if (country == nullptr)
-	   country = "   ";
-	fprintf (f, "%s;%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;;\n",
+	fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;;\n",
 	             serviceName. c_str (),
-	             country,
 	             serviceId,
 	             d -> subchId,
 	             d -> startAddr,
@@ -118,4 +104,3 @@ bool	success;
 	             getUserApplicationType (d -> appType),
 	             compnr == 0 ? "no": "yes");
 }
-

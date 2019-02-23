@@ -325,9 +325,8 @@ bool	err;
 	   theDevice	-> stopReader ();
 	   int32_t frequency =
 	               dabBand. Frequency (theBand, theChannel);
-	   theDevice	-> setVFOFrequency (frequency);
-	   theDevice	-> restartReader ();
-
+	   theDevice	-> restartReader (frequency);
+	   
 	   ensembleRecognized.	store (false);
 	   dabReset (theRadio);
 //	The device should be working right now

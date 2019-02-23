@@ -301,7 +301,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-handler.cpp 
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp 
-	     ../library/src/support/viterbi_handler.cpp
+	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
