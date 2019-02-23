@@ -325,9 +325,8 @@ bool	err;
 	   theDevice	-> stopReader ();
 	   int32_t frequency =
 	               dabBand. Frequency (theBand, theChannel);
-	   theDevice	-> setVFOFrequency (frequency);
-	   theDevice	-> restartReader ();
-
+	   theDevice	-> restartReader (frequency);
+	   
 	   ensembleRecognized.	store (false);
 	   dabReset (theRadio);
 //	The device should be working right now
@@ -449,15 +448,16 @@ bool	err;
 }
 
 void    printOptions (void) {
-	fprintf (stderr,
-"                          dab-scanner options are\n\
-	                  -d number   amount of time to look for time synchr\n\
-	                  -D number   amount of time to look for full sync\n\
-	                  -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
-	                  -B Band     Band is either L_BAND or BAND_III (default)\n\
-	                  -G number   gain for device (range 1 .. 100)\n\
-	                  -Q          if set, set autogain for device true\n\
-	                  -p number   ppm correction for the attached device\n\
-	                  -F filename in case the output is to a file\n");
+        fprintf (stderr,
+"                        dab-scanner options are\n\
+                        -d number        amount of time to look for time synchr\n\
+                        -D number        amount of time to look for full sync\n\
+                        -M Mode          Mode is 1, 2 or 4. Default is Mode 1\n\
+                        -B Band          Band is either L_BAND or BAND_III (default)\n\
+                        -G number        gain for device (range 1 .. 100)\n\
+                        -Q               if set, set autogain for device true\n\
+                        -p number        ppm correction for the attached device\n\
+                        -F filename      in case the output is to a file\n\
+                        -C start channel the start channel, default: 5A\n");
 }
 
