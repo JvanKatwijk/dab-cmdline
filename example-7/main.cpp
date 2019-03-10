@@ -35,7 +35,7 @@
 #include	"audiosink.h"
 #include	"filesink.h"
 #include	"dab-api.h"
-#include	"band-handler.h"
+#include	"includes/support/band-handler.h"
 #include	"stdin-handler.h"
 #include	<locale>
 #include	<codecvt>

@@ -273,7 +273,6 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
-	     ./band-handler.h
 	     ./audio-base.h
 	     ./audiosink.h
 	     ./filesink.h
@@ -309,6 +308,7 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-handler.h 
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h 
+         ../library/includes/support/band-handler.cpp
 	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -326,7 +326,6 @@ endif ()
 	     ./audiosink.cpp
 	     ./filesink.cpp
 	     ./newconverter.cpp
-	     ./band-handler.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
@@ -357,6 +356,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-handler.cpp 
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp 
+         ../library/src/support/band-handler.cpp
 	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp

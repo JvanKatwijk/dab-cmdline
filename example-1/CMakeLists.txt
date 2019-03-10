@@ -160,12 +160,12 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ../dab-api.h
-	     ../includes/dab-constants.h
+	     ../library/includes/dab-constants.h
+         ../library/includes/support/band-handler.h
 	     ./ringbuffer.h
 	     ./audio-base.h
 	     ./audiosink.h
 	     ./newconverter.h
-	     ./band-handler.h
 	     ../devices/device-handler.h
 	)
 
@@ -175,8 +175,8 @@ endif ()
 	     ./audio-base.cpp
 	     ./audiosink.cpp
 	     ./newconverter.cpp
-	     ./band-handler.cpp
 	     ../devices/device-handler.cpp
+         ../library/src/support/band-handler.cpp
 	)
 
 	add_executable (${objectName}

@@ -33,7 +33,7 @@
 #include	"audiosink.h"
 #include	"config.h"
 #include	"radiodata.h"
-#include	"band-handler.h"
+#include	"includes/support/band-handler.h"
 #include	"tcp-writer.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
