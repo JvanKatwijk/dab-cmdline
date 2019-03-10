@@ -176,6 +176,8 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
     INSTALL (TARGETS ${objectName} DESTINATION ./lib)
 
+    INSTALL (FILES ${${objectName}_HDRS} DESTINATION include/${objectName} COMPONENT devel)
+
 ########################################################################
 # Create uninstall target
 ########################################################################
