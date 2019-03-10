@@ -184,6 +184,7 @@ endif()
 
     set (${objectName}_SRCS
         ${${objectName}_SRCS}
+        device-handler.cpp
     )
 
 #####################################################################

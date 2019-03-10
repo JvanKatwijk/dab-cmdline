@@ -79,6 +79,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./includes/ofdm/phasereference.h
          ./includes/ofdm/phasetable.h
          ./includes/ofdm/freq-interleaver.h
+         ./includes/ofdm/ofdm-decoder.h
          ./includes/ofdm/sample-reader.h
          ./includes/ofdm/timesyncer.h
          ./includes/ofdm/fic-handler.h
@@ -106,6 +107,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./includes/support/protTables.h
          ./includes/support/viterbi-handler.h
          ./includes/support/protection.h
+         ./includes/support/semaphore.h
          ./includes/support/uep-protection.h
          ./includes/support/eep-protection.h
          ./includes/support/fft_handler.h
@@ -121,6 +123,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./src/ofdm/phasereference.cpp
          ./src/ofdm/phasetable.cpp
          ./src/ofdm/freq-interleaver.cpp
+         ./src/ofdm/ofdm-decoder.cpp
          ./src/ofdm/sample-reader.cpp
          ./src/ofdm/timesyncer.cpp
          ./src/ofdm/fic-handler.cpp
