@@ -1,6 +1,7 @@
 # Ignore temporary files
 *.swp
 # Ignore build folders
+/dab-scanner/build/
 /example-*/build/
 /library/build/
 /simple-dab/build/
