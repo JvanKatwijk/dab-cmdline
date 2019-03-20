@@ -142,7 +142,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 	     ./src/backend/data/mot/mot-handler.cpp 
 	     ./src/backend/data/mot/mot-dir.cpp 
 	     ./src/backend/data/mot/mot-object.cpp 
-	     ./src/support/viterbi_handler.cpp
+	     ./src/support/viterbi-handler.cpp
 	     ./src/support/protection.cpp
 	     ./src/support/protTables.cpp
 	     ./src/support/eep-protection.cpp
