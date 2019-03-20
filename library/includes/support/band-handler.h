@@ -20,22 +20,22 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__BANDHANDLER__
-#define	__BANDHANDLER__
-#include	<stdint.h>
-#include	<string>
+#ifndef  __BANDHANDLER__
+#define  __BANDHANDLER__
+#include <stdint.h>
+#include <string>
 //
-//	a simple convenience class
+//    a simple convenience class
 //
 
-#define	BAND_III	0100
-#define	L_BAND		0101
+#define  BAND_III 0100
+#define  L_BAND   0101
 
 class bandHandler {
 public:
-	bandHandler	(void);
-	~bandHandler	(void);
-int32_t Frequency	(uint8_t band, std::string Channel);
+    bandHandler  (void);
+    ~bandHandler (void);
+int32_t Frequency (uint8_t band, std::string Channel);
 std::string nextChannel (uint8_t dabBand, std::string Channel);
 
 };
