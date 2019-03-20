@@ -51,6 +51,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 #######################################################################
 #
+
 #    Here we really start
 
     include_directories (
@@ -163,6 +164,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
               ${FAAD_INCLUDE_DIRS}
               ${SNDFILES_INCLUDE_DIRS}
     )
+
 
 #####################################################################
 
