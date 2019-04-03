@@ -172,10 +172,6 @@ double	winElem;
 
 static
 uint8_t bits [] = {128, 64, 32, 16, 8, 4, 2, 1};
-static inline
-uint8_t getbit (uint8_t value, int16_t bitPos) {
-	return value & bits [bitPos] ? 1 : 0;
-}
 
 //
 void	TII_Detector::reset (void) {

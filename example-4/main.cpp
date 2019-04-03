@@ -31,7 +31,7 @@
 #include	<complex>
 #include	<vector>
 #include	"dab-api.h"
-#include	"band-handler.h"
+#include	"includes/support/band-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
 #elif	HAVE_AIRSPY

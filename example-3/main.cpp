@@ -31,7 +31,7 @@
 #include	<complex>
 #include	<vector>
 #include	"dab-api.h"
-#include	"band-handler.h"
+#include	"includes/support/band-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
 #elif	HAVE_AIRSPY
@@ -44,6 +44,8 @@
 #include	"rawfiles.h"
 #elif	HAVE_RTL_TCP
 #include	"rtl_tcp-client.h"
+#elif   HAVE_HACKRF
+#include        "hackrf-handler.h"
 #endif
 
 #include	<atomic>
@@ -213,9 +215,16 @@ uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
-int		theGain		= 35;	// scale = 0 .. 100
+int		deviceGain	= 45;	// scale = 0 .. 100
 int		GRdB		= 30;
-int		lnaState	= 2;
+#ifdef  HAVE_HACKRF
+int             lnaGain         = 40;
+int             vgaGain         = 40;
+#endif
+#ifdef  HAVE_SDRPLAY
+int16_t         GRdB            = 30;
+int16_t         lnaState        = 2;
+#endif
 int16_t		waitingTime	= 10;
 bool		autogain	= false;
 int	opt;
@@ -249,6 +258,10 @@ bool	err;
 	while ((opt = getopt (argc, argv, "W:M:B:P:S:F:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:S:H:I:Q")) != -1) {
+#elif	HAVE_SDRPLAY
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:L:S:Q")) != -1) {
+#elif	HAVE_HACKRF
+	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:g:L:S:Q")) != -1) {
 #else
 	while ((opt = getopt (argc, argv, "W:M:B:C:P:G:L:S:Q")) != -1) {
 #endif
@@ -281,11 +294,23 @@ bool	err;
 	      case 'F':
 	         fileName	= std::string (optarg);
 	         break;
+	      case 'R':
+	         repeater	= false;
+	         break;
 #else
 	      case 'C':
 	         theChannel	= std::string (optarg);
 	         break;
 
+#ifdef  HAVE_HACKRF
+              case 'G':
+                 lnaGain        = atoi (optarg);
+                 break;
+
+              case 'g':
+                 vgaGain        = atoi (optarg);
+                 break;
+#else
 #ifdef	HAVE_SDRPLAY
 	      case 'G':
 	         GRdB		= atoi (optarg);
@@ -298,11 +323,11 @@ bool	err;
 	      case 'G':
 	         theGain	= atoi (optarg);
 	         break;
-#endif
 	      case 'Q':
 	         autogain	= true;
 	         break;
-
+#endif
+#endif
 #ifdef	HAVE_RTL_TCP
 	      case 'H':
 	         hostname	= std::string (optarg);
@@ -350,6 +375,11 @@ bool	err;
 	                                     ppmCorrection,
 	                                     theGain,
 	                                     autogain);
+#elif   HAVE_HACKRF
+           theDevice    = new hackrfHandler     (frequency,
+                                                 ppmCorrection,
+                                                 lnaGain,
+                                                 vgaGain);
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName);
 #elif	HAVE_RAWFILES
@@ -394,9 +424,6 @@ bool	err;
 	   exit (4);
 	}
 
-	theDevice	-> setGain (theGain);
-	if (autogain)
-	   theDevice	-> set_autogain (autogain);
 	theDevice	-> restartReader (frequency);
 //
 //	The device should be working right now

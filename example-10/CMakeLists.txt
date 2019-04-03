@@ -299,7 +299,6 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
-	     ./band-handler.h
              ./dab_tables.h
 	     ./server-thread/tcp-server.h
 	     ../dab-api.h
@@ -333,6 +332,7 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-handler.h
 	     ../library/includes/backend/data/mot/mot-dir.h
 	     ../library/includes/backend/data/mot/mot-object.h
+         ../library/includes/support/band-handler.h
 	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -346,7 +346,6 @@ endif ()
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	     ./main.cpp
-	     ./band-handler.cpp
 	     ./dab_tables.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
@@ -378,6 +377,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-handler.cpp
 	     ../library/src/backend/data/mot/mot-dir.cpp
 	     ../library/src/backend/data/mot/mot-object.cpp
+         ../library/src/support/band-handler.cpp
 	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp

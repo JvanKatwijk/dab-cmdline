@@ -41,6 +41,11 @@ if(DEFINED RTLSDR)
    set(objectName dab-rtlsdr-3)
 endif ()
 
+if(DEFINED HACKRF)
+   set(HACKRF true)
+   set(objectName dab-hackrf-3)
+endif ()
+
 if(DEFINED WAVFILES)
    set(WAVFILES true)
    set(objectName dab-files-3)
@@ -236,6 +241,39 @@ add_definitions (-DSTREAMER_OUTPUT)
            add_definitions (-DHAVE_RAWFILES)
         endif()
 
+	if (HACKRF)
+	   find_path (HACKLIB_INCLUDE_DIR
+                      NAMES hackrf.h
+                      PATHS
+	              ../devices/hackrf-handler/libhackrf/
+                       /usr/local/include/
+	   )
+           include_directories (${HACKLIB_INCLUDE_DIR})
+
+           find_library (HACKLIB hackrf)
+           if(NOT(HACKLIB))
+              message(FATAL_ERROR "please install -lhackrf")
+           else(NOT(HACKLIB))
+              list (APPEND extraLibs ${HACKLIB})
+           endif(NOT(HACKLIB))
+
+	   include_directories (
+	     ../devices/hackrf-handler
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/hackrf-handler/hackrf-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/hackrf-handler/hackrf-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_HACKRF)
+	endif (HACKRF)
+
 #######################################################################
 #
 #	Here we really start
@@ -261,7 +299,6 @@ add_definitions (-DSTREAMER_OUTPUT)
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
-	     ./band-handler.h
 	     ./server-thread/tcp-server.h
 	     ./streamer.h
 	     ../dab-api.h
@@ -294,6 +331,7 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ../library/includes/backend/data/mot/mot-handler.h
 	     ../library/includes/backend/data/mot/mot-dir.h
 	     ../library/includes/backend/data/mot/mot-object.h
+         ../library/inclues/support/band-handler.h
 	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -307,7 +345,6 @@ add_definitions (-DSTREAMER_OUTPUT)
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	     ./main.cpp
-	     ./band-handler.cpp
 	     ./streamer.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
@@ -339,6 +376,7 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ../library/src/backend/data/mot/mot-handler.cpp
 	     ../library/src/backend/data/mot/mot-dir.cpp
 	     ../library/src/backend/data/mot/mot-object.cpp
+         ../library/src/support/band-handler.cpp
 	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp

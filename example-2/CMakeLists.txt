@@ -196,7 +196,7 @@ endif ()
 
 	if (HACKRF)
 	   find_path (HACKLIB_INCLUDE_DIR
-                      NAMES mirsdrapi-rsp.h
+                      NAMES hackrf.h
                       PATHS
 	              ../devices/hackrf-handler/libhackrf/
                        /usr/local/include/
@@ -311,7 +311,6 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
-	     ./band-handler.h
 	     ./audio-base.h
 	     ./audiosink.h
 	     ./filesink.h
@@ -347,6 +346,7 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h 
 	     ../library/includes/backend/data/data-processor.h
+         ../library/includes/support/band-handler.h
 	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -364,7 +364,6 @@ endif ()
 	     ./audiosink.cpp
 	     ./filesink.cpp
 	     ./newconverter.cpp
-	     ./band-handler.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
@@ -395,6 +394,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp 
 	     ../library/src/backend/data/data-processor.cpp
+         ../library/src/support/band-handler.cpp
 	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp

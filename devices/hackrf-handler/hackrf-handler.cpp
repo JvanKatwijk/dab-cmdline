@@ -146,7 +146,7 @@ int	res;
         if (res != HACKRF_SUCCESS) {
            fprintf (stderr, "Problem with hackrf_set_freq: \n");
            fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
-           return;
+           return false;
         }
         vfoFrequency = newFrequency;
 

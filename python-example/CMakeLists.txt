@@ -170,7 +170,6 @@ endif ()
 
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
-	     ./band-handler.h
 	     ../dab-api.h
 	     ../device-handler.h
 	     ../ringbuffer.h
@@ -204,6 +203,7 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-dir.h
 	     ../library/includes/backend/data/mot/mot-object.h
 	     ../library/includes/backend/data/data-processor.h
+         ../library/includes/support/band-handler.h
 	     ../library/includes/support/viterbi_768/viterbi-768.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -221,7 +221,6 @@ endif ()
 
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
-	     ./band-handler.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
 	     ../library/src/dab-class.cpp
@@ -252,6 +251,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-dir.cpp
 	     ../library/src/backend/data/mot/mot-object.cpp
 	     ../library/src/backend/data/data-processor.cpp
+         ../library/src/support/band-handler.cpp
 	     ../library/src/support/viterbi_768/viterbi-768.cpp
 	     ../library/src/support/viterbi_768/spiral-no-sse.c
 	     ../library/src/support/protTables.cpp

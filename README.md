@@ -121,13 +121,13 @@ The standard way to create an executable is
         make
         sudo make install
 
-where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY,
+where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY, HACKRF,
 RTLSDR, WAVFILES (".sdr"), or RTL_TCP. The name of the generated executable
-is dab-xxx-y for the examples 1 - 6, and dab-scanner-xxx for the dab-scanner
+is dab-xxx-y for the examples 1 - 7, and dab-scanner-xxx for the dab-scanner
 program, where xxx is the device name, and y the number
 of the example to which the executable belongs.
 
-The executable will  be installed (make install) in /usr/local/bin, so yo need to have
+The executable will be installed (make install) in /usr/local/bin, so yo need to have
 permissions (you can obviously also just run the generated program
 from the build directory).
 
@@ -152,7 +152,7 @@ a pointer (type void *) to structures internal to the library.
 	 but will have created a few threads running in the background.
 
 As soon as an ensemble is recognized, a callback function will be
-called. On recognition of the services within the ensemble also
+called. Recognition of a service within an ensemble also
 leads to calling a callback function, with the service name as parameter.
 
 	"is_audioService" can be used to enquire whether or not a service
@@ -244,12 +244,12 @@ For the python-example read the README file in the python-example directory.
 HOWEVER: before running the example program one has to create an
 ADAPTED library.
 The CMakeLists.txt file for creating such an adapted library is in the python
-directory.
+directory. Note that the python example is not maintained and a little obsolete.
 
 
 =============================================================================
 
-Command-line Parameters for the C (C++) versions
+Command-line Parameters for the C (C++) exmple programs
 -----------------------------------------------------------------------
 
 The programs accept the following command line parameters:
@@ -331,7 +331,7 @@ A simple "reader" (client), using qt is included in the sources.
 Copyrights
 -------------------------------------------------------------------------
 	
-	Copyright (C)  2016, 2017
+	Copyright (C)  2016, 2017, 2018
 	Jan van Katwijk (J.vanKatwijk@gmail.com)
 	Lazy Chair Programming
 
