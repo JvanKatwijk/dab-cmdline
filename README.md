@@ -88,7 +88,8 @@ Example 10
 ----------------------------------------------------------------------------
 
 Example 10 is contributed by Hayati Ayguen and - when run - gives some
-information on the processing of a.o the TII
+information on the processing of a.o the TII. Compiling it will require
+definition of some constants.
 
 -------------------------------------------------------------------------------
 A DAB scanner
