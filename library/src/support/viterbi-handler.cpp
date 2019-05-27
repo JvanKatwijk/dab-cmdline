@@ -90,8 +90,6 @@ int	i, j;
 }
 
 	viterbiHandler::~viterbiHandler (void) {
-int	i;
-//
 	for (int i = 0; i < blockLength + 6; i++) {
 	   delete [] transCosts [i];
 	   delete [] history    [i];
@@ -146,7 +144,7 @@ int	i;
 
 	   computeCostTable (sym_0, sym_1, sym_2, sym_3);
            for (int cState = 0; cState < numofStates / 2; cState ++) {
-              uint8_t entrybit =  0;
+//	      uint8_t entrybit =  0;
               prev_0    = predecessor_for_0 [cState];
               prev_1    = predecessor_for_1 [cState];
 //      we compute the minimal costs, based on the costs of the
@@ -169,7 +167,7 @@ int	i;
 
 	   for (int cState = numofStates / 2;
 	                                cState < numofStates; cState ++) {
-              uint8_t entrybit = 1;
+//	      uint8_t entrybit = 1;
 	      prev_0    = predecessor_for_0 [cState];
 	      prev_1    = predecessor_for_1 [cState];
 
@@ -226,7 +224,6 @@ int	i;
 uint8_t	viterbiHandler::bitFor (int state, int poly, int bit) {
 int  theRegister;
 uint8_t resBit = 0;
-int	i;
 //
 //      the register after shifting "bit" in would be:
 	theRegister = bit == 0 ? state : (state + numofStates);

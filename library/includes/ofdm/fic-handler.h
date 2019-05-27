@@ -68,8 +68,9 @@ public:
         uint8_t getInterTabId           (bool *);
 
 private:
-	dabParams	params;
+	fib_processor	fibProcessor;
 	fib_quality_t	fib_qualityHandler;
+	dabParams	params;
 	void		*userData;
 	void		process_ficInput	(int16_t);
 	uint8_t		bitBuffer_out	[768];
@@ -84,7 +85,6 @@ private:
 	int16_t		ficRatio;
 	uint16_t	convState;
 	mutex		fibProtector;
-	fib_processor	fibProcessor;
 	uint8_t		PRBS [768];
 	uint8_t		shiftRegister [9];
 	void		show_ficCRC	(bool);

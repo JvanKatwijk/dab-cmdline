@@ -53,6 +53,7 @@ int	maxlna;
 	   fprintf (stderr, "please upgrade to sdrplay library 2.13\n");
 	   throw (24);
 	}
+	(void)err;
 
 	mir_sdr_GetDevices (devDesc, &numofDevs, uint32_t (4));
 	if (numofDevs == 0) {
@@ -67,12 +68,14 @@ int	maxlna;
 	                              devDesc [deviceIndex]. SerNo, hwVersion);
 	mir_sdr_SetDeviceIdx (deviceIndex);
 
-	if (hwVersion == 2) 
-	   if (antenna == 0)
+	if (hwVersion == 2) {
+	   if (antenna == 0) {
 	      err = mir_sdr_RSPII_AntennaControl (mir_sdr_RSPII_ANTENNA_A);
-	   else
+	   }
+	   else {
 	      err = mir_sdr_RSPII_AntennaControl (mir_sdr_RSPII_ANTENNA_B);
-
+	   }
+	}
 	if (hwVersion == 255) {
 	   nrBits	= 14;
 	   denominator	= 8192.0;

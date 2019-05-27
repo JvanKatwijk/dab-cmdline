@@ -49,7 +49,7 @@ int32_t pointer = 7;
 	contentsubType	= ((segment [5] & 0x01) << 8) | segment [6];
 
 //	we are actually only interested in the name, if any
-        while (pointer < headerSize) {
+        while ((int)pointer < (int)headerSize) {
            uint8_t PLI	= (segment [pointer] & 0300) >> 6;
            uint8_t paramId = (segment [pointer] & 077);
            uint16_t     length;
@@ -141,7 +141,6 @@ int32_t i;
 
 
 void	motObject::handleComplete (void) {
-int	i;
 std::vector<uint8_t> result;
 
         for (const auto &it : motMap)

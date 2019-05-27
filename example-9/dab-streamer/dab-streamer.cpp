@@ -127,7 +127,6 @@ int     bufferSize;
 std::vector<float>      bi (0);
 std::vector<float>      bo (0);
 int     error;
-int	rdsFiller	= 0;
 
 int     sampleCounter   = 0;
 uint64_t        nextStop;
@@ -196,7 +195,7 @@ SRC_DATA        *src_data =
 
 	   src_data     -> input_frames         = readCount / 2;
 	   src_data     -> output_frames        = outputLimit / 2;
-	   int res      = src_process (converter, src_data);
+	   (void) src_process (converter, src_data);
 //
 //      The samplerate is now "rate", we do not want to overload
 //      the socket, so we built in a break after rate / 4 samples
@@ -257,13 +256,11 @@ static double	out	= 0;
 	return out;
 }
 
-static int cnt	= 0;
-
 void	dabStreamer::modulateData (float *bo, int amount, int channels) {
 int	i;
 
 	for (i = 0; i < amount; i ++) {
-	   double clock		= 2 * M_PI * (double)pos * 19000.0 / outRate;
+//	   double clock		= 2 * M_PI * (double)pos * 19000.0 / outRate;
 
 //	taking 3468 as period works fine
 	   int	ind_1	= (int)(((int64_t)pos * 19000) % outRate);
@@ -274,13 +271,11 @@ int	i;
 	   double	carrier	= sinTable [ind_2];
 	   double	rds_carrier = sinTable [ind_3];
 	   double	symclk	= sinTable [ind_4];
-	   double bit_d;
+	   double bit_d	= 0;
 
-//#define MANCH_ENCODE(clk, bit) \
-//        (((clk ^ bit) << 1) | ((clk ^ 0x1 ^ bit)))
+//#define MANCH_ENCODE(clk, bit) (((clk ^ bit) << 1) | ((clk ^ 0x1 ^ bit)))
 
-//#define NRZ(in) \
-//        (double)(((int)((in) & 0x1) << 1) - 1)
+//#define NRZ(in)  (double)(((int)((in) & 0x1) << 1) - 1)
 
 	   if ((symclk_p <= 0) && (symclk > 0)) {
 	      e		= group -> bits [bpos]^ prev_e;
@@ -450,7 +445,8 @@ static int af_pos = 0, ps_pos = 0;
 uint16_t di = (group_0a. info_block -> di >> (ps_pos >> 1)) & 0x1;
 
 	group_0a. blocks [index_B] =
-	             group_0a. blocks [index_B] & 0xfff8 | di << 2 | ps_pos >> 1;
+	         (group_0a. blocks [index_B] & 0xfff8) |
+	                              (di << 2) | (ps_pos >> 1);
         group_0a. blocks [index_C] = group_0a. info_block -> af [af_pos];
         group_0a. blocks [index_D] =
 	             group_0a. info_block -> ps_name [ps_pos] << 8
@@ -466,7 +462,7 @@ uint16_t di = (group_0a. info_block -> di >> (ps_pos >> 1)) & 0x1;
 void	dabStreamer::rds_group_2A_update (void) {
 static int b_pos = 0;
 	group_2a. blocks [index_B] =
-	             group_2a. blocks [index_B] & 0xffe0 | b_pos;
+	             (group_2a. blocks [index_B] & 0xffe0) | b_pos;
 	group_2a. blocks [index_C] =
 	             group_2a. info_block -> radiotext [rt_pos + 0] << 8
 	           | group_2a. info_block -> radiotext [rt_pos + 1];

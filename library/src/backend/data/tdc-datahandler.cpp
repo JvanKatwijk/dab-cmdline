@@ -100,6 +100,7 @@ int16_t i;
 int16_t noS     = getBits (data, offset, 8);
 uint8_t	buffer [length];
 
+	(void)noS;
 	for (i = 0; i < length; i ++)
 	   buffer [i] = getBits (data, offset + i * 8, 8);
 
@@ -146,6 +147,7 @@ uint16_t        crc;
            testVector [3 + i] = getBits (data, offset + 40 + i * 8, 8);
 	testVector [3 + size    ] = getBits (data, offset + 24, 8);
 	testVector [3 + size + 1] = getBits (data, offset + 32, 8);
+	(void)crc;
         return check_crc_bytes (testVector, 5 + size) == 0;
 }
 

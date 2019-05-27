@@ -103,7 +103,7 @@
 	   fprintf (stderr, "NULL detected\n");
 	this	-> programnameHandler	= programnameHandler;
 	this	-> userData		= userData;
-	memset (dateTime, 0, 8 * sizeof (uint8_t));
+	memset (dateTime, 0, 8 * sizeof (uint32_t));
 
 	reset	();
 }

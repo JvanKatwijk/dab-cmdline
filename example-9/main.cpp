@@ -235,7 +235,6 @@ bool	repeater		= true;
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
 #endif
-bool	err;
 
 	std::cerr << "dab_cmdline example IX,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";

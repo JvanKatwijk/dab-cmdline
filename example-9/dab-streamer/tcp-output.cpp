@@ -65,8 +65,8 @@ void	tcpOutput::run (void) {
  *	6. Receive Data.
  *	7. Close Connection. 
  */
-	int socket_desc , client_sock , c , read_size;
-	struct sockaddr_in server, myself;
+	int socket_desc;
+	struct sockaddr_in server;
 
 	//Create socket
 	socket_desc = socket (AF_INET , SOCK_STREAM , 0);

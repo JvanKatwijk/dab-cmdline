@@ -35,7 +35,7 @@ something like
 
 In this case, the example program was built with the SDRplay as device (other
 possibilities are DABsticks, AIRspy devices and HACKRF devices (and some
-of the example programs can be configured to take file input).
+of the example programs can be configured to take file input)).
 Furthermore, the example program will set the tuner to Band III, channel 12C,
 will select the service "Radio 4". The Gain of the tuner is set to 80 (on 
 a scale from 1 .. 100), the main program will select "default" as
@@ -44,7 +44,7 @@ The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
 
-The examples 1 to 7 are basically simple variations on a single theme:
+The examples 1 to 7 and 9 are basically simple variations on a single theme:
 
 	- example 1 is the example where the main program is linked to
 	  a precompiled shared library, 

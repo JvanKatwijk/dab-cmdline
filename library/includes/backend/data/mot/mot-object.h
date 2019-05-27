@@ -49,7 +49,7 @@ private:
 	bool		dirElement;
 	uint16_t	transportId;
 	int16_t		numofSegments;
-	uint32_t	segmentSize;
+	int32_t		segmentSize;
 	void		*ctx;
 	uint32_t	headerSize;
 	uint32_t	bodySize;
