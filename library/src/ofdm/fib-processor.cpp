@@ -123,6 +123,10 @@ uint8_t	*d		= p;
 	(void)fib;
 	while (processedBytes  < 30) {
 	   FIGtype 		= getBits_3 (d, 0);
+	   uint8_t FIGlength    = getBits_5 (d, 3);
+           if ((FIGtype == 0x07) && (FIGlength == 0x3F))
+              return;
+
 	   switch (FIGtype) {
 	      case 0:
 	         process_FIG0 (d);	

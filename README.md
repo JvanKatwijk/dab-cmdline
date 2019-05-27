@@ -1,7 +1,6 @@
 
 DAB COMMAND LINE and DAB LIBRARY
 
-
 ---------------------------------------------------------------------
 Introduction
 ---------------------------------------------------------------------
@@ -26,7 +25,7 @@ to deliver input samples and something is available for handling the output.
 
 THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY THERE TO GIVE YOU AN 
 IDEA HOW TO USE THE LIBRARY OR ITS SOURCES. MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS
-TESTED ON ALL EXAMPLES, PLEASE CORRECT THEM  YOURSELF IF YOU (THINK YOU)
+TESTED ON ALL EXAMPLES, PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU)
 FIND AN ERROR BEFORE ASKING ME.
 
 Invocation of the example programs, with some parameters specified, is
@@ -78,7 +77,26 @@ The examples 1 to 7 are basically simple variations on a single theme:
 	- example 7 is an experimental version where stdin is
 	  used as input device (and the command line parameters are
 	  adapted to that)
-	  
+
+	- example 9 is a new project. It is derived from example 2
+	  and it aims at retransmitting the audio from a selected
+	  service as an FM signal, stereo and equipped with RDS
+	  such that we can listen to the "warm" sound of old (tube)
+	  radios. The program will emit the FM stereo samples either
+	  to a file, or a tcp port.
+	  "Normal use", i.e. audio output using the soundcard is also possible.
+
+	  The rds text is derved from the dynamic label as emitted by
+	  the dab service.
+
+	  The sources for a simple "hackrf-server" are included in
+	  the example-9 directory. This hackrf server will instruct
+	  the hackrf device to transmit the incoming samples.
+
+	  If you are not allowed to transmit (as most of us I assume),
+	  a simple coax cable between the hackrf device and the "old"
+	  radio to listen to will do.
+
 	- in a separate project a variant of the DAB library is used to create 
 	  a DAB server program, running as a service on an RPI 2/3 under Stretch and
 	  being controlled by an android app (which is part of the development)

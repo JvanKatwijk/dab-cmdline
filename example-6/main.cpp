@@ -253,7 +253,7 @@ bool	err;
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     my_radioData. ppmCorrection,
-	                                     my_radioData. theGain);
+	                                     my_radioData. theGain, false);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     my_radioData. ppmCorrection,

@@ -275,7 +275,7 @@ deviceHandler	*theDevice;
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmCorrection,
-	                                     theGain);
+	                                     theGain, false);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     ppmCorrection,

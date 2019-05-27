@@ -35,7 +35,8 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 
 	airspyHandler::airspyHandler (int32_t	frequency,
 	                              int16_t	ppmCorrection,
-	                              int16_t	theGain) {
+	                              int16_t	theGain,
+	                              bool	biasTee) {
 int	result, i;
 int	distance	= 10000000;
 uint32_t myBuffer [20];
@@ -161,6 +162,7 @@ uint32_t samplerate_count;
 	(void)my_airspy_set_freq (device, frequency);
 	gain		= theGain * 21 / 100;
 	(void) my_airspy_set_sensitivity_gain (device, gain);
+	(void) my_airspy_set_rf_bias          (device, biasTee ? 1 : 0);
 }
 
 	airspyHandler::~airspyHandler (void) {
