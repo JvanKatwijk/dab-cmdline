@@ -82,7 +82,7 @@ static
 std::atomic<bool>ensembleRecognized;
 
 std::string	programName		= "Sky Radio";
-//int32_t		serviceIdentifier	= -1;
+int32_t		serviceIdentifier	= -1;
 
 static void sighandler (int signum) {
         fprintf (stderr, "Signal caught, terminating!\n");
@@ -200,43 +200,59 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
-std::string	theChannel	= "11C";
-uint8_t		theBand		= BAND_III;
-int16_t		ppmCorrection	= 0;
-int		deviceGain	= 45;	// scale = 0 .. 100
+int16_t		timeSyncTime	= 5;
+int16_t		freqSyncTime	= 5;
 std::string	fmFile		= std::string ("");
 int		port		= -1;
 std::string	url		= "127.0.0.1";
-#ifdef	HAVE_HACKRF
-int		lnaGain		= 40;
+#ifdef	HAVE_WAVFILES
+std::string	inputfileName	= std::string ("");
+bool		repeater	= true;
+#elif	HAVE_RAWFILES
+std::string	inputfileName	= std::string ("");
+bool		repeater	= true;
+#elif	HAVE_HACKRF
+uint8_t		theBand		= BAND_III;
+std::string	theChannel	= "11C";
 int		vgaGain		= 40;
+int		lnaGain		= 40;
 bool		ampEnable	= false;
+int		ppmCorrection	= 0;
+#elif	HAVE_SDRPLAY
+uint8_t		theBand		= BAND_III;
+std::string	theChannel	= "11C";
+int		GRdB		= 20;
+int		lnaState	= 2;
+bool		autogain	= false;
+int		ppmCorrection	= 0;
+#elif	HAVE_RTLSDR
+uint8_t		theBand		= BAND_III;
+std::string	theChannel	= "11C";
+int		gain		= 50;	// scale 1 .. 100
+bool		autogain	= false;
+int		ppmCorrection	= 0;
+#elif	HAVE_AIRSPY
+uint8_t		theBand		= BAND_III;
+std::string	theChannel	= "11C";
+int		gain		= 18;	// scale 1 .. 21
+bool		boost		= false;
+int		ppmCorrection	= 0;
+#elif	HAVE_RTL_TCP
+std::string	hostname = "127.0.0.1";		// default
+int32_t		basePort = 1234;		// default
+uint8_t		theBand		= BAND_III;
+std::string	theChannel	= "11C";
+int		gain		= 50;
+bool		autogain	= false;
+int		ppmCorrection;
 #endif
-#ifdef	HAVE_SDRPLAY	
-int16_t		GRdB		= 30;
-int16_t		lnaState	= 2;
-#endif
-
 std::string	soundChannel	= "default";
 int		latency		= 10;
-int16_t		timeSyncTime	= 5;
-int16_t		freqSyncTime	= 5;
-bool		autogain	= false;
 int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
-#ifdef	HAVE_WAVFILES
-std::string	fileName;
-bool	repeater		= true;
-#elif	HAVE_RAWFILES
-std::string	fileName;
-bool	repeater		= true;
-#elif HAVE_RTL_TCP
-std::string	hostname = "127.0.0.1";		// default
-int32_t		basePort = 1234;		// default
-#endif
-
+int		frequency	= -1;
 	std::cerr << "dab_cmdline example IX,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
@@ -250,19 +266,34 @@ int32_t		basePort = 1234;		// default
 
 	std::setlocale (LC_ALL, "en-US.utf8");
 
-//	For file input we do not need options like Q, G and C,
-//	We do need an option to specify the filename
+//
+//	Since different input devices have different approaches to
+//	setting gain etc, we split
 
 #ifdef HAVE_HACKRF
-	while ((opt = getopt (argc, argv, "ED:d:M:B:C:P:G:L:g:A:L:S:Q:u:p:f:")) != -1) {
-#elif	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES) && !defined (HAVE_RTL_TCP))
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:L:g:A:L:S:Q:u:p:f:")) != -1) {
+std::string options	= "M:D:d:P:S:p:u:f:C:B:v:l:ac:";
+#elif	HAVE_SDRPLAY
+std::string options	= "M:D:d:P:S:p:u:f:C:B:G:L:Qc:";
+#elif	HAVE_RTLSDR
+std::string options	= "M:D:d:P:S:p:u:f:C:B:G:Qc";
+#elif	HAVE_AIRSPY
+std::string options	= "M:D:d:P:S:p:u:f:C:B:G:bc:";
 #elif   HAVE_RTL_TCP
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:Q:u:p:f:")) != -1) {
-#else
-	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:u:p:f:R")) != -1) {
+std::string options	= "M:D:d:P:S:p:u:f:C:B:H:I:G:Qc:";
+#elif	HAVE_WAVFILES
+std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
+#elif	HAVE_RAWFILES
+std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
 #endif
+	while ((opt = getopt (argc, argv, options. c_str ())) != -1) {
 	   switch (opt) {
+//	first part is common
+	      case 'M':
+	         theMode	= atoi (optarg);
+	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
+	            theMode = 1; 
+	         break;
+
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
 	         break;
@@ -271,20 +302,16 @@ int32_t		basePort = 1234;		// default
 	         timeSyncTime	= atoi (optarg);
 	         break;
 
-	      case 'M':
-	         theMode	= atoi (optarg);
-	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
-	            theMode = 1; 
-	         break;
-
-	      case 'B':
-	         theBand = std::string (optarg) == std::string ("L_BAND") ?
-	                                                 L_BAND : BAND_III;
-	         break;
-
 	      case 'P':
-	         programName	= optarg;
+	         programName	= std::string (optarg);
 	         break;
+
+	      case 'S': {
+                 std::stringstream ss;
+                 ss << std::hex << optarg;
+//	ss >> serviceIdentifier;
+                 break;
+              }
 
 	      case 'p':
 	         port		= atoi (optarg);
@@ -300,37 +327,56 @@ int32_t		basePort = 1234;		// default
 
 #ifdef	HAVE_WAVFILES
 	      case 'F':
-	         fileName	= std::string (optarg);
+	         inputfileName	= std::string (optarg);
 	         break;
+
 	      case 'R':
 	         repeater	= false;
 	         break;
+
 #elif	HAVE_RAWFILES
 	      case 'F':
-	         fileName	= std::string (optarg);
+	         inputfileName	= std::string (optarg);
 	         break;
 	      case 'R':
 	         repeater	= false;
 	         break;
-#else
+#elif	HAVE_HACKRF
+	      case 'B':
+	         theBand = std::string (optarg) == std::string ("L_BAND") ?
+	                                                 L_BAND : BAND_III;
+	         break;
+
 	      case 'C':
 	         theChannel	= std::string (optarg);
 	         break;
 
-#ifdef	HAVE_HACKRF
-	      case 'G':
-	         lnaGain	= atoi (optarg);
-	         break;
-
-	      case 'g':
+	      case 'v':
 	         vgaGain	= atoi (optarg);
 	         break;
 
-	      case 'E':
+	      case 'l':
+	         lnaGain	= atoi (optarg);
+	         break;
+
+	      case 'a':
 	         ampEnable	= true;
 	         break;
-#else
-#ifdef	HAVE_SDRPLAY
+
+	      case 'c':
+	         ppmCorrection	= atoi (optarg);
+	         break;
+
+#elif	HAVE_SDRPLAY
+	      case 'B':
+	         theBand = std::string (optarg) == std::string ("L_BAND") ?
+	                                                 L_BAND : BAND_III;
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
 	      case 'G':
 	         GRdB		= atoi (optarg);
 	         break;
@@ -342,17 +388,65 @@ int32_t		basePort = 1234;		// default
 	      case 'Q':
 	         autogain	= true;
 	         break;
-#else
+
+	      case 'c':
+	         ppmCorrection	= atoi (optarg);
+	         break;
+
+#elif 	HAVE_RTLSDR
+	      case 'B':
+	         theBand = std::string (optarg) == std::string ("L_BAND") ?
+	                                                 L_BAND : BAND_III;
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
 	      case 'G':
-	         deviceGain	= atoi (optarg);
+	         gain		= atoi (optarg);
 	         break;
 
 	      case 'Q':
 	         autogain	= true;
 	         break;
-#endif
-#endif
-#ifdef	HAVE_RTL_TCP
+
+	      case 'c':
+	         ppmCorrection	= atoi (optarg);
+	         break;
+
+#elif	HAVE_AIRSPY
+	      case 'B':
+	         theBand = std::string (optarg) == std::string ("L_BAND") ?
+	                                                 L_BAND : BAND_III;
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+	
+	      case 'b':
+	         boost		= true;
+	         break;
+
+	      case 'c':
+	         ppmCorrection	= atoi (optarg);
+	         break;
+
+#elif	HAVE_RTL_TCP
+	      case 'B':
+	         theBand = std::string (optarg) == std::string ("L_BAND") ?
+	                                                 L_BAND : BAND_III;
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
 	      case 'H':
 	         hostname	= std::string (optarg);
 	         break;
@@ -360,15 +454,19 @@ int32_t		basePort = 1234;		// default
 	      case 'I':
 	         basePort	= atoi (optarg);
 	         break;
-#endif
-#endif
 
-	      case 'S': {
-                 std::stringstream ss;
-                 ss << std::hex << optarg;
-//	ss >> serviceIdentifier;
-                 break;
-              }
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'c':
+	         ppmCorrection	= atoi (optarg);
+	         break;
+#endif
 
 	      default:
 	         printOptions ();
@@ -380,9 +478,9 @@ int32_t		basePort = 1234;		// default
 	sigemptyset (&sigact.sa_mask);
 	sigact.sa_flags = 0;
 
-	int32_t frequency	= dabBand. Frequency (theBand, theChannel);
 	try {
 #ifdef	HAVE_SDRPLAY
+	   frequency	= dabBand. Frequency (theBand, theChannel);
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
 	                                      GRdB,
@@ -391,31 +489,36 @@ int32_t		basePort = 1234;		// default
 	                                      0,
 	                                      0);
 #elif	HAVE_AIRSPY
+	   frequency	= dabBand. Frequency (theBand, theChannel);
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmCorrection,
-	                                     deviceGain, false);
+	                                     gain,
+	                                     boost);
 #elif	HAVE_RTLSDR
+	   frequency	= dabBand. Frequency (theBand, theChannel);
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     ppmCorrection,
-	                                     deviceGain,
+	                                     gain,
 	                                     autogain);
 #elif	HAVE_HACKRF
+	   frequency	= dabBand. Frequency (theBand, theChannel);
 	   theDevice	= new hackrfHandler (frequency,
 	                                      ppmCorrection,
 	                                      lnaGain,
 	                                      vgaGain,
 	                                      ampEnable);
-#elif	HAVE_WAVFILES
-	   theDevice	= new wavFiles (fileName, repeater);
-#elif	defined (HAVE_RAWFILES)
-	   theDevice	= new rawFiles (fileName, repeater);
 #elif	HAVE_RTL_TCP
+	   frequency	= dabBand. Frequency (theBand, theChannel);
 	   theDevice	= new rtl_tcp_client (hostname,
 	                                      basePort,
 	                                      frequency,
-	                                      deviceGain,
+	                                      gain,
 	                                      autogain,
 	                                      ppmCorrection);
+#elif	HAVE_WAVFILES
+	   theDevice	= new wavFiles (inputfileName, repeater);
+#elif	defined (HAVE_RAWFILES)
+	   theDevice	= new rawFiles (inputfileName, repeater);
 #endif
 
 	}
@@ -543,20 +646,48 @@ int32_t		basePort = 1234;		// default
 void    printOptions (void) {
         std::cerr << 
 "                          dab-cmdline options are\n"
-"                         -D number\tamount of time to look for an ensemble\n"
+"	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
+"	                  -D number\tamount of time to look for an ensemble\n"
 "	                  -d number\tseconds to reach time sync\n"
-"                         -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
-"                         -B Band\tBand is either L_BAND or BAND_III (default)\n"
-"                         -P name\tprogram to be selected in the ensemble\n"
-"                         -C channel\tchannel to be used\n"
-"                         -G Gain\tgain for device (range 1 .. 100)\n"
-"	                  -G GRdB\tGain Reduction (dB) for SDRplay (20 .. 59)\n"
-"	                  -L lnaState\tlnaState for SDRplay\n"
-"	                  -Q\t\tif set, set autogain for device true\n"
-"	                  -F filename\tin case the input is from file\n"
-"                         -S hexnumber use hexnumber to identify program\n"
+"	                  -P name\tprogram to be selected in the ensemble\n"
+"	                  -S hexnumber use hexnumber to identify program\n"
 "	                  -f filename\twrite audio as stereo fm data to file\n"
 "	                  -p port\twrite audio as stereo fm to port port\n"
-"	                  -u url\twrite audio as stereo fm to given port on url\n";
+"	                  -u url\twrite audio as stereo fm to given port on url\n"
+"	for file input:\n"
+"	                  -F filename\tin case the input is from file\n"
+"	                  -R switch off automatic continuation after eof\n"
+"	for hackrf:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -v vgaGain\n"
+"	                  -l lnaGain\n"
+"	                  -a amp enable (default off)\n"
+"	                  -c number\tppm offset\n"
+"	for SDRplay:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -G Gain reduction in dB (range 20 .. 59)\n"
+"	                  -L lnaState (depends on model chosen)\n"
+"	                  -Q autogain (default off)\n"
+"	                  -c number\t ppm offset\n"
+"	for rtlsdr:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -G number\t	gain, range 0 .. 100\n"
+"	                  -Q autogain (default off)\n"
+"	                  -c number\tppm offset\n"
+"	for airspy:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -G number\t	gain, range 1 .. 21\n"
+"	                  -b set rf bias\n"
+"	                  -c number\t ppm Correction\n"
+"	for rtl_tcp:\n"
+"	                  -H url\t hostname for connection\n"
+"	                  -I number\t baseport for connection\n"
+"	                  -G number\t gain setting\n"
+"	                  -Q autogain (default off)\n"
+"	                  -c number\t ppm Correction\n";
 }
 
