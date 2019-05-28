@@ -32,6 +32,7 @@
 	                                   SFM_WRITE, &sf_info);
 	if (oFile == NULL)
 	   throw (23);
+	buffer. resize (BUF_SIZE);
         localBuffer. resize (2 * BUF_SIZE);
 	localBufferP		= 0;
 }

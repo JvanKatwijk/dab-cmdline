@@ -210,6 +210,7 @@ std::string	url		= "127.0.0.1";
 #ifdef	HAVE_HACKRF
 int		lnaGain		= 40;
 int		vgaGain		= 40;
+bool		ampEnable	= false;
 #endif
 #ifdef	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
@@ -251,7 +252,10 @@ int32_t		basePort = 1234;		// default
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES) && !defined (HAVE_RTL_TCP))
+
+#ifdef HAVE_HACKRF
+	while ((opt = getopt (argc, argv, "ED:d:M:B:C:P:G:L:g:A:L:S:Q:u:p:f:")) != -1) {
+#elif	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES) && !defined (HAVE_RTL_TCP))
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:L:g:A:L:S:Q:u:p:f:")) != -1) {
 #elif   HAVE_RTL_TCP
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:Q:u:p:f:")) != -1) {
@@ -320,6 +324,10 @@ int32_t		basePort = 1234;		// default
 
 	      case 'g':
 	         vgaGain	= atoi (optarg);
+	         break;
+
+	      case 'E':
+	         ampEnable	= true;
 	         break;
 #else
 #ifdef	HAVE_SDRPLAY
@@ -392,10 +400,11 @@ int32_t		basePort = 1234;		// default
 	                                     deviceGain,
 	                                     autogain);
 #elif	HAVE_HACKRF
-	   theDevice	= new hackrfHandler	(frequency,
-	                                         ppmCorrection,
-	                                         lnaGain,
-	                                         vgaGain);
+	   theDevice	= new hackrfHandler (frequency,
+	                                      ppmCorrection,
+	                                      lnaGain,
+	                                      vgaGain,
+	                                      ampEnable);
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName, repeater);
 #elif	defined (HAVE_RAWFILES)

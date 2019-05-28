@@ -37,7 +37,8 @@ public:
 			hackrfHandler		(int32_t frequency,
 	                                         int16_t  ppm,
                                                  int16_t  lnaGain,
-                                                 int16_t  vgaGain);
+                                                 int16_t  vgaGain,
+	                                         bool	ampEnable = false);
 			~hackrfHandler		(void);
 	bool		restartReader		(int32_t);
 	void		stopReader		(void);
@@ -51,9 +52,12 @@ public:
 	RingBuffer<std::complex<float>>	*_I_Buffer;
 	hackrf_device	*theDevice;
 private:
-
-	int32_t		inputRate;
 	int32_t		vfoFrequency;
+	int16_t		ppm;
+	int16_t		lnaGain;
+	int16_t		vgaGain;
+	bool		ampEnable;
+	int32_t		inputRate;
 	std::atomic<bool>	running;
 	void		setLNAGain		(int);
 	void		setVGAGain		(int);

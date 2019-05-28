@@ -3,6 +3,8 @@
  *    Copyright (C) 2014 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
+ *    Copyright (C) 2019 Amplifier, antenna and ppm correctors
+ *    Fabio Capozzi
  *
  *    This file is part of dab-cmdline/dab-library
  *
@@ -27,12 +29,16 @@
 	hackrfHandler::hackrfHandler  (int32_t	frequency,
 	                               int16_t	ppm,
 	                               int16_t	lnaGain,
-	                               int16_t	vgaGain) {
-int	err;
+	                               int16_t	vgaGain,
+	                               bool	ampEnable) {
 int	res;
+	vfoFrequency			= frequency;
+	this	-> lnaGain		= lnaGain;
+	this	-> vgaGain		= vgaGain;
+	this	-> ampEnable		= ampEnable;
+
 	this	-> inputRate		= 2048000;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(1024 * 1024);
-	vfoFrequency	= frequency;
 //
 	res	= hackrf_init ();
 	if (res != HACKRF_SUCCESS) {
@@ -76,10 +82,16 @@ int	res;
 	   char *serial = deviceList -> serial_numbers [0];
 	   enum hackrf_usb_board_id board_id =
 	                 deviceList -> usb_board_ids [0];
+	   (void) serial;
+	   (void) board_id;
 	}
 
-	setLNAGain	(lnaGain);
-	setVGAGain	(vgaGain);
+	if ((vgaGain <= 62) && (vgaGain >= 0)) 
+           (void)hackrf_set_vga_gain (theDevice, vgaGain);
+	if ((lnaGain <= 40) && (lnaGain >= 0)) 
+           (void)hackrf_set_lna_gain (theDevice, lnaGain);
+	(void)hackrf_set_amp_enable (theDevice, ampEnable);
+
 	running. store (false);
 }
 
@@ -156,6 +168,14 @@ int	res;
 	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
 	   return false;
 	}
+//
+//	reset the gain(s), since the amp-enable is to be reset
+//	after each change in frequency
+	if ((vgaGain <= 62) && (vgaGain >= 0)) 
+           (void)hackrf_set_vga_gain (theDevice, vgaGain);
+	if ((lnaGain <= 40) && (lnaGain >= 0)) 
+           (void)hackrf_set_lna_gain (theDevice, lnaGain);
+	(void)hackrf_set_amp_enable (theDevice, ampEnable);
 	running. store (hackrf_is_streaming (theDevice));
 	return running. load ();
 }
@@ -168,7 +188,7 @@ int	res;
 
 	res	= hackrf_stop_rx (theDevice);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_stop_rx :\n", res);
+	   fprintf (stderr, "Problem with hackrf_stop_rx :");
 	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
 	   return;
 	}

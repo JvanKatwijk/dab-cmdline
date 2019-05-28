@@ -20,30 +20,34 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__FILE_DRIVER__
-#define	__FILE_DRIVER__
+#ifndef	__TCP_OUTPUT__
+#define	__TCP_OUTPUT__
 
 #include	<stdint.h>
 #include	<sys/types.h>
+#include	<sys/socket.h>
+#include	<netdb.h>
 #include	<string>
 #include	<thread>
 #include	<unistd.h>
-#include	<sndfile.h>
-#include	<vector>
+#include	<atomic>
 #include	<complex>
 #include	"ringbuffer.h"
 #include	"output-driver.h"
 
-class	fileDriver : public outputDriver {
+class	tcpOutput : public  outputDriver {
 public:
-		fileDriver	(std::string, int);
-		~fileDriver	(void);
+		tcpOutput	(int, std::string);
+		~tcpOutput	(void);
 	void	sendSample	(std::complex<float>);
+	void	run		(void);
 private:
-	SNDFILE		*oFile;
-	SF_INFO		sf_info;
-	std::vector<float> localBuffer;
-	int		localBufferP;
+	int		port;
+	std::string	address;
+	std::thread	threadHandle;
+	RingBuffer<std::complex<float>> 	*buffer;
+	std::atomic<bool>	running;
+	std::atomic<bool>	connected;
 };
 #endif
 
