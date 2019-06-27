@@ -63,7 +63,7 @@ void	print_ensembleData (FILE *f,
 void	print_audioheader (FILE *f,
                         bool jsonOutput) {
 	if (jsonOutput == false) {
-		fprintf (f, "\nAudio services\nprogram name;country;serviceId;subchannelId;start address;length (CU); bit rate;DAB/DAB+; prot level; code rate; language; program type\n\n");
+		fprintf (f, "\nAudio services\nprogram name;serviceId;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
 	}
 }
 
@@ -85,7 +85,7 @@ bool	success;
 	uint8_t countryId = (serviceId >> 12) & 0xF;
 
 	if (jsonOutput == false) {
-		fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;\n",
+		fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%d;%s;%s;%s;\n",
 	             serviceName. c_str (),
 	             serviceId,
 	             d -> subchId,
@@ -93,6 +93,7 @@ bool	success;
 	             d -> length,
 	             d -> bitRate,
 	             getASCTy  (d -> ASCTy),
+				 d -> programType,
 	             protL. c_str (),
 	             codeRate. c_str (),
 	             getLanguage (d -> language));
@@ -103,7 +104,7 @@ bool	success;
 			*firstService = false;
 		}
 		
-		fprintf (f, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\" }",
+		fprintf (f, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"genre\": \"%d\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\" }",
 	             serviceId,
 	             serviceName. c_str (),
 	             d -> subchId,
@@ -111,6 +112,7 @@ bool	success;
 	             d -> length,
 	             d -> bitRate,
 	             getASCTy  (d -> ASCTy),
+				 d -> programType,
 	             protL. c_str (),
 	             codeRate. c_str (),
 	             getLanguage (d -> language));
@@ -144,7 +146,7 @@ bool	success;
 	uint8_t countryId = (serviceId >> 12) & 0xF;
 	
 	if (jsonOutput == false) {
-		fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;;\n",
+		fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
 	             serviceName. c_str (),
 	             serviceId,
 	             d -> subchId,
