@@ -181,11 +181,13 @@ int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 10;
 bool		autogain	= false;
+bool		jsonOutput	= false;
 int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
 bool	err;
+bool firstEnsemble = true;
 
 	fprintf (stderr, "dab_scanner V 1.0alfa,\n\
 	                  Copyright 2018 J van Katwijk, Lazy Chair Computing\n\	                            2018 Hayati Ayguen\n");
@@ -198,12 +200,16 @@ bool	err;
 	   exit (1);
 	}
 
-	while ((opt = getopt (argc, argv, "F:D:d:M:B:p:G:g:QC:")) != -1) {
+	while ((opt = getopt (argc, argv, "F:D:d:M:B:p:G:g:QC:j")) != -1) {
 	   switch (opt) {
 	      case 'F':
 	         outFile	= fopen (optarg, "w");
 	         if (outFile == NULL)
 	            outFile = stderr;
+	         break;
+
+	      case 'j':
+	         jsonOutput	= true;
 	         break;
 
 	      case 'D':
@@ -320,8 +326,11 @@ bool	err;
 	if (autogain)
 	   theDevice	-> set_autogain (autogain);
 
+   	print_fileHeader (outFile, jsonOutput);
+   
 	while (true) {
 	   bool	firstTime	= true;
+	   bool firstService = true;
 	   theDevice	-> stopReader ();
 	   int32_t frequency =
 	               dabBand. Frequency (theBand, theChannel);
@@ -368,12 +377,14 @@ bool	err;
 //
 //	print ensemble data here
 	   print_ensembleData (outFile,
+                           jsonOutput,
                                theRadio,
 	                       theChannel,
 	                       ensembleName,
-	                       ensembleId);
+	                       ensembleId,
+						   &firstEnsemble);
 
-	   print_audioheader (outFile);
+	   print_audioheader (outFile, jsonOutput);
 	   for (int i = 0; i < programNames. size (); i ++) {
 	      if (is_audioService (theRadio, programNames [i]. c_str ())) {
 	         audiodata ad;
@@ -381,9 +392,11 @@ bool	err;
 	                              programNames [i]. c_str (),
 	                              &ad, 0);
 	         print_audioService (outFile, 
+                                 jsonOutput,
 	                             theRadio,
 	                             programNames [i]. c_str (),
-	                             &ad);
+	                             &ad,
+	                             &firstService);
 	         for (int j = 1; j < 5; j ++) {
 	            packetdata pd;
 	            dataforDataService (theRadio,
@@ -391,10 +404,12 @@ bool	err;
                                         &pd, j);
 	            if (pd. defined)
 	               print_dataService (outFile,
+                                          jsonOutput,
                                           theRadio,
                                           programNames [i]. c_str (),
                                           j,
-	                                  &pd);
+	                                  &pd,
+	                                  &firstService);
 	         }
 	      }
 	   }
@@ -402,7 +417,7 @@ bool	err;
 	   for (int i = 0; i < programNames. size (); i ++) {
 	      if (is_dataService (theRadio, programNames [i]. c_str ())) {
 	         if (firstTime)
-	            print_dataHeader (outFile);
+	            print_dataHeader (outFile, jsonOutput);
 	         firstTime	= false;
 	         for (int j = 0; j < 5; j ++) {
                     packetdata pd;
@@ -411,10 +426,12 @@ bool	err;
                                         &pd, j);
                     if (pd. defined)
                        print_dataService (outFile,
+                                          jsonOutput,
                                           theRadio,
                                           programNames [i]. c_str (),
                                           j,
-	                                  &pd);
+	                                  &pd,
+                                      &firstService);
                  }
 	      }
 	      else
@@ -426,13 +443,18 @@ bool	err;
                                         &pd, j);
 	            if (pd. defined)
 	               print_dataService (outFile,
+                                          jsonOutput,
                                           theRadio,
                                           programNames [i]. c_str (),
                                           j,
-	                                  &pd);
+	                                  &pd,
+                                      &firstService);
 	         }
 	      }
 	   }
+	   
+	   print_ensembleFooter (outFile, jsonOutput);
+	   
 	   theDevice	-> stopReader ();
 	   dabStop (theRadio);
 	   programNames. resize (0);
@@ -440,6 +462,8 @@ bool	err;
 	   theChannel	= dabBand. nextChannel (theBand, theChannel);
 	}
 
+	print_fileFooter (outFile, jsonOutput);
+	
 	fclose (outFile);
 	theDevice	-> stopReader ();
 	dabStop	(theRadio);
@@ -458,6 +482,7 @@ void    printOptions (void) {
                         -Q               if set, set autogain for device true\n\
                         -p number        ppm correction for the attached device\n\
                         -F filename      in case the output is to a file\n\
+                        -j               output data in json format\n\
                         -C start channel the start channel, default: 5A\n");
 }
 
