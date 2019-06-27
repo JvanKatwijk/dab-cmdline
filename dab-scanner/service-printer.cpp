@@ -103,7 +103,7 @@ bool	success;
 			*firstService = false;
 		}
 		
-		fprintf (f, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"encoding\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\" }",
+		fprintf (f, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\" }",
 	             serviceId,
 	             serviceName. c_str (),
 	             d -> subchId,
@@ -120,7 +120,7 @@ bool	success;
 void	print_dataHeader (FILE *f,
                         bool jsonOutput) {
 	if (jsonOutput == false) {
-		fprintf (f, "\n\n\nData Services\nprogram name;;serviceId;subchannelId;start address;length (CU); bit rate; FEC; prot level; appType ; subService ; \n\n");
+		fprintf (f, "\n\n\nData Services\nprogram name;;serviceId;subchannelId;start address;length (CU); bit rate; FEC; prot level; appType; DSCTy; subService; \n\n");
 	}
 }
 
@@ -154,6 +154,7 @@ bool	success;
 	             getFECscheme (d -> FEC_scheme),
 	             protL. c_str (),
 	             getUserApplicationType (d -> appType),
+ 				 getDSCTy (d -> DSCTy),
 	             compnr == 0 ? "no": "yes");
 	} else {
 		if(*firstService == false) {
@@ -162,7 +163,7 @@ bool	success;
 			*firstService = false;
 		}
 
-		fprintf (f, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"FEC\": \"%s\", \"protectionLevel\": \"%s\", \"appType\": \"%s\", \"subService\": \"%s\" }",
+		fprintf (f, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"FEC\": \"%s\", \"protectionLevel\": \"%s\", \"appType\": \"%s\", \"data\": \"%s\", \"subService\": \"%s\" }",
 	             serviceId,
 	             serviceName. c_str (),
 	             d -> subchId,
@@ -172,6 +173,7 @@ bool	success;
 	             getFECscheme (d -> FEC_scheme),
 	             protL. c_str (),
 	             getUserApplicationType (d -> appType),
+				 getDSCTy (d -> DSCTy),
 	             compnr == 0 ? "no": "yes");
 	}
 }
