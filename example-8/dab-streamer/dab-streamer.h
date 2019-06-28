@@ -132,13 +132,13 @@ typedef struct {
 
 class dabStreamer : public audioBase {
 public:
-		dabStreamer		(int, std::string, int, std::string);
+		dabStreamer		(int, std::string);
 		~dabStreamer		(void);
 	void	audioOutput		(float *, int);
 	void	addRds			(const char *);
 	void	stop			(void);
 private:
-	void	run			(void);
+	void		run		(void);
 	std::thread	threadHandle;
 	int		inRate;
 	int		outRate;

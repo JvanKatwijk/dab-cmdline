@@ -36,9 +36,7 @@
 #include	<unistd.h>
 #include	<vector>
 #include	"dab-streamer.h"
-#include	"file-driver.h"
-#include	"tcp-output.h"
-
+#include	"soundcard-driver.h"
 static inline
 int64_t         getMyTime       (void) {
 struct timeval  tv;
@@ -48,16 +46,11 @@ struct timeval  tv;
 }
 
 		dabStreamer::dabStreamer (int		inRate,
-	                                  std::string	fileName,
-	                                  int		port,	
-	                                  std::string	url) {
+	                                  std::string	channel) {
 
 	this	-> inRate		= inRate;
 	this	-> outRate		= 192000;
-	if (fileName. empty ())
-	   generator	= new tcpOutput (port, url);
-	else
-	   generator	= new fileDriver (fileName, 192000);
+	generator	= new soundcardDriver (5, channel);
 	this	-> pcmBuffer		= new RingBuffer<float> (8 * 32768);
 	this	-> rdsBuffer		= new RingBuffer<char> (256);
 

@@ -85,7 +85,7 @@ std::string	programName		= "Sky Radio";
 int32_t		serviceIdentifier	= -1;
 
 static void sighandler (int signum) {
-	fprintf (stderr, "Signal caught, terminating!\n");
+        fprintf (stderr, "Signal caught, terminating!\n");
 	run. store (false);
 }
 
@@ -307,18 +307,6 @@ std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
 
 	      case 'P':
 	         programName	= std::string (optarg);
-	         break;
-
-	      case 'p':
-	         port		= atoi (optarg);
-	         break;
-
-	      case 'u':
-	         url		= std::string (optarg);
-	         break;
-
-	      case 'f':
-	         fmFile		= std::string (optarg);
 	         break;
 
 #ifdef	HAVE_WAVFILES
@@ -550,22 +538,12 @@ std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
 	   exit (4);
 	}
 //
-//	where to go with the audio
-	if ((port == -1) && (fmFile. empty ())) {
-	   bool err	= false;
-	   soundOut	= new audioSink (latency, soundChannel, &err);
-	   if (err) {
-	      std::cerr << "no valid sound channel, fatal\n";
-	      exit (33);
-	   }
-	}	
-	else
-	   try {
-	      soundOut	= new dabStreamer (48000, fmFile, port, url);
-	   } catch (int e) {
-	      fprintf (stderr, "could not connect to fm server\n");
-	      exit (34);
-	   }
+	try {
+	   soundOut	= new dabStreamer (48000, soundChannel);
+	} catch (int e) {
+	   fprintf (stderr, "could not connect to sound out\n");
+	   exit (34);
+	}
 //
 	theDevice	-> restartReader (frequency);
 //	The device should be working right now
@@ -575,18 +553,18 @@ std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
 	dabStartProcessing (theRadio);
 
 	while (!timeSynced. load () && (--timeSyncTime >= 0))
-	   sleep (1);
+           sleep (1);
 
-	if (!timeSynced. load ()) {
-	   cerr << "There does not seem to be a DAB signal here" << endl;
+        if (!timeSynced. load ()) {
+           cerr << "There does not seem to be a DAB signal here" << endl;
 	   theDevice -> stopReader ();
-	   sleep (1);
-	   dabStop (theRadio);
-	   dabExit (theRadio);
-	   delete theDevice;
-	   exit (22);
+           sleep (1);
+           dabStop (theRadio);
+           dabExit (theRadio);
+           delete theDevice;
+           exit (22);
 	}
-	else
+        else
 	   std::cerr << "there might be a DAB signal here" << endl;
 
 	while (!ensembleRecognized. load () &&
@@ -608,7 +586,7 @@ std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
 
 	run. store (true);
 	std::cerr << "we try to start program " <<
-	                                         programName << "\n";
+                                                 programName << "\n";
 	audiodata ad;
 	if (!is_audioService (theRadio, programName. c_str ())) {
 	   std::cerr << "sorry  we cannot handle service " << 
@@ -641,15 +619,12 @@ std::string options	= "M:D:d:P:S:p:u:f:M:F:R";
 }
 
 void    printOptions (void) {
-	std::cerr << 
+        std::cerr << 
 "                          dab-cmdline options are\n"
 "	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
 "	                  -D number\tamount of time to look for an ensemble\n"
 "	                  -d number\tseconds to reach time sync\n"
 "	                  -P name\tprogram to be selected in the ensemble\n"
-"	                  -f filename\twrite audio as stereo fm data to file\n"
-"	                  -p port\twrite audio as stereo fm to port port\n"
-"	                  -u url\twrite audio as stereo fm to given port on url\n"
 "	for file input:\n"
 "	                  -F filename\tin case the input is from file\n"
 "	                  -R switch off automatic continuation after eof\n"

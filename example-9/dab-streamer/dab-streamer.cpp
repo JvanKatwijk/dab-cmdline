@@ -38,7 +38,6 @@
 #include	"dab-streamer.h"
 #include	"file-driver.h"
 #include	"tcp-output.h"
-
 static inline
 int64_t         getMyTime       (void) {
 struct timeval  tv;

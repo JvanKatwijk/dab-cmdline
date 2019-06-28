@@ -44,7 +44,7 @@ The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
 
-The examples 1 to 7 and 9 are basically simple variations on a single theme:
+The examples 1 to 9 are basically simple variations on a single theme:
 
 	- example 1 is the example where the main program is linked to
 	  a precompiled shared library, 
@@ -78,20 +78,22 @@ The examples 1 to 7 and 9 are basically simple variations on a single theme:
 	  used as input device (and the command line parameters are
 	  adapted to that)
 
-	- example 9 is a new project. It is derived from example 2
-	  and it aims at retransmitting the audio from a selected
+	- example 8 and 9 are a new project. They are derived from example 2
+	  and aim at retransmitting the audio from a selected
 	  service as an FM signal, stereo and equipped with RDS
 	  such that we can listen to the "warm" sound of old (tube)
-	  radios. The program will emit the FM stereo samples either
+	  radios.
+	  example 8 will emit the FM stereo samples through a selected
+	  soundcard channel, example 9 will emit the FM stereo samples either
 	  to a file, or a tcp port.
-	  "Normal use", i.e. audio output using the soundcard is also possible.
-
 	  The rds text is derved from the dynamic label as emitted by
 	  the dab service.
 
 	  The sources for a simple "hackrf-server" are included in
 	  the example-9 directory. This hackrf server will instruct
 	  the hackrf device to transmit the incoming samples.
+	  Communication between the example 9 programme and the hackrf
+	  server is through a TCP port, I am using 127.0.0.1:8765
 
 	  If you are not allowed to transmit (as most of us I assume),
 	  a simple coax cable between the hackrf device and the "old"
