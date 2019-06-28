@@ -23,19 +23,33 @@
 #include	"dab_tables.h"
 #include	"dab-api.h"
 
+void	print_fileHeader (FILE *f,
+                        bool jsonOutput);
 void	print_ensembleData (FILE *f,
+                        bool jsonOutput,
 	                    void *theRadio,
 	                    std::string channel,
 	                    std::string ensembleLabel,
-	                    uint32_t ensembleId);
-void	print_audioheader (FILE *f);
+	                    uint32_t ensembleId,
+						bool *firstEnsemble);
+void	print_audioheader (FILE *f,
+                        bool jsonOutput);
 void	print_audioService (FILE *f,
+                        bool jsonOutput,
 	                    void *theRadio,
 	                    std::string serviceName,
-	                    audiodata *d);
-void	print_dataHeader (FILE *f);
+	                    audiodata *d,
+						bool *firstService);
+void	print_dataHeader (FILE *f,
+                        bool jsonOutput);
 void	print_dataService (FILE		*f,
+                       bool jsonOutput,
 	                   void		*theRadio,
 	                   std::string	serviceName,
 	                   uint8_t	compnr,
-	                   packetdata *d);
+	                   packetdata *d,
+					   bool *firstService);
+void	print_ensembleFooter (FILE *f,
+                        bool jsonOutput);
+void	print_fileFooter (FILE *f,
+                        bool jsonOutput);
