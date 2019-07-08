@@ -11,6 +11,13 @@ A few callback functions provide the communication back from the
 library to the caller.
 The library interface is given in dab-api.h
 
+-----------------------------------------------------------------------
+New
+-----------------------------------------------------------------------
+
+New is now that the limeSDR is supported. In example 2 the LimeSDR
+is one of the possibilities when selecting a device in configuration time
+
 ----------------------------------------------------------------------
 The C (C++) example programs
 ------------------------------------------------------------------------
@@ -43,6 +50,8 @@ audio output device.
 The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
+
+Supported devices
 
 The examples 1 to 9 are basically simple variations on a single theme:
 
@@ -142,7 +151,8 @@ The standard way to create an executable is
         sudo make install
 
 where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY, HACKRF,
-RTLSDR, WAVFILES (".sdr"), or RTL_TCP. The name of the generated executable
+RTLSDR, WAVFILES (".sdr"), or RTL_TCP.
+The name of the generated executable
 is dab-xxx-y for the examples 1 - 7, and dab-scanner-xxx for the dab-scanner
 program, where xxx is the device name, and y the number
 of the example to which the executable belongs.

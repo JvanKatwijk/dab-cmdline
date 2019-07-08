@@ -130,13 +130,15 @@ int		index_attempts		= 0;
 	my_ficHandler. reset ();
 	myReader. setRunning (true);
 	my_mscHandler. start ();
+
 	try {
+	   myReader. reset ();
 	   for (i = 0; i < T_F / 2; i ++) {
 	      jan_abs (myReader. getSample (0));
 	   }
 
-//Initing:
 notSynced:
+//Initing:
 #ifdef	__TII_INCLUDED__
 	   my_TII_Detector. reset ();
 #endif
@@ -172,6 +174,7 @@ SyncOnPhase:
 	         syncsignalHandler (false, userData);
 	         index_attempts	= 0;
 	      }
+	      fprintf (stderr, "startIndex %d\n", startIndex);
 	      goto notSynced;
 	   }
 
@@ -240,6 +243,12 @@ SyncOnPhase:
 
 //	we integrate the newly found frequency error with the
 //	existing frequency error.
+//
+//	
+	   if (!correctionNeeded & (abs (arg (FreqCorr)) > 1.5)) {
+//	      fprintf (stderr, "resync with %d (%f)\n", startIndex, arg (FreqCorr));
+	      goto notSynced;
+	   }
 	   fineOffset += 0.1 * arg (FreqCorr) / M_PI * (carrierDiff);
 
 //	at the end of the frame, just skip Tnull samples

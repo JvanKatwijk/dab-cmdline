@@ -42,6 +42,7 @@ private:
 	std::vector<float>      phaseDifferences;
 	dabParams		params;
 	int32_t			T_u;
+	int32_t			T_g;
 	int16_t			threshold;
 	int16_t			diff_length;
 

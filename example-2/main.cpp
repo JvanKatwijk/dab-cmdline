@@ -50,7 +50,10 @@
 #include	"rtl_tcp-client.h"
 #elif	HAVE_HACKRF
 #include	"hackrf-handler.h"
+#elif	HAVE_LIME
+#include	"lime-handler.h"
 #endif
+
 #include	<locale>
 #include	<codecvt>
 #include	<atomic>
@@ -238,36 +241,56 @@ int	main (int argc, char **argv) {
 uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
-int16_t		ppmCorrection	= 0;
-int		deviceGain	= 45;	// scale = 0 .. 100
 #ifdef	HAVE_HACKRF
 int		lnaGain		= 40;
 int		vgaGain		= 40;
-#endif
-#ifdef	HAVE_SDRPLAY	
+int		ppmOffset	= 0;
+const char	*optionsString	= "D:d:M:B:P:O:A:C:G:g:p:";
+#elif	HAVE_LIME
+int16_t		gain		= 70;
+std::string	antenna		= "Auto";
+const char	*optionsString	= "D:d:M:B:P:O:A:C:G:g:X:";
+#elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
+bool		autogain	= false;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "D:d:M:B:P:O:A:C:G:L:Qp:";
+#elif	HAVE_AIRSPY
+int16_t		gain		= 20;
+bool		autogain	= false;
+int		ppmOffset	= 0;
+const char	*optionsString	= "D:d:M:B:P:O:A:C:G:p:";
+#elif	HAVE_RTLSDR
+int16_t		gain		= 50;
+bool		autogain	= false;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "D:d:M:B:P:O:A:C:G:p:Q";
+#elif	HAVE_WAVFILES
+std::string	fileName;
+bool		repeater	= true;
+const char	*optionsString	= "D:d:M:B:P:O:A:F:R:";
+#elif	HAVE_RAWFILES
+std::string	fileName;
+bool	repeater		= true;
+const char	*optionsString	= "D:d:M:B:P:O:A:F:R:";
+#elif
+//	HAVE_RTL_TCP
+int		gain		= 50;
+bool		autogain	= false;
+int		ppmOffset	= 0;
+std::string	hostname = "127.0.0.1";		// default
+int32_t		basePort = 1234;		// default
+const char	*optionsString	= "D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
-
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 5;
-bool		autogain	= false;
 int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
-#ifdef	HAVE_WAVFILES
-std::string	fileName;
-bool	repeater		= true;
-#elif	HAVE_RAWFILES
-std::string	fileName;
-bool	repeater		= true;
-#elif HAVE_RTL_TCP
-std::string	hostname = "127.0.0.1";		// default
-int32_t		basePort = 1234;		// default
-#endif
 bool	err;
 
 	std::cerr << "dab_cmdline example II,\n \
@@ -283,17 +306,9 @@ bool	err;
 
 	std::setlocale (LC_ALL, "en-US.utf8");
 
-//	For file input we do not need options like Q, G and C,
-//	We do need an option to specify the filename
-#if	(!defined (HAVE_WAVFILES) && !defined (HAVE_RAWFILES) && !defined (HAVE_RTL_TCP))
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:L:g:A:L:S:QO:")) != -1) {
-#elif   HAVE_RTL_TCP
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
-#else
-	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:O:R")) != -1) {
-#endif
+	fprintf (stderr, "options are %s\n", optionsString);
+	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
-
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
 	         break;
@@ -317,71 +332,6 @@ bool	err;
 	         programName	= optarg;
 	         break;
 
-	      case 'p':
-	         ppmCorrection	= atoi (optarg);
-	         break;
-
-#ifdef	HAVE_WAVFILES
-	      case 'F':
-	         fileName	= std::string (optarg);
-	         break;
-	      case 'R':
-	         repeater	= false;
-	         break;
-#elif	HAVE_RAWFILES
-	      case 'F':
-	         fileName	= std::string (optarg);
-	         break;
-	      case 'R':
-	         repeater	= false;
-	         break;
-#else
-	      case 'C':
-	         theChannel	= std::string (optarg);
-	         break;
-
-#ifdef	HAVE_HACKRF
-	      case 'G':
-	         lnaGain	= atoi (optarg);
-	         break;
-
-	      case 'g':
-	         vgaGain	= atoi (optarg);
-	         break;
-#else
-#ifdef	HAVE_SDRPLAY
-	      case 'G':
-	         GRdB		= atoi (optarg);
-	         break;
-
-	      case 'L':
-	         lnaState	= atoi (optarg);
-	         break;
-
-	      case 'Q':
-	         autogain	= true;
-	         break;
-#else
-	      case 'G':
-	         deviceGain	= atoi (optarg);
-	         break;
-
-	      case 'Q':
-	         autogain	= true;
-	         break;
-#endif
-#endif
-#ifdef	HAVE_RTL_TCP
-	      case 'H':
-	         hostname	= std::string (optarg);
-	         break;
-
-	      case 'I':
-	         basePort	= atoi (optarg);
-	         break;
-#endif
-#endif
-
 	      case 'O':
 	         soundOut	= new fileSink (std::string (optarg), &err);
 	         if (!err) {
@@ -394,14 +344,136 @@ bool	err;
 	         soundChannel	= optarg;
 	         break;
 
-	      case 'S': {
-                 std::stringstream ss;
-                 ss << std::hex << optarg;
-//	ss >> serviceIdentifier;
-                 break;
-              }
+#ifdef	HAVE_WAVFILES
+	      case 'F':
+	         fileName	= std::string (optarg);
+
+	      case 'R':
+	         repeater	= false;
+	         break;
+#elif	HAVE_RAWFILES
+	      case 'F':
+	         fileName	= std::string (optarg);
+	         break;
+
+	      case 'R':	         repeater	= false;
+	         break;
+
+#elif	HAVE_HACKRF
+	      case 'G':
+	         lnaGain	= atoi (optarg);
+	         break;
+
+	      case 'g':
+	         vgaGain	= atoi (optarg);
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+	
+	      case 'p':
+	         ppmOffset	= 0;
+	         break;
+
+#elif	HAVE_LIME
+	      case 'G':
+	      case 'g':	
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'X':
+	         antenna	= std::string (optarg);
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         fprintf (stderr, "%s \n", optarg);
+	         break;
+
+#elif	HAVE_SDRPLAY
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+#elif	HAVE_AIRSPY
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
+#elif	HAVE_RTLSDR
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
+#elif	HAVE_RTL_TCP
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
+	      case 'H':
+	         hostname	= std::string (optarg);
+	         break;
+
+	      case 'I':
+	         basePort	= atoi (optarg);
+	         break;
+	      case "G":
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+#endif
 
 	      default:
+	         fprintf (stderr, "Option %c not understood\n", opt);
 	         printOptions ();
 	         exit (1);
 	   }
@@ -415,7 +487,7 @@ bool	err;
 	try {
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
-	                                      ppmCorrection,
+	                                      ppmOffset,
 	                                      GRdB,
 	                                      lnaState,
 	                                      autogain,
@@ -423,18 +495,21 @@ bool	err;
 	                                      0);
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
-	                                     ppmCorrection,
-	                                     deviceGain, false);
+	                                     ppmOffset,
+	                                     gain, false);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
-	                                     ppmCorrection,
-	                                     deviceGain,
+	                                     ppmOffset,
+	                                     gain,
 	                                     autogain);
 #elif	HAVE_HACKRF
 	   theDevice	= new hackrfHandler	(frequency,
-	                                         ppmCorrection,
+	                                         ppmOffset,
 	                                         lnaGain,
 	                                         vgaGain);
+#elif	HAVE_LIME
+	   theDevice	= new limeHandler	(frequency, gain, antenna);
+
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName, repeater);
 #elif	defined (HAVE_RAWFILES)
@@ -443,7 +518,7 @@ bool	err;
 	   theDevice	= new rtl_tcp_client (hostname,
 	                                      basePort,
 	                                      frequency,
-	                                      deviceGain,
+	                                      gain,
 	                                      autogain,
 	                                      ppmCorrection);
 #endif

@@ -27,9 +27,9 @@
 static  inline
 int16_t valueFor (int16_t b) {
 int16_t res     = 1;
-        while (--b > 0)
-           res <<= 1;
-        return res;
+	while (--b > 0)
+	   res <<= 1;
+	return res;
 }
 
 	sampleReader::sampleReader (dabProcessor *parent,
@@ -39,18 +39,18 @@ int16_t res     = 1;
 int	i;
 	theParent		= parent;
 	this	-> theRig	= theRig;
-        bufferSize		= 32768;
-        this    -> spectrumBuffer       = spectrumBuffer;
-        localBuffer. resize (bufferSize);
-        localCounter		= 0;
+	bufferSize		= 32768;
+	this    -> spectrumBuffer       = spectrumBuffer;
+	localBuffer. resize (bufferSize);
+	localCounter		= 0;
 	currentPhase		= 0;
 	sLevel			= 0;
 	sampleCount		= 0;
 	oscillatorTable = new std::complex<float> [INPUT_RATE];
-        for (i = 0; i < INPUT_RATE; i ++)
-           oscillatorTable [i] = std::complex<float>
+	for (i = 0; i < INPUT_RATE; i ++)
+	   oscillatorTable [i] = std::complex<float>
 	                            (cos (2.0 * M_PI * i / INPUT_RATE),
-                                     sin (2.0 * M_PI * i / INPUT_RATE));
+	                             sin (2.0 * M_PI * i / INPUT_RATE));
 
 	corrector	= 0;
 	running. store (true);
@@ -59,6 +59,14 @@ int	i;
 	sampleReader::~sampleReader (void) {
 	delete[] oscillatorTable;
 }
+
+void	sampleReader::reset	(void) {
+	localCounter            = 0;
+	currentPhase            = 0;
+	sLevel                  = 0;
+	sampleCount             = 0;
+}
+
 
 void	sampleReader::setRunning (bool b) {
 	running. store (b);
@@ -98,10 +106,10 @@ std::complex<float> temp;
 	if (++ sampleCount > INPUT_RATE / N) {
 	   sampleCount = 0;
 	   if (spectrumBuffer != nullptr)
-              spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
+	      spectrumBuffer -> putDataIntoBuffer (localBuffer. data (),
 	                                                    localCounter);
 	   theParent -> show_Corrector (phaseOffset);
-           localCounter = 0;
+	   localCounter = 0;
 	}
 	return temp;
 }

@@ -45,11 +45,12 @@ public:
 			~sampleReader		(void);
 		void	setRunning	(bool b);
 		float	get_sLevel	(void);
+	        void	reset		(void);
 		std::complex<float> getSample	(int32_t);
 	        void	getSamples	(std::complex<float> *v,
 	                                 int32_t n, int32_t phase);
 private:
-	      dabProcessor	*theParent;
+		dabProcessor	*theParent;
 		deviceHandler	*theRig;
 		RingBuffer<std::complex<float>> *spectrumBuffer;
 		std::vector<std::complex<float>> localBuffer;

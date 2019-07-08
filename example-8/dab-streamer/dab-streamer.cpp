@@ -322,9 +322,11 @@ int	i;
 	   if (nextPhase >= 2 * M_PI)
 	      nextPhase -= 2 * M_PI;
 
-	   std::complex<float>xxx =
-	              std::complex<float> (cos (nextPhase), sin (nextPhase));
-	   generator -> sendSample (xxx);
+//	   std::complex<float>xxx =
+//	              std::complex<float> (cos (nextPhase), sin (nextPhase));
+//	   generator -> sendSample (xxx);
+	   generator -> sendSample (std::complex <float> (8 * sample,
+	                                                  8 * sample));
 	   pos++;
 	}
 }

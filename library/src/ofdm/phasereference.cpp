@@ -39,6 +39,7 @@
 int32_t	i;
 float	Phi_k;
         this    -> T_u          = params. get_T_u ();
+        this    -> T_g          = params. get_T_g ();
         this    -> threshold    = threshold;
         this    -> diff_length  = diff_length;
         refTable.               resize (T_u);
@@ -88,19 +89,23 @@ float	Max		= -10000;
 /**
   *	We compute the average signal value ...
   */
-	for (i = 0; i < T_u; i ++) {
+	for (i = 0; i < T_u / 2; i ++) 
+	   sum += abs (fft_buffer [i]);
+
+	sum /= (T_u / 2);
+
+	for (i = T_g - 40; i < T_g + 10; i ++) {
 	   float absValue = abs (fft_buffer [i]);
-	   sum	+= absValue;
 	   if (absValue > Max) {
 	      maxIndex = i;
 	      Max = absValue;
 	   }
 	}
 /**
-  *	that gives us a basis for defining the threshold
+  *	that gives us a basis for validating the result
   */
-	if (Max < threshold * sum / T_u) {
-	   return  - abs (Max * T_u / sum) - 1;
+	if (Max < threshold * sum) {
+	   return  - abs (Max / sum) - 1;
 	}
 	else
 	   return maxIndex;	
