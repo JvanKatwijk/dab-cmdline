@@ -94,10 +94,10 @@ float	Max		= -10000;
 
 	sum /= (T_u / 2);
 
-	for (i = T_g - 40; i < T_g + 10; i ++) {
-	   float absValue = abs (fft_buffer [i]);
+	for (i = 0; i < 50; i ++) {
+	   float absValue = abs (fft_buffer [T_g - 40 + i]);
 	   if (absValue > Max) {
-	      maxIndex = i;
+	      maxIndex = T_g - 40 + i;
 	      Max = absValue;
 	   }
 	}

@@ -123,7 +123,9 @@ bool		correctionNeeded	= true;
 std::vector<complex<float>>	ofdmBuffer (T_null);
 int		dip_attempts		= 0;
 int		index_attempts		= 0;
-
+float		avgValue_nullPeriod	= 0;
+float		avgValue_testPeriod	= 0;
+int		testLength		= 100;
 	isSynced	= false;
 	snr		= 0;
 	running. store (true);
@@ -157,16 +159,28 @@ notSynced:
               case NO_END_OF_DIP_FOUND:
                  goto notSynced;
            }
-
-SyncOnPhase:
-//	We arrive here when - it seems we are time synchronized,
-//	either from above
-//	or after having processed a frame
-//	Now read in Tu samples. The precise number is not really important
-//	as long as we can be sure that the first sample to be identified
-//	is part of the samples read.
 	   myReader. getSamples (ofdmBuffer. data (),
 	                         T_u, coarseOffset + fineOffset);
+
+	   goto SyncOnPhase;
+
+Check_endofNull:
+//	when we are here, we had a (more or less) decent frame,
+//	and we are ready for the new one.
+//	we just check that we are around the end of the null period
+
+	   myReader. getSamples (ofdmBuffer. data (),
+	                         T_u, coarseOffset + fineOffset);
+	   avgValue_testPeriod	= 0;
+	   for (i = 0; i < testLength; i ++)
+	      avgValue_testPeriod += abs (ofdmBuffer [i]);
+	   avgValue_testPeriod /= testLength;
+
+	   if (avgValue_testPeriod < avgValue_nullPeriod * 2)
+	      goto notSynced;
+//
+//	and fall through
+SyncOnPhase:
 	   int startIndex = phaseSynchronizer. findIndex (ofdmBuffer. data ());
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
@@ -174,7 +188,7 @@ SyncOnPhase:
 	         syncsignalHandler (false, userData);
 	         index_attempts	= 0;
 	      }
-	      fprintf (stderr, "startIndex %d\n", startIndex);
+//	      fprintf (stderr, "startIndex %d\n", startIndex);
 	      goto notSynced;
 	   }
 
@@ -258,6 +272,7 @@ SyncOnPhase:
 	   for (i = 0; i < T_null; i ++)
 	      sum += abs (ofdmBuffer [i]);
 	   sum /= T_null;
+	   avgValue_nullPeriod	= sum;
 
 	   float sum2 = myReader. get_sLevel ();
 	   snr	= 0.9 * snr + 0.1 * 20 * log10 ((sum2 + 0.005) / sum);
@@ -326,7 +341,7 @@ SyncOnPhase:
 	      coarseOffset -= carrierDiff;
 	      fineOffset += carrierDiff;
 	   }
-	   goto SyncOnPhase;
+	   goto Check_endofNull;
 	}
 	
 	catch (int e) {
