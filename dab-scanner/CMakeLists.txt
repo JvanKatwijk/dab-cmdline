@@ -234,7 +234,7 @@ endif ()
 	     ../library/includes/ofdm/freq-interleaver.h
 	     ../library/includes/ofdm/timesyncer.h
 	     ../library/includes/ofdm/fic-handler.h
-	     ../library/includes/ofdm/fib-processor.cpp
+	     ../library/includes/ofdm/fib-processor.h
 	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/backend-base.h

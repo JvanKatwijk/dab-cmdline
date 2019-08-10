@@ -471,7 +471,6 @@ bool	err;
 	         break;
 
 #endif
-
 	      default:
 	         fprintf (stderr, "Option %c not understood\n", opt);
 	         printOptions ();
@@ -520,7 +519,7 @@ bool	err;
 	                                      frequency,
 	                                      gain,
 	                                      autogain,
-	                                      ppmCorrection);
+	                                      ppmOffset);
 #endif
 
 	}

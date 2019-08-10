@@ -19,13 +19,16 @@ b. If you want to pipe the output to e.g. aplay then be aware that
    In order to ensure a continuous stream of samples out
    you may define STREAM_OUTPUT (see CMakeLists.txt) file,
    in which case the samples are fed into a separate thread that
-   will fill in gaps with calues 0. Note however, that still
+   will fill in gaps with values 0. Note however, that still
    no rate conversion takes place. While the Dutch services as
    as far as I know all 48000 samples/second, e.g. in Switzerland
    theu are not.
 >>>>>>>>>>>>>>>>END OF NOTE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-See the file main.cpp for the command line options
+See the file main.cpp for the command line options.
+I just tried to have the command line options similar to the
+ones of example 2 (However, choises for audio output are obviously
+not available).
 
 Feel free to improve the program
 

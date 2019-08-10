@@ -22,12 +22,12 @@
  *	E X A M P L E  P R O G R A M
  *	for the DAB-library
  */
+#include	<QApplication>
+#include	<stdlib.h>
 #include	<unistd.h>
 #include	<signal.h>
 #include	<getopt.h>
 #include        <cstdio>
-#include        <iostream>
-#include	<complex>
 #include	<vector>
 #include	"dab-api.h"
 #include	"includes/support/band-handler.h"
