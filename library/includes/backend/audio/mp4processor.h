@@ -59,9 +59,10 @@ private:
 	                                 int16_t frame_length,
 	                                 stream_parms *sp,
 	                                 bool*);
-	void		buildHeader (int16_t framelen,
-                                     stream_parms *sp,
-                                     uint8_t *header);
+	void		build_aacFile (int16_t		aac_frame_len,
+                                       stream_parms	*sp,
+	                               uint8_t		*data,
+                                       std::vector<uint8_t>  &header);
 	int16_t		superFramesize;
 	int16_t		blockFillIndex;
 	int16_t		blocksInBuffer;

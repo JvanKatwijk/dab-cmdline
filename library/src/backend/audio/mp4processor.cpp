@@ -25,13 +25,78 @@
  *	may 15 2015. A real improvement on the code
  *	is the addition from Stefan Poeschel to create a
  *	header for the aac that matches, really a big help!!!!
+ *	bitWriter and the text of build_aacFile is from DABlin
  ************************************************************************
+    DABlin - capital DAB experience
+    Copyright (C) 2015-2019 Stefan Pöschel
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include	"mp4processor.h"
 #include	<cstring>
 //
 #include	"charsets.h"
 #include	"pad-handler.h"
+
+#include	<stdlib.h>
+#include	<stdint.h>
+#include	<vector>
+
+class BitWriter {
+private:
+        std::vector<uint8_t> data;
+        size_t byte_bits;
+public:
+        BitWriter() {Reset();}
+
+void	Reset () {
+	data.clear();
+	byte_bits = 0;
+}
+
+void	AddBits (int data_new, size_t count) {
+	while (count > 0) {
+//	add new byte, if needed
+	   if (byte_bits == 0)
+	      data.push_back (0x00);
+
+	   size_t copy_bits = std::min(count, 8 - byte_bits);
+	   uint8_t copy_data =
+	       (data_new >> (count - copy_bits)) & (0xFF >> (8 - copy_bits));
+	   data.back() |= copy_data << (8 - byte_bits - copy_bits);
+
+	   byte_bits = (byte_bits + copy_bits) % 8;
+	   count -= copy_bits;
+	}
+}
+
+void	AddBytes (const uint8_t *data, size_t len) {
+	for(size_t i = 0; i < len; i++)
+	   AddBits (data[i], 8);
+}
+
+const std::vector<uint8_t> GetData() {
+	   return data;
+	}
+
+void	WriteAudioMuxLengthBytes () {
+	size_t len = data.size() - 3;
+	data [1] |= (len >> 8) & 0x1F;
+	data [2] = len & 0xFF;
+}
+};
 
 //
 //	Now for real
@@ -163,6 +228,18 @@ stream_parms	streamParameters;
 	streamParameters. psFlag   = (outVector [2] >> 3) & 01;	// bit 20
 	streamParameters. mpegSurround	= (outVector [2] & 07);	// bits 21 .. 23
 
+//
+//      added for the aac file writer
+        streamParameters. CoreSrIndex   =
+                      streamParameters. dacRate ?
+                                    (streamParameters. sbrFlag ? 6 : 3) :
+                                    (streamParameters. sbrFlag ? 8 : 5);
+        streamParameters. CoreChConfig  =
+                      streamParameters. aacChannelMode ? 2 : 1;
+
+        streamParameters. ExtensionSrIndex =
+                      streamParameters. dacRate ? 3 : 5;
+
 	switch (2 * streamParameters. dacRate + streamParameters. sbrFlag) {
 	   default:		// cannot happen
 	   case 0:
@@ -236,14 +313,14 @@ stream_parms	streamParameters;
                  my_padHandler. processPAD (buffer, count - 3, L1, L0);
               }
 #ifdef	AAC_OUT
-	      uint8_t fileBuffer [1024];
-	      buildHeader (aac_frame_length, &streamParameters, fileBuffer);
-	      memcpy (&fileBuffer [7], 
-	              &outVector [au_start [i]],
-	              aac_frame_length);
+	      std::vector<uint8_t> fileBuffer;
+	      build_aacFile (aac_frame_length,
+	                     &streamParameters,
+	                     &(outVector. data () [au_start [i]]),
+	                     fileBuffer);
 	      if (soundOut != nullptr) 
-	         (soundOut)((int16_t *)(&fileBuffer [0]),
-	                    aac_frame_length + 7, 0, false, nullptr);
+	         (soundOut)((int16_t *)(fileBuffer. data ()),
+	                    fileBuffer. size (), 0, false, nullptr);
 #else	
 //	we handle the aac -> PMC conversion here
 	
@@ -317,85 +394,52 @@ void	mp4Processor::isStereo		(bool b) {
 	(void)b;
 }
 
+void	mp4Processor::build_aacFile (int16_t	aac_frame_len,
+	                             stream_parms *sp,
+	                             uint8_t	*data,
+	                             std::vector<uint8_t> &fileBuffer) {
+BitWriter	au_bw;
 
-void	mp4Processor::buildHeader (int16_t framelen,
-	                           stream_parms *sp,
-	                           uint8_t *header) {
-	struct adts_fixed_header {
-		unsigned                     : 4;
-		unsigned home                : 1;
-		unsigned orig                : 1;
-		unsigned channel_config      : 3;
-		unsigned private_bit         : 1;
-		unsigned sampling_freq_index : 4;
-		unsigned profile             : 2;
-		unsigned protection_absent   : 1;
-		unsigned layer               : 2;
-		unsigned id                  : 1;
-		unsigned syncword            : 12;
-	} fh;
-	struct adts_variable_header {
-		unsigned                            : 4;
-		unsigned num_raw_data_blks_in_frame : 2;
-		unsigned adts_buffer_fullness       : 11;
-		unsigned frame_length               : 13;
-		unsigned copyright_id_start         : 1;
-		unsigned copyright_id_bit           : 1;
-	} vh;
-	/* 32k 16k 48k 24k */
-	const unsigned short samptab[] = {0x5, 0x8, 0x3, 0x6};
+	au_bw. AddBits (0x2B7, 11);	// syncword
+	au_bw. AddBits (    0, 13);	// audioMuxLengthBytes - written later
+//	AudioMuxElement(1)
 
-	fh. syncword = 0xfff;
-	fh. id = 0;
-	fh. layer = 0;
-	fh. protection_absent = 1;
-	fh. profile = 0;
-	fh. sampling_freq_index = samptab [sp -> dacRate << 1 | sp -> sbrFlag];
+	au_bw. AddBits (    0, 1);	// useSameStreamMux
+//	StreamMuxConfig()
 
-	fh. private_bit = 0;
-	switch (sp -> mpegSurround) {
-	   default:
-	      fprintf (stderr, "Unrecognized mpeg_surround_config ignored\n");
-//	not nice, but deliberate: fall through
-	   case 0:
-	      if (sp -> sbrFlag && !sp -> aacChannelMode && sp -> psFlag)
-	         fh. channel_config = 2; /* Parametric stereo */
-	      else
-	         fh. channel_config = 1 << sp -> aacChannelMode ;
-	      break;
+	au_bw. AddBits (    0, 1);	// audioMuxVersion
+	au_bw. AddBits (    1, 1);	// allStreamsSameTimeFraming
+	au_bw. AddBits (    0, 6);	// numSubFrames
+	au_bw. AddBits (    0, 4);	// numProgram
+	au_bw. AddBits (    0, 3);	// numLayer
 
-	   case 1:
-	      fh. channel_config = 6;
-	      break;
+	if (sp  -> sbrFlag) {
+	   au_bw. AddBits (0b00101, 5); // SBR
+	   au_bw. AddBits (sp -> CoreSrIndex, 4); // samplingFrequencyIndex
+	   au_bw. AddBits (sp -> CoreChConfig, 4); // channelConfiguration
+	   au_bw. AddBits (sp -> ExtensionSrIndex, 4);	// extensionSamplingFrequencyIndex
+	   au_bw. AddBits (0b00010, 5);		// AAC LC
+	   au_bw. AddBits (0b100, 3);							// GASpecificConfig() with 960 transform
+	} else {
+	   au_bw. AddBits (0b00010, 5); // AAC LC
+	   au_bw. AddBits (sp -> CoreSrIndex, 4); // samplingFrequencyIndex
+	   au_bw. AddBits (sp -> CoreChConfig, 4); // channelConfiguration
+	   au_bw. AddBits (0b100, 3);							// GASpecificConfig() with 960 transform
 	}
 
-	fh. orig = 0;
-	fh. home = 0;
-	vh. copyright_id_bit = 0;
-	vh. copyright_id_start = 0;
-	vh. frame_length = framelen + 7;  /* Includes header length */
-	vh. adts_buffer_fullness = 1999;
-	vh. num_raw_data_blks_in_frame = 0;
-	header [0]	= fh. syncword >> 4;
-	header [1]	= (fh. syncword & 0xf) << 4;
-	header [1]	|= fh. id << 3;
-	header [1]	|= fh. layer << 1;
-	header [1]	|= fh. protection_absent;
-        header [2]	= fh. profile << 6;
-	header [2]	|= fh. sampling_freq_index << 2;
-	header [2]	|= fh. private_bit << 1;
-	header [2]	|= (fh. channel_config & 0x4);
-	header [3]	= (fh. channel_config & 0x3) << 6;
-	header [3]	|= fh. orig << 5;
-	header [3]	|= fh. home << 4;
-	header [3]	|= vh. copyright_id_bit << 3;
-	header [3]	|= vh. copyright_id_start << 2;
-	header [3]	|= (vh. frame_length >> 11) & 0x3;
-	header [4]	= (vh. frame_length >> 3) & 0xff;
-	header [5]	= (vh. frame_length & 0x7) << 5;
-	header [5]	|= vh. adts_buffer_fullness >> 6;
-	header [6]	= (vh. adts_buffer_fullness & 0x3f) << 2;
-	header [6]	|= vh. num_raw_data_blks_in_frame;
+	au_bw. AddBits (0b000, 3);	// frameLengthType
+	au_bw. AddBits (0xFF, 8);	// latmBufferFullness
+	au_bw. AddBits (   0, 1);	// otherDataPresent
+	au_bw. AddBits (   0, 1);	// crcCheckPresent
+
+//	PayloadLengthInfo()
+	for (size_t i = 0; i < aac_frame_len / 255; i++)
+	   au_bw. AddBits (0xFF, 8);
+	au_bw. AddBits (aac_frame_len % 255, 8);
+
+	au_bw. AddBytes (data, aac_frame_len);
+	au_bw. WriteAudioMuxLengthBytes ();
+	fileBuffer	= au_bw. GetData ();
 }
 
 

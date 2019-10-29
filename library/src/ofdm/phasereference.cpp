@@ -54,10 +54,13 @@ float	Phi_k;
         }
 //
 //      prepare a table for the coarse frequency synchronization
-        for (i = 1; i <= diff_length; i ++)
-           phaseDifferences [i - 1] = abs (arg (refTable [(T_u + i) % T_u] *
-                                         conj (refTable [(T_u + i + 1) % T_u])));
-
+	shiftFactor	= this -> diff_length / 4;
+        for (i = 0; i < diff_length; i ++) {
+           phaseDifferences [i] =
+	                abs (arg (refTable [(T_u - shiftFactor + i) % T_u] *
+                                  conj (refTable [(T_u - shiftFactor + i + 1) % T_u])));
+	   phaseDifferences [i] *= phaseDifferences [i];
+	}
 }
 
 	phaseReference::~phaseReference (void) {
@@ -128,27 +131,46 @@ float	Max		= -10000;
 //      fft, but that did not work too well.
 #define SEARCH_RANGE    (2 * 35)
 int16_t phaseReference::estimateOffset (std::complex<float> *v) {
-int16_t i, j, index = 100;
+int16_t i, j, index_1 = 100, index_2 = 100;
 float   computedDiffs [SEARCH_RANGE + diff_length + 1];
 
-	memcpy (fft_buffer, v, T_u * sizeof (std::complex<float>));
+	for (i = 0; i < T_u; i ++)
+	   fft_buffer [i] = v [i];
+
 	my_fftHandler. do_FFT ();
 
 	for (i = T_u - SEARCH_RANGE / 2;
-	     i < T_u + SEARCH_RANGE / 2 + diff_length; i ++)
+	     i < T_u + SEARCH_RANGE / 2 + diff_length; i ++) 
 	   computedDiffs [i - (T_u - SEARCH_RANGE / 2)] =
-	      abs (arg (fft_buffer [i % T_u] * conj (fft_buffer [(i + 1) % T_u])));
-	float   Mmin = 1000;
-	for (i = T_u - SEARCH_RANGE / 2; i < T_u + SEARCH_RANGE / 2; i ++) {
-	   float sum = 0;
-	   for (j = 1; j < diff_length; j ++)
-	      if (phaseDifferences [j - 1] < 0.1)
-	         sum += computedDiffs [i - (T_u - SEARCH_RANGE / 2) + j];
-	   if (sum < Mmin) {
-	      Mmin = sum;
-	      index = i;
-	   }
-	}
-        return index - T_u;
+	      arg (fft_buffer [(i - shiftFactor) % T_u] *
+	           conj (fft_buffer [(i - shiftFactor + 1) % T_u]));
+
+	for (i = 0; i < SEARCH_RANGE + diff_length; i ++)
+	   computedDiffs [i] *= computedDiffs [i];
+
+        float   Mmin_1 = 10000;
+        float   Mmin_2 = 10000;
+
+	for (i = T_u - SEARCH_RANGE / 2;
+             i < T_u + SEARCH_RANGE / 2; i ++) {
+           int sum_1 = 0;
+           int sum_2 = 0;
+           for (j = 0; j < diff_length; j ++) {
+              if (phaseDifferences [j] < 0.05)
+                 sum_1 += computedDiffs [i - (T_u - SEARCH_RANGE / 2) + j];
+              sum_2 += abs (computedDiffs [i - (T_u - SEARCH_RANGE / 2) + j] -
+                                                   phaseDifferences [j]);
+           }
+           if (sum_1 < Mmin_1) {
+              Mmin_1 = sum_1;
+              index_1 = i;
+           }
+           if (sum_2 < Mmin_2) {
+              Mmin_2 = sum_2;
+              index_2 = i;
+           }
+        }
+
+        return index_1 == index_2 ? index_1 - T_u : 100;
 }
 

@@ -276,8 +276,7 @@ bool	err;
 	timesyncSet.	store (false);
 	run.		store (false);
 
-	std::wcout.imbue(std::locale("en_US.utf8"));
-	std::setlocale (LC_ALL, "en-US.utf8");
+	std::setlocale (LC_ALL, "");
 	if (argc == 1) {
 	   printOptions ();
 	   exit (1);

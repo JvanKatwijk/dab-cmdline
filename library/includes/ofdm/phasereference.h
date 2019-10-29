@@ -45,7 +45,7 @@ private:
 	int32_t			T_g;
 	int16_t			threshold;
 	int16_t			diff_length;
-
+	int16_t			shiftFactor;
 	fft_handler	my_fftHandler;
 	std::complex<float>     *fft_buffer;
 };

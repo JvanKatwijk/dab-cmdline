@@ -106,9 +106,9 @@ std::complex<float> conjVector [T_u];
            conjVector [index] = r1;
 //	The viterbi decoder expects values in the range 0 .. 255,
 //	we present values -127 .. 127 (easy with depuncturing)
-	   float ab1		= jan_abs (r1);
-	   ibits [i]		= - real (r1) / ab1 * 127.0;
-	   ibits [carriers + i] = - imag (r1) / ab1 * 127.0;
+	   float ab1		= abs (r1);
+	   ibits [i]		= - real (r1) / ab1 * 1024.0;
+	   ibits [carriers + i] = - imag (r1) / ab1 * 1024.0;
 	}
 
 	memcpy (phaseReference. data (),
