@@ -603,18 +603,52 @@ bool	err;
 }
 
 void    printOptions (void) {
-        fprintf (stderr,
-"                          dab-cmdline options are\n\
-	                  -T number   duration of the processing\n\
-                          -W number   amount of time to look for an ensemble\n\
-                          -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
-                          -B Band     Band is either L_BAND or BAND_III (default)\n\
-                          -P name     program to be selected in the ensemble\n\
-                          -C channel  channel to be used\n\
-                          -G Gain     gain for device (range 1 .. 100)\n\
-                          -Q          if set, set autogain for device true\n\
-	                  -F filename in case the input is from file\n\
-                          -S hexnumber use hexnumber to identify program\n\n");
+        std::cerr << 
+"                          dab-cmdline options are\n"
+"	                  -T duration\t halt after <duration>  minutes\n"
+"	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
+"	                  -D number\tamount of time to look for an ensemble\n"
+"	                  -d number\tseconds to reach time sync\n"
+"	                  -P name\tprogram to be selected in the ensemble\n"
+"	for file input:\n"
+"	                  -F filename\tin case the input is from file\n"
+"	                  -R switch off automatic continuation after eof\n"
+"	for hackrf:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -v vgaGain\n"
+"	                  -l lnaGain\n"
+"	                  -a amp enable (default off)\n"
+"	                  -c number\tppm offset\n"
+"	for SDRplay:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -G Gain reduction in dB (range 20 .. 59)\n"
+"	                  -L lnaState (depends on model chosen)\n"
+"	                  -Q autogain (default off)\n"
+"	                  -c number\t ppm offset\n"
+"	for rtlsdr:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -G number\t	gain, range 0 .. 100\n"
+"	                  -Q autogain (default off)\n"
+"	                  -c number\tppm offset\n"
+"	for airspy:\n"
+"	                  -B Band\tBand is either L_BAND or BAND_III (default)\n"
+"	                  -C Channel\n"
+"	                  -G number\t	gain, range 1 .. 21\n"
+"	                  -b set rf bias\n"
+"	                  -c number\t ppm Correction\n"
+"	for rtl_tcp:\n"
+"	                  -H url\t hostname for connection\n"
+"	                  -I number\t baseport for connection\n"
+"	                  -G number\t gain setting\n"
+"	                  -Q autogain (default off)\n"
+"	                  -c number\t ppm Correction\n"
+"      for limesdr:\n"
+"                         -G number\t gain\n"
+"                         -X antenna selection\n"
+"                         -C channel\n";
 }
 
                           

@@ -158,15 +158,6 @@ void	motdataHandler (std::string s, int d, void *ctx) {
 //
 //	Note: the function is called from the tdcHandler with a
 //	frame, either frame 0 or frame 1.
-//	The frames are packed bytes, here an additional header
-//	is added, a header of 8 bytes:
-//	the first 4 bytes for a pattern 0xFF 0x00 0xFF 0x00 0xFF
-//	the length of the contents, i.e. framelength without header
-//	is stored in bytes 5 (high byte) and byte 6.
-//	byte 7 contains 0x00, byte 8 contains 0x00 for frametype 0
-//	and 0xFF for frametype 1
-//	Note that the callback function is executed in the thread
-//	that executes the tdcHandler code.
 static
 void	bytesOut_Handler (uint8_t *data, int16_t amount,
 	                  uint8_t type, void *ctx) {

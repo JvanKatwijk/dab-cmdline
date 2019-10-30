@@ -41,6 +41,11 @@ if(DEFINED RTLSDR)
    set(objectName dab-rtlsdr-4)
 endif ()
 
+if(DEFINED HACKRF)
+   set(HACKRF true)
+   set(objectName dab-hackrf-4)
+endif ()
+
 if(DEFINED WAVFILES)
    set(WAVFILES true)
    set(objectName dab-files-4)
@@ -51,15 +56,20 @@ if(DEFINED RAWFILES)
    set(objectName dab-raw-4)
 endif ()
 
+if(DEFINED LIMESDR)
+   set(LIMESDR true)
+   set(objectName dab-lime-4)
+endif ()
+
 if(DEFINED RTL_TCP)
    set(RTL_TCP true)
    set(objectName dab-rtl_tcp-4)
 endif ()
 
-
 if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 endif ()
+
 #for this version we need to define
 
     add_definitions(-DAAC_OUT)
@@ -146,6 +156,33 @@ endif ()
 	 add_definitions (-DHAVE_SDRPLAY)
 	endif (SDRPLAY)
 
+	if (LIMESDR)
+           find_library (LIMELIB LimeSuite)
+           if(NOT(LIMELIB))
+              message(FATAL_ERROR "please install LimeSuite")
+           else(NOT(LIMELIB))
+              list (APPEND extraLibs ${LIMELIB})
+           endif(NOT(LIMELIB))
+
+	   include_directories (
+	     ../devices/lime-handler
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/lime-handler/LMS7002M_parameters.h
+	        ../devices/lime-handler/LimeSuite.h
+	        ../devices/lime-handler/lime-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/lime-handler/lime-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_LIME)
+	endif (LIMESDR)
+
 	if (AIRSPY)
            find_package(LibAIRSPY)
            if (NOT LIBAIRSPY_FOUND)
@@ -218,6 +255,38 @@ endif ()
 	   add_definitions (-DHAVE_WAVFILES)
 	endif()
 
+	if (HACKRF)
+	   find_path (HACKLIB_INCLUDE_DIR
+                      NAMES hackrf.h
+                      PATHS
+	              ../devices/hackrf-handler/libhackrf/
+                       /usr/local/include/
+	   )
+           include_directories (${HACKLIB_INCLUDE_DIR})
+
+           find_library (HACKLIB hackrf)
+           if(NOT(HACKLIB))
+              message(FATAL_ERROR "please install -lhackrf")
+           else(NOT(HACKLIB))
+              list (APPEND extraLibs ${HACKLIB})
+           endif(NOT(HACKLIB))
+
+	   include_directories (
+	     ../devices/hackrf-handler
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/hackrf-handler/hackrf-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/hackrf-handler/hackrf-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_HACKRF)
+	endif (HACKRF)
 	if (RAWFILES)
            include_directories (
                 ../devices/rawfiles/
