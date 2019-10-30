@@ -15,8 +15,9 @@ The library interface is given in dab-api.h
 New
 -----------------------------------------------------------------------
 
-New is now that the limeSDR is supported. In example 2 the LimeSDR
+New is now that the limeSDR is supported. In examples 2, 3 and 4 the LimeSDR
 is one of the possibilities when selecting a device in configuration time
+(of course you should have installed a support library).
 
 ----------------------------------------------------------------------
 The C (C++) example programs
@@ -51,7 +52,22 @@ The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
 
+----------------------------------------------------------------------
 Supported devices
+----------------------------------------------------------------------
+
+	- SDRplay RSP's
+	- AIRspy
+	- RTLSDR based devices
+	- HACKRF (only example programs 2, 3, 4, 8 and 9)
+	- LimeSDR (only example programs 2, 3 and 4)
+
+and of course fileinput of ".raw" and ".sdr" files is supported, as
+well as input through the rtl_tcp driver.
+
+--------------------------------------------------------------------------
+The examples
+---------------------------------------------------------------------------
 
 The examples 1 to 9 are basically simple variations on a single theme:
 
