@@ -200,27 +200,27 @@ uint8_t		theBand		= BAND_III;
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:g:p:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:g:X:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:L:Qp:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 int		ppmOffset	= 0;
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:p:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:p:Q";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Q";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
@@ -236,7 +236,7 @@ bool		autogain	= false;
 int		ppmOffset	= 0;
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:Qp:H:I";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
@@ -247,8 +247,9 @@ struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
 bool	err;
+int	theDuration	= -1;		// infinite
 
-	std::cerr << "dab_cmdline example II,\n \
+	std::cerr << "dab_cmdline example IV,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
@@ -264,6 +265,9 @@ bool	err;
 	fprintf (stderr, "options are %s\n", optionsString);
 	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
+	      case 'T':
+	         theDuration	= 60 * atoi (optarg);
+	         break;
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
 	         break;
@@ -557,8 +561,11 @@ bool	err;
         dabReset_msc (theRadio);
         set_audioChannel (theRadio, &ad);
 
-	while (run. load ())
+	while (run. load () && (theDuration != 0)) {
+	   if (theDuration > 0)
+	      theDuration --;
 	   sleep (1);
+	}
 	theDevice	-> stopReader ();
 	dabStop	(theRadio);
 	dabExit	(theRadio);
@@ -568,6 +575,7 @@ bool	err;
 void    printOptions (void) {
         fprintf (stderr,
 "                          dab-cmdline options are\n\
+	                  -T number   duration of the processing (in seconds)\n\
                           -W number   amount of time to look for an ensemble\n\
                           -M Mode     Mode is 1, 2 or 4. Default is Mode 1\n\
                           -B Band     Band is either L_BAND or BAND_III (default)\n\

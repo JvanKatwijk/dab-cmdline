@@ -142,20 +142,14 @@ double	winElem;
 	numUsedBuffers	= 0;
 
 	window. resize 		(T_u);
-
 	for (i = 0; i < T_u; i ++) {
-	   winElem  = (0.42 -
-	               0.5 * cos (2 * M_PI * (float)i / T_u) +
-	               0.08 * cos (4 * M_PI * (float)i / T_u));
-	   winSum += winElem;
+	   window [i]  = (0.42 -
+	                  0.5 * cos (2 * M_PI * (float)i / T_u) +
+	                  0.08 * cos (4 * M_PI * (float)i / T_u));
+	   winSum	+= window [i];
 	}
-
-	for (i = 0; i < T_u; i ++) {
-	   winElem  = (0.42 -
-	               0.5 * cos (2 * M_PI * (float)i / T_u) +
-	               0.08 * cos (4 * M_PI * (float)i / T_u));
-	   window [i] = winElem / winSum;
-	}
+	for (i = 0; i < T_u; i ++)
+	   window [i] /= winSum;
 
 #if LOG_WIN_SUM
 	fprintf(stderr, "TII_Detector: T_u %d, window sum was: %f\n", T_u, winSum);
@@ -192,45 +186,14 @@ int	i;
 	   memset (&P_allAvg [0], 0, T_u * sizeof (float));
 	}
 
-#if OUT_STAT
-	float timeMaxNorm = std::norm (v[0]);
-	for (int j = 1; j < T_u; j ++) {
-	   float n = std::norm (v[j]);
-	   if (n > timeMaxNorm)
-	      timeMaxNorm = n;
-	}
-#endif
-
 //	windowing + FFT
 	for (i = 0; i < T_u; i ++)
-//	   fft_buffer [i] = cmul (v [i], window [i]);
-	   fft_buffer [i] = v [i];
+	   fft_buffer [i] = cmul (v [i], window [i]);
 	my_fftHandler. do_FFT ();
 
 	for (int j = 0; j < T_u; ++j ) {
 	   P_tmpNorm [j] = std::norm (fft_buffer [j]);
 	}
-
-#if OUT_STAT
-	float specMaxNorm = std::norm( P_tmpNorm[0] );
-	for (int j = 1; j < T_u; ++j ) {
-	   if (P_tmpNorm [j] > specMaxNorm)
-	      specMaxNorm = P_tmpNorm [j];
-	}
-
-	float timeMag = sqrt (timeMaxNorm);
-	float specMag = sqrt (specMaxNorm);
-	fprintf (stderr,
-	         "TII_Detector addBuffer(): %d / %u: timeMax = %f  specMax = %f\n",
-	         cifCounter, numUsedBuffers, timeMag, specMag);
-	
-	if (specMaxNorm > 32768.0F) {	// must be an error!  ( 128*128 *2 )
-	   fprintf (stderr,
-	            "TII_Detector addBuffer(): OVERFLOW! %d / %u: max norm() = %f\n",
-	            cifCounter, numUsedBuffers, specMaxNorm);
-	   return;		// do NOT use this spectrum
-	}
-#endif
 
 	if (alfa < 0.0F || isFirstAdd) {
 	   for (int j = 0; j < T_u; j++) {
@@ -241,8 +204,8 @@ int	i;
 	   numUsedBuffers ++;
 	}
 	else {
-	   const float alpha = alfa;
-	   const float beta = 1.0F - alpha;
+	   const float alpha	= alfa;
+	   const float beta	= 1.0F - alpha;
 	   for (int j = 0; j < T_u; j++) {
 	      P_allAvg [j] = alpha * P_allAvg [j] + beta * P_tmpNorm [j];
 	      theBuffer [j] = alpha * theBuffer [j] +
@@ -273,7 +236,6 @@ int	i;
 	                            conj (inVec [(T_u + carr + 1) % T_u])));
 	}
 }
-
 
 #define	NUM_GROUPS	8
 #define	GROUPSIZE	24
@@ -367,7 +329,6 @@ float	minTable	[NUM_GROUPS];
 //	we start with collecting the values of the correct
 //	elements of the NUM_GROUPS groups
 //
-//	for the qt-dab, we only need the "top" performer
 	if (ind1 > 0) {
 	   uint16_t pattern	= 0;
 	   float x [NUM_GROUPS];

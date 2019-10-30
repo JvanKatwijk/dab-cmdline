@@ -31,7 +31,6 @@
   *	The class inherits from the phaseTable.
   */
 	phaseReference::phaseReference (uint8_t	dabMode,
-	                                int16_t	threshold,	
 	                                int16_t	diff_length):
 	                                     phaseTable (dabMode),
 	                                     params (dabMode),
@@ -70,12 +69,12 @@ float	Phi_k;
   *	\brief findIndex
   *	the vector v contains "T_u" samples that are believed to
   *	belong to the first non-null block of a DAB frame.
-  *	We correlate the data in this verctor with the predefined
+  *	We correlate the data in this vector with the predefined
   *	data, and if the maximum exceeds a threshold value,
   *	we believe that that indicates the first sample we were
   *	looking for.
   */
-int32_t	phaseReference::findIndex (std::complex<float> *v) {
+int32_t	phaseReference::findIndex (std::complex<float> *v, int threshold) {
 int32_t	i;
 int32_t	maxIndex	= -1;
 float	sum		= 0;
@@ -114,21 +113,6 @@ float	Max		= -10000;
 	   return maxIndex;	
 }
 
-//      We investigate a sequence of phaseDifferences that
-//      are known starting at real carrier 0.
-//      Phase of the carriers of the "real" block 0 may be
-//      quite different than the phase of the carriers of the "reference"
-//      block, plain correlation (i.e. sum (x, y, i) does not work well.
-//      What is a good measure though is looking at the phase differences
-//      between successive carriers in both the "real" block and the
-//      reference block. These should be more or less the same.
-//      So we just compute the phasedifference between phasedifferences
-//      as measured and as they should be.
-//      To keep things simple, we just look at the locations where
-//      the phasedifference with the successor should be 0
-//      In previous versions we looked
-//      at the "weight" of the positive and negative carriers in the
-//      fft, but that did not work too well.
 #define SEARCH_RANGE    (2 * 35)
 int16_t phaseReference::estimateOffset (std::complex<float> *v) {
 int16_t i, j, index_1 = 100, index_2 = 100;

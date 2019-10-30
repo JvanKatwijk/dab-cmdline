@@ -59,7 +59,6 @@
 	                                              inputDevice,
 	                                              spectrumBuffer),
 	                                    phaseSynchronizer (dabMode,
-	                                                       THRESHOLD,
 	                                                       DIFF_LENGTH),
 	                                    my_ofdmDecoder (dabMode,
 	                                                    iqBuffer),
@@ -126,6 +125,8 @@ int		index_attempts		= 0;
 float		avgValue_nullPeriod	= 0;
 float		avgValue_testPeriod	= 0;
 int		testLength		= 100;
+int		startIndex		= -1;
+
 	isSynced	= false;
 	snr		= 0;
 	running. store (true);
@@ -162,6 +163,18 @@ notSynced:
 	   myReader. getSamples (ofdmBuffer. data (),
 	                         T_u, coarseOffset + fineOffset);
 
+	   startIndex = phaseSynchronizer.
+	                        findIndex (ofdmBuffer. data (), THRESHOLD);
+	   if (startIndex < 0) { // no sync, try again
+	      isSynced	= false;
+	      if (++index_attempts > 5) {
+	         syncsignalHandler (false, userData);
+	         index_attempts	= 0;
+	      }
+//	      fprintf (stderr, "startIndex %d\n", startIndex);
+	      goto notSynced;
+	   }
+	   index_attempts	= 0;
 	   goto SyncOnPhase;
 
 Check_endofNull:
@@ -170,18 +183,10 @@ Check_endofNull:
 //	we just check that we are around the end of the null period
 
 	   myReader. getSamples (ofdmBuffer. data (),
-	                         T_u, coarseOffset + fineOffset);
-	   avgValue_testPeriod	= 0;
-	   for (i = 0; i < testLength; i ++)
-	      avgValue_testPeriod += abs (ofdmBuffer [i]);
-	   avgValue_testPeriod /= testLength;
-
-	   if (avgValue_testPeriod < avgValue_nullPeriod * 2)
-	      goto notSynced;
-//
-//	and fall through
-SyncOnPhase:
-	   int startIndex = phaseSynchronizer. findIndex (ofdmBuffer. data ());
+	                      T_u, coarseOffset + fineOffset);
+	   startIndex =
+			phaseSynchronizer.
+	                         findIndex (ofdmBuffer. data (), 4 * THRESHOLD);
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
 	      if (++index_attempts > 5) {
@@ -192,6 +197,7 @@ SyncOnPhase:
 	      goto notSynced;
 	   }
 
+SyncOnPhase:
 	   index_attempts	= 0;
 	   dip_attempts		= 0;
 	   isSynced		= true;
