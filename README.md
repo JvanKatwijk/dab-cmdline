@@ -14,10 +14,15 @@ The library interface is given in dab-api.h
 -----------------------------------------------------------------------
 New
 -----------------------------------------------------------------------
+New is that now the new SDRplay library, the v3 library, is supported.
+In order to allow choosing between the "old" 2.13 and the "new" 3.06
+library, the CMakeFile for example 2 allows selection of 
 
-New is now that the limeSDR is supported. In examples 2, 3 and 4 the LimeSDR
-is one of the possibilities when selecting a device in configuration time
-(of course you should have installed a support library).
+	-DSDRPLAY=ON
+or
+	-DSDRPLAY_V3=ON
+
+Of course, you should have installed the right library
 
 ----------------------------------------------------------------------
 The C (C++) example programs
@@ -56,7 +61,7 @@ The Library code will be set to interpret the input as being of Mode 1.
 Supported devices
 ----------------------------------------------------------------------
 
-	- SDRplay RSP's
+	- SDRplay RSP's (using 2.13 lib or 3.06 lib)
 	- AIRspy
 	- RTLSDR based devices
 	- HACKRF (only example programs 2, 3, 4, 8 and 9)

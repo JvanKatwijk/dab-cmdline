@@ -38,6 +38,8 @@
 #include	"includes/support/band-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
+#elif	HAVE_SDRPLAY_V3
+#include	"sdrplay-handler-v3.h"
 #elif	HAVE_AIRSPY
 #include	"airspy-handler.h"
 #elif	HAVE_RTLSDR
@@ -93,7 +95,7 @@ std::string	programName		= "Sky Radio";
 //int32_t		serviceIdentifier	= -1;
 
 static void sighandler (int signum) {
-        fprintf (stderr, "Signal caught, terminating!\n");
+	fprintf (stderr, "Signal caught, terminating!\n");
 	run. store (false);
 }
 
@@ -251,6 +253,12 @@ int16_t		gain		= 70;
 std::string	antenna		= "Auto";
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
 #elif	HAVE_SDRPLAY	
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 2;
+bool		autogain	= false;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+#elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
@@ -415,6 +423,27 @@ int	theDuration		= -1;	// no limit
 	         ppmOffset	= atoi (optarg);
 	         break;
 
+#elif	HAVE_SDRPLAY_V3
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
 #elif	HAVE_AIRSPY
 	      case 'G':
 	         gain		= atoi (optarg);
@@ -489,6 +518,14 @@ int	theDuration		= -1;	// no limit
 	try {
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
+	                                      ppmOffset,
+	                                      GRdB,
+	                                      lnaState,
+	                                      autogain,
+	                                      0,
+	                                      0);
+#elif	HAVE_SDRPLAY_V3
+	   theDevice	= new sdrplayHandler_v3 (frequency,
 	                                      ppmOffset,
 	                                      GRdB,
 	                                      lnaState,
@@ -571,18 +608,18 @@ int	theDuration		= -1;	// no limit
 	dabStartProcessing (theRadio);
 
 	while (!timeSynced. load () && (--timeSyncTime >= 0))
-           sleep (1);
+	   sleep (1);
 
-        if (!timeSynced. load ()) {
-           cerr << "There does not seem to be a DAB signal here" << endl;
+	if (!timeSynced. load ()) {
+	   cerr << "There does not seem to be a DAB signal here" << endl;
 	   theDevice -> stopReader ();
-           sleep (1);
-           dabStop (theRadio);
-           dabExit (theRadio);
-           delete theDevice;
-           exit (22);
+	   sleep (1);
+	   dabStop (theRadio);
+	   dabExit (theRadio);
+	   delete theDevice;
+	   exit (22);
 	}
-        else
+	else
 	   std::cerr << "there might be a DAB signal here" << endl;
 
 	while (!ensembleRecognized. load () &&
@@ -604,7 +641,7 @@ int	theDuration		= -1;	// no limit
 
 	run. store (true);
 	std::cerr << "we try to start program " <<
-                                                 programName << "\n";
+	                                         programName << "\n";
 	audiodata ad;
 	if (!is_audioService (theRadio, programName. c_str ())) {
 	   std::cerr << "sorry  we cannot handle service " << 
@@ -640,7 +677,7 @@ int	theDuration		= -1;	// no limit
 }
 
 void    printOptions (void) {
-        std::cerr << 
+	std::cerr << 
 "                          dab-cmdline options are\n"
 "	                  -T Duration\tstop after <Duration> seconds\n"
 "	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"

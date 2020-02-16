@@ -39,6 +39,11 @@ if(DEFINED SDRPLAY)
    set(objectName dab-sdrplay-2)
 endif ()
 
+if(DEFINED SDRPLAY_V3)
+   set(SDRPLAY_V3 true)
+   set(objectName dab-sdrplay-2)
+endif ()
+
 if(DEFINED RTLSDR)
    set(RTLSDR true)
    set(objectName dab-rtlsdr-2)
@@ -149,6 +154,40 @@ endif ()
 
 	 add_definitions (-DHAVE_SDRPLAY)
 	endif (SDRPLAY)
+
+	if (SDRPLAY_V3)
+	   find_path (SDRPLAYLIB_INCLUDE_DIR
+                      NAMES sdrplay_api.h
+                      PATHS
+                      /usr/local/include/
+	   )
+           include_directories (${SDRPLAYLIB_INCLUDE_DIR})
+
+           find_library (SDRPLAYLIB sdrplay_api)
+           if(NOT(SDRPLAYLIB))
+              message(FATAL_ERROR "please install -lsdrplay_api")
+           else(NOT(SDRPLAYLIB))
+              list (APPEND extraLibs ${SDRPLAYLIB})
+           endif(NOT(SDRPLAYLIB))
+
+	   include_directories (
+	     ../devices/sdrplay-handler-v3
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/sdrplay-handler-v3/sdrplay-handler-v3.h
+	        ../devices/sdrplay-handler-v3/sdrplay-controller.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/sdrplay-handler-v3/sdrplay-handler-v3.cpp
+	        ../devices/sdrplay-handler-v3/sdrplay-controller.cpp
+	   )
+
+	   add_definitions (-DHAVE_SDRPLAY_V3)
+	endif (SDRPLAY_V3)
 
 	if (LIMESDR)
            find_library (LIMELIB LimeSuite)
