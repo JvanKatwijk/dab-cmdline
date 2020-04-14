@@ -81,6 +81,7 @@
 	this	-> inputDevice		= inputDevice;
 	this	-> syncsignalHandler	= syncsignalHandler;
 	this	-> systemdataHandler	= systemdataHandler;
+	this	-> programdataHandler	= programdata;
 	this	-> userData		= userData;
 	this	-> T_null		= params. get_T_null ();
 	this	-> T_s			= params. get_T_s ();
@@ -458,7 +459,7 @@ uint8_t dabProcessor::getInterTabId     (bool *success) {
 
 void    dabProcessor::set_audioChannel (audiodata *d) {
         my_mscHandler. set_audioChannel (d);
-	programdata (d, userdata);
+	programdataHandler (d, userData);
 }
 
 void    dabProcessor::set_dataChannel (packetdata *d) {
