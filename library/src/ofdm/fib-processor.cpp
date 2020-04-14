@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2014 - 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
+ *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -100,7 +101,7 @@
 	                              void	*userData) {
 	this	-> ensemblenameHandler	= ensemblenameHandler;
 	if (programnameHandler == nullptr)
-	   fprintf (stderr, "NULL detected\n");
+	   fprintf (stderr, "nullptr detected\n");
 	this	-> programnameHandler	= programnameHandler;
 	this	-> userData		= userData;
 	memset (dateTime, 0, 8 * sizeof (uint32_t));
@@ -343,7 +344,9 @@ int16_t	SubChId		= getBits_6 (d, bitOffset);
 int16_t StartAdr	= getBits (d, bitOffset + 6, 10);
 int16_t	tabelIndex;
 int16_t	option, protLevel, subChanSize;
-	(void)pd;		// not used right now, maybe later
+static  int table_1 [] = {12, 8, 6, 4};
+static  int table_2 [] = {27, 21, 18, 15};
+
 	subChannels [SubChId]. StartAddr = StartAdr;
 	subChannels [SubChId]. inUse	 = true;
 
@@ -364,31 +367,19 @@ int16_t	option, protLevel, subChanSize;
 	      subChannels [SubChId]. protLevel = protLevel;
 	      subChanSize = getBits (d, bitOffset + 22, 10);
 	      subChannels [SubChId]. Length	= subChanSize;
-	      if (protLevel == 0)	// actually protLevel 1
-	         subChannels [SubChId]. BitRate	= subChanSize / 12 * 8;
-	      if (protLevel == 1)
-	         subChannels [SubChId]. BitRate	= subChanSize / 8 * 8;
-	      if (protLevel == 2)
-	         subChannels [SubChId]. BitRate	= subChanSize / 6 * 8;
-	      if (protLevel == 3)
-	         subChannels [SubChId]. BitRate	= subChanSize / 4 * 8;
+	      subChannels [SubChId]. BitRate	= subChanSize / table_1 [protLevel] * 8;
 	   }
 	   else			// option should be 001
 	   if (option == 001) {		// B Level protection
-	      protLevel = getBits_2 (d, bitOffset + 20);
-//
-//	we encode the B protection levels by adding a 04 to the level
-	      subChannels [SubChId]. protLevel = protLevel + (1 << 2);
-	      subChanSize = getBits (d, bitOffset + 22, 10);
-	      subChannels [SubChId]. Length = subChanSize;
-	      if (protLevel == 0)	// actually prot level 1
-	         subChannels [SubChId]. BitRate	= subChanSize / 27 * 32;
-	      if (protLevel == 1)
-	         subChannels [SubChId]. BitRate	= subChanSize / 21 * 32;
-	      if (protLevel == 2)
-	         subChannels [SubChId]. BitRate	= subChanSize / 18 * 32;
-	      if (protLevel == 3)
-	         subChannels [SubChId]. BitRate	= subChanSize / 15 * 32;
+	      protLevel				=
+	                                 getBits_2 (d, bitOffset + 20);
+	      subChannels [SubChId]. protLevel= protLevel + (1 << 2);
+	      subChanSize			=
+	                                 getBits (d, bitOffset + 22, 10);
+	      subChannels [SubChId]. Length	=
+	                                 subChanSize;
+	      subChannels [SubChId]. BitRate	= 
+	                                 subChanSize /table_2 [protLevel] * 32;
 	   }
 
 	   bitOffset += 32;

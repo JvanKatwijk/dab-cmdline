@@ -164,6 +164,7 @@ int	res;
 	                 this -> hackrf_error_name (hackrf_error (res)));
 	   return false;
 	}
+
 	fprintf (stderr, "transmitter running\n");
 	running. store (hackrf_is_streaming (theDevice));
 	fprintf (stderr, "hackrf is %s transmitting\n",

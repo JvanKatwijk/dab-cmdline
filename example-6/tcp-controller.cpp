@@ -5,6 +5,7 @@
  *    Lazy Chair Computing
  *
  *    This file is part of the  DAB-library
+ *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -56,9 +57,9 @@
 	}
 	fprintf (stderr, "Socket created");
 //	Prepare the sockaddr_in structure
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY;
-	server.sin_port = htons (port);
+	server.sin_family	= AF_INET;
+	server.sin_addr.s_addr	= INADDR_ANY;
+	server.sin_port		= htons (port);
 	
 //	Bind
 	if (bind (socket_desc,
@@ -155,8 +156,9 @@ int	value;
 	      theRadio	-> stop ();
 	      theDevice	-> stopReader ();
 	      my_radioData -> theChannel = std::string ((char *)(&buffer [1]));
-	      {  int frequency = theBandHandler -> Frequency (my_radioData -> theBand,
-	                                              my_radioData -> theChannel);
+	      {  int frequency =
+	             theBandHandler -> Frequency (my_radioData -> theBand,
+	                                          my_radioData -> theChannel);
 	         theDevice	-> setVFOFrequency (frequency);
 	      }
 	      theRadio	-> startProcessing ();

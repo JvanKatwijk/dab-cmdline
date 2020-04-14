@@ -458,6 +458,7 @@ uint8_t dabProcessor::getInterTabId     (bool *success) {
 
 void    dabProcessor::set_audioChannel (audiodata *d) {
         my_mscHandler. set_audioChannel (d);
+	programdata (d, userdata);
 }
 
 void    dabProcessor::set_dataChannel (packetdata *d) {

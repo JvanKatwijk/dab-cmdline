@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
+ *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -31,11 +32,6 @@
 #include	"fft_handler.h"
 
 /**
-  *	\brief ofdmDecoder
-  *	The class ofdmDecoder is - when implemented in a separate thread -
-  *	taking the data from the ofdmProcessor class in, and
-  *	will extract the Tu samples, do an FFT and extract the
-  *	carriers and map them on (soft) bits
   */
 	ofdmDecoder::ofdmDecoder	(uint8_t	dabMode,
                                          RingBuffer<std::complex<float>> *iqBuffer):
@@ -73,9 +69,10 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *buffer) {
 void	ofdmDecoder::decode (std::complex<float> *buffer,
 	                             int32_t blkno, int16_t *ibits) {
 int16_t	i;
+std::complex<float> conjVector [T_u];
+
       memcpy (fft_buffer, &(buffer[T_g]),
                                        T_u * sizeof (std::complex<float>));
-std::complex<float> conjVector [T_u];
 
 //fftlabel:
 /**

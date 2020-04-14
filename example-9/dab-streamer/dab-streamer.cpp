@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2019
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computer
  *
  *    This file is part of the dab-fm streamer
+ *
  *    dab-fm streamer is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
