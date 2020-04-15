@@ -161,16 +161,17 @@ std::vector<uint8_t> result;
 	std::string realName;
 
 //	MOT slide, to show
-	if (name == "")
-	   realName = "no name";
-        else
-	   realName = name;
-	realName = "/tmp/" + realName;
-	FILE * temp = fopen (realName. c_str (), "w");
-	fwrite (result.data (), 1, result. size (), temp);
-	fclose (temp);
-	if (motdataHandler != nullptr)
+	if (motdataHandler != nullptr) {
+	   if (name == "")
+	      realName = "no name";
+           else
+	      realName = name;
+	   realName = "/tmp/" + realName;
+	   FILE * temp = fopen (realName. c_str (), "w");
+	   fwrite (result.data (), 1, result. size (), temp);
+	   fclose (temp);
 	   motdataHandler (realName, contentsubType, ctx);
+	}
 }
 
 int     motObject::get_headerSize       (void) {
