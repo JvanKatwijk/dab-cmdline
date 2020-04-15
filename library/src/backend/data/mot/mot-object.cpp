@@ -165,8 +165,10 @@ std::vector<uint8_t> result;
 	   realName = "no name";
         else
 	   realName = name;
-//	FILE * temp = fopen (realName. c_str (), "w");
-//	fwrite (result.data (), 1, result. size (), temp);
+	realName = "/tmp/" + realName;
+	FILE * temp = fopen (realName. c_str (), "w");
+	fwrite (result.data (), 1, result. size (), temp);
+	fclose (temp);
 	if (motdataHandler != nullptr)
 	   motdataHandler (realName, contentsubType, ctx);
 }
