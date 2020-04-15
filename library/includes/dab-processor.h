@@ -126,6 +126,7 @@ private:
 	mscHandler	my_mscHandler;
 	syncsignal_t	syncsignalHandler;
 	systemdata_t	systemdataHandler;
+	programdata_t	programdataHandler;
 	void		call_systemData (bool, int16_t, int32_t);
 	std::thread	threadHandle;
 	void		*userData;
