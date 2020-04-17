@@ -63,7 +63,7 @@
 	server. sin_port	= htons (basePort);
 
 //	Print a resolved address of server (the first IP of the host)
-	std::cout << "server address = " <<
+	std::cerr << "server address = " <<
 	          (host->h_addr_list[0][0] & 0xff) << "." <<
 	          (host->h_addr_list[0][1] & 0xff) << "." <<
 	          (host->h_addr_list[0][2] & 0xff) << "." <<
