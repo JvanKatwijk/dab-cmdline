@@ -28,6 +28,7 @@
 #include	<getopt.h>
 #include        <cstdio>
 #include	<vector>
+#include	<iostream>
 #include	"dab-api.h"
 #include	"includes/support/band-handler.h"
 #include	"service-printer.h"
@@ -188,8 +189,8 @@ deviceHandler	*theDevice;
 bool	err;
 bool firstEnsemble = true;
 
-	fprintf (stderr, "dab_scanner V 1.0alfa,\n\
-	                  Copyright 2018 J van Katwijk, Lazy Chair Computing\n\	                            2018 Hayati Ayguen\n");
+	fprintf (stderr, "dab_scanner V 1.0alfa,\n"
+	                "Copyright 2018 J van Katwijk, Lazy Chair Computing\n"	                         "2018 Hayati Ayguen\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
@@ -280,7 +281,8 @@ bool firstEnsemble = true;
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmCorrection,
-	                                     theGain);
+	                                     theGain,
+	                                     false);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     ppmCorrection,
