@@ -71,10 +71,78 @@ and of course fileinput of ".raw" and ".sdr" files is supported, as
 well as input through the rtl_tcp driver.
 
 --------------------------------------------------------------------------
+An example: installing example 2
+--------------------------------------------------------------------------
+
+As with other sdr programs, a number of libraries is to be installed.
+Assuming that the program is to be compiled in a Debian based system
+(e.g. Ubuntu)
+
+	sudo apt-get update
+	sudo apt-get install git cmake
+	sudo apt-get install build-essential g++
+	sudo apt-get install pkg-config
+	sudo apt-get install libsndfile1-dev
+	sudo apt-get install libfftw3-dev portaudio19-dev
+	sudo apt-get install libfaad-dev zlib1g-dev 
+	sudo apt-get install libusb-1.0-0-dev mesa-common-dev
+	sudo apt-get install libgl1-mesa-dev
+	sudo apt-get install libsamplerate0-dev
+
+Installing the library for the SDRplay requires downloading the library
+from the "www.SDRplay.com" site.
+
+Installing the library for the RTLSDR can be done by executing the 
+following lines
+
+	git clone git://git.osmocom.org/rtl-sdr.git
+	cd rtl-sdr/
+	mkdir build
+	cd build
+	cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+	make
+	sudo make install
+	sudo ldconfig
+	cd ..
+	rm -rf build
+	cd ..
+
+Installing the library for the AIRspy can be done by executing the
+following lines
+
+	wget https://github.com/airspy/host/archive/master.zip
+	unzip master.zip
+	cd airspyone_host-master
+	mkdir build
+	cd build
+	cmake ../ -DINSTALL_UDEV_RULES=ON
+	make
+	sudo make install
+	sudo ldconfig
+	cd ..
+	rm -rf build
+	cd ..
+
+Once the libraries are installed, creating an executable for example 2
+is straightforward
+
+	cd dab-cmdline
+	cd example-2
+	mkdir build
+	cd build
+	cmake .. -DXXX=ON (replace XXX by the name of the device)
+	make
+	sudo make install
+	cd ../../..
+
+The resulting executable is installed in "/usr/local/bin"
+
+--------------------------------------------------------------------------
 The examples
 ---------------------------------------------------------------------------
 
-The examples 1 to 9 are basically simple variations on a single theme:
+The examples 1 to 9 are basically simple variations on a single theme,
+example 2 is the basic one, others are derived.
 
 	- example 1 is the example where the main program is linked to
 	  a precompiled shared library, 
@@ -133,14 +201,6 @@ The examples 1 to 9 are basically simple variations on a single theme:
 	  a DAB server program, running as a service on an RPI 2/3 under Stretch and
 	  being controlled by an android app (which is part of the development)
 
-----------------------------------------------------------------------------
-Example 10
-----------------------------------------------------------------------------
-
-Example 10 is contributed by Hayati Ayguen and - when run - gives some
-information on the processing of a.o the TII. Compiling it will require
-definition of some constants.
-
 -------------------------------------------------------------------------------
 A DAB scanner
 -------------------------------------------------------------------------------
@@ -155,33 +215,6 @@ by Libre Office Calc or similar programs.
 ![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 
  
-----------------------------------------------------------------------------
-Building an executable
-----------------------------------------------------------------------------
-
-For each of the programs, a CMakeLists.txt file exists with which a
-Makefile can be generated using Cmake.
-
-The standard way to create an executable is
-
-	cd X   (replace X by the appropriate name of the example)
-	mkdir build
-        cd build
-        cmake .. -DXXX=ON
-        make
-        sudo make install
-
-where XXX is one of the supported input devices, i.e. SDRPLAY, AIRSPY, HACKRF,
-RTLSDR, WAVFILES (".sdr"), or RTL_TCP.
-The name of the generated executable
-is dab-xxx-y for the examples 1 - 7, and dab-scanner-xxx for the dab-scanner
-program, where xxx is the device name, and y the number
-of the example to which the executable belongs.
-
-The executable will be installed (make install) in /usr/local/bin, so yo need to have
-permissions (you can obviously also just run the generated program
-from the build directory).
-
 ------------------------------------------------------------------------
 The API
 -----------------------------------------------------------------------

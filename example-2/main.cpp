@@ -267,7 +267,7 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
-int		ppmOffset	= 0;
+bool		rf_bias		= false;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
@@ -535,7 +535,7 @@ int	theDuration		= -1;	// no limit
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmOffset,
-	                                     gain, false);
+	                                     gain, rf_bias);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
 	                                     ppmOffset,
