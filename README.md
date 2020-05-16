@@ -22,6 +22,10 @@ library, the CMakeFile for example 2 allows selection of
 or
 	-DSDRPLAY_V3=ON
 
+and example 2 allows the selection of the xml-filereader
+
+	-DXM_FILES=ON
+
 Of course, you should have installed the right library
 
 ----------------------------------------------------------------------

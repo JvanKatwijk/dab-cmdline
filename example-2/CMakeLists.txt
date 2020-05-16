@@ -64,6 +64,11 @@ if(DEFINED RAWFILES)
    set(objectName dab-raw-2)
 endif ()
 
+if(DEFINED XMLFILES)
+   set(XMLFILES true)
+   set(objectName dab-xml-2)
+endif ()
+
 if(DEFINED LIMESDR)
    set(LIMESDR true)
    set(objectName dab-lime-2)
@@ -357,6 +362,31 @@ endif ()
 
 	   add_definitions (-DHAVE_RAWFILES)
 	endif()
+
+	if (XMLFILES)
+	   include_directories (
+	     ../devices/xml-filereader
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/xml-filereader/rapidxml.hpp
+	        ../devices/xml-filereader/xml-filereader.h
+	        ../devices/xml-filereader/xmlreader.h
+	        ../devices/xml-filereader/element-reader.h
+	        ../devices/xml-filereader/xml-descriptor.h
+	   )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/xml-filereader/xml-filereader.cpp
+	        ../devices/xml-filereader/xml-reader.cpp
+	        ../devices/xml-filereader/xml-descriptor.cpp
+	   )
+
+	   add_definitions (-DHAVE_XMLFILES)
+	endif (XMLFILES)
+
 #######################################################################
 #
 #	Here we really start

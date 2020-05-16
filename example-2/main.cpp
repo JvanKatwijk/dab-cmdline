@@ -48,6 +48,8 @@
 #include	"wavfiles.h"
 #elif	HAVE_RAWFILES
 #include	"rawfiles.h"
+#elif	HAVE_XMLFILES
+#include	"xml-filereader.h"
 #elif	HAVE_RTL_TCP
 #include	"rtl_tcp-client.h"
 #elif	HAVE_HACKRF
@@ -282,7 +284,11 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
 std::string	fileName;
 bool	repeater		= true;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
-#elif
+#elif	HAVE_XMLFILES
+std::string	fileName;
+bool		repeater	= true;
+const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
+#else
 //	HAVE_RTL_TCP
 int		gain		= 50;
 bool		autogain	= false;
@@ -298,7 +304,7 @@ int16_t		freqSyncTime	= 5;
 int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
-deviceHandler	*theDevice;
+deviceHandler	*theDevice	= nullptr;
 bool	err;
 int	theDuration		= -1;	// no limit
 	std::cerr << "dab_cmdline example II,\n \
@@ -363,6 +369,14 @@ int	theDuration		= -1;	// no limit
 	         repeater	= false;
 	         break;
 #elif	HAVE_RAWFILES
+	      case 'F':
+	         fileName	= std::string (optarg);
+	         break;
+
+	      case 'R':	         repeater	= false;
+	         break;
+
+#elif	HAVE_XMLFILES
 	      case 'F':
 	         fileName	= std::string (optarg);
 	         break;
@@ -553,6 +567,8 @@ int	theDuration		= -1;	// no limit
 	   theDevice	= new wavFiles (fileName, repeater);
 #elif	defined (HAVE_RAWFILES)
 	   theDevice	= new rawFiles (fileName, repeater);
+#elif	defined (HAVE_XMLFILES)
+	   theDevice	= new xml_fileReader (fileName, repeater);
 #elif	HAVE_RTL_TCP
 	   theDevice	= new rtl_tcp_client (hostname,
 	                                      basePort,
@@ -567,6 +583,11 @@ int	theDuration		= -1;	// no limit
 	   std::cerr << "allocating device failed (" << e << "), fatal\n";
 	   exit (32);
 	}
+	if (theDevice == nullptr) {
+	   fprintf (stderr, "no device selected, fatal\n");
+	   exit (33);
+	}
+
 //
 	if (soundOut == NULL) {	// not bound to a file?
 	   soundOut	= new audioSink	(latency, soundChannel, &err);
