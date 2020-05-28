@@ -16,7 +16,7 @@ New
 -----------------------------------------------------------------------
 New is that now the new SDRplay library, the v3 library, is supported.
 In order to allow choosing between the "old" 2.13 and the "new" 3.06
-library, the CMakeFile for example 2 allows selection of 
+library, the CMakeFile for example 2 and example 3 allows selection of 
 
 	-DSDRPLAY=ON
 or

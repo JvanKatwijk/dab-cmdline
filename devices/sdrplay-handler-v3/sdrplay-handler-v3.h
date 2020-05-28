@@ -24,23 +24,25 @@
 #ifndef __SDRPLAY_HANDLER_V3__
 #define	__SDRPLAY_HANDLER_V3__
 
-#include	<atomic>
-#include	<stdio.h>
+#include        <stdint.h>
+#include        <thread>
+#include        <atomic>
+#include        <vector>
 #include	"dab-constants.h"
 #include	"ringbuffer.h"
 #include	"device-handler.h"
+#include	<sdrplay_api.h>
 
-class	sdrplayController;
 
 class	sdrplayHandler_v3: public deviceHandler {
 public:
-		sdrplayHandler_v3 (uint32_t        frequency,
-                                   int16_t        ppmCorrection,
-                                   int16_t        GRdB,
-                                   int16_t        lnaState,
-                                   bool           autogain,
-                                   uint16_t       deviceIndex,
-                                   int16_t        antenna);
+		sdrplayHandler_v3 (uint32_t	frequency,
+                                   int16_t	ppmCorrection,
+                                   int16_t	GRdB,
+                                   int16_t	lnaState,
+                                   bool		autogain,
+                                   uint16_t	deviceIndex,
+                                   int16_t	antenna);
 
 		~sdrplayHandler_v3	();
 	bool    restartReader           (int32_t);
@@ -49,16 +51,28 @@ public:
         int32_t Samples                 (void);
         void    resetBuffer             (void);
         int16_t bitDepth                (void);
-	float	denominator;
+//	The following items should be visible from outsize
+//	the callback functions refer to them
+        RingBuffer<std::complex<float>> _I_Buffer;
+        float   denominator;
+        void    update_PowerOverload (sdrplay_api_EventParamsT *params);
+        std::atomic<bool>       running;
 private:
-	RingBuffer<std::complex<float>>	*_I_Buffer;
-	sdrplayController	*theController;
-	int32_t			vfoFrequency;
-	int16_t			ppmCorrection;
-	int16_t			GRdB;
-	int16_t			lnaState;
-	bool			autogain;
-	uint16_t		deviceIndex;
+        void                    run             ();
+        sdrplay_api_DeviceT             *chosenDevice;
+        sdrplay_api_DeviceParamsT       *deviceParams;
+        sdrplay_api_CallbackFnsT        cbFns;
+        sdrplay_api_RxChannelParamsT    *chParams;
+        std::thread                     threadHandle;
+
+        bool                    failFlag;
+        int16_t                 hwVersion;
+        int32_t                 vfoFrequency;
+        int16_t                 ppmCorrection;
+        int16_t                 GRdB;
+        int16_t                 lnaState;
+        bool                    autogain;
+        uint16_t                deviceIndex;
 	int16_t			antenna;
 	int16_t			nrBits;
 };

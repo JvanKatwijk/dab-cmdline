@@ -34,6 +34,8 @@
 #include	"includes/support/band-handler.h"
 #ifdef  HAVE_SDRPLAY
 #include        "sdrplay-handler.h"
+#elif  HAVE_SDRPLAY_V3
+#include        "sdrplay-handler.h"
 #elif   HAVE_AIRSPY
 #include        "airspy-handler.h"
 #elif   HAVE_RTLSDR
@@ -228,6 +230,12 @@ int16_t		gain		= 70;
 std::string	antenna		= "Auto";
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
 #elif	HAVE_SDRPLAY	
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 2;
+bool		autogain	= false;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+#elif	HAVE_SDRPLAY_V3
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
@@ -462,6 +470,14 @@ bool	err;
 	try {
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
+	                                      ppmOffset,
+	                                      GRdB,
+	                                      lnaState,
+	                                      autogain,
+	                                      0,
+	                                      0);
+#ifdef	HAVE_SDRPLAY_V3
+	   theDevice	= new sdrplayHandler_v3 (frequency,
 	                                      ppmOffset,
 	                                      GRdB,
 	                                      lnaState,
