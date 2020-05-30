@@ -21,7 +21,6 @@
  */
 
 #include	"sdrplay-handler-v3.h"
-#include	"sdrplay-controller.h"
 
 
 	sdrplayHandler_v3::sdrplayHandler_v3  (uint32_t	frequency,
@@ -158,6 +157,7 @@ sdrplay_api_ErrT        err;
 sdrplay_api_DeviceT     devs [6];
 float			apiVersion;
 uint32_t                ndev;
+int			lna_upperBound;
 
 	chosenDevice	= nullptr;
 	deviceParams	= nullptr;
@@ -184,7 +184,7 @@ uint32_t                ndev;
 	   return;
         }
 
-        if (apiVersion < SDRPLAY_API_VERSION - 0.1)) {
+        if (apiVersion < (SDRPLAY_API_VERSION - 0.1)) {
            fprintf (stderr, "API versions don't match (local=%.2f dll=%.2f)\n",
                                               SDRPLAY_API_VERSION, apiVersion);
 	   failFlag	= true;
@@ -246,7 +246,8 @@ uint32_t                ndev;
 //	these will change:
 	chParams	-> tunerParams. rfFreq. rfHz    = vfoFrequency;
 	chParams	-> tunerParams. gain.gRdB	= GRdB;
-	chParams	-> tunerParams. gain.LNAstate	= lnaState;
+	chParams	-> tunerParams. gain.LNAstate	= 3;
+//	chParams	-> tunerParams. gain.LNAstate	= lnaState;
 	chParams	-> ctrlParams.agc.enable =
 	          autogain ?  sdrplay_api_AGC_100HZ :
 	                      sdrplay_api_AGC_DISABLE;
@@ -265,27 +266,44 @@ uint32_t                ndev;
 	hwVersion = devs [0]. hwVer;
 	switch (hwVersion) {
 	   case 1:		// old RSP
+	      lna_upperBound	= 3;
 	      denominator	= 2048.0;
 	      nrBits		= 12;
 	      break;
 	   case 2:		// RSP II
+	      lna_upperBound	= 8;
 	      denominator	= 2048.0;
 	      nrBits		= 14;
 	      break;
 	   case 3:		// RSP-DUO
+	      lna_upperBound	= 9;
 	      denominator	= 2048.0;
 	      nrBits		= 12;
 	      break;
+	   case 4:		// RSP-Dx
+	      lna_upperBound	= 26;
+	      denominator	= 2048.0;
+	      nrBits		= 14;
+	      break;
 	   default:
 	   case 255:		// RSP-1A
+	      lna_upperBound	= 9;
 	      denominator	= 8192.0;
 	      nrBits		= 14;
 	      break;
 	}
 
+	if (lnaState >= lna_upperBound)
+	   this -> lnaState	= lna_upperBound;
+
 	err = sdrplay_api_Update (chosenDevice -> dev,
 	                          chosenDevice -> tuner,
 	                          sdrplay_api_Update_Tuner_Frf,
+	                          sdrplay_api_Update_Ext1_None);
+	chParams -> tunerParams. gain. LNAstate = this -> lnaState;
+	err = sdrplay_api_Update (chosenDevice -> dev,
+	                          chosenDevice -> tuner,
+	                          sdrplay_api_Update_Tuner_Gr,
 	                          sdrplay_api_Update_Ext1_None);
 	if (err != sdrplay_api_Success) {
 	   fprintf (stderr, "restart: error %s\n",

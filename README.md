@@ -22,7 +22,11 @@ library, the CMakeFile for example 2 and example 3 allows selection of
 or
 	-DSDRPLAY_V3=ON
 
-and example 2 allows the selection of the xml-filereader
+Note that, while both the 2.13 and 3.06 library interface can be used
+for the RSP1, the RSP II, the RSP Ia and the RSP Duo from SDRplay,
+for using the RSP-Dx one needs to have the 3.06 library installed.
+
+Furthermore,  example 2 allows the selection of the xml-filereader
 
 	-DXM_FILES=ON
 
