@@ -398,7 +398,7 @@ bool firstEnsemble = true;
 	                             programNames [i]. c_str (),
 	                             &ad,
 	                             &firstService);
-	         for (int j = 1; j < 5; j ++) {
+	         for (int j = 0; j < 16; j ++) {
 	            packetdata pd;
 	            dataforDataService (theRadio,
 	                                programNames [i]. c_str (),
@@ -420,7 +420,7 @@ bool firstEnsemble = true;
 	         if (firstTime)
 	            print_dataHeader (outFile, jsonOutput);
 	         firstTime	= false;
-	         for (int j = 0; j < 5; j ++) {
+	         for (int j = 0; j < 16; j ++) {
                     packetdata pd;
                     dataforDataService (theRadio,
                                         programNames [i]. c_str (),
@@ -437,7 +437,7 @@ bool firstEnsemble = true;
 	      }
 	      else
 	      if (is_audioService (theRadio, programNames [i]. c_str ())) {
-	         for (int j = 1; j < 5; j ++) {
+	         for (int j = 0; j < 16; j ++) {
 	            packetdata pd;
 	            dataforDataService (theRadio,
 	                                programNames [i]. c_str (),
