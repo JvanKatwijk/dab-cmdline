@@ -37,6 +37,9 @@
 	this	-> lnaState	= lnaState;
 	this	-> autogain	= autogain;
 	failFlag                = false;
+//
+//	we start the actual handler, but we have to wait until
+//	we  know that it is functioning (or not)
         running. store  (false);
         threadHandle            = std::thread (&sdrplayHandler_v3::run, this);
         while (!failFlag && !running. load ())
@@ -45,7 +48,6 @@
            threadHandle. join ();
            throw (21);
         }
-
 }
 
 	sdrplayHandler_v3::~sdrplayHandler_v3 () {
@@ -223,6 +225,7 @@ int			lna_upperBound;
 
 	err	= sdrplay_api_DebugEnable (chosenDevice -> dev, 
 	                                         (sdrplay_api_DbgLvl_t)1);
+
 //	retrieve device parameters, so they can be changed if needed
 	err	= sdrplay_api_GetDeviceParams (chosenDevice -> dev,
 	                                                     &deviceParams);
@@ -300,13 +303,19 @@ int			lna_upperBound;
 	                          chosenDevice -> tuner,
 	                          sdrplay_api_Update_Tuner_Frf,
 	                          sdrplay_api_Update_Ext1_None);
+	if (err != sdrplay_api_Success) {
+	   fprintf (stderr, "restart: error %s\n",
+	                              sdrplay_api_GetErrorString (err));
+	   goto closeAPI;
+
+	}
 	chParams -> tunerParams. gain. LNAstate = this -> lnaState;
 	err = sdrplay_api_Update (chosenDevice -> dev,
 	                          chosenDevice -> tuner,
 	                          sdrplay_api_Update_Tuner_Gr,
 	                          sdrplay_api_Update_Ext1_None);
 	if (err != sdrplay_api_Success) {
-	   fprintf (stderr, "restart: error %s\n",
+	   fprintf (stderr, "restart: error in lna setting %s\n",
 	                              sdrplay_api_GetErrorString (err));
 	   goto closeAPI;
 

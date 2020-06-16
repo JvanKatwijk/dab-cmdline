@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2016, 2017, 2018
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is the API description of the DAB-library.
  *
@@ -112,7 +112,6 @@ typedef	struct {
 //
 //	dynamic label data, embedded in the audio stream, is sent as string
 	typedef void (*dataOut_t)(std::string, void *);
-//
 //
 //	byte oriented data, emitted by various dataHandlers, is sent
 //	as array of uint8_t values (packed bytes)

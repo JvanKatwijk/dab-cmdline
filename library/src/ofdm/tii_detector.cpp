@@ -201,6 +201,7 @@ int	i;
 	      P_allAvg  [j] += P_tmpNorm [j];
 	      theBuffer [j] += fft_buffer [j];
 	   }
+
 	   isFirstAdd = false;
 	   numUsedBuffers ++;
 	}
@@ -395,7 +396,7 @@ int	num_subIDs [NUM_SUBIDS];	// counter for possible subIDs over all groups
 int		groupNo, i, j;
 
 	*pNumOut = 0;
-	if (params.get_dabMode() != 1)
+	if (params.get_dabMode () != 1)
 	    return;
 
 //	sum 4 times repeated spectrum of 384 carriers into P_avg[]
@@ -530,7 +531,7 @@ int		groupNo, i, j;
 	   const float minPsig = subP [NUM_SUBIDS_IN_PATTERN - 1];
 //	output if above minimum SNR
 	   float minSNR = powerRatio (minPsig, maxPnoise);
-//	float minSNR = minGrpSNR;
+//	   float minSNR = minGrpSNR;
 
 	   if (minSNR >= MIN_SNR_POWER_RATIO) {
 //	      outTii [*pNumOut] = 1000 * groupPatternBits + subID;
@@ -552,7 +553,3 @@ int		groupNo, i, j;
 	   }
 	}
 }
-
-
-//
-//

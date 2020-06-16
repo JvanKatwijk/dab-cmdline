@@ -164,7 +164,7 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 //	typedef void (*motdata_t)(std::string, int, void *);
 void	motdataHandler (std::string s, int d, void *ctx) {
 	(void)s; (void)d; (void)ctx;
-	fprintf (stderr, "plaatje %s\n", s. c_str ());
+//	fprintf (stderr, "plaatje %s\n", s. c_str ());
 }
 
 //
@@ -293,8 +293,8 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
 int		gain		= 50;
 bool		autogain	= false;
 int		ppmOffset	= 0;
-std::string	hostname = "127.0.0.1";		// default
-int32_t		basePort = 1234;		// default
+std::string	hostname	= "127.0.0.1";	// default
+int32_t		basePort	= 1234;		// default
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
@@ -307,6 +307,7 @@ bandHandler	dabBand;
 deviceHandler	*theDevice	= nullptr;
 bool	err;
 int	theDuration		= -1;	// no limit
+
 	std::cerr << "dab_cmdline example II,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
@@ -668,6 +669,10 @@ int	theDuration		= -1;	// no limit
 	   std::cerr << "sorry  we cannot handle service " << 
 	                                         programName << "\n";
 	   run. store (false);
+	   sleep (1);
+	   dabExit (theRadio);
+	   delete theDevice;
+	   exit (22);
 	}
 
 	if (run. load ()) {

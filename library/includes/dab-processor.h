@@ -39,7 +39,7 @@
 #include	"ringbuffer.h"
 #include	"dab-api.h"
 #include	"sample-reader.h"
-#ifdef	__TII_INCLUDED
+#ifdef	__TII_INCLUDED__
 #include	"tii_detector.h"
 #endif
 //
@@ -105,7 +105,9 @@ public:
 #endif
 private:
 //
+#ifdef	__TII_INCLUDED__
 //	additions for example-10
+	TII_Detector	my_TII_Detector;
 	int             tii_framedelay;
         int             tii_counter;
         tii_t           my_tiiHandler;
@@ -113,14 +115,11 @@ private:
         float           tii_alfa;
         int             tii_resetFrameCount;
         unsigned        tii_num;
-
+#endif
 	deviceHandler	*inputDevice;
 	dabParams	params;
 	sampleReader	myReader;
 	phaseReference	phaseSynchronizer;
-#ifdef	__TII_INCLUDED__
-	TII_Detector	my_TII_Detector;
-#endif
 	ofdmDecoder	my_ofdmDecoder;
 	ficHandler	my_ficHandler;
 	mscHandler	my_mscHandler;

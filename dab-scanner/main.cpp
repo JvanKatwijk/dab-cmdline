@@ -393,7 +393,7 @@ bool firstEnsemble = true;
 	                              programNames [i]. c_str (),
 	                              &ad, 0);
 	         print_audioService (outFile, 
-                                 jsonOutput,
+                                     jsonOutput,
 	                             theRadio,
 	                             programNames [i]. c_str (),
 	                             &ad,

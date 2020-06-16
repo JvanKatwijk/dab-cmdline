@@ -47,14 +47,15 @@
 	                                 RingBuffer<std::complex<float>> *spectrumBuffer,
 	                                 RingBuffer<std::complex<float>> *iqBuffer,
 	                                 void		*userData):
+#ifdef	__TII_INCLUDED__
 	                                    tii_framedelay  (20),
                                             tii_counter     (0),
-#ifdef	__TII_INCLUDED__
+	                                    my_TII_Detector (dabMode),
                                             my_tiiHandler   (nullptr),
                                             my_tiiExHandler (nullptr),
-#endif
                                             tii_alfa        (-1.0F),
                                             tii_resetFrameCount (-1),
+#endif
 	                                    params (dabMode),
 	                                    myReader (this,
 	                                              inputDevice,
@@ -63,9 +64,6 @@
 	                                                       DIFF_LENGTH),
 	                                    my_ofdmDecoder (dabMode,
 	                                                    iqBuffer),
-#ifdef	__TII_INCLUDED__
-	                                    my_TII_Detector (dabMode),
-#endif
 	                                    my_ficHandler (dabMode,
 	                                                   ensemblename_Handler,
                                                            programname_Handler,
@@ -86,13 +84,13 @@
 	this	-> T_null		= params. get_T_null ();
 	this	-> T_s			= params. get_T_s ();
 	this	-> T_u			= params. get_T_u ();
-	this	-> T_F			= params. get_T_F ();
 	this	-> T_g			= params. get_T_g();
+	this	-> T_F			= params. get_T_F ();
 	this	-> nrBlocks		= params. get_L ();
 	this	-> carriers		= params. get_carriers ();
 	this	-> carrierDiff		= params. get_carrierDiff ();
-	isSynced	= false;
-	snr		= 0;
+	isSynced			= false;
+	snr				= 0;
 	running. store (false);
 }
 
@@ -118,15 +116,12 @@ void	dabProcessor::run	(void) {
 std::complex<float>	FreqCorr;
 timeSyncer      myTimeSyncer (&myReader);
 int32_t		i;
-float		fineOffset	= 0;
-float		coarseOffset	= 0;
+float		fineOffset		= 0;
+float		coarseOffset		= 0;
 bool		correctionNeeded	= true;
 std::vector<complex<float>>	ofdmBuffer (T_null);
 int		dip_attempts		= 0;
 int		index_attempts		= 0;
-float		avgValue_nullPeriod	= 0;
-float		avgValue_testPeriod	= 0;
-int		testLength		= 100;
 int		startIndex		= -1;
 
 	isSynced	= false;
@@ -280,7 +275,6 @@ SyncOnPhase:
 	   for (i = 0; i < T_null; i ++)
 	      sum += abs (ofdmBuffer [i]);
 	   sum /= T_null;
-	   avgValue_nullPeriod	= sum;
 
 	   float sum2 = myReader. get_sLevel ();
 	   snr	= 0.9 * snr + 0.1 * 20 * log10 ((sum2 + 0.005) / sum);
@@ -293,9 +287,7 @@ SyncOnPhase:
               if ((my_tiiHandler || my_tiiExHandler)) {
                  int32_t cifCounter = my_ficHandler. get_CIFcount ();
                  if (wasSecond (cifCounter, &params)) {
-                    my_TII_Detector.
-                          addBuffer (ofdmBuffer,
-                                     tii_alfa, cifCounter);
+                    my_TII_Detector. addBuffer (ofdmBuffer, tii_alfa, cifCounter);
                     tii_counter ++;
                     if (tii_counter >= tii_framedelay) {
                        if (my_tiiHandler) {
@@ -328,6 +320,7 @@ SyncOnPhase:
                                               userData);
                        }
                     }
+
                     if (tii_counter >= tii_framedelay)
                        tii_counter = 0;
                     if (my_TII_Detector. getNumBuffers() >=

@@ -155,8 +155,6 @@ std::map <int, int> tiiMap;
 std::map <int, ExTiiInfo> tiiExMap;
 int numAllTii = 0;
 
-
-
 #if ENABLE_FAST_EXIT
   #define FAST_EXIT( N )  exit( N )
 #else
@@ -170,7 +168,6 @@ int numAllTii = 0;
   #define FMT_DURATION  ""
   #define SINCE_START   
 #endif
-
 
 inline void sleepMillis(unsigned ms) {
 	usleep (ms * 1000);
@@ -642,7 +639,10 @@ int32_t		basePort = 1234;		// default
 int		deviceIndex = 0;
 const char	* deviceSerial = nullptr;
 #endif
-
+#ifdef	HAVE_SDRPLAY
+int	lnaState;
+#define	SDRPLAY_OPTS	"L:"
+#endif
 bool	err;
 
 	msecs_progStart = currentMSecsSinceEpoch ();  // for  long sinceStart()
@@ -679,7 +679,7 @@ bool	err;
 	#endif
 #endif
 
-	while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:E:ct:a:r:xO:" FILE_OPTS NON_FILE_OPTS RTLSDR_OPTS RTL_TCP_OPTS )) != -1) {
+	while ((opt = getopt (argc, argv, "W:A:M:B:P:p:S:E:ct:a:r:xO:" FILE_OPTS NON_FILE_OPTS RTLSDR_OPTS RTL_TCP_OPTS SDRPLAY_OPTS )) != -1) {
 	   fprintf (stderr, "opt = %c\n", opt);
 	   switch (opt) {
 	      case 'W':
@@ -779,6 +779,11 @@ bool	err;
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#ifdef HAVE_SDRPLAY
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+#endif
 #if defined(HAVE_RTLSDR)
 	      case 'd':
 	         deviceIndex	= atoi (optarg);
@@ -827,6 +832,7 @@ bool	err;
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
 	                                      theGain,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);

@@ -101,6 +101,8 @@ if (DEFINED_SERVER)
     add_definitions(-DHAVE_SERVER)
 endif ()
 
+add_definitions (-D__TII_INCLUDED__)
+
 #########################################################################
 	find_package (PkgConfig)
 
