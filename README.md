@@ -21,6 +21,7 @@ library, the CMakeFile for example 2 and example 3 allows selection of
 
 	-DSDRPLAY=ON
 or
+
 	-DSDRPLAY_V3=ON
 
 Note that, while both the 2.13 and 3.06 library interface can be used
@@ -56,7 +57,7 @@ something like
 	dab-sdrplay-x -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
 
 In this case, the example program was built with the SDRplay as device (other
-possibilities are DABsticks, AIRspy devices and HACKRF devices (and some
+possibilities are DABsticks, AIRspy devices, HACKRF and Lime SDR devices (and some
 of the example programs can be configured to take file input)).
 Furthermore, the example program will set the tuner to Band III, channel 12C,
 will select the service "Radio 4". The Gain of the tuner is set to 80 (on 
@@ -83,7 +84,7 @@ well as input through the rtl_tcp driver.
 The examples
 ---------------------------------------------------------------------------
 
-The examples 1 to 9 are basically simple variations on a single theme,
+The examples 1 to 7 are basically simple variations on a single theme,
 example 2 is the basic one, others are derived.
 
 	- example 1 is the example where the main program is linked to
@@ -119,6 +120,10 @@ example 2 is the basic one, others are derived.
 	- example 7 is an experimental version where stdin is
 	  used as input device (and the command line parameters are
 	  adapted to that)
+
+	The sourcetree contains directories for some other examples as well,
+	however, most recent changes were not applied, and these examples
+	are considered "obsolete".
 
 	For all examples it holds that no garantee is given on their functioning,
 	feel free to improve.
