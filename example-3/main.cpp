@@ -476,7 +476,7 @@ bool	err;
 	                                      autogain,
 	                                      0,
 	                                      0);
-#ifdef	HAVE_SDRPLAY_V3
+#elif	HAVE_SDRPLAY_V3
 	   theDevice	= new sdrplayHandler_v3 (frequency,
 	                                      ppmOffset,
 	                                      GRdB,

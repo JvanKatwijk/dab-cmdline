@@ -362,8 +362,8 @@ bool	err;
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
 	                                      ppmCorrection,
-	                                      theGain,
-	                                      3,
+	                                      GRdB,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);
@@ -426,7 +426,7 @@ bool	err;
 	   exit (4);
 	}
 
-	theDevice	-> setGain (theGain);
+//	theDevice	-> setGain (theGain);
 	if (autogain)
 	   theDevice	-> set_autogain (autogain);
 	theDevice	-> restartReader (frequency);

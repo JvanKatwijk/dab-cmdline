@@ -43,7 +43,8 @@
 	                                programname_t  programnameHandler,
 	                                fib_quality_t fib_qualityHandler,
 	                                void		*userData):
-	                                      viterbiHandler (768),
+	                                      viterbiSpiral (768),
+//	                                      viterbiHandler (768),
 	                                      fibProcessor (ensemblenameHandler,
 	                                                    programnameHandler,
 	                                                    userData),

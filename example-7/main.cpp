@@ -44,6 +44,8 @@
 using std::cerr;
 using std::endl;
 
+#define	MHz(x)	(x * 1000000)
+
 void    printOptions (void);	// forward declaration
 //	we deal with callbacks from different threads. So, if you extend
 //	the functions, take care and add locking whenever needed
@@ -203,24 +205,10 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
-std::string	theChannel	= "11C";
-uint8_t		theBand		= BAND_III;
-int16_t		ppmCorrection	= 0;
-int		deviceGain	= 45;	// scale = 0 .. 100
-#ifdef	HAVE_HACKRF
-int		lnaGain		= 40;
-int		vgaGain		= 40;
-#endif
-#ifdef	HAVE_SDRPLAY	
-int16_t		GRdB		= 30;
-int16_t		lnaState	= 2;
-#endif
-
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 5;
-bool		autogain	= false;
 int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
@@ -256,11 +244,6 @@ bool	err;
 	         theMode	= atoi (optarg);
 	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
 	            theMode = 1; 
-	         break;
-
-	      case 'B':
-	         theBand = std::string (optarg) == std::string ("L_BAND") ?
-	                                                 L_BAND : BAND_III;
 	         break;
 
 	      case 'P':

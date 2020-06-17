@@ -30,14 +30,16 @@
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<vector>
-#include	"viterbi-handler.h"
+#include	"viterbi-spiral.h"
+//#include	"viterbi-handler.h"
 #include	"fib-processor.h"
 #include	<mutex>
 #include	<string>
 #include	"dab-api.h"
 #include	"dab-params.h"
 
-class ficHandler: public viterbiHandler {
+class ficHandler: public viterbiSpiral {
+//class ficHandler: public viterbiHandler {
 public:
 		ficHandler		(uint8_t,	// dabMode
 	                                 ensemblename_t,

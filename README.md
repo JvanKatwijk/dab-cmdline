@@ -14,6 +14,7 @@ The library interface is given in dab-api.h
 -----------------------------------------------------------------------
 New
 -----------------------------------------------------------------------
+
 New is that now the new SDRplay library, the v3 library, is supported.
 In order to allow choosing between the "old" 2.13 and the "new" 3.06
 library, the CMakeFile for example 2 and example 3 allows selection of 
@@ -28,7 +29,7 @@ for using the RSP-Dx one needs to have the 3.06 library installed.
 
 Furthermore,  example 2 allows the selection of the xml-filereader
 
-	-DXM_FILES=ON
+	-DXML_FILES=ON
 
 Of course, you should have installed the right library
 
@@ -77,6 +78,64 @@ Supported devices
 
 and of course fileinput of ".raw" and ".sdr" files is supported, as
 well as input through the rtl_tcp driver.
+
+--------------------------------------------------------------------------
+The examples
+---------------------------------------------------------------------------
+
+The examples 1 to 9 are basically simple variations on a single theme,
+example 2 is the basic one, others are derived.
+
+	- example 1 is the example where the main program is linked to
+	  a precompiled shared library, 
+	  i.e. the DAB library should be pre-installed
+
+	- example 2 has the same functionality as example 1, the sources
+          of the library are "compiled-in", however.
+
+	- example 3 has the same functionality as example 2, and here
+	  the library sources are "compiled in" as well. However, the
+	  PCM samples are being sent out to stdout.
+	  One might use one of the available programs to make the sound
+	  audible
+	  dab-example-3 .... | aplay -r 48000 -f S16_LE -t raw -c 2
+
+	- example 4 has the sample functionality as examples 2 and 3, and
+	  here the library sources are "compiled in" as well. However,
+	  no sound decoding takes place. The MP2 frames (in case of DAB)
+	  or the AAC frames (in case of DAB+) are just emitted through stdout.
+	  The output can be processed by e.g. VLC.
+	  (Note that the AAC frames have 960 rather than 1024 samples,
+	   not all audio programs are capable of handling these).
+
+	- example 5 is a small experimental extension to example 2,
+	  It contains a simple "keyboard listener", that will react
+	  on entering a stroke on the return key. It will cause the
+	  "next" (audio) service to be selected.
+
+	- example 6 is an experimental version where control is
+	  through an IP port. 
+	  
+	- example 7 is an experimental version where stdin is
+	  used as input device (and the command line parameters are
+	  adapted to that)
+
+	For all examples it holds that no garantee is given on their functioning,
+	feel free to improve.
+
+-------------------------------------------------------------------------------
+A simple DAB scanner
+-------------------------------------------------------------------------------
+
+Next to these examples, a simple dab-scanner was made, an example program
+that just scans all channels of the given band (BAND III by default)
+and collects and emits data about the ensembles and services encountered.
+Output can be sent to a file - ASCII - that can be interpreted
+by Libre Office Calc or similar programs.
+
+The dab-scanner supports rtlsdr, sdrplay, airspy, hackrf, and lime sdr.
+
+![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 
 --------------------------------------------------------------------------
 An example: installing example 2
@@ -145,84 +204,6 @@ is straightforward
 
 The resulting executable is installed in "/usr/local/bin"
 
---------------------------------------------------------------------------
-The examples
----------------------------------------------------------------------------
-
-The examples 1 to 9 are basically simple variations on a single theme,
-example 2 is the basic one, others are derived.
-
-	- example 1 is the example where the main program is linked to
-	  a precompiled shared library, 
-	  i.e. the DAB library should be pre-installed
-
-	- example 2 has the same functionality as example 1, the sources
-          of the library are "compiled-in", however.
-
-	- example 3 has the same functionality as example 2, and here
-	  the library sources are "compiled in" as well. However, the
-	  PCM samples are being sent out to stdout.
-	  One might use one of the available programs to make the sound
-	  audible
-	  dab-example-3 .... | aplay -r 48000 -f S16_LE -t raw -c 2
-
-	- example 4 has the sample functionality as examples 2 and 3, and
-	  here the library sources are "compiled in" as well. However,
-	  no sound decoding takes place. The MP2 frames (in case of DAB)
-	  or the AAC frames (in case of DAB+) are just emitted through stdout.
-	  (Note that the AAC frames have 960 rather than 1024 samples)
-
-	- example 5 is a small experimental extension to example 2,
-	  It contains a simple "keyboard listener", that will react
-	  on entering a stroke on the return key. It will cause the
-	  "next" (audio) service to be selected.
-
-	- example 6 is an experimental version where control is
-	  through an IP port. 
-	  
-	- example 7 is an experimental version where stdin is
-	  used as input device (and the command line parameters are
-	  adapted to that)
-
-	- example 8 and 9 are a new project. They are derived from example 2
-	  and aim at retransmitting the audio from a selected
-	  service as an FM signal, stereo and equipped with RDS
-	  such that we can listen to the "warm" sound of old (tube)
-	  radios.
-	  example 8 will emit the FM stereo samples through a selected
-	  soundcard channel, example 9 will emit the FM stereo samples either
-	  to a file, or a tcp port.
-	  The rds text is derved from the dynamic label as emitted by
-	  the dab service.
-
-	  The sources for a simple "hackrf-server" are included in
-	  the example-9 directory. This hackrf server will instruct
-	  the hackrf device to transmit the incoming samples.
-	  Communication between the example 9 programme and the hackrf
-	  server is through a TCP port, I am using 127.0.0.1:8765
-
-	  If you are not allowed to transmit (as most of us I assume),
-	  a simple coax cable between the hackrf device and the "old"
-	  radio to listen to will do.
-
-	- in a separate project a variant of the DAB library is used to create 
-	  a DAB server program, running as a service on an RPI 2/3 under Stretch and
-	  being controlled by an android app (which is part of the development)
-
--------------------------------------------------------------------------------
-A DAB scanner
--------------------------------------------------------------------------------
-
-Next to these examples, a simple dab-scanner was made, an example program
-that just scans all channels of the given band (BAND III by default)
-and collects and emits data about the ensembles and services encountered.
-Output can be sent to a file - ASCII - that can be interpreted
-by Libre Office Calc or similar programs.
-
-
-![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
-
- 
 ------------------------------------------------------------------------
 The API
 -----------------------------------------------------------------------
@@ -425,9 +406,8 @@ Copyrights
 	
 	Copyright (C)  2016, 2017, 2018
 	Jan van Katwijk (J.vanKatwijk@gmail.com)
-	Lazy Chair Programming
+	Lazy Chair Computing
 
-The dab-library software is made available under the GPL-2.0. The dab-library uses a number of GPL-ed libraries, all
-rigfhts gratefully acknowledged.
+The dab-library software is made available under the GPL-2.0. The dab-library uses a number of GPL-ed libraries, all rigfhts gratefully acknowledged.
 All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 	GNU General Public License for more details.
 

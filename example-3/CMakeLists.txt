@@ -26,49 +26,105 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ######################################################################
 #
 ########################################################################
-if(DEFINED AIRSPY)
-   set(AIRSPY true)
-   set(objectName dab-airspy-3)
+OPTION(RTLSDR   "Input: RTLSDR"   OFF)
+OPTION(SDRPLAY  "Input: SDRPlay"  OFF)
+OPTION(AIRSPY   "Input: AirSpy"   OFF)
+OPTION(HACKRF	"Input: HACKRF"	  OFF)
+OPTION(LIMESDR	"Input: LIMESDR"  OFF)
+OPTION(RTL_TCP  "Input: RTL_TCP"  OFF)
+OPTION(SDRPLAY_V3  "Input: SDRPlay_V3"  OFF)
+OPTION(WAVFILES "Input: WAVFILES" OFF)
+OPTION(RAWFILES "Input: RAWFILES" OFF)
+OPTION(SERVER	"Create TDC server"	  OFF)
+OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
+OPTION(RPI_DEFINED "optimize for ARM/NEON" OFF)
+
+if ( (NOT RTLSDR) AND (NOT SDRPLAY) AND (NOT AirSpy) AND (NOT HACKRF) AND (NOT LIMESDR) AND (NOT RTL_TCP) AND (NOT SDRPLAY_V3) AND (NOT WAVFILES) AND (NOT RAWFILES) )
+   message("None of the Input Options selected. Using default SDRPlay")
+   set(SDRPlay ON)
 endif ()
 
-if(DEFINED SDRPLAY)
-   set(SDRPLAY true)
-   set(objectName dab-sdrplay-3)
+set (objectName "")
+
+if(RTLSDR)
+   if (objectName STREQUAL "")
+      set(RTLSDR ON)
+      set(objectName dab-rtlsdr-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED SDRPLAY_V3)
-   set(SDRPLAY_V3 true)
-   set(objectName dab-sdrplay-3)
+if(SDRPLAY)
+   if (objectName STREQUAL "")
+      set(SDRPLAY ON)
+      set(objectName dab-sdrplay-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED RTLSDR)
-   set(RTLSDR true)
-   set(objectName dab-rtlsdr-3)
+if(AIRSPY)
+   if (objectName STREQUAL "")
+      set(AIRSPY ON)
+      set(objectName dab-airspy-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED HACKRF)
-   set(HACKRF true)
-   set(objectName dab-hackrf-3)
+if(HACKRF)
+   if (objectName STREQUAL "")
+      set(HACKRF ON)
+      set(objectName dab-hackrf-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED WAVFILES)
-   set(WAVFILES true)
-   set(objectName dab-files-3)
+if(LIMESDR)
+   if (objectName STREQUAL "")
+      set(LIMESDR ON)
+      set(objectName dab-lime-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED RAWFILES)
-   set(RAWFILES true)
-   set(objectName dab-raw-3)
+if(RTL_TCP)
+   if (objectName STREQUAL "")
+      set(RTL_TCP ON)
+      set(objectName dab-rtl_tcp-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED LIMESDR)
-   set(LIMESDR true)
-   set(objectName dab-lime-2)
+if(SDRPLAY_V3)
+   if (objectName STREQUAL "")
+      set(SDRPLAY_V3 ON)
+      set(objectName dab-sdrplay-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED RTL_TCP)
-   set(RTL_TCP true)
-   set(objectName dab-rtl_tcp-3)
+if(WAVFILES)
+   if (objectName STREQUAL "")
+      set(WAVFILES ON)
+      set(objectName dab-files-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
+endif ()
+
+if(RAWFILES)
+   if (objectName STREQUAL "")
+      set(RAWFILES ON)
+      set(objectName dab-raw-3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
 if (DEFINED_SERVER)
@@ -361,6 +417,7 @@ add_definitions (-DSTREAMER_OUTPUT)
 	           ../library/includes/backend/data/mot
 	           ../library/includes/backend/data/journaline
 	           ../library/includes/support
+	           ../library/includes/support/viterbi-spiral
 	           /usr/include/
 	)
 
@@ -399,8 +456,8 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ../library/includes/backend/data/mot/mot-handler.h
 	     ../library/includes/backend/data/mot/mot-dir.h
 	     ../library/includes/backend/data/mot/mot-object.h
-         ../library/inclues/support/band-handler.h
-	     ../library/includes/support/viterbi-handler.h
+	     ../library/inclues/support/band-handler.h
+#	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
@@ -408,6 +465,7 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ../library/includes/support/fft_handler.h
 	     ../library/includes/support/dab-params.h
 	     ../library/includes/support/tii_table.h
+	     ../library/includes/support/viterbi-spiral/viterbi-spiral.h
 	)
 
 	set (${objectName}_SRCS
@@ -444,8 +502,8 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ../library/src/backend/data/mot/mot-handler.cpp
 	     ../library/src/backend/data/mot/mot-dir.cpp
 	     ../library/src/backend/data/mot/mot-object.cpp
-         ../library/src/support/band-handler.cpp
-	     ../library/src/support/viterbi-handler.cpp
+	     ../library/src/support/band-handler.cpp
+#	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
@@ -453,9 +511,43 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ../library/src/support/fft_handler.cpp
 	     ../library/src/support/dab-params.cpp
 	     ../library/src/support/tii_table.cpp
+	     ../library/src/support/viterbi-spiral/viterbi-spiral.cpp
 	)
 
-#
+	if (X64_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ../library/src/support/viterbi-spiral/spiral-sse.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ../library/src/support/viterbi-spiral/spiral-sse.h
+           )
+           add_definitions (-DSSE_AVAILABLE)
+        elseif (RPI_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ../library/src/support/viterbi-spiral/spiral-neon.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ../library/src/support/viterbi-spiral/spiral-neon.h
+           )
+           add_definitions (-DNEON_AVAILABLE)
+	# compiler options moved below add_executable .. and target specific
+	#set (CMAKE_CXX_FLAGS "${CMAKE_XCC_FLAGS} -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4")
+	#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4")
+        else (X64_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ../library/src/support/viterbi-spiral/spiral-no-sse.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ../library/src/support/viterbi-spiral/spiral-no-sse.h
+           )
+        endif (X64_DEFINED)
+
 	include_directories (
 	          ${FFTW_INCLUDE_DIRS}
 	          ${FAAD_INCLUDE_DIRS}
@@ -467,6 +559,11 @@ add_definitions (-DSTREAMER_OUTPUT)
 	add_executable (${objectName} 
 	                ${${objectName}_SRCS}
 	)
+	if (RPI_DEFINED)
+           # compiler options seem changed with gcc versions. gcc 8.3.0 on Raspbian didn't accept -mcpu ..
+           # test options with "make VERBOSE=1"
+           target_compile_options(${objectName}  PRIVATE -march=armv7-a -mfloat-abi=hard -mfpu=neon-vfpv4 )
+	endif()
 
 	target_link_libraries (${objectName}
 	                       ${FFTW3F_LIBRARIES}

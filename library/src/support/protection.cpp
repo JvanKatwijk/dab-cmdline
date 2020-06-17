@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
+ *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -25,7 +26,7 @@
 #include	"protection.h"
 
      protection::protection  (int16_t bitRate, int16_t protLevel):
-                                        viterbiHandler (24 * bitRate),
+	                                viterbiSpiral (24 * bitRate),
                                         outSize (24 * bitRate),
                                         indexTable   (outSize * 4 + 24),
                                         viterbiBlock (outSize * 4 + 24) {

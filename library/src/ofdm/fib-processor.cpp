@@ -599,9 +599,6 @@ uint8_t		extensionFlag;
         if (lsFlag == 1) {
            SCid = getBits (d, lOffset + 4, 12);
            lOffset += 16;
-//           if (find_packetComponent ((SCIds << 4) | SCid) != nullptr) {
-//              fprintf (stderr, "packet component bestaat !!\n");
-//           }
         }
 	else {
 	   MSCflag	= getBits_1 (d, lOffset + 1);
@@ -697,8 +694,8 @@ uint8_t	PD_bit	= getBits_1 (d, 8 + 2);
 }
 
 int16_t	fib_processor::HandleFIG0Extension13 (uint8_t *d,
-	                                     int16_t used,
-	                                     uint8_t pdBit) {
+	                                      int16_t used,
+	                                      uint8_t pdBit) {
 int16_t	lOffset		= used * 8;
 uint32_t	SId	= getLBits (d, lOffset, pdBit == 1 ? 32 : 16);
 uint16_t	SCIdS;
@@ -728,17 +725,13 @@ int16_t		appType;
 void	fib_processor::FIG0Extension14 (uint8_t *d) {
 int16_t	Length	= getBits_5 (d, 3);	// in Bytes
 int16_t	used	= 2;			// in Bytes
-int16_t	i;
 
 	while (used < Length) {
 	   int16_t SubChId	= getBits_6 (d, used * 8);
 	   uint8_t FEC_scheme	= getBits_2 (d, used * 8 + 6);
 	   used = used + 1;
-	   for (i = 0; i < 64; i ++) {
-              if (subChannels [i]. SubChId == SubChId) {
-                 subChannels [i]. FEC_scheme = FEC_scheme;
-              }
-           }
+	   if (subChannels [SubChId]. inUse)
+	      subChannels [SubChId]. FEC_scheme = FEC_scheme;
 	}
 }
 

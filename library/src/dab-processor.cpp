@@ -346,7 +346,7 @@ SyncOnPhase:
 	}
 	
 	catch (int e) {
-	   ;
+	   fprintf (stderr, "dab processor will stop\n");
 	}
 	my_mscHandler.  stop ();
 //	fprintf (stderr, "dabProcessor is shutting down\n");

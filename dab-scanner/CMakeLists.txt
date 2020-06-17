@@ -29,25 +29,78 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ######################################################################
 #
 ########################################################################
-if(DEFINED AIRSPY)
-   set(AIRSPY true)
-   set(objectName dab-scanner-airspy)
+
+OPTION(RTLSDR   "Input: RTLSDR"   OFF)
+OPTION(SDRPLAY  "Input: SDRPlay"  OFF)
+OPTION(AIRSPY   "Input: AirSpy"   OFF)
+OPTION(HACKRF	"Input: HACKRF"	  OFF)
+OPTION(LIMESDR	"Input: LIMESDR"  OFF)
+OPTION(SDRPLAY_V3  "Input: SDRPlay_V3"  OFF)
+
+OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
+OPTION(RPI_DEFINED "optimize for ARM/NEON" OFF)
+
+if ( (NOT RTLSDR) AND (NOT SDRPLAY) AND (NOT AirSpy) AND (NOT HACKRF) AND (NOT LIMESDR) AND (NOT SDRPLAY_V3) )
+   message("None of the Input Options selected. Using default SDRPlay")
+   set(SDRPlay ON)
 endif ()
 
-if(DEFINED SDRPLAY)
-   set(SDRPLAY true)
-   set(objectName dab-scanner-sdrplay)
+set (objectName "")
+
+if(RTLSDR)
+   if (objectName STREQUAL "")
+      set(RTLSDR ON)
+      set(objectName dab-scanner-rtlsdr)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED RTLSDR)
-   set(RTLSDR true)
-   set(objectName dab-scanner-rtlsdr)
+if(SDRPLAY)
+   if (objectName STREQUAL "")
+      set(SDRPLAY ON)
+      set(objectName dab-scanner-sdrplay-v2)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
 
-if(DEFINED HACKRF)
-   set(HACKRF true)
-   set(objectName dab-scanner-hackrf)
+if(AIRSPY)
+   if (objectName STREQUAL "")
+      set(AIRSPY ON)
+      set(objectName dab-scanner-airspy)
+   else ()
+      message ("Ignoring second option")
+   endif ()
 endif ()
+
+if(HACKRF)
+   if (objectName STREQUAL "")
+      set(HACKRF ON)
+      set(objectName dab-scanner-hackrf)
+   else ()
+      message ("Ignoring second option")
+   endif ()
+endif ()
+
+if(LIMESDR)
+   if (objectName STREQUAL "")
+      set(LIMESDR ON)
+      set(objectName dab-scanner-lime)
+   else ()
+      message ("Ignoring second option")
+   endif ()
+endif ()
+
+if(SDRPLAY_V3)
+   if (objectName STREQUAL "")
+      set(SDRPLAY_V3 ON)
+      set(objectName dab-scanner-sdrplay-v3)
+   else ()
+      message ("Ignoring second option")
+   endif ()
+endif ()
+
 
 #########################################################################
 	find_package (PkgConfig)
@@ -116,6 +169,38 @@ endif ()
 	 add_definitions (-DHAVE_SDRPLAY)
 	endif (SDRPLAY)
 
+	if (SDRPLAY_V3)
+	   find_path (SDRPLAYLIB_INCLUDE_DIR
+                      NAMES sdrplay_api.h
+                      PATHS
+                      /usr/local/include/
+	   )
+           include_directories (${SDRPLAYLIB_INCLUDE_DIR})
+
+           find_library (SDRPLAYLIB sdrplay_api)
+           if(NOT(SDRPLAYLIB))
+              message(FATAL_ERROR "please install -lsdrplay_api")
+           else(NOT(SDRPLAYLIB))
+              list (APPEND extraLibs ${SDRPLAYLIB})
+           endif(NOT(SDRPLAYLIB))
+
+	   include_directories (
+	     ../devices/sdrplay-handler-v3
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/sdrplay-handler-v3/sdrplay-handler-v3.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/sdrplay-handler-v3/sdrplay-handler-v3.cpp
+	   )
+
+	   add_definitions (-DHAVE_SDRPLAY_V3)
+	endif (SDRPLAY_V3)
+
 	if (HACKRF)
 	   find_path (HACKLIB_INCLUDE_DIR
                       NAMES mirsdrapi-rsp.h
@@ -148,6 +233,33 @@ endif ()
 
 	 add_definitions (-DHAVE_HACKRF)
 	endif (HACKRF)
+
+	if (LIMESDR)
+           find_library (LIMELIB LimeSuite)
+           if(NOT(LIMELIB))
+              message(FATAL_ERROR "please install LimeSuite")
+           else(NOT(LIMELIB))
+              list (APPEND extraLibs ${LIMELIB})
+           endif(NOT(LIMELIB))
+
+	   include_directories (
+	     ../devices/lime-handler
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/lime-handler/LMS7002M_parameters.h
+	        ../devices/lime-handler/LimeSuite.h
+	        ../devices/lime-handler/lime-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/lime-handler/lime-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_LIME)
+	endif (LIMESDR)
 
 	if (AIRSPY)
            find_package(LibAIRSPY)
@@ -217,6 +329,7 @@ endif ()
 	           ../library/includes/backend/data/mot
 	           ../library/includes/backend/data/journaline
 	           ../library/includes/support
+	           ../library/includes/support/viterbi-spiral
 	           /usr/include/
 	)
 
@@ -255,8 +368,8 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-handler.h 
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h
-         ../library/includes/support/band-handler.h 
-	     ../library/includes/support/viterbi_handler.h
+	     ../library/includes/support/band-handler.h 
+#	     ../library/includes/support/viterbi_handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
@@ -264,6 +377,7 @@ endif ()
 	     ../library/includes/support/fft_handler.h
 	     ../library/includes/support/dab-params.h
 	     ../library/includes/support/tii_table.h
+	     ../library/includes/support/viterbi-spiral/viterbi-spiral.h
 	)
 
 	set (${objectName}_SRCS
@@ -300,8 +414,8 @@ endif ()
 	     ../library/src/backend/data/mot/mot-handler.cpp 
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp
-         ../library/src/support/band-handler.cpp
-	     ../library/src/support/viterbi-handler.cpp
+	     ../library/src/support/band-handler.cpp
+#	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
@@ -309,8 +423,43 @@ endif ()
 	     ../library/src/support/fft_handler.cpp
 	     ../library/src/support/dab-params.cpp
 	     ../library/src/support/tii_table.cpp
+	     ../library/src/support/viterbi-spiral/viterbi-spiral.cpp
 	)
-#
+
+	if (X64_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ../library/src/support/viterbi-spiral/spiral-sse.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ../library/src/support/viterbi-spiral/spiral-sse.h
+           )
+           add_definitions (-DSSE_AVAILABLE)
+        elseif (RPI_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ../library/src/support/viterbi-spiral/spiral-neon.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ../library/src/support/viterbi-spiral/spiral-neon.h
+           )
+           add_definitions (-DNEON_AVAILABLE)
+	# compiler options moved below add_executable .. and target specific
+	#set (CMAKE_CXX_FLAGS "${CMAKE_XCC_FLAGS} -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4")
+	#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4")
+        else (X64_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ../library/src/support/viterbi-spiral/spiral-no-sse.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ../library/src/support/viterbi-spiral/spiral-no-sse.h
+           )
+        endif (X64_DEFINED)
+
 	include_directories (
 	          ${FFTW_INCLUDE_DIRS}
 	          ${PORTAUDIO_INCLUDE_DIRS}
@@ -323,6 +472,12 @@ endif ()
 	add_executable (${objectName} 
 	                ${${objectName}_SRCS}
 	)
+
+	if (RPI_DEFINED)
+           # compiler options seem changed with gcc versions. gcc 8.3.0 on Raspbian didn't accept -mcpu ..
+           # test options with "make VERBOSE=1"
+           target_compile_options(${objectName}  PRIVATE -march=armv7-a -mfloat-abi=hard -mfpu=neon-vfpv4 )
+        endif()
 
 	target_link_libraries (${objectName}
 	                       ${FFTW3F_LIBRARIES}

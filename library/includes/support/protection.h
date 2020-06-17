@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
+ *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -19,7 +20,6 @@
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *
  *	Simple base class for combining uep and eep deconvolvers
  */
 #ifndef	__PROTECTION__
@@ -27,9 +27,11 @@
 
 #include	<stdint.h>
 #include	<vector>
-#include	"viterbi-handler.h"
+#include	"viterbi-spiral.h"
+//#include	"viterbi-handler.h"
 
-class	protection: public viterbiHandler {
+class	protection: public viterbiSpiral {
+//class	protection: public viterbiHandler {
 public:
 		protection  	(int16_t, int16_t);
 virtual		~protection	(void);

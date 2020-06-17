@@ -40,6 +40,10 @@
 #include	"rtlsdr-handler.h"
 #elif	HAVE_HACKRF
 #include	"hackrf-handler.h"
+#elif	HAVE_LIME
+#include	"lime-handler.h"
+#elif	HAVE_SDRPLAY_V3
+#include	"sdrplay-handler-v3.h"
 #endif
 
 #include	<atomic>
@@ -167,26 +171,49 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 
 int	main (int argc, char **argv) {
 // Default values
-uint8_t		theMode		= 1;
-std::string	theChannel	= "5A";
 std::string	startChannel	= "5A";
+uint8_t		theMode		= 1;
+std::string	theChannel	= "5C";
 uint8_t		theBand		= BAND_III;
-int16_t		ppmCorrection	= 0;
-int		theGain		= 35;	// scale = 0 .. 100
 #ifdef	HAVE_HACKRF
 int		lnaGain		= 40;
 int		vgaGain		= 40;
-#endif
-int16_t		latency		= 10;
-int16_t		timeSyncTime	= 5;
-int16_t		freqSyncTime	= 10;
+int		ppmOffset	= 0;
+const char	*optionsString	= "F:jD:d:M:B:C::G:g:p:";
+#elif	HAVE_LIME
+int16_t		gain		= 70;
+std::string	antenna		= "Auto";
+const char	*optionsString	= "F:jD:d:M:B:C:G:g:X:";
+#elif	HAVE_SDRPLAY	
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 4;
+bool		autogain	= true;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "F:jD:d:M:B:C:G:L:Qp:";
+#elif	HAVE_SDRPLAY_V3	
+int16_t		GRdB		= 30;
+int16_t		lnaState	= 2;
 bool		autogain	= false;
-bool		jsonOutput	= false;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "F:jD:d:M:B:C:G:L:Qp:";
+#elif	HAVE_AIRSPY
+int16_t		gain		= 20;
+bool		autogain	= false;
+bool		rf_bias		= false;
+const char	*optionsString	= "F:jD:d:M:B:C:G:bp:";
+#elif	HAVE_RTLSDR
+int16_t		gain		= 50;
+bool		autogain	= false;
+int16_t		ppmOffset	= 0;
+const char	*optionsString	= "F:jD:d:M:B:C:G:p:Q";
+#endif
 int	opt;
+int	freqSyncTime		= 10;
+int	timeSyncTime		= 10;
+bool	jsonOutput		= false;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
-bool	err;
 bool firstEnsemble = true;
 
 	fprintf (stderr, "dab_scanner V 1.0alfa,\n"
@@ -200,7 +227,7 @@ bool firstEnsemble = true;
 	   exit (1);
 	}
 
-	while ((opt = getopt (argc, argv, "F:D:d:M:B:p:G:g:QC:j")) != -1) {
+	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
 	      case 'F':
 	         outFile	= fopen (optarg, "w");
@@ -231,19 +258,13 @@ bool firstEnsemble = true;
 	                                     L_BAND : BAND_III;
 	         break;
 
-	      case 'p':
-	         ppmCorrection	= atoi (optarg);
+	      case 'C':
+	         startChannel	= std::string (optarg);
 	         break;
 
-#ifndef	HAVE_HACKRF
-	      case 'G':
-	         theGain	= atoi (optarg);
-	         break;
+//	device specific options
 
-	      case 'Q':
-	         autogain	= true;
-	         break;
-#else
+#ifdef	HAVE_HACKRF
 	      case 'G':
 	         lnaGain	= atoi (optarg);
 	         break;
@@ -251,12 +272,82 @@ bool firstEnsemble = true;
 	      case 'g':
 	         vgaGain	= atoi (optarg);
 	         break;
-
-#endif
-	      case 'C':
-	         theChannel	= std::string (optarg);
-	         startChannel	= theChannel;
+	
+	      case 'p':
+	         ppmOffset	= 0;
 	         break;
+
+#elif	HAVE_LIME
+	      case 'G':
+	      case 'g':	
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'X':
+	         antenna	= std::string (optarg);
+	         break;
+
+
+#elif	HAVE_SDRPLAY
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+#elif	HAVE_SDRPLAY_V3
+	      case 'G':
+	         GRdB		= atoi (optarg);
+	         break;
+
+	      case 'L':
+	         lnaState	= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+#elif	HAVE_AIRSPY
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+
+#elif	HAVE_RTLSDR
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+
+	      case 'Q':
+	         autogain	= true;
+	         break;
+
+	      case 'p':
+	         ppmOffset	= atoi (optarg);
+	         break;
+#endif
 
 	      default:
 	         printOptions ();
@@ -268,29 +359,38 @@ bool firstEnsemble = true;
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = 0;
 
+	theChannel		= startChannel;
 	int32_t frequency	= dabBand. Frequency (theBand, theChannel);
 	try {
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
-	                                      ppmCorrection,
-	                                      theGain,
-	                                      3,
+	                                      ppmOffset,
+	                                      GRdB,
+	                                      lnaState,
 	                                      autogain,
 	                                      0,
 	                                      0);
+#elif   HAVE_SDRPLAY_V3
+           theDevice    = new sdrplayHandler_v3 (frequency,
+                                              ppmOffset,
+                                              GRdB,
+                                              lnaState,
+                                              autogain,
+                                              0,
+                                              0);
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
-	                                     ppmCorrection,
-	                                     theGain,
-	                                     false);
+	                                     ppmOffset,
+	                                     gain,
+	                                     rf_bias);
 #elif	HAVE_RTLSDR
 	   theDevice	= new rtlsdrHandler (frequency,
-	                                     ppmCorrection,
-	                                     theGain,
+	                                     ppmOffset,
+	                                     gain,
 	                                     autogain);
 #elif	HAVE_HACKRF
 	   theDevice	= new hackrfHandler (frequency,
-	                                     ppmCorrection,
+	                                     ppmOffset,
 	                                     lnaGain,
 	                                     vgaGain);
 #endif
@@ -323,7 +423,7 @@ bool firstEnsemble = true;
 	   exit (4);
 	}
 
-	theDevice	-> setGain (theGain);
+//	theDevice	-> setGain (theGain);
 	if (autogain)
 	   theDevice	-> set_autogain (autogain);
 
@@ -331,7 +431,7 @@ bool firstEnsemble = true;
    
 	while (true) {
 	   bool	firstTime	= true;
-	   bool firstService = true;
+	   bool firstService	= true;
 	   theDevice	-> stopReader ();
 	   int32_t frequency =
 	               dabBand. Frequency (theBand, theChannel);
@@ -378,15 +478,15 @@ bool firstEnsemble = true;
 //
 //	print ensemble data here
 	   print_ensembleData (outFile,
-                           jsonOutput,
+	                       jsonOutput,
                                theRadio,
 	                       theChannel,
 	                       ensembleName,
 	                       ensembleId,
-						   &firstEnsemble);
+	                       &firstEnsemble);
 
 	   print_audioheader (outFile, jsonOutput);
-	   for (int i = 0; i < programNames. size (); i ++) {
+	   for (int i = 0; i < (int)(programNames. size ()); i ++) {
 	      if (is_audioService (theRadio, programNames [i]. c_str ())) {
 	         audiodata ad;
 	         dataforAudioService (theRadio,
@@ -415,7 +515,7 @@ bool firstEnsemble = true;
 	      }
 	   }
 
-	   for (int i = 0; i < programNames. size (); i ++) {
+	   for (int i = 0; i < (int)(programNames. size ()); i ++) {
 	      if (is_dataService (theRadio, programNames [i]. c_str ())) {
 	         if (firstTime)
 	            print_dataHeader (outFile, jsonOutput);
@@ -432,7 +532,7 @@ bool firstEnsemble = true;
                                           programNames [i]. c_str (),
                                           j,
 	                                  &pd,
-                                      &firstService);
+                                          &firstService);
                  }
 	      }
 	      else
@@ -475,15 +575,33 @@ bool firstEnsemble = true;
 void    printOptions (void) {
         fprintf (stderr,
 "                        dab-scanner options are\n\
+                        -F filename      in case the output is to a file\n\
+                        -j               output data in json format\n\
                         -d number        amount of time to look for time synchr\n\
                         -D number        amount of time to look for full sync\n\
                         -M Mode          Mode is 1, 2 or 4. Default is Mode 1\n\
                         -B Band          Band is either L_BAND or BAND_III (default)\n\
-                        -G number        gain for device (range 1 .. 100)\n\
-                        -Q               if set, set autogain for device true\n\
-                        -p number        ppm correction for the attached device\n\
-                        -F filename      in case the output is to a file\n\
-                        -j               output data in json format\n\
-                        -C start channel the start channel, default: 5A\n");
+                        -C start channel the start channel, default: 5A\n"
+"	for hackrf:\n"
+"	                  -v vgaGain\n"
+"	                  -l lnaGain\n"
+"	                  -p number\tppm offset\n"
+"	for SDRplay:\n"
+"	                  -G Gain reduction in dB (range 20 .. 59)\n"
+"	                  -L lnaState (depends on model chosen)\n"
+"	                  -Q autogain (default off)\n"
+"	                  -p number\t ppm offset\n"
+"	for rtlsdr:\n"
+"	                  -G number\t	gain, range 0 .. 100\n"
+"	                  -Q autogain (default off)\n"
+"	                  -p number\tppm offset\n"
+"	for airspy:\n"
+"	                  -G number\t	gain, range 1 .. 21\n"
+"	                  -b set rf bias\n"
+"	                  -p number\t ppm Correction\n"
+"	for limesdr:\n"
+"	                  -G number\t gain\n"
+"	                  -X antenna selection\n"
+"	                  -C channel\n");
 }
 

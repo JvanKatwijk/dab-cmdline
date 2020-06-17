@@ -8,6 +8,14 @@ if(MINGW)
     add_definitions ( -municode)
 endif()
 
+if (X64_DEFINED)
+   set(X64_DEFINED true)
+endif ()
+
+if (RPI_DEFINED)
+   set(RPI_DEFINED true)
+endif ()
+
 ########################################################################
 # select the release build type by default to get optimization flags
 ########################################################################
@@ -67,6 +75,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
                ./includes/backend/data/mot
                ./includes/backend/data/journaline
                ./includes/support
+	       ./includes/support/viterbi-spiral
                /usr/include/
     )
 
@@ -106,7 +115,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./includes/backend/data/mot/mot-object.h
          ./includes/support/band-handler.h
          ./includes/support/protTables.h
-         ./includes/support/viterbi-handler.h
+#	 ./includes/support/viterbi-handler.h
          ./includes/support/protection.h
          ./includes/support/semaphore.h
          ./includes/support/uep-protection.h
@@ -114,6 +123,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./includes/support/fft_handler.h
          ./includes/support/dab-params.h
          ./includes/support/tii_table.h
+	 ./includes/support/viterbi-spiral/viterbi-spiral.h
     )
 
     set (${objectName}_SRCS
@@ -148,7 +158,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./src/backend/data/mot/mot-dir.cpp 
          ./src/backend/data/mot/mot-object.cpp
          ./src/support/band-handler.cpp
-         ./src/support/viterbi-handler.cpp
+#	 ./src/support/viterbi-handler.cpp
          ./src/support/protection.cpp
          ./src/support/protTables.cpp
          ./src/support/eep-protection.cpp
@@ -156,9 +166,44 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./src/support/fft_handler.cpp
          ./src/support/dab-params.cpp
          ./src/support/tii_table.cpp
-    )
+	 ./src/support/viterbi-spiral/viterbi-spiral.cpp
+	)
 
-    include_directories (
+	if (X64_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ./src/support/viterbi-spiral/spiral-sse.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ./src/support/viterbi-spiral/spiral-sse.h
+           )
+           add_definitions (-DSSE_AVAILABLE)
+        elseif (RPI_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ./src/support/viterbi-spiral/spiral-neon.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ./src/support/viterbi-spiral/spiral-neon.h
+           )
+           add_definitions (-DNEON_AVAILABLE)
+	# compiler options moved below add_executable .. and target specific
+	#set (CMAKE_CXX_FLAGS "${CMAKE_XCC_FLAGS} -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4")
+	#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4")
+        else (X64_DEFINED)
+           set (${objectName}_SRCS
+                ${${objectName}_SRCS}
+              ./src/support/viterbi-spiral/spiral-no-sse.c
+           )
+           set (${objectName}_HDRS
+                ${${objectName}_HDRS}
+             ./src/support/viterbi-spiral/spiral-no-sse.h
+           )
+        endif (X64_DEFINED)
+
+	include_directories (
               ${FFTW_INCLUDE_DIRS}
               ${PORTAUDIO_INCLUDE_DIRS}
               ${FAAD_INCLUDE_DIRS}
@@ -171,6 +216,12 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
     add_library (${objectName} SHARED
                     ${${objectName}_SRCS}
     )
+
+    if (RPI_DEFINED)
+	# compiler options seem changed with gcc versions. gcc 8.3.0 on Raspbian didn't accept -mcpu ..
+	# test options with "make VERBOSE=1"
+	target_compile_options(${objectName}  PRIVATE -march=armv7-a -mfloat-abi=hard -mfpu=neon-vfpv4 )
+    endif()
 
     target_link_libraries (${objectName}
                            ${FFTW3F_LIBRARIES}

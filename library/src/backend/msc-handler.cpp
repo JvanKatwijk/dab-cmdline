@@ -135,7 +135,7 @@ std::vector<int16_t> ibits;
 	ibits. resize (BitsperBlock);
 	while (running. load ()) {
 	   while (!usedSlots. tryAcquire (200))
-	      if (!running)
+	      if (!running. load ())
 	         return;
 	   memcpy (fft_buffer, theData [currentBlock],
 	                 params. get_T_u () * sizeof (std::complex<float>));
