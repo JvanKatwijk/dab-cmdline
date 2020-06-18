@@ -89,21 +89,18 @@ public:
 	int32_t		sampleCounter;
 private:
 	int32_t		inputRate;
-	int32_t		deviceCount;
 	uint16_t	deviceIndex;
 	bool		autogain;
 	int16_t		ppmCorrection;
 	HINSTANCE	Handle;
 	std::thread	workerHandle;
-	int32_t		lastFrequency;
 	bool		libraryLoaded;
 	bool		open;
 	int		*gains;
 	int16_t		gainsCount;
-	int		gain;
 	bool		running;
 	int		frequency;
-	char	* deviceOptions;
+	char		* deviceOptions;
 //	here we need to load functions from the dll
 	bool		load_rtlFunctions	(void);
 	pfnrtlsdr_get_index_by_serial	rtlsdr_get_index_by_serial;

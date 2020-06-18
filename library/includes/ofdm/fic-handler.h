@@ -86,7 +86,6 @@ private:
 	int16_t		ficBlocks;
 	int16_t		ficMissed;
 	int16_t		ficRatio;
-	uint16_t	convState;
 	mutex		fibProtector;
 	uint8_t		PRBS [768];
 	uint8_t		shiftRegister [9];

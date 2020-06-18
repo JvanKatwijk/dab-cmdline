@@ -303,7 +303,7 @@ struct quantizer_spec* mp2Processor::read_allocation(int sb, int b2_table) {
 void 	mp2Processor::read_samples (struct quantizer_spec *q,
 	                            int scalefactor, int *sample) {
 int idx, adj, scale;
-register int val;
+int val;
 
 	if (!q) {
         // no bits allocated for this subband
@@ -601,12 +601,12 @@ int16_t vLength = 24 * bitRate / 8;
 	   if (MP2Header_OK == 2) {
 	      addbittoMP2 (MP2frame, v [i], MP2bitCount ++);
 	      if (MP2bitCount >= lf) {
-	         bool stereo;
-	         int16_t sample_buf [KJMP2_SAMPLES_PER_FRAME * 2];
 #ifdef	AAC_OUT
 	         soundOut ((int16_t *)(&MP2frame [0]), MP2bitCount,
 	                               0, false, nullptr);
 #else
+	         int16_t sample_buf [KJMP2_SAMPLES_PER_FRAME * 2];
+	         bool stereo;
 	         if (mp2decodeFrame (MP2frame, sample_buf, &stereo)) {
 	            output (sample_buf,
 	                    2 * (int32_t)KJMP2_SAMPLES_PER_FRAME,

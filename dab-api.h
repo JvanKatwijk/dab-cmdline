@@ -225,7 +225,7 @@ void	set_dataChannel		(void *, packetdata *);
 int32_t dab_getSId		(void *, const char*);
 //
 //	and the other way around, mapping the service identifier to a name
-std::string dab_getserviceName	(void *, int32_t);
+void	dab_getserviceName	(void *, int32_t, char *);
 }
 #endif
 

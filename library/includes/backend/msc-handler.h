@@ -79,16 +79,12 @@ virtual	void		run		(void);
 
 	std::thread	threadHandle;
 	std::vector<complex<float> > phaseReference;
-	bool		audioService;
 	std::mutex	mutexer;
 	std::vector<virtualBackend *>theBackends;
-//	std::vector<int16_t> cifVector;
 	int16_t		cifCount;
-	int16_t		blkCount;
 	std::atomic<bool> work_to_do;
 	int16_t		BitsperBlock;
 	int16_t		numberofblocksperCIF;
-	int16_t		blockCount;
 };
 
 #endif

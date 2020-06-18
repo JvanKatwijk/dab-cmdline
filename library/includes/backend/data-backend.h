@@ -47,19 +47,13 @@ public:
 	void	stopRunning	(void);
 	void	start		(void);
 private:
-	uint8_t		DSCTy;
 	int16_t		fragmentSize;
 	int16_t		bitRate;
 	bool		shortForm;
 	int16_t		protLevel;
-	uint8_t		DGflag;
-	int16_t		FEC_scheme;
-	bool		show_crcErrors;
-	int16_t		crcErrors;
 void	run		(void);
 	std::atomic<bool>	running;
 	std::thread	threadHandle;
-	int16_t		interleaverIndex;
 	int16_t		countforInterleaver;
 	std::vector<uint8_t> outV;
 	std::vector<int16_t>	tempX;

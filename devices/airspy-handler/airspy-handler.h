@@ -131,7 +131,6 @@ private:
 	int16_t		gain;
 	HINSTANCE	Handle;
 	bool		libraryLoaded;
-	bool		success;
 	bool		running;
 const	char*		board_id_name (void);
 	int32_t		selectedRate;
@@ -141,7 +140,6 @@ const	char*		board_id_name (void);
 	int16_t		mapTable_int   [4 * 512];
 	float		mapTable_float [4 * 512];
 	RingBuffer<std::complex<float>> *theBuffer;
-	int32_t		inputRate;
 	struct airspy_device* device;
 	uint64_t 	serialNumber;
 	char		serial[128];

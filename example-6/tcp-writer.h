@@ -52,7 +52,6 @@ private:
 	std::atomic<bool>	connected;
 	int			socket_desc;
         struct sockaddr_in server;
-	bool			isReady;
 	std::mutex		mutex;
 	std::condition_variable condvar;
 	std::queue<uint8_t *> messageQ;

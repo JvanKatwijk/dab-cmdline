@@ -51,7 +51,6 @@ public:
 private:
 	bool		processSuperframe (uint8_t [], int16_t);
 	audioOut_t	soundOut;
-	dataOut_t	dataOut;
 	programQuality_t	mscQuality;
 	void		*ctx;
 	padHandler	my_padHandler;
@@ -66,13 +65,11 @@ private:
 	int16_t		superFramesize;
 	int16_t		blockFillIndex;
 	int16_t		blocksInBuffer;
-	int16_t		blockCount;
 	int16_t		bitRate;
 	std::vector<uint8_t> frameBytes;
 	std::vector<uint8_t> outVector;
 	int16_t		RSDims;
 	int16_t		au_start	[10];
-	int32_t		baudRate;
 
 	firecode_checker	fc;
 	reedSolomon	my_rsDecoder;
@@ -90,7 +87,6 @@ private:
 	int16_t		rs_quality;
 	int16_t		aac_quality;
 
-	int16_t		charSet;
 	void            show_frameErrors        (int);
         void            show_rsErrors           (int);
         void            show_aacErrors          (int);

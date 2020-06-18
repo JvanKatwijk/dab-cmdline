@@ -53,7 +53,6 @@ public:
 	hackrf_device	*theDevice;
 private:
 	int32_t		vfoFrequency;
-	int16_t		ppm;
 	int16_t		lnaGain;
 	int16_t		vgaGain;
 	bool		ampEnable;

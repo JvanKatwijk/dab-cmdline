@@ -269,7 +269,6 @@ int32_t		basePort = 1234;		// default
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
-int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 5;
 int		theDuration	= -1;	// default, infinite
@@ -277,7 +276,6 @@ int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
-bool	err;
 
 	fprintf (stderr, "dab_cmdline example III,\n \
 	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
@@ -495,7 +493,7 @@ bool	err;
 	                                     autogain);
 #elif   HAVE_HACKRF
            theDevice    = new hackrfHandler     (frequency,
-                                                 ppmCorrection,
+                                                 ppmOffset,
                                                  lnaGain,
                                                  vgaGain);
 #elif   HAVE_LIME
@@ -585,8 +583,11 @@ bool	err;
 	}
 
 	run. store (true);
-	if (serviceIdentifier != -1) 
-	   programName = dab_getserviceName (theRadio, serviceIdentifier);
+	if (serviceIdentifier != -1) {
+	   char temp [255];
+	   dab_getserviceName (theRadio, serviceIdentifier, temp);
+	   programName = std::string (temp);
+	}
 
 	std::cerr << "we try to start program " <<
                                                  programName << "\n";

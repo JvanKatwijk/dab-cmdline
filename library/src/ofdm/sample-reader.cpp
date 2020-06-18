@@ -25,14 +25,6 @@
 #include	"device-handler.h"
 #include	"dab-processor.h"
 
-static  inline
-int16_t valueFor (int16_t b) {
-int16_t res     = 1;
-	while (--b > 0)
-	   res <<= 1;
-	return res;
-}
-
 static
 std::complex<float> oscillatorTable [INPUT_RATE];
 

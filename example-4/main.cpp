@@ -243,14 +243,12 @@ int32_t		basePort = 1234;		// default
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
-int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 5;
 int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
-bool	err;
 int	theDuration	= -1;		// infinite
 
 	std::cerr << "dab_cmdline example IV,\n \
@@ -542,8 +540,11 @@ int	theDuration	= -1;		// infinite
 	}
 
 	run. store (true);
-	if (serviceIdentifier != -1) 
-	   programName = dab_getserviceName (theRadio, serviceIdentifier);
+	if (serviceIdentifier != -1) {
+	   char temp [255];
+	   dab_getserviceName (theRadio, serviceIdentifier, temp);
+	   programName = std::string (temp);
+	}
 
         std::cerr << "we try to start program " <<
                                                  programName << "\n";

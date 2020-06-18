@@ -49,7 +49,6 @@ const	char		*outputChannelwithRate	(int16_t, int32_t);
 	void		audioOutput		(float *, int32_t);
 	int32_t		CardRate;
 	int16_t		latency;
-	int32_t		size;
 	bool		portAudio;
 	bool		writerRunning;
 	int16_t		numofDevices;

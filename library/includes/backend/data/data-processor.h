@@ -50,7 +50,6 @@ private:
 	bytesOut_t	bytesOut;
 	void		*ctx;
 	int16_t		crcErrors;
-	int16_t		handledPackets;
 	std::vector<uint8_t> series;
 	uint8_t		packetState;
 //

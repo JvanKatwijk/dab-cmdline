@@ -270,6 +270,7 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
+int16_t		ppmOffset	= 0;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;

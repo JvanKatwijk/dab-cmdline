@@ -59,7 +59,6 @@ private:
 		int32_t		bufferSize;
 		int32_t		currentPhase;
 		std::atomic<bool>	running;
-		int32_t		bufferContent;
 		float		sLevel;
 		int32_t		sampleCount;
 	        int32_t		corrector;

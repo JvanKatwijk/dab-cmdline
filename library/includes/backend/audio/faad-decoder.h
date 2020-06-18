@@ -40,13 +40,10 @@ typedef struct {
 
 class	faadDecoder {
 private:
-	bool			processorOK;
 	bool			aacInitialized;
 	uint32_t		aacCap;
 	NeAACDecHandle		aacHandle;
 	NeAACDecConfigurationPtr	aacConf;
-	NeAACDecFrameInfo	hInfo;
-	bool			isStereo;
 	int32_t			baudRate;
 	void			*userData;
 	audioOut_t		soundOut;

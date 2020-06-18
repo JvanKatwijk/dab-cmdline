@@ -43,7 +43,6 @@ private:
 	dabParams		params;
 	int32_t			T_u;
 	int32_t			T_g;
-	int16_t			threshold;
 	int16_t			diff_length;
 	int16_t			shiftFactor;
 	fft_handler	my_fftHandler;

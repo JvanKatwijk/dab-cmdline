@@ -76,7 +76,6 @@ private:
 
 	protection	*protectionHandler;
 	backendBase	*our_backendBase;
-	RingBuffer<int16_t>	*Buffer;
 };
 
 #endif

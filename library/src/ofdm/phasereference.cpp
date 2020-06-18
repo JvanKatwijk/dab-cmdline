@@ -40,7 +40,6 @@ int32_t	i;
 float	Phi_k;
         this    -> T_u          = params. get_T_u ();
         this    -> T_g          = params. get_T_g ();
-        this    -> threshold    = threshold;
         this    -> diff_length  = diff_length;
         refTable.               resize (T_u);
         phaseDifferences.       resize (diff_length);

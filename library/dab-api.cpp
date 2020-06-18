@@ -114,7 +114,9 @@ int32_t dab_getSId      (void *Handle, const char* c_s) {
 	return ((dabProcessor *)Handle) -> get_SId (s);
 }
 
-std::string dab_getserviceName (void *Handle, int32_t SId) {
-	return ((dabProcessor *)Handle) -> get_serviceName (SId);
+void	dab_getserviceName (void *Handle, int32_t SId, char *out) {
+	std::string s = ((dabProcessor *)Handle) -> get_serviceName (SId);
+	const char * t = s. c_str ();
+	(void)strcpy (out, t);
 }
 

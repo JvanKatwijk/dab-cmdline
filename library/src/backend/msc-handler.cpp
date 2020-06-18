@@ -64,7 +64,6 @@ static int blocksperCIF [] = {18, 72, 0, 36};
 
 //	cifVector. resize (55296);
 	cifCount		= 0;	// msc blocks in CIF
-	blkCount		= 0;
 	theBackends. push_back (new virtualBackend (0, 0));
 	BitsperBlock		= 2 * params. get_carriers ();
 	numberofblocksperCIF	= blocksperCIF [(dabMode - 1) & 03];
@@ -214,7 +213,6 @@ int16_t	currentblk;
 	   return;
 //	OK, now we have a full CIF
 	mutexer. lock ();
-	blkCount	= 0;
 	cifCount	= (cifCount + 1) & 03;
 	for (auto const& b: theBackends) {
 	   int startAddr	= b -> startAddr ();
