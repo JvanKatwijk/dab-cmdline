@@ -56,6 +56,8 @@
 #include	"hackrf-handler.h"
 #elif	HAVE_LIME
 #include	"lime-handler.h"
+#elif	HAVE_PLUTO
+#include	"pluto-handler.h"
 #endif
 
 #include	<locale>
@@ -254,6 +256,10 @@ const char	*optionsString	= "D:d:M:B:P:O:A:C:G:g:p:";
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
+#elif	HAVE_PLUTO
+int16_t		gain		= 60;
+bool		autogain	= true;
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Q";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
@@ -417,7 +423,17 @@ int	theDuration		= -1;	// no limit
 	         theChannel	= std::string (optarg);
 	         fprintf (stderr, "%s \n", optarg);
 	         break;
-
+#elif	HAVE_PLUTO
+	      case 'G':
+	         gain		= atoi (optarg);
+	         break;
+	      case 'Q':
+	         autogain	= true;
+	         break;
+	      case 'C':
+	         theChannel	= std::string (optarg);
+	         fprintf (stderr, "%s \n", optarg);
+	         break;
 #elif	HAVE_SDRPLAY
 	      case 'G':
 	         GRdB		= atoi (optarg);
@@ -564,7 +580,8 @@ int	theDuration		= -1;	// no limit
 	                                         vgaGain);
 #elif	HAVE_LIME
 	   theDevice	= new limeHandler	(frequency, gain, antenna);
-
+#elif	HAVE_PLUTO
+	   theDevice	= new plutoHandler	(frequency, gain, autogain);
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName, repeater);
 #elif	defined (HAVE_RAWFILES)

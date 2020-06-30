@@ -1245,13 +1245,13 @@ int16_t	firstFree	= -1;
 	   }
 	}
 
-	ServiceComps [firstFree]. inUse  = true;
-	ServiceComps [firstFree]. TMid   = TMid;
-	ServiceComps [firstFree]. service = s;
-	ServiceComps [firstFree]. componentNr = compnr;
-	ServiceComps [firstFree]. SCId   = SCId;
-	ServiceComps [firstFree]. PS_flag = ps_flag;
-	ServiceComps [firstFree]. CAflag = CAflag;
+	ServiceComps [firstFree]. inUse		= true;
+	ServiceComps [firstFree]. TMid		= TMid;
+	ServiceComps [firstFree]. service	= s;
+	ServiceComps [firstFree]. componentNr	= compnr;
+	ServiceComps [firstFree]. SCId		= SCId;
+	ServiceComps [firstFree]. PS_flag	= ps_flag;
+	ServiceComps [firstFree]. CAflag	= CAflag;
 	ServiceComps [firstFree]. is_madePublic = false;
 }
 

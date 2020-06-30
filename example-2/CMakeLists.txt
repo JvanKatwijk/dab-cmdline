@@ -34,6 +34,7 @@ OPTION(SDRPLAY  "Input: SDRPlay"  OFF)
 OPTION(AIRSPY   "Input: AirSpy"   OFF)
 OPTION(HACKRF	"Input: HACKRF"	  OFF)
 OPTION(LIMESDR	"Input: LIMESDR"  OFF)
+OPTION(PLUTO	"Input: PLUTO"	  OFF)
 OPTION(RTL_TCP  "Input: RTL_TCP"  OFF)
 OPTION(SDRPLAY_V3  "Input: SDRPlay_V3"  OFF)
 OPTION(WAVFILES "Input: WAVFILES" OFF)
@@ -91,6 +92,15 @@ if(LIMESDR)
    if (objectName STREQUAL "")
       set(LIMESDR ON)
       set(objectName dab-lime-2)
+   else ()
+      message ("Ignoring second option")
+   endif ()
+endif ()
+
+if(PLUTO)
+   if (objectName STREQUAL "")
+      set(PLUTOSDR ON)
+      set(objectName dab-pluto-2)
    else ()
       message ("Ignoring second option")
    endif ()
@@ -279,6 +289,31 @@ endif ()
 
 	 add_definitions (-DHAVE_LIME)
 	endif (LIMESDR)
+
+	if (PLUTOSDR)
+           find_library (PLUTOLIB iio)
+           if(NOT(PLUTOLIB))
+              message(FATAL_ERROR "please install libiio")
+           else(NOT(PLUTOLIB))
+              list (APPEND extraLibs ${PLUTOLIB})
+           endif(NOT(PLUTOLIB))
+
+	   include_directories (
+	     ../devices/pluto
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/pluto/pluto-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/pluto/pluto-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_PLUTO)
+	endif (PLUTOSDR)
 
 	if (AIRSPY)
            find_package(LibAIRSPY)
