@@ -277,7 +277,7 @@ int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:b";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
@@ -483,6 +483,10 @@ int	theDuration		= -1;	// no limit
 
 	      case 'Q':
 	         autogain	= true;
+	         break;
+
+	      case 'b':
+	         rf_bias	= true;
 	         break;
 
 	      case 'p':
@@ -714,7 +718,7 @@ int	theDuration		= -1;	// no limit
 	   sleep (1);
 	}
 	theDevice	-> stopReader ();
-	dabReset (theRadio);
+//	dabReset (theRadio);
 	dabExit  (theRadio);
 	delete theDevice;	
 	delete soundOut;

@@ -160,6 +160,8 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	   throw (26);
 	}
 
+	fprintf (stderr, "found a device %s\n",
+	               iio_device_get_name (rx));
         if (!cfg_ad9361_streaming_ch (ctx, &rxcfg, 0)) {
 	   fprintf (stderr, "RX port 0 not found");
 	   throw (27);

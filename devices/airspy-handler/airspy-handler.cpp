@@ -44,6 +44,7 @@ uint32_t samplerate_count;
 
 	this	-> frequency	= frequency;
 	this	-> ppmCorrection = ppmCorrection;
+	this	-> theGain	= theGain;
 //
 	device			= 0;
 	serialNumber		= 0;
@@ -160,8 +161,7 @@ uint32_t samplerate_count;
 //	Here we set the gain and frequency
 
 	(void)my_airspy_set_freq (device, frequency);
-	gain		= theGain * 21 / 100;
-	(void) my_airspy_set_sensitivity_gain (device, gain);
+	(void) my_airspy_set_sensitivity_gain (device, theGain);
 	(void) my_airspy_set_rf_bias          (device, biasTee ? 1 : 0);
 }
 
@@ -219,7 +219,7 @@ int32_t	bufSize	= EXTIO_NS * EXTIO_BASE_TYPE_SIZE * 2;
 	   return false;
 	}
 
-	result = my_airspy_set_sensitivity_gain (device, gain);
+	result = my_airspy_set_sensitivity_gain (device, theGain);
 	
 	result = my_airspy_start_rx (device,
 	            (airspy_sample_block_cb_fn)callback, this);
@@ -557,7 +557,7 @@ bool	airspyHandler::load_airspyFunctions (void) {
 //	the gain
 //	a special for compatibility with the dab-rpi software
 void	airspyHandler::setGain		(int value) {
-	gain	= value * 21 / 100;
-	(void) my_airspy_set_sensitivity_gain (device, gain);
+	theGain	= value;
+	(void) my_airspy_set_sensitivity_gain (device, theGain);
 }
 
