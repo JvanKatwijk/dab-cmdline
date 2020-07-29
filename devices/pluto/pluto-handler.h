@@ -30,17 +30,7 @@
 #include	"device-handler.h"
 #include	<thread>
 
-/* common RX and TX streaming params */
-struct stream_cfg {
-        long long	bw_hz; // Analog banwidth in Hz
-        long long	fs_hz; // Baseband sample rate in Hz
-        long long	lo_hz; // Local oscillator frequency in Hz
-        const char* rfport; // Port name
-	struct	iio_channel	*lo_channel;
-	struct	iio_channel	*gain_channel;
-};
-
-#define	PLUTO_RATE	2500000
+#define	PLUTO_RATE	2100000
 #define	DAB_RATE	2048000
 #define	DIVIDER		1000
 #define	CONV_SIZE	(PLUTO_RATE / DIVIDER)
@@ -49,26 +39,36 @@ public:
 			plutoHandler		(int	frequency,
 	                                         int	gain,
 	                                         bool	agc);
-            		~plutoHandler		();
+	    		~plutoHandler		();
+	int32_t		defaultFrequency	();
 	bool		restartReader		(int32_t);
 	void		stopReader		();
 	int32_t		getSamples		(std::complex<float> *,
 	                                                          int32_t);
-	int32_t		Samples			();
-	void		resetBuffer		();
-	int16_t		bitDepth		();
+	int32_t		Samples			(void);
+	void		resetBuffer		(void);
+	int16_t		bitDepth		(void);
+
 private:
-	RingBuffer<std::complex<float>>	_I_Buffer;
+
+	RingBuffer<std::complex<float>> _I_Buffer;
 	std::thread		threadHandle;
 	void			run		();
 	int32_t			inputRate;
 	std::atomic<bool>	running;
+//	configuration items
+	int64_t			bw_hz; // Analog banwidth in Hz
+	int64_t			fs_hz; // Baseband sample rate in Hz
+	int64_t			lo_hz; // Local oscillator frequency in Hz
+	const char* rfport; // Port name
+	struct	iio_channel	*lo_channel;
+	struct	iio_channel	*gain_channel;
 	struct	iio_device	*rx;
 	struct	iio_context	*ctx;
 	struct	iio_channel	*rx0_i;
 	struct	iio_channel	*rx0_q;
 	struct	iio_buffer	*rxbuf;
-	struct	stream_cfg	rxcfg;
+//	struct	stream_cfg	rxcfg;
 	std::complex<float>	convBuffer	[CONV_SIZE + 1];
 	int			convIndex;
 	int16_t			mapTable_int	[DAB_RATE / DIVIDER];

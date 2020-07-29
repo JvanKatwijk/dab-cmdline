@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2014 .. 2020
+ *    Copyright (C) 2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -33,70 +33,6 @@ char*	get_ch_name (const char* type, int id) {
         return tmpstr;
 }
 
-/* returns ad9361 phy device */
-static
-struct	iio_device* get_ad9361_phy (struct iio_context *ctx) {
-struct iio_device *dev =  iio_context_find_device(ctx, "ad9361-phy");
-	if (dev == nullptr) {
-	   fprintf (stderr, "No ad9361-phy found, fatal\n");
-	   throw (21);
-	}
-        return dev;
-}
-
-/* applies streaming configuration through IIO */
-static
-bool	cfg_ad9361_streaming_ch (struct iio_context *ctx,
-	                         struct stream_cfg *cfg, int chid) {
-struct iio_channel *chn = nullptr;
-
-// Configure phy and lo channels
-//	fprintf (stderr, "* Acquiring AD9361 phy channel %d\n", chid);
-	chn = iio_device_find_channel (get_ad9361_phy (ctx),
-                                        get_ch_name ("voltage", chid),
-                                        false);
-	if (chn == nullptr) {
-	   fprintf (stderr, "cannot acquire phy channel %d\n", chid);
-	   return false;
-	}
-
-	if (iio_channel_attr_write (chn, "rf_port_select",
-	                                                cfg -> rfport) < 0) {
-	   fprintf (stderr, "cannot select port\n");
-	   return false;
-	}
-
-	if (iio_channel_attr_write_longlong (chn, "rf_bandwidth",
-	                                                 cfg -> bw_hz) < 0) {
-	   fprintf (stderr, "cannot select bandwidth\n");
-	   return false;
-	}
-
-	if (iio_channel_attr_write_longlong (chn, "sampling_frequency",
-	                                                 cfg -> fs_hz) < 0) {
-	   fprintf (stderr, "cannot set sampling frequency\n");
-	   return false;
-	}
-
-	cfg	-> gain_channel = chn;
-// Configure LO channel
-//	fprintf (stderr, "* Acquiring AD9361 %s lo channel\n", "RX");
-	cfg -> lo_channel = iio_device_find_channel (get_ad9361_phy (ctx),
-                                              get_ch_name ("altvoltage", 0),
-                                              true);
-	if (cfg -> lo_channel == nullptr) {
-	   fprintf (stderr, "cannot find lo for channel\n");
-	   return false;
-	}
-
-	if (iio_channel_attr_write_longlong (cfg -> lo_channel, "frequency",
-	                                                 cfg -> lo_hz) < 0) {
-	   fprintf (stderr, "cannot set local oscillator frequency\n");
-	   return false;
-	}
-	return true;
-}
-
 /* finds AD9361 streaming IIO channels */
 static
 bool get_ad9361_stream_ch (__notused struct iio_context *ctx,
@@ -119,17 +55,22 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	plutoHandler::plutoHandler  (int32_t	frequency,
 	                             int	gainValue,
 	                             bool	agcMode):
-	                                  _I_Buffer (4 * 1024 * 1024) {
-	ctx				= nullptr;
-	rxbuf				= nullptr;
-	rx0_i				= nullptr;
-	rx0_q				= nullptr;
+	                               _I_Buffer (4 * 1024 * 1024) {
+struct iio_channel *chn = nullptr;
 
-	rxcfg. bw_hz			= PLUTO_RATE;
-	rxcfg. fs_hz			= PLUTO_RATE;
-	rxcfg. lo_hz			= frequency;
-	rxcfg. rfport			= "A_BALANCED";
+	this	-> ctx			= nullptr;
+	this	-> rxbuf		= nullptr;
+	this	-> rx0_i		= nullptr;
+	this	-> rx0_q		= nullptr;
 
+	this	-> bw_hz		= PLUTO_RATE;
+	this	-> fs_hz		= PLUTO_RATE;
+	this	-> lo_hz		= frequency;
+	this	-> rfport		= "A_BALANCED";
+
+//
+//	step 1: establish a context
+//
 	ctx	= iio_create_default_context ();
 	if (ctx == nullptr) {
 	   ctx = iio_create_local_context ();
@@ -140,15 +81,16 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	}
 
 	if (ctx == nullptr) {
-//	   ctx = iio_create_network_context ("192.168.2.1");
-	   ctx = iio_create_network_context ("qra.f5oeo.fr");
+	   ctx = iio_create_network_context ("192.168.2.1");
+//	   ctx = iio_create_network_context ("qra.f5oeo.fr");
 	}
 
 	if (ctx == nullptr) {
 	   fprintf (stderr, "No pluto found, fatal\n");
 	   throw (24);
 	}
-
+//
+//	step 2: look for availability of devices
 	if (iio_context_get_devices_count (ctx) <= 0) {
 	   fprintf (stderr, "no devices found, fatal");
 	   throw (25);
@@ -157,24 +99,81 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	rx = iio_context_find_device (ctx, "cf-ad9361-lpc");
 	if (rx == nullptr) {
 	   fprintf (stderr, "No device found");
+	   iio_context_destroy (ctx);
 	   throw (26);
 	}
 
-	fprintf (stderr, "found a device %s\n",
-	               iio_device_get_name (rx));
-        if (!cfg_ad9361_streaming_ch (ctx, &rxcfg, 0)) {
-	   fprintf (stderr, "RX port 0 not found");
+	fprintf (stderr, "found a device %s\n", iio_device_get_name (rx));
+
+//	fprintf (stderr, "* Acquiring AD9361 phy channel %d\n", 0);
+	struct iio_device *phys_dev = iio_context_find_device (ctx,
+	                                             "ad9361-phy");
+	if (phys_dev == nullptr) {
+	   fprintf (stderr, "cannot find device\n");
+	   iio_context_destroy (ctx);
+	   throw (27);
+	}
+	chn = iio_device_find_channel (phys_dev,
+                                       get_ch_name ("voltage", 0),
+                                       false);
+	if (chn == nullptr) {
+	   fprintf (stderr, "cannot acquire phy channel %d\n", 0);
+	   iio_context_destroy (ctx);
 	   throw (27);
 	}
 
-        if (!get_ad9361_stream_ch (ctx, rx, 0, &rx0_i)) {
-	   fprintf (stderr, "RX chan i not found");
+	if (iio_channel_attr_write (chn, "rf_port_select",
+	                                            this -> rfport) < 0) {
+	   fprintf (stderr, "cannot select port\n");
+	   iio_context_destroy (ctx);
 	   throw (28);
+	}
+
+	if (iio_channel_attr_write_longlong (chn, "rf_bandwidth",
+	                                             this -> bw_hz) < 0) {
+	   fprintf (stderr, "cannot select bandwidth\n");
+	   iio_context_destroy (ctx);
+	   throw (29);
+	}
+
+	if (iio_channel_attr_write_longlong (chn, "sampling_frequency",
+	                                                 this -> fs_hz) < 0) {
+	   fprintf (stderr, "cannot set sampling frequency\n");
+	   iio_context_destroy (ctx);
+	   throw (30);
+	}
+//
+//	we use the channel for setting gains
+	this	-> gain_channel = chn;
+// Configure LO channel, when here, we know that phys_dev is not null
+//	fprintf (stderr, "* Acquiring AD9361 %s lo channel\n", "RX");
+	this -> lo_channel =
+	                iio_device_find_channel (phys_dev,
+                                                 get_ch_name ("altvoltage", 0),
+                                                 true);
+	if (this -> lo_channel == nullptr) {
+	   fprintf (stderr, "cannot find lo for channel\n");
+	   iio_context_destroy (ctx);
+	   throw (31);
+	}
+
+	if (iio_channel_attr_write_longlong (this -> lo_channel,
+	                                     "frequency", this -> lo_hz) < 0) {
+	   fprintf (stderr, "cannot set local oscillator frequency\n");
+	   iio_context_destroy (ctx);
+	   throw (32);
+	}
+
+        if (!get_ad9361_stream_ch (ctx, rx, 0, &rx0_i)) {
+	   fprintf (stderr, "RX chan i not found\n");
+	   iio_context_destroy (ctx);
+	   throw (33);
 	}
 
         if (!get_ad9361_stream_ch (ctx, rx, 1, &rx0_q)) {
 	   fprintf (stderr, "RX chan q not found");
-	   throw (29);
+	   iio_context_destroy (ctx);
+	   throw (34);
 	}
 
         iio_channel_enable (rx0_i);
@@ -183,25 +182,28 @@ std::complex<float> cmul (std::complex<float> x, float y) {
         rxbuf = iio_device_create_buffer (rx, 1024*1024, false);
 	if (rxbuf == nullptr) {
 	   fprintf (stderr, "could not create RX buffer, fatal");
-	   throw (30);
+	   iio_context_destroy (ctx);
+	   throw (35);
 	}
 //
 	iio_buffer_set_blocking_mode (rxbuf, true);
 	if (!agcMode) {
-	   int ret = iio_channel_attr_write (rxcfg. gain_channel,
+	   int ret = iio_channel_attr_write (this -> gain_channel,
 	                                     "gain_control_mode", "manual");
-	   ret = iio_channel_attr_write_longlong (rxcfg. gain_channel,
+	   ret = iio_channel_attr_write_longlong (this -> gain_channel,
 	                                          "hardwaregain", gainValue);
 	   if (ret < 0) 
 	      fprintf (stderr, "error in initial gain setting");
 	}
 	else {
-	   int ret = iio_channel_attr_write (rxcfg. gain_channel,
-	                                     "gain_control_mode", "slow_attack");
+	   int ret = iio_channel_attr_write (this -> gain_channel,
+	                                     "gain_control_mode",
+	                                     "slow_attack");
 	   if (ret < 0)
 	      fprintf (stderr, "error in initial gain setting");
 	}
-	
+//
+//	and set up interpolation table
 	float	divider		= (float)DIVIDER;
 	float	denominator	= DAB_RATE / divider;
 	for (int i = 0; i < DAB_RATE / DIVIDER; i ++) {
@@ -218,19 +220,18 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	iio_buffer_destroy (rxbuf);
 	iio_context_destroy (ctx);
 }
-//
 
 bool	plutoHandler::restartReader	(int32_t freq) {
 	if (running. load())
 	   return true;		// should not happen
 
-	if (freq == rxcfg. lo_hz)
-	   return true;
+//	if (freq == this -> lo_hz)
+//	   return true;
 
-	rxcfg. lo_hz	= freq;
+	this -> lo_hz	= freq;
 	int ret	= iio_channel_attr_write_longlong
-	                             (rxcfg. lo_channel,
-	                                   "frequency", rxcfg. lo_hz);
+	                             (this -> lo_channel,
+	                                   "frequency", this -> lo_hz);
 	if (ret < 0) {
 	   fprintf (stderr, "error in selected frequency\n");
 	   return false;
@@ -246,6 +247,10 @@ void	plutoHandler::stopReader() {
 	running. store (false);
 	usleep (50000);
 	threadHandle. join ();
+}
+
+int32_t	plutoHandler::defaultFrequency	() {
+	return 220000000;
 }
 
 void	plutoHandler::run	() {
@@ -276,7 +281,7 @@ std::complex<float> localBuf [DAB_RATE / DIVIDER];
                                      cmul (convBuffer [inpBase], 1 - inpRatio);
                  }
 	         _I_Buffer. putDataIntoBuffer (localBuf,
-	                                        DAB_RATE / DIVIDER);
+	                                          DAB_RATE / DIVIDER);
 	         convBuffer [0] = convBuffer [CONV_SIZE];
 	         convIndex = 1;
 	      }
@@ -284,21 +289,17 @@ std::complex<float> localBuf [DAB_RATE / DIVIDER];
 	}
 }
 
-int32_t	plutoHandler::getSamples (std::complex<float> *V, int32_t size) { 
-	if (!running. load ())
-	   return 0;
+int32_t	plutoHandler::Samples		() {
+	return _I_Buffer. GetRingBufferReadAvailable ();
+}
+
+int32_t	plutoHandler::getSamples	(std::complex<float> *V, int size) {
 	return _I_Buffer. getDataFromBuffer (V, size);
 }
 
-int32_t	plutoHandler::Samples () {
-	return _I_Buffer. GetRingBufferReadAvailable();
+void	plutoHandler::resetBuffer	() {
+	_I_Buffer. FlushRingBuffer ();
 }
 
-void	plutoHandler::resetBuffer() {
-	_I_Buffer. FlushRingBuffer();
-}
-
-int16_t	plutoHandler::bitDepth() {
-	return 12;
-}
+int16_t	plutoHandler::bitDepth		() { return 12;}
 

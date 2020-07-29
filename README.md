@@ -12,27 +12,11 @@ library to the caller.
 The library interface is given in dab-api.h
 
 -----------------------------------------------------------------------
-New
+NEW: Support for Pluto
 -----------------------------------------------------------------------
 
-New is that now the new SDRplay library, the v3 library, is supported.
-In order to allow choosing between the "old" 2.13 and the "new" 3.06
-library, the CMakeFile for example 2 and example 3 allows selection of 
-
-	-DSDRPLAY=ON
-or
-
-	-DSDRPLAY_V3=ON
-
-Note that, while both the 2.13 and 3.06 library interface can be used
-for the RSP1, the RSP II, the RSP Ia and the RSP Duo from SDRplay,
-for using the RSP-Dx one needs to have the 3.06 library installed.
-
-Furthermore,  example 2 allows the selection of the xml-filereader
-
-	-DXML_FILES=ON
-
-Of course, you should have installed the right library
+Just a few days ago I got the Adalm Pluto and added support for the Pluto
+for example 2. 
 
 ----------------------------------------------------------------------
 The C (C++) example programs

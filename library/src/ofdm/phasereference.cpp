@@ -132,8 +132,8 @@ float   computedDiffs [SEARCH_RANGE + diff_length + 1];
 	for (i = 0; i < SEARCH_RANGE + diff_length; i ++)
 	   computedDiffs [i] *= computedDiffs [i];
 
-        float   Mmin_1 = 10000;
-        float   Mmin_2 = 10000;
+        float   Mmin = 10000;
+        float   Mmax = 0;
 
 	for (i = T_u - SEARCH_RANGE / 2;
              i < T_u + SEARCH_RANGE / 2; i ++) {
@@ -142,15 +142,15 @@ float   computedDiffs [SEARCH_RANGE + diff_length + 1];
            for (j = 0; j < diff_length; j ++) {
               if (phaseDifferences [j] < 0.05)
                  sum_1 += computedDiffs [i - (T_u - SEARCH_RANGE / 2) + j];
-              sum_2 += abs (computedDiffs [i - (T_u - SEARCH_RANGE / 2) + j] -
-                                                   phaseDifferences [j]);
+	      if (phaseDifferences [j] > M_PI - 0.05)
+                 sum_2 += computedDiffs [i - (T_u - SEARCH_RANGE / 2) + j];
            }
-           if (sum_1 < Mmin_1) {
-              Mmin_1 = sum_1;
+           if (sum_1 < Mmin) {
+              Mmin = sum_1;
               index_1 = i;
            }
-           if (sum_2 < Mmin_2) {
-              Mmin_2 = sum_2;
+           if (sum_2 > Mmax) {
+              Mmax = sum_2;
               index_2 = i;
            }
         }
