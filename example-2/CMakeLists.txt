@@ -295,7 +295,7 @@ endif ()
            if(NOT(PLUTOLIB))
               message(FATAL_ERROR "please install libiio")
            else(NOT(PLUTOLIB))
-              list (APPEND extraLibs ${PLUTOLIB})
+              list (APPEND extraLibs ${PLUTOLIB} "libad9361.so")
            endif(NOT(PLUTOLIB))
 
 	   include_directories (

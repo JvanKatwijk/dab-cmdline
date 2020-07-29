@@ -22,6 +22,7 @@
 
 #include	"pluto-handler.h"
 #include	<unistd.h>
+#include	"ad9361.h"
 
 /* static scratch mem for strings */
 static char tmpstr[64];
@@ -58,6 +59,8 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	                               _I_Buffer (4 * 1024 * 1024) {
 struct iio_channel *chn = nullptr;
 
+struct filter_design_parameters p;
+int16_t	taps [128];
 	this	-> ctx			= nullptr;
 	this	-> rxbuf		= nullptr;
 	this	-> rx0_i		= nullptr;
@@ -212,6 +215,17 @@ struct iio_channel *chn = nullptr;
            mapTable_float [i]   = i * (inVal / denominator) - mapTable_int [i];
         }
         convIndex       = 0;
+
+	int ret = ad9361_set_bb_rate_custom_filter_auto (phys_dev, 2100000);
+	float Fpass	= 1536000 / 2;
+	float Fstop	= Fpass * 1.1;
+	float wnomTX	= 1.6 * Fstop;	// dummy here
+	float wnomRX	= 1536000;	// RF bandwidth of analog filter
+	ret = ad9361_set_bb_rate_custom_filter_manual (phys_dev, PLUTO_RATE,
+	                                               Fpass, Fstop,
+	                                               wnomTX, wnomRX);
+	if (ret < 0)
+	   fprintf (stderr, "mislukt, error code %d\n", ret);
 	running. store (false);
 }
 
