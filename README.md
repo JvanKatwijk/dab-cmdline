@@ -60,6 +60,7 @@ Supported devices
 	- RTLSDR based devices
 	- HACKRF (only example programs 2, 3, 4, 8 and 9)
 	- LimeSDR (only example programs 2, 3 and 4)
+	- Pluto (only example 2)
 
 and of course fileinput of ".raw" and ".sdr" files is supported, as
 well as input through the rtl_tcp driver.
@@ -147,6 +148,10 @@ Assuming that the program is to be compiled in a Debian based system
 
 Installing the library for the SDRplay requires downloading the library
 from the "www.SDRplay.com" site.
+
+For pluto the "libiio-dev" has to be installed. Note that on "old"
+Ubuntu versions, e.g. 16.04, only an old, not yet complete, version
+of the library is available.
 
 Installing the library for the RTLSDR can be done by executing the 
 following lines

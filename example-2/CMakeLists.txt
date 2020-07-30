@@ -304,6 +304,7 @@ endif ()
 
 	   set ($(objectName)_HDRS
 	        ${${objectName}_HDRS}
+	        ../devices/pluto/dabFilter.h
 	        ../devices/pluto/pluto-handler.h
            )
 

@@ -22,7 +22,7 @@
 
 #include	"pluto-handler.h"
 #include	<unistd.h>
-#include	"ad9361.h"
+#include	"dabFilter.h"
 
 /* static scratch mem for strings */
 static char tmpstr[64];
@@ -53,14 +53,41 @@ std::complex<float> cmul (std::complex<float> x, float y) {
 	return std::complex<float> (real (x) * y, imag (x) * y);
 }
 
+int	ad9361_set_trx_fir_enable(struct iio_device *dev, int enable) {
+int ret = iio_device_attr_write_bool (dev,
+	                              "in_out_voltage_filter_fir_en",
+	                              !!enable);
+	if (ret < 0)
+	   ret = iio_channel_attr_write_bool (
+	                        iio_device_find_channel(dev, "out", false),
+	                        "voltage_filter_fir_en", !!enable);
+	return ret;
+}
+
+int	ad9361_get_trx_fir_enable (struct iio_device *dev, int *enable) {
+bool value;
+
+	int ret = iio_device_attr_read_bool (dev,
+	                                     "in_out_voltage_filter_fir_en",
+	                                     &value);
+
+	if (ret < 0)
+	   ret = iio_channel_attr_read_bool (
+	                        iio_device_find_channel (dev, "out", false),
+	                        "voltage_filter_fir_en", &value);
+	if (!ret)
+	   *enable	= value;
+
+	return ret;
+}
+
+
 	plutoHandler::plutoHandler  (int32_t	frequency,
 	                             int	gainValue,
 	                             bool	agcMode):
 	                               _I_Buffer (4 * 1024 * 1024) {
 struct iio_channel *chn = nullptr;
 
-struct filter_design_parameters p;
-int16_t	taps [128];
 	this	-> ctx			= nullptr;
 	this	-> rxbuf		= nullptr;
 	this	-> rx0_i		= nullptr;
@@ -216,16 +243,18 @@ int16_t	taps [128];
         }
         convIndex       = 0;
 
-	int ret = ad9361_set_bb_rate_custom_filter_auto (phys_dev, 2100000);
-	float Fpass	= 1536000 / 2;
-	float Fstop	= Fpass * 1.1;
-	float wnomTX	= 1.6 * Fstop;	// dummy here
-	float wnomRX	= 1536000;	// RF bandwidth of analog filter
-	ret = ad9361_set_bb_rate_custom_filter_manual (phys_dev, PLUTO_RATE,
-	                                               Fpass, Fstop,
-	                                               wnomTX, wnomRX);
+	int enabled;
+//	go for the filter
+	ad9361_get_trx_fir_enable (phys_dev, &enabled);
+	if (enabled)
+	   ad9361_set_trx_fir_enable (phys_dev, 0);
+	int ret = iio_device_attr_write_raw (phys_dev,
+	                                     "filter_fir_config",
+	                                     dabFilter, strlen (dabFilter));
 	if (ret < 0)
-	   fprintf (stderr, "mislukt, error code %d\n", ret);
+	   fprintf (stderr, "filter mislukt");
+//	and enable it
+	ad9361_set_trx_fir_enable (phys_dev, 1);
 	running. store (false);
 }
 
