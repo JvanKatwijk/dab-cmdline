@@ -16,7 +16,10 @@ NEW: Support for Pluto
 -----------------------------------------------------------------------
 
 Just a few days ago I got the Adalm Pluto and added support for the Pluto
-for example 2. 
+for example 2. An experiment, with the Adalm Pluto and the SDRplay as input devices
+is recorded in a separate project (dab-pluto). In that project the approach
+of handling the input is changed and - since a lot of data handling is omitted -
+the software tree is simplified.
 
 ----------------------------------------------------------------------
 The C (C++) example programs
