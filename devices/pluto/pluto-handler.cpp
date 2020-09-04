@@ -209,7 +209,7 @@ struct iio_channel *chn = nullptr;
         iio_channel_enable (rx0_i);
         iio_channel_enable (rx0_q);
 
-        rxbuf = iio_device_create_buffer (rx, 1024*1024, false);
+        rxbuf = iio_device_create_buffer (rx, 256*1024, false);
 	if (rxbuf == nullptr) {
 	   fprintf (stderr, "could not create RX buffer, fatal");
 	   iio_context_destroy (ctx);

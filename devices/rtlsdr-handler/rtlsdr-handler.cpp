@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2010, 2011, 2012, 2013
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB library
+ *
  *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -29,6 +30,8 @@
 #include	"rtl-sdr.h"
 #include	"rtlsdr-handler.h"
 
+#include	<chrono>
+#include	<ctime>
 #ifdef	__MINGW32__
 #define	GETPROCADDRESS	GetProcAddress
 #else
@@ -83,6 +86,8 @@ int16_t	i;
 	this	-> autogain	= autogain;
 	this	-> deviceIndex	= deviceIndex;
 
+	this	-> outFile	= nullptr;
+	this	-> dumpIndex	= 0;
 	inputRate		= 2048000;
 	libraryLoaded		= false;
 	open			= false;
@@ -264,15 +269,23 @@ float convTable [] = {
 //	The brave old getSamples. For the dab stick, we get
 //	size samples: still in I/Q pairs, but we have to convert the data from
 //	uint8_t to DSPCOMPLEX *
+
 int32_t	rtlsdrHandler::getSamples (std::complex<float> *V, int32_t size) { 
 int32_t	amount, i;
 uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 //
 	amount = _I_Buffer	-> getDataFromBuffer (tempBuffer, 2 * size);
-	for (i = 0; i < amount / 2; i ++)
-	    V [i] = std::complex<float>
-	                    (convTable [tempBuffer [2 * i]],
-	                     convTable [tempBuffer [2 * i + 1]]);;
+	for (i = 0; i < amount / 2; i ++) {
+	   V [i] = std::complex<float>
+	                   (convTable [tempBuffer [2 * i]],
+	                    convTable [tempBuffer [2 * i + 1]]);;
+	   dumpBuffer [2 + dumpIndex    ] = real (V [i]) * 512;
+	   dumpBuffer [2 + dumpIndex + 1] = imag (V [i]) * 512;
+	   if (++ dumpIndex >= DUMP_SIZE / 2) {
+	      sf_writef_short (outFile, dumpBuffer, dumpIndex);
+	      dumpIndex = 0;
+	   }
+	}
 	return amount / 2;
 }
 
@@ -434,5 +447,28 @@ int16_t	rtlsdrHandler::maxGain	(void) {
 
 int16_t	rtlsdrHandler::bitDepth	(void) {
 	return 8;
+}
+
+void	rtlsdrHandler::startDumping	(std::string s) {
+auto now = std::chrono::system_clock::now();
+std::time_t currentTime = std::chrono::system_clock::to_time_t (now);
+std::string fileName = s + std::string (std::ctime (&currentTime)) + std::string (".wav");
+SF_INFO	sf_info;
+	
+	sf_info. samplerate	= 2048000;
+	sf_info. channels	= 2;
+	sf_info. format		= SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	outFile			= sf_open (fileName. c_str (),
+                                           SFM_WRITE, &sf_info);
+	if (outFile != nullptr)
+	   fprintf (stderr, "opened file %s\n", fileName. c_str ());
+	else
+	   fprintf (stderr, "opening %s failed\n", fileName. c_str ());
+}
+
+void	rtlsdrHandler::stopDumping	() {
+	if (outFile != nullptr)
+	   sf_close (outFile);
+	outFile	= nullptr;
 }
 

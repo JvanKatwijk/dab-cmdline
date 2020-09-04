@@ -121,6 +121,11 @@ endif ()
         endif ()
 	list(APPEND extraLibs ${ZLIB_LIBRARY})
 
+	find_package(LibSndFile)
+        if (NOT LIBSNDFILE_FOUND)
+            message(FATAL_ERROR "please install libsndfile")
+        endif ()
+        list(APPEND extraLibs ${LIBSNDFILE_LIBRARY})
 
 	find_library (PTHREADS pthread)
 	if (NOT(PTHREADS))

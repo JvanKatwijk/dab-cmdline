@@ -28,6 +28,10 @@
 #include	"ringbuffer.h"
 #include	"device-handler.h"
 #include	<thread>
+#include	<sndfile.h>
+
+#define	DUMP_SIZE	4096
+
 class	dll_driver;
 typedef	void *HINSTANCE;
 //
@@ -81,6 +85,8 @@ public:
 	void		resetBuffer	(void);
 	int16_t		maxGain		(void);
 	int16_t		bitDepth	(void);
+	void		startDumping	(std::string);
+	void		stopDumping	();
 //
 //	These need to be visible for the separate usb handling thread
 	RingBuffer<uint8_t>	*_I_Buffer;
@@ -99,8 +105,11 @@ private:
 	int		*gains;
 	int16_t		gainsCount;
 	bool		running;
+	SNDFILE		*outFile;
 	int		frequency;
 	char		* deviceOptions;
+	int16_t		dumpBuffer [DUMP_SIZE];
+	int		dumpIndex;
 //	here we need to load functions from the dll
 	bool		load_rtlFunctions	(void);
 	pfnrtlsdr_get_index_by_serial	rtlsdr_get_index_by_serial;

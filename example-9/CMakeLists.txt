@@ -303,6 +303,7 @@ endif ()
 	           ../library/includes/backend/data/mot
 	           ../library/includes/backend/data/journaline
 	           ../library/includes/support
+	           ../library/includes/support/viterbi-spiral
 	           /usr/include/
 	)
 
@@ -346,8 +347,8 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h 
 	     ../library/includes/backend/data/data-processor.h
-         ../library/includes/support/band-handler.h
-	     ../library/includes/support/viterbi-handler.h
+	      ../library/includes/support/band-handler.h
+#	     ../library/includes/support/viterbi-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
@@ -355,6 +356,8 @@ endif ()
 	     ../library/includes/support/fft_handler.h
 	     ../library/includes/support/dab-params.h
 	     ../library/includes/support/tii_table.h
+	     ../library/includes/support/viterbi-spiral/viterbi-spiral.h
+	     ../library/src/support/viterbi-spiral/spiral-no-sse.h
 	)
 
 	set (${objectName}_SRCS
@@ -396,8 +399,8 @@ endif ()
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp 
 	     ../library/src/backend/data/data-processor.cpp
-         ../library/src/support/band-handler.cpp
-	     ../library/src/support/viterbi-handler.cpp
+	     ../library/src/support/band-handler.cpp
+#	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
@@ -405,6 +408,9 @@ endif ()
 	     ../library/src/support/fft_handler.cpp
 	     ../library/src/support/dab-params.cpp
 	     ../library/src/support/tii_table.cpp
+	     ../library/src/support/viterbi-spiral/viterbi-spiral.cpp
+            ../library/src/support/viterbi-spiral/spiral-no-sse.c
+
 	)
 
 #

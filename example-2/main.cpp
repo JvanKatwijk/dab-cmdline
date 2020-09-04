@@ -239,7 +239,7 @@ void	fibQuality	(int16_t q, void *ctx) {
 
 static
 void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
-//	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
+	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
 
 int	main (int argc, char **argv) {
@@ -372,6 +372,7 @@ int	theDuration		= -1;	// no limit
 #ifdef	HAVE_WAVFILES
 	      case 'F':
 	         fileName	= std::string (optarg);
+	         break;
 
 	      case 'R':
 	         repeater	= false;

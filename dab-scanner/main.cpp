@@ -205,7 +205,9 @@ const char	*optionsString	= "F:jD:d:M:B:C:G:bp:";
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "F:jD:d:M:B:C:G:p:Q";
+int		dumpDuration	= 1;
+bool		rawDump		= false;
+const char	*optionsString	= "F:jD:d:M:B:C:G:p:QR:T:";
 #endif
 int	opt;
 int	freqSyncTime		= 10;
@@ -261,6 +263,7 @@ bool firstEnsemble = true;
 	      case 'C':
 	         startChannel	= std::string (optarg);
 	         break;
+
 
 //	device specific options
 
@@ -346,6 +349,14 @@ bool firstEnsemble = true;
 
 	      case 'p':
 	         ppmOffset	= atoi (optarg);
+	         break;
+
+	      case 'R':
+	         rawDump	= true;
+	         break;
+
+	      case 'T':
+	         dumpDuration	= 60 * atoi (optarg);
 	         break;
 #endif
 
@@ -474,8 +485,14 @@ bool firstEnsemble = true;
 	      else
 	         continue;
 	   }
+#ifdef	HAVE_RTLSDR
+	   if (rawDump) {
+	      ((rtlsdrHandler *)theDevice) -> startDumping (theChannel);
+	      sleep (dumpDuration);
+	   }
+#else
 	   sleep (5);
-//
+#endif
 //	print ensemble data here
 	   print_ensembleData (outFile,
 	                       jsonOutput,
@@ -555,7 +572,11 @@ bool firstEnsemble = true;
 	   }
 	   
 	   print_ensembleFooter (outFile, jsonOutput);
-	   
+
+#ifdef	HAVE_RTLSDR
+	   if (rawDump)
+	      ((rtlsdrHandler *)theDevice) -> stopDumping ();
+#endif
 	   theDevice	-> stopReader ();
 	   dabStop (theRadio);
 	   programNames. resize (0);
@@ -581,7 +602,8 @@ void    printOptions (void) {
                         -D number        amount of time to look for full sync\n\
                         -M Mode          Mode is 1, 2 or 4. Default is Mode 1\n\
                         -B Band          Band is either L_BAND or BAND_III (default)\n\
-                        -C start channel the start channel, default: 5A\n"
+                        -C start channel the start channel, default: 5A\n\
+	                -R filename	raw dump of the input data\n"
 "	for hackrf:\n"
 "	                  -v vgaGain\n"
 "	                  -l lnaGain\n"
