@@ -268,7 +268,7 @@ float convTable [] = {
 //
 //	The brave old getSamples. For the dab stick, we get
 //	size samples: still in I/Q pairs, but we have to convert the data from
-//	uint8_t to DSPCOMPLEX *
+//	uint8_t to std::complex<float>
 
 int32_t	rtlsdrHandler::getSamples (std::complex<float> *V, int32_t size) { 
 int32_t	amount, i;
@@ -279,10 +279,10 @@ uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 	   V [i] = std::complex<float>
 	                   (convTable [tempBuffer [2 * i]],
 	                    convTable [tempBuffer [2 * i + 1]]);;
-	   dumpBuffer [2 + dumpIndex    ] = real (V [i]) * 512;
-	   dumpBuffer [2 + dumpIndex + 1] = imag (V [i]) * 512;
+	   dumpBuffer [2 * dumpIndex     ]	= tempBuffer [2 * i];
+	   dumpBuffer [2 * dumpBuffer + 1]	= tempBuffer [2 * i + 1];
 	   if (++ dumpIndex >= DUMP_SIZE / 2) {
-	      sf_writef_short (outFile, dumpBuffer, dumpIndex);
+	      fwrite (outFile, 2, DUMP_SIZE / 2, dumpBuffer);
 	      dumpIndex = 0;
 	   }
 	}
@@ -452,14 +452,8 @@ int16_t	rtlsdrHandler::bitDepth	(void) {
 void	rtlsdrHandler::startDumping	(std::string s) {
 auto now = std::chrono::system_clock::now();
 std::time_t currentTime = std::chrono::system_clock::to_time_t (now);
-std::string fileName = s + std::string (std::ctime (&currentTime)) + std::string (".wav");
-SF_INFO	sf_info;
-	
-	sf_info. samplerate	= 2048000;
-	sf_info. channels	= 2;
-	sf_info. format		= SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-	outFile			= sf_open (fileName. c_str (),
-                                           SFM_WRITE, &sf_info);
+std::string fileName = s + std::string (std::ctime (&currentTime)) + std::string (".iq");
+	outFile			= fopen (fileName. c_str (), "w + b");
 	if (outFile != nullptr)
 	   fprintf (stderr, "opened file %s\n", fileName. c_str ());
 	else
@@ -468,7 +462,7 @@ SF_INFO	sf_info;
 
 void	rtlsdrHandler::stopDumping	() {
 	if (outFile != nullptr)
-	   sf_close (outFile);
+	   fclose (outFile);
 	outFile	= nullptr;
 }
 

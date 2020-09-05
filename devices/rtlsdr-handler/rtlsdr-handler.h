@@ -28,9 +28,8 @@
 #include	"ringbuffer.h"
 #include	"device-handler.h"
 #include	<thread>
-#include	<sndfile.h>
 
-#define	DUMP_SIZE	4096
+#define	DUMP_SIZE	8192
 
 class	dll_driver;
 typedef	void *HINSTANCE;
@@ -105,10 +104,10 @@ private:
 	int		*gains;
 	int16_t		gainsCount;
 	bool		running;
-	SNDFILE		*outFile;
+	FILE		*outFile;
 	int		frequency;
 	char		* deviceOptions;
-	int16_t		dumpBuffer [DUMP_SIZE];
+	uint8_t		dumpBuffer [DUMP_SIZE];
 	int		dumpIndex;
 //	here we need to load functions from the dll
 	bool		load_rtlFunctions	(void);
