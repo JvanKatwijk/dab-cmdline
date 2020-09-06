@@ -279,10 +279,10 @@ uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 	   V [i] = std::complex<float>
 	                   (convTable [tempBuffer [2 * i]],
 	                    convTable [tempBuffer [2 * i + 1]]);;
-	   dumpBuffer [2 * dumpIndex     ]	= tempBuffer [2 * i];
-	   dumpBuffer [2 * dumpBuffer + 1]	= tempBuffer [2 * i + 1];
+	   dumpBuffer [2 * dumpIndex    ]	= tempBuffer [2 * i];
+	   dumpBuffer [2 * dumpIndex + 1]	= tempBuffer [2 * i + 1];
 	   if (++ dumpIndex >= DUMP_SIZE / 2) {
-	      fwrite (outFile, 2, DUMP_SIZE / 2, dumpBuffer);
+	      fwrite (dumpBuffer, 2, DUMP_SIZE / 2, outFile);
 	      dumpIndex = 0;
 	   }
 	}
