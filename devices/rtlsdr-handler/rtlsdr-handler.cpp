@@ -281,9 +281,11 @@ uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 	                    convTable [tempBuffer [2 * i + 1]]);;
 	   dumpBuffer [2 * dumpIndex    ]	= tempBuffer [2 * i];
 	   dumpBuffer [2 * dumpIndex + 1]	= tempBuffer [2 * i + 1];
-	   if (++ dumpIndex >= DUMP_SIZE / 2) {
-	      fwrite (dumpBuffer, 2, DUMP_SIZE / 2, outFile);
-	      dumpIndex = 0;
+	   if (outFile != nullptr) {
+	      if (++ dumpIndex >= DUMP_SIZE / 2) {
+	         fwrite (dumpBuffer, 1, DUMP_SIZE, outFile);
+	         dumpIndex = 0;
+	      }
 	   }
 	}
 	return amount / 2;
