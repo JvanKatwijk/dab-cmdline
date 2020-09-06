@@ -32,6 +32,7 @@
 
 #include	<chrono>
 #include	<ctime>
+
 #ifdef	__MINGW32__
 #define	GETPROCADDRESS	GetProcAddress
 #else
@@ -451,10 +452,31 @@ int16_t	rtlsdrHandler::bitDepth	(void) {
 	return 8;
 }
 
-void	rtlsdrHandler::startDumping	(std::string s) {
-auto now = std::chrono::system_clock::now();
-std::time_t currentTime = std::chrono::system_clock::to_time_t (now);
-std::string fileName = s + std::string (std::ctime (&currentTime)) + std::string (".iq");
+std::string toHex (uint32_t ensembleId) {
+char t [4];
+std::string res;
+uint8_t c [2];
+int     i;
+        for (i = 0; i < 4; i ++) {
+           t [3 - i] = ensembleId & 0xF;
+           ensembleId >>= 4;
+        }
+        for (i = 0; i < 4; i ++) {
+           c [0] = t [i] <= 9 ? (char) ('0' + t [i]) : (char)('A'+ t [i] - 10);
+	   c [1] = 0;
+           res. append ((const char *) (&c));
+        }
+        return res;
+}
+
+void	rtlsdrHandler::startDumping	(std::string s, uint32_t ensembleId) {
+time_t now;
+	time (&now);
+	char buf [sizeof "2020-09-06-08T06:07:09Z"];
+	strftime (buf, sizeof (buf), "%F %T", gmtime (&now));
+//	strftime (buf, sizeof (buf), "%FT%TZ", gmtime (&now));
+	std::string timeString = buf;
+	std::string fileName = s + " " + toHex (ensembleId) + " " + timeString + ".iq";
 	outFile			= fopen (fileName. c_str (), "w + b");
 	if (outFile != nullptr)
 	   fprintf (stderr, "opened file %s\n", fileName. c_str ());

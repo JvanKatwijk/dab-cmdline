@@ -84,7 +84,7 @@ public:
 	void		resetBuffer	(void);
 	int16_t		maxGain		(void);
 	int16_t		bitDepth	(void);
-	void		startDumping	(std::string);
+	void		startDumping	(std::string, uint32_t);
 	void		stopDumping	();
 //
 //	These need to be visible for the separate usb handling thread

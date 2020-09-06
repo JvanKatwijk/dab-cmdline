@@ -1,3 +1,4 @@
+#
 /*
  *    Copyright (C) 2015, 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -219,7 +220,9 @@ deviceHandler	*theDevice;
 bool firstEnsemble = true;
 
 	fprintf (stderr, "dab_scanner V 1.0alfa,\n"
-	                "Copyright 2018 J van Katwijk, Lazy Chair Computing\n"	                         "2018 Hayati Ayguen\n");
+	                "Copyright 2018 J van Katwijk, Lazy Chair Computing\n"	                         "2018 Hayati Ayguen\n"
+	                 "2019 J van Katwijk\n"
+	                 "2020 J van Katwijk\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
@@ -356,7 +359,7 @@ bool firstEnsemble = true;
 	         break;
 
 	      case 'T':
-	         dumpDuration	= 60 * atoi (optarg);
+	         dumpDuration	= atoi (optarg);
 	         break;
 #endif
 
@@ -485,10 +488,15 @@ bool firstEnsemble = true;
 	      else
 	         continue;
 	   }
+	   
 #ifdef	HAVE_RTLSDR
 	   if (rawDump) {
-	      ((rtlsdrHandler *)theDevice) -> startDumping (theChannel);
-	      sleep (dumpDuration);
+	      ((rtlsdrHandler *)theDevice) -> startDumping (theChannel,
+	                                                     ensembleId);
+	      for (int i = 0; i < dumpDuration; i ++) {
+	         sleep (1);
+	         fprintf (stderr, "%d\r", dumpDuration - i);
+	      }
 	   }
 #else
 	   sleep (5);
