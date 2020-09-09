@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C)  2009, 2010, 2011
+ *    Copyright (C)  2020
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -19,12 +19,12 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 
 #ifndef __FILE_SINK__
 #define	__FILE_SINK__
 #include	<stdio.h>
+#include	<sndfile.h>
 #include	"audio-base.h"
 #include	"ringbuffer.h"
 #include	<string>
@@ -37,7 +37,7 @@ public:
 	void		restart			(void);
 private:
 	void		audioOutput		(float *, int32_t);
-	FILE		*outputFile;
+	SNDFILE		*outputFile;
 	bool		audioOK;
 };
 

@@ -398,6 +398,12 @@ endif ()
 	 add_definitions (-DHAVE_HACKRF)
 	endif (HACKRF)
 
+	find_package(LibSndFile)
+	if (NOT LIBSNDFILE_FOUND)
+	   message(FATAL_ERROR "please install libsndfile")
+	endif ()
+	list(APPEND extraLibs ${LIBSNDFILE_LIBRARY})
+
         find_package(Portaudio)
         if (NOT PORTAUDIO_FOUND)
             message(FATAL_ERROR "please install portaudio V19")
@@ -431,12 +437,6 @@ endif ()
 	        ${${objectName}_SRCS}
 	        ../devices/wavfiles/wavfiles.cpp
 	   )
-	   find_package(LibSndFile)
-	   if (NOT LIBSNDFILE_FOUND)
-	      message(FATAL_ERROR "please install libsndfile")
-	   endif ()
-	   list(APPEND extraLibs ${LIBSNDFILE_LIBRARY})
-
 	   add_definitions (-DHAVE_WAVFILES)
 	endif()
 
@@ -491,6 +491,7 @@ endif ()
 	           .
 	           ./
 	           ./server-thread
+	           ./audio-sink
 	           ../
 	           ../library
 	           ../library/includes
@@ -508,10 +509,10 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
-	     ./audio-base.h
-	     ./audiosink.h
-	     ./filesink.h
-	     ./newconverter.h
+	     ./audio-sink/audio-base.h
+	     ./audio-sink/audiosink.h
+	     ./audio-sink/filesink.h
+	     ./audio-sink/newconverter.h
 	     ./server-thread/tcp-server.h
 	     ../dab-api.h
 	     ../devices/device-handler.h
@@ -558,10 +559,10 @@ endif ()
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	     ./main.cpp
-	     ./audio-base.cpp
-	     ./audiosink.cpp
-	     ./filesink.cpp
-	     ./newconverter.cpp
+	     ./audio-sink/audio-base.cpp
+	     ./audio-sink/audiosink.cpp
+	     ./audio-sink/filesink.cpp
+	     ./audio-sink/newconverter.cpp
 	     ./server-thread/tcp-server.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp

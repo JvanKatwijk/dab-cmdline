@@ -25,22 +25,28 @@
 #include	"filesink.h"
 
 	fileSink::fileSink	(std::string fileName, bool *success) {
-	if (fileName == "-")	{	// stdout
-	   outputFile = stdout;
-	   *success = true;
+SF_INFO sf_info;
+	fprintf (stderr, "fase 1\n");
+	sf_info. samplerate	= 48000;
+	sf_info. channels	= 2;
+	sf_info. format	= SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+	fprintf (stderr, "trying to open %s\n", fileName. c_str ());
+	outputFile		= sf_open (fileName. c_str (),
+	                                           SFM_WRITE, &sf_info);
+	if (outputFile == nullptr) {
+	   fprintf (stderr, "cannot open %s\n", fileName. c_str ());
+	   *success	= false;
+	   return;
 	}
-	else {
-	   outputFile = fopen (fileName. c_str (), "w+b");
-	   *success = outputFile != NULL;
-	}
+	fprintf (stderr, "Opened %s\n", fileName. c_str ());
+	*success	= true;
 	audioOK = *success;
 }
 
-
 	fileSink::~fileSink	(void) {
 	   if (audioOK)
-	      fclose (outputFile);
-	}
+	      sf_close (outputFile);
+}
 
 void	fileSink::stop		(void) {
 }
@@ -56,7 +62,7 @@ void	fileSink::audioOutput	(float *buffer, int32_t amount) {
 	      localBuffer [2 * i    ] = buffer [2 * i] * 32767;
 	      localBuffer [2 * i + 1] = buffer [2 * i + 1] * 32767;
 	   }
-	   fwrite (localBuffer, 2 * sizeof (int16_t), amount, outputFile);
+	   sf_write_short (outputFile, localBuffer, amount);
 	}
 }
 

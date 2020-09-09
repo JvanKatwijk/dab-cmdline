@@ -30,8 +30,11 @@ byte 5 is the low  byte of the 16 bit size
 byte 6 is 0x00
 byte 7 is 0 for packet type 0, 0xFF for packet type 1
 
-Note that the lenngth is the length of the data part, so not taking the
+Note that the length is the length of the data part, so not taking the
 header into account
 
 The bytesOut function puts the data into a simple TCP server that can be 
 read from port 8888 (depending on the configuration).
+
+Sound output now is written in PCM format, i.e. a regular wav file
+
