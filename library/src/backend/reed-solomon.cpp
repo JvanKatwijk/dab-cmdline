@@ -7,6 +7,9 @@
 #include	<stdio.h>
 #include	"reed-solomon.h"
 #include	<string.h>
+#ifdef _MSC_VER
+#include	<malloc.h>
+#endif
 
 /*
  *	Reed-Solomon decoder
@@ -110,8 +113,13 @@ uint8_t feedback;
 }
 
 void	reedSolomon::enc (const uint8_t *r, uint8_t *d, int16_t cutlen) {
+#ifdef _MSC_VER
+uint8_t *rf = (uint8_t *)_alloca(codeLength);
+uint8_t *bb = (uint8_t *)_alloca(nroots);
+#else
 uint8_t rf [codeLength];
 uint8_t bb [nroots];
+#endif
 int16_t i;
 
 	memset (rf, 0, cutlen * sizeof (rf [0]));
@@ -128,7 +136,11 @@ int16_t i;
 
 
 int16_t	reedSolomon::dec (const uint8_t *r, uint8_t *d, int16_t cutlen) {
+#ifdef _MSC_VER
+uint8_t *rf = (uint8_t *)_alloca(codeLength);
+#else
 uint8_t rf [codeLength];
+#endif
 int16_t i;
 int16_t	ret;
 
@@ -143,12 +155,20 @@ int16_t	ret;
 }
 
 int16_t	reedSolomon::decode_rs (uint8_t *data) {
+#ifdef _MSC_VER
+uint8_t *syndromes = (uint8_t *)_alloca(nroots);
+uint8_t *Lambda	   = (uint8_t *)_alloca(nroots);
+uint8_t	*rootTable = (uint8_t *)_alloca(nroots);
+uint8_t	*locTable  = (uint8_t *)_alloca(nroots);
+uint8_t	*omega     = (uint8_t *)_alloca(nroots);
+#else
 uint8_t syndromes [nroots];
 uint8_t Lambda	  [nroots];
-uint16_t lambda_degree, omega_degree;
 uint8_t	rootTable [nroots];
 uint8_t	locTable  [nroots];
 uint8_t	omega	  [nroots];
+#endif
+uint16_t lambda_degree, omega_degree;
 int16_t	rootCount;
 int16_t	i;
 //
@@ -269,7 +289,11 @@ uint16_t syn_error = 0;
 //	
 uint16_t reedSolomon::computeLambda (uint8_t *syndromes, uint8_t *Lambda) {
 uint16_t K = 1, L = 0;
+#ifdef _MSC_VER
+uint8_t *Corrector = (uint8_t *)_alloca(nroots);
+#else
 uint8_t Corrector	[nroots];
+#endif
 int16_t  i;
 int16_t	deg_lambda	= 0;
 
@@ -283,7 +307,11 @@ int16_t	deg_lambda	= 0;
 	Corrector [1]	= 1;
 //
 	while (K <= nroots) {
+#ifdef _MSC_VER
+	   uint8_t *oldLambda = (uint8_t *)_alloca(nroots);
+#else
 	   uint8_t oldLambda [nroots];
+#endif
 	   memcpy (oldLambda, Lambda, nroots * sizeof (Lambda [0]));
 //
 //	Compute new lambda
@@ -330,7 +358,11 @@ int16_t  reedSolomon::computeErrors (uint8_t *Lambda,
 int16_t i, j, k;
 int16_t rootCount = 0;
 //
+#ifdef _MSC_VER
+	uint8_t *workRegister = (uint8_t *)_alloca(nroots + 1);
+#else
 	uint8_t workRegister [nroots + 1];
+#endif
 	memcpy (&workRegister, Lambda, (nroots + 1) * sizeof (uint8_t));
 //
 //	reg is lambda in power notation

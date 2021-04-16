@@ -219,7 +219,11 @@ int16_t	currentblk;
 	   int Length		= b -> Length    ();
 
 	   if (Length > 0) {
+#ifdef _MSC_VER
+	      int16_t *myBegin = (int16_t *)_alloca((Length * CUSize) * sizeof(int16_t));
+#else
 	      int16_t myBegin [Length * CUSize];
+#endif
 	      memcpy (myBegin, &cifVector [startAddr * CUSize],
 	                               Length * CUSize * sizeof (int16_t));
 	      (void) b -> process (myBegin, Length * CUSize);

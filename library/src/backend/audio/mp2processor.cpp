@@ -581,7 +581,11 @@ void	mp2Processor::addtoFrame (uint8_t *v) {
 int16_t	i, j;
 int16_t	lf	= baudRate == 48000 ? MP2framesize : 2 * MP2framesize;
 int16_t	amount	= MP2framesize;
+#ifdef _MSC_VER
+uint8_t *help = (uint8_t *)_alloca(24 * bitRate / 8);
+#else
 uint8_t help [24 * bitRate / 8];
+#endif
 int16_t vLength = 24 * bitRate / 8;
 
         for (i = 0; i < 24 * bitRate / 8; i ++) {

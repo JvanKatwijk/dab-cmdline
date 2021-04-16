@@ -15,26 +15,32 @@
 #define DECISIONTYPE_BITSIZE 32
 #define COMPUTETYPE uint32_t
 
+#ifdef _MSC_VER
+#define ALIGN_16
+#else
+#define ALIGN_16 __attribute__ ((aligned (16)))
+#endif
+
 //decision_t is a BIT vector
 typedef union {
 	DECISIONTYPE t[NUMSTATES/DECISIONTYPE_BITSIZE];
 	uint32_t w[NUMSTATES/32];
 	uint16_t s[NUMSTATES/16];
 	uint8_t c[NUMSTATES/8];
-} decision_t __attribute__ ((aligned (16)));
+} decision_t ALIGN_16;
 
 typedef union {
 	COMPUTETYPE t[NUMSTATES];
-} metric_t __attribute__ ((aligned (16)));
+} metric_t ALIGN_16;
 
 /* State info for instance of Viterbi decoder
  */
 
 struct v {
 /* path metric buffer 1 */
-	__attribute__ ((aligned (16))) metric_t metrics1;
+	ALIGN_16 metric_t metrics1;
 /* path metric buffer 2 */
-	__attribute__ ((aligned (16))) metric_t metrics2;
+	ALIGN_16 metric_t metrics2;
 /* Pointers to path metrics, swapped on every bit */
 	metric_t *old_metrics,*new_metrics;
 	decision_t *decisions;   /* decisions */
@@ -48,7 +54,7 @@ public:
 private:
 
 	struct v	vp;
-	COMPUTETYPE Branchtab	[NUMSTATES / 2 * RATE] __attribute__ ((aligned (16)));
+	COMPUTETYPE Branchtab	[NUMSTATES / 2 * RATE] ALIGN_16;
 //	int	parityb		(uint8_t);
 	int	parity		(int);
 	void	partab_init	(void);

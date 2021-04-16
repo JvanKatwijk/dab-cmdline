@@ -120,3 +120,27 @@ void	dab_getserviceName (void *Handle, int32_t SId, char *out) {
 	(void)strcpy (out, t);
 }
 
+#ifdef _MSC_VER
+#include <windows.h>
+extern "C" {
+
+void usleep(int usec)
+{
+	HANDLE timer;
+	LARGE_INTEGER ft;
+
+	ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
+
+	timer = CreateWaitableTimer(NULL, TRUE, NULL);
+	SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
+	WaitForSingleObject(timer, INFINITE);
+	CloseHandle(timer);
+}
+
+void sleep(int seconds)
+{
+    Sleep (seconds*1000);
+}
+
+}
+#endif
