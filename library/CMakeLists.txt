@@ -1,6 +1,13 @@
 cmake_minimum_required( VERSION 2.8.11 )
+project(dab_lib)
 set (objectName dab_lib)
-add_definitions ( -Wall -g -std=c++11 -O3)
+if (MSVC)
+    set(CMAKE_CXX_STANDARD 11)
+    add_definitions(-D_USE_MATH_DEFINES -DDAB_API_EXPORT)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+else()
+    add_definitions ( -Wall -g -std=c++11 -O3 -DDAB_API_EXPORT)
+endif()
 #    modify if you want
 set (CMAKE_INSTALL_PREFIX /usr/local/)
 
@@ -205,6 +212,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 	include_directories (
               ${FFTW_INCLUDE_DIRS}
+              ${FFTW3F_INCLUDE_DIRS}
               ${PORTAUDIO_INCLUDE_DIRS}
               ${FAAD_INCLUDE_DIRS}
               ${SNDFILES_INCLUDE_DIRS}
