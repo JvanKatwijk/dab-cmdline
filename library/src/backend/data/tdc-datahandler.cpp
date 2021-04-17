@@ -98,7 +98,11 @@ int32_t tdc_dataHandler::handleFrame_type_0 (uint8_t *data,
                                             int32_t offset, int32_t length) {
 int16_t i;
 int16_t noS     = getBits (data, offset, 8);
+#ifdef _MSC_VER
+uint8_t	*buffer = (uint8_t *)_alloca(length);
+#else
 uint8_t	buffer [length];
+#endif
 
 	(void)noS;
 	for (i = 0; i < length; i ++)
@@ -112,7 +116,11 @@ uint8_t	buffer [length];
 int32_t tdc_dataHandler::handleFrame_type_1 (uint8_t *data,
                                              int32_t offset, int32_t length) {
 int16_t i;
+#ifdef _MSC_VER
+uint8_t	*buffer = (uint8_t *)_alloca(length);
+#else
 uint8_t	buffer [length];
+#endif
 
 	for (i = 0; i < length; i ++)
 	   buffer [i] = getBits (data, offset + i * 8, 8);

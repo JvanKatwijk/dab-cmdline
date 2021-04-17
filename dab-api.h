@@ -28,6 +28,20 @@
 #include	<complex>
 #include	"ringbuffer.h"
 
+#if defined (__GNUC__) && (__GNUC__ >= 4)
+#define DAB_API __attribute__((visibility("default")))
+#elif defined (_MSC_VER)
+#ifdef DAB_API_EXPORT
+#define DAB_API __declspec(dllexport)
+#elif DAB_API_STATIC
+#define DAB_API
+#else if
+#define DAB_API __declspec(dllimport)
+#endif
+#else
+#define DAB_API
+#endif
+
 //	Experimental API for controlling the dab software library
 //
 //	Version 3.0
@@ -155,7 +169,7 @@ extern "C" {
 //	The other parameters are as described above. For each of them a NULL
 //	can be passed as parameter, with the expected result.
 //
-void	*dabInit   (deviceHandler       *,
+void DAB_API	*dabInit   (deviceHandler       *,
 	            uint8_t             Mode,
 	            syncsignal_t        syncsignalHandler,
 	            systemdata_t        systemdataHandler,
@@ -173,17 +187,17 @@ void	*dabInit   (deviceHandler       *,
 	            void                *userData);
 
 //	dabExit cleans up the library on termination
-void	dabExit		(void *);
+void DAB_API	dabExit		(void *);
 //
 //	the actual processing starts with calling startProcessing,
 //	note that the input device needs to be started separately
-void	dabStartProcessing (void *);
+void DAB_API	dabStartProcessing (void *);
 //
 //	dabReset is as the name suggests for resetting the state of the library
-void	dabReset	(void *);
+void DAB_API	dabReset	(void *);
 //
 //	dabStop will stop operation of the functions in the library
-void	dabStop		(void *);
+void DAB_API	dabStop		(void *);
 //
 //	dabReset_msc will terminate the operation of active audio and/or data
 //	handlers (there may be more than one active!).
@@ -191,41 +205,41 @@ void	dabStop		(void *);
 //	normal operation is to call first
 //	on dabReset_msc, and then call set_xxxChannel for
 //	the requested services
-void	dabReset_msc		(void *);
+void DAB_API	dabReset_msc		(void *);
 //
 //	is_audioService will return true id the main service with the
 //	name is an audioservice
-bool	is_audioService		(void *, const char *);
+bool DAB_API	is_audioService		(void *, const char *);
 //
 //	is_dataService will return true id the main service with the
 //	name is a dataservice
-bool	is_dataService		(void *, const char *);
+bool DAB_API	is_dataService		(void *, const char *);
 //
 //	dataforAudioService will search for the audiodata of the i-th
 //	(sub)service with the name as given. If no such service exists,
 //	the "defined" bit in the struct will be set to false;
-void	dataforAudioService	(void *, const char *, audiodata *, int);
+void DAB_API	dataforAudioService	(void *, const char *, audiodata *, int);
 //
 //	dataforDataService will search for the packetdata of the i-th
 //	(sub)service with the name as given. If no such service exists,
 //	the "defined" bit in the struct will be set to false;
-void	dataforDataService	(void *, const char *, packetdata *, int);
+void DAB_API	dataforDataService	(void *, const char *, packetdata *, int);
 //
 //	set-audioChannel will add - if properly defined - a handler
 //	for handling the audiodata as described in the parameter
 //	to the list of active handlers
-void	set_audioChannel	(void *, audiodata *);
+void DAB_API	set_audioChannel	(void *, audiodata *);
 //
 //	set-dataChannel will add - if properly defined - a handler
 //	for handling the packetdata as described in the parameter
 //	to the list of active handlers
-void	set_dataChannel		(void *, packetdata *);
+void DAB_API	set_dataChannel		(void *, packetdata *);
 //
 //	mapping from a name to a Service identifier is done 
-int32_t dab_getSId		(void *, const char*);
+int32_t DAB_API dab_getSId		(void *, const char*);
 //
 //	and the other way around, mapping the service identifier to a name
-void	dab_getserviceName	(void *, int32_t, char *);
+void DAB_API	dab_getserviceName	(void *, int32_t, char *);
 }
 #endif
 

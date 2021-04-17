@@ -33,16 +33,26 @@
 #include	<complex>
 #include	<limits>
 #include	<cstring>
+#ifndef _MSC_VER
 #include	<unistd.h>
-
+#endif
 
 #ifndef	__FREEBSD__
 #include	<malloc.h>
 #endif
 
-#ifdef	__MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 //#include	"iostream.h"
 #include	"windows.h"
+#ifdef _MSC_VER
+#include	<malloc.h>
+#undef min
+#undef max
+extern "C" {
+void sleep(int);
+void usleep(int usec);
+}
+#endif
 #else
 #ifndef	__FREEBSD__
 #include	"alloca.h"

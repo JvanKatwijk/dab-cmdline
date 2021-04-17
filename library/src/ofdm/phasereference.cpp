@@ -116,7 +116,11 @@ float	Max		= -10000;
 #define SEARCH_RANGE    (2 * 35)
 int16_t phaseReference::estimateOffset (std::complex<float> *v) {
 int16_t i, j, index_1 = 100, index_2 = 100;
+#ifdef _MSC_VER
+float   *computedDiffs = (float *)_alloca((SEARCH_RANGE + diff_length + 1) * sizeof(float));
+#else
 float   computedDiffs [SEARCH_RANGE + diff_length + 1];
+#endif
 
 	for (i = 0; i < T_u; i ++)
 	   fft_buffer [i] = v [i];

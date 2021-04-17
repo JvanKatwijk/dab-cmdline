@@ -69,7 +69,11 @@ void	ofdmDecoder::processBlock_0 (std::complex<float> *buffer) {
 void	ofdmDecoder::decode (std::complex<float> *buffer,
 	                             int32_t blkno, int16_t *ibits) {
 int16_t	i;
+#ifdef _MSC_VER
+std::complex<float> *conjVector = (std::complex<float> *)_alloca(T_u*sizeof(std::complex<float>));
+#else
 std::complex<float> conjVector [T_u];
+#endif
 
       memcpy (fft_buffer, &(buffer[T_g]),
                                        T_u * sizeof (std::complex<float>));

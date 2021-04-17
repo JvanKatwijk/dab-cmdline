@@ -34,7 +34,11 @@
 int	timeSyncer::sync (int T_null, int T_F) {
 float	cLevel		= 0;
 int	counter		= 0;
+#ifdef _MSC_VER
+float	*envBuffer      = (float *)_alloca(syncBufferSize * sizeof(float));
+#else
 float	envBuffer       [syncBufferSize];
+#endif
 const
 int	syncBufferMask	= syncBufferSize - 1;
 int	i;
