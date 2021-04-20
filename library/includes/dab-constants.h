@@ -37,8 +37,10 @@
 #include	<unistd.h>
 #endif
 
+#ifndef __APPLE__
 #ifndef	__FREEBSD__
 #include	<malloc.h>
+#endif
 #endif
 
 #if defined(__MINGW32__) || defined(_MSC_VER)
