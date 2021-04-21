@@ -363,7 +363,7 @@ int16_t rootCount = 0;
 #else
 	uint8_t workRegister [nroots + 1];
 #endif
-	memcpy (&workRegister, Lambda, (nroots + 1) * sizeof (uint8_t));
+	memcpy (workRegister, Lambda, (nroots + 1) * sizeof (uint8_t));
 //
 //	reg is lambda in power notation
 	for (i = 1, k = iprim - 1;
