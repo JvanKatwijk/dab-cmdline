@@ -160,13 +160,13 @@ uint8_t *syndromes = (uint8_t *)_alloca(nroots);
 uint8_t *Lambda	   = (uint8_t *)_alloca(nroots);
 uint8_t	*rootTable = (uint8_t *)_alloca(nroots);
 uint8_t	*locTable  = (uint8_t *)_alloca(nroots);
-uint8_t	*omega     = (uint8_t *)_alloca(nroots);
+uint8_t	*omega     = (uint8_t *)_alloca(nroots+1);
 #else
 uint8_t syndromes [nroots];
 uint8_t Lambda	  [nroots];
 uint8_t	rootTable [nroots];
 uint8_t	locTable  [nroots];
-uint8_t	omega	  [nroots];
+uint8_t	omega	  [nroots+1];
 #endif
 uint16_t lambda_degree, omega_degree;
 int16_t	rootCount;
