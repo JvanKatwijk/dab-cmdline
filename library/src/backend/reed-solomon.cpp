@@ -157,13 +157,13 @@ int16_t	ret;
 int16_t	reedSolomon::decode_rs (uint8_t *data) {
 #ifdef _MSC_VER
 uint8_t *syndromes = (uint8_t *)_alloca(nroots);
-uint8_t *Lambda	   = (uint8_t *)_alloca(nroots);
+uint8_t *Lambda	   = (uint8_t *)_alloca(nroots + 1);
 uint8_t	*rootTable = (uint8_t *)_alloca(nroots);
 uint8_t	*locTable  = (uint8_t *)_alloca(nroots);
 uint8_t	*omega     = (uint8_t *)_alloca(nroots + 1);
 #else
 uint8_t syndromes [nroots];
-uint8_t Lambda	  [nroots];
+uint8_t Lambda	  [nroots + 1];
 uint8_t	rootTable [nroots];
 uint8_t	locTable  [nroots];
 uint8_t	omega	  [nroots + 1];
