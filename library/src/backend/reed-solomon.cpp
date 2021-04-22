@@ -167,7 +167,6 @@ uint8_t Lambda	  [nroots];
 uint8_t	rootTable [nroots];
 uint8_t	locTable  [nroots];
 uint8_t	omega	  [nroots + 1];
-#endif
 uint16_t lambda_degree, omega_degree;
 int16_t	rootCount;
 int16_t	i;
@@ -363,7 +362,7 @@ int16_t rootCount = 0;
 #else
 	uint8_t workRegister [nroots + 1];
 #endif
-	memcpy (&workRegister, Lambda, (nroots + 1) * sizeof (uint8_t));
+	memcpy (workRegister, Lambda, (nroots + 1) * sizeof (uint8_t));
 //
 //	reg is lambda in power notation
 	for (i = 1, k = iprim - 1;
