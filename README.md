@@ -68,6 +68,38 @@ Supported devices
 and of course fileinput of ".raw" and ".sdr" files is supported, as
 well as input through the rtl_tcp driver.
 
+-------------------------------------------------------------------------
+IMPORTANT NOTICE
+-------------------------------------------------------------------------
+
+Since I was unhappy with passing lots of individual callback functions
+through the whole of the computing chain, I made (am making) a
+change to the API and the dabInit function in the API.
+
+Until recently one had to specify all individual callback functions
+as parameter to the dabInit function.
+
+The change is that now a struct "API_struct" is defined in the API,
+the fields of which are the references to the different callback functions
+such that the call to dabInit is basically simplified to
+
+	theRadio        = dabInit (theDevice,
+                                   &interface,
+                                   nullptr,             // no spectrum shown
+                                   nullptr,             // no constellations
+                                   nullptr              // Ctx
+                                  );
+
+Examples 2, 3 and 4 are adapted, example 5 will soon follow.
+
+The obvious advantage is that adding a callback function for a specific
+purpose now does not change all of the intermediate functions in tbhe library,
+basically opne only modified
+
+	a. the structure
+	b. the main program for filling the structure and adding a handler
+	c. the affected function in the library
+
 --------------------------------------------------------------------------
 The examples
 ---------------------------------------------------------------------------
