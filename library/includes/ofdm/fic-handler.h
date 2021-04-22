@@ -31,7 +31,6 @@
 #include	<stdint.h>
 #include	<vector>
 #include	"viterbi-spiral.h"
-//#include	"viterbi-handler.h"
 #include	"fib-processor.h"
 #include	<mutex>
 #include	<string>
@@ -41,10 +40,7 @@
 class ficHandler: public viterbiSpiral {
 //class ficHandler: public viterbiHandler {
 public:
-		ficHandler		(uint8_t,	// dabMode
-	                                 ensemblename_t,
-	                                 programname_t,
-	                                 fib_quality_t,
+		ficHandler		(API_struct *,
 	                                 void	*);
 		~ficHandler		(void);
 	void	process_ficBlock	(std::vector<int16_t>, int16_t);
@@ -57,18 +53,8 @@ public:
 	void	dataforDataService	(std::string &, packetdata *, int);
 	void	dataforAudioService	(std::string &, audiodata *, int);
 //
-//	additional functions for example 10
-        int32_t get_CIFcount            (void) const;
-        bool    has_CIFcount            (void) const;
-        std::complex<float>
-                get_coordinates         (int16_t, int16_t, bool *);
-        std::complex<float>
-                get_coordinates         (int16_t, int16_t, bool *,
-                                         int16_t *pMainId, int16_t *,
-                                         int16_t *pTD);
+        int32_t get_CIFcount            (void);
         void    reset                   (void);
-        uint8_t getECC                  (bool *);
-        uint8_t getInterTabId           (bool *);
 
 private:
 	fib_processor	fibProcessor;

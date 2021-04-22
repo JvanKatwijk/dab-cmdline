@@ -29,7 +29,6 @@
 #include	"phasetable.h"
 #include	"freq-interleaver.h"
 #include	"dab-params.h"
-#include	"fft_handler.h"
 
 /**
   */

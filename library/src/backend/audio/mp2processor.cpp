@@ -218,14 +218,9 @@ struct quantizer_spec quantizer_table [17] = {
 ////////////////////////////////////////////////////////////////////////////////
 
 	mp2Processor::mp2Processor (int16_t		bitRate,
-	                            audioOut_t		soundOut,
-	                            dataOut_t		dataOut,
-	                            programQuality_t	mscQuality,
-	                            motdata_t		motdata_Handler,
+	                            API_struct		*p,
 	                            void		*ctx):
-	                                       my_padHandler (dataOut,
-	                                                      motdata_Handler,
-	                                                      ctx) {
+	                                       my_padHandler (p, ctx) {
 int16_t	i, j;
 int16_t *nPtr = &N [0][0];
 
@@ -243,9 +238,9 @@ int16_t *nPtr = &N [0][0];
 	      V [i][j] = 0;
 
 	this	-> bitRate	= bitRate;
-	this	-> soundOut	= soundOut;
-	this	-> dataOut	= dataOut;
-	this	-> mscQuality	= mscQuality;
+	this	-> soundOut	= p	-> audioOut_Handler;
+	this	-> dataOut	= p	-> dataOut_Handler;
+	this	-> mscQuality	= p	-> program_quality_Handler;
 	Voffs		= 0;
 	baudRate	= 48000;	// default for DAB
 	MP2framesize	= 24 * bitRate;	// may be changed

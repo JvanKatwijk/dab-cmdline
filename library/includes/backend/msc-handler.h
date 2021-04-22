@@ -2,9 +2,10 @@
 /*
  *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
+ *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -37,7 +38,7 @@
 #include	"dab-api.h"
 #include	"dab-params.h"
 #include	"freq-interleaver.h"
-#include	"fft_handler.h"
+#include	"fft-handler.h"
 #include	"semaphore.h"
 
 class	virtualBackend;
@@ -45,23 +46,19 @@ class	virtualBackend;
 using namespace std;
 class mscHandler {
 public:
-		mscHandler		(uint8_t,
-	                                 audioOut_t,
-	                                 dataOut_t,
-	                                 bytesOut_t,
-	                                 programQuality_t,
-	                                 motdata_t,
+		mscHandler		(API_struct *,
 	                                 void		*);
-		~mscHandler		(void);
+		~mscHandler		();
 	void	process_mscBlock	(std::complex<float> *, int16_t);
 	void	set_audioChannel	(audiodata	*);
 	void	set_dataChannel		(packetdata     *);
-	void	reset			(void);
-	void	stop			(void);
-	void	start			(void);
+	void	reset			();
+	void	stop			();
+	void	start			();
 private:
-virtual	void		run		(void);
+virtual	void		run		();
 	void		process_mscBlock (std::vector<int16_t>, int16_t);
+	API_struct	*p;
 	dabParams	params;
 	fft_handler	my_fftHandler;
 	std::complex<float>	*fft_buffer;

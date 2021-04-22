@@ -101,7 +101,7 @@ static void sighandler (int signum) {
 }
 
 static
-void	syncsignalHandler (bool b, void *userData) {
+void	syncsignal_Handler (bool b, void *userData) {
 	timeSynced. store (b);
 	timesyncSet. store (true);
 	(void)userData;
@@ -113,19 +113,19 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	ensemblenameHandler (std::string name, int Id, void *userData) {
+void	ensemblename_Handler (std::string name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
 	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
 static
-void	programnameHandler (std::string s, int SId, void * userdata) {
+void	programname_Handler (std::string s, int SId, void * userdata) {
 	fprintf (stderr, "%s (%X) is part of the ensemble\n", s. c_str (), SId);
 }
 
 static
-void	programdataHandler (audiodata *d, void *ctx) {
+void	programdata_Handler (audiodata *d, void *ctx) {
 	(void)ctx;
 	fprintf (stderr, "\tstartaddress\t= %d\n", d -> startAddr);
 	fprintf (stderr, "\tlength\t\t= %d\n",     d -> length);
@@ -177,6 +177,11 @@ int16_t i;
 #endif
 	(void)ctx;
 }
+
+void    tii_data_Handler        (int s) {
+        fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
+}
+
 //
 //
 //	In this example the PCM samples are written out to stdout.
@@ -214,6 +219,7 @@ static
 void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 //	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
+
 
 int	main (int argc, char **argv) {
 // Default values
@@ -518,20 +524,26 @@ deviceHandler	*theDevice;
 #ifdef	STREAMER_OUTPUT
 	theStreamer	= new streamer ();
 #endif
+//
+//	and with a sound device we now can create a "backend"
+	API_struct interface;
+	interface. dabMode	= theMode;
+	interface. syncsignal_Handler	= syncsignal_Handler;
+	interface. systemdata_Handler	= systemData;
+	interface. ensemblename_Handler	= ensemblename_Handler;
+	interface. programname_Handler	= programname_Handler;
+	interface. fib_quality_Handler	= fibQuality;
+	interface. audioOut_Handler	= pcmHandler;
+	interface. dataOut_Handler	= dataOut_Handler;
+	interface. bytesOut_Handler	= bytesOut_Handler;
+	interface. programdata_Handler	= programdata_Handler;
+	interface. program_quality_Handler		= mscQuality;
+	interface. motdata_Handler	= nullptr;
+	interface. tii_data_Handler	= tii_data_Handler;
+
 //	and with a sound device we can create a "backend"
 	theRadio	= (void *)dabInit (theDevice,
-	                                   theMode,
-	                                   syncsignalHandler,
-	                                   systemData,
-	                                   ensemblenameHandler,
-	                                   programnameHandler,
-	                                   fibQuality,
-	                                   pcmHandler,
-	                                   dataOut_Handler,
-	                                   bytesOut_Handler,
-	                                   programdataHandler,
-	                                   mscQuality,
-	                                   NULL,	// no mot slides
+	                                   &interface,
 	                                   NULL,	// no spectrum shown
 	                                   NULL,	// no constellations
 	                                   NULL		//ctx

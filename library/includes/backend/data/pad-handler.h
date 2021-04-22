@@ -32,7 +32,7 @@ class	motObject;
 
 class	padHandler {
 public:
-		padHandler	(dataOut_t, motdata_t, void *);
+		padHandler	(API_struct *, void *);
 		~padHandler	(void);
 	void	processPAD	(uint8_t *, int16_t, uint8_t, uint8_t);
 private:

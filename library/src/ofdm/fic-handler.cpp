@@ -38,22 +38,17 @@
   * 	puncturing.
   *	The data is sent through to the fic processor
   */
-		ficHandler::ficHandler (uint8_t	dabMode,
-	                                ensemblename_t ensemblenameHandler,
-	                                programname_t  programnameHandler,
-	                                fib_quality_t fib_qualityHandler,
+		ficHandler::ficHandler (API_struct *p,
 	                                void		*userData):
 	                                      viterbiSpiral (768),
 //	                                      viterbiHandler (768),
-	                                      fibProcessor (ensemblenameHandler,
-	                                                    programnameHandler,
+	                                      fibProcessor (p,
 	                                                    userData),
-	                                                    params (dabMode) {
+	                                                    params (p -> dabMode) {
 int16_t	i, j, k;
 int16_t	local	= 0;
 
-	(void)dabMode;
-	this	-> fib_qualityHandler	= fib_qualityHandler;
+	this	-> fib_qualityHandler	= p ->  fib_quality_Handler;
 	this	-> userData		= userData;
 	index		= 0;
 	BitsperBlock	= 2 * params. get_carriers ();
@@ -135,7 +130,6 @@ int32_t	i;
 	if (blkno == 1) {
 	   index = 0;
 	   ficno = 0;
-	   fibProcessor. newFrame ();
 	}
 //
 	if ((1 <= blkno) && (blkno <= 3)) {
@@ -232,55 +226,9 @@ void	ficHandler::dataforDataService	(std::string &s, packetdata *d, int c) {
 	fibProtector. unlock ();
 }
 
-int32_t ficHandler::get_CIFcount        (void) const {
+int32_t ficHandler::get_CIFcount        (void) {
 //	no lock, because using std::atomic<> in fib_processor class
         return fibProcessor. get_CIFcount();
-}
-
-bool    ficHandler::has_CIFcount        (void) const {
-//	no lock, because using std::atomic<> in fib_processor class
-        return fibProcessor. has_CIFcount();
-}
-
-std::complex<float>	ficHandler::get_coordinates (int16_t mainId,
-                                             int16_t subId, bool *success) {
-std::complex<float> result;
-
-        fibProtector. lock ();
-        result = fibProcessor. get_coordinates (mainId, subId, success);
-        fibProtector. unlock ();
-        return result;
-}
-//
-//	Alternative function (extended), contributed by Hayati Ayguen
-//	mainId < 0 (-1) => don't check mainId
-//	subId == -1 => deliver first available offset
-//	subId == -2 => deliver coarse coordinates
-std::complex<float>
-	ficHandler::get_coordinates	(int16_t mainId,
-	                                 int16_t subId, bool *success,
-	                                 int16_t *pMainId, int16_t *pSubId,
-	                                 int16_t *pTD) {
-std::complex<float> result;
-
-        fibProtector. lock ();
-        result = fibProcessor. get_coordinates (mainId, subId, success,
-	                                        pMainId, pSubId, pTD);
-        fibProtector. unlock ();
-        return result;
-}
-
-uint8_t ficHandler::getECC	(bool *success) {
-// no lock, because using std::atomic<> in fib_processor class
-	return fibProcessor. getECC (success);
-}
-
-uint8_t ficHandler::getInterTabId	(bool *success) {
-uint8_t result;
-
-	// no lock, because using std::atomic<> in fib_processor class
-	result = fibProcessor.getInterTabId (success);
-	return result;
 }
 
 int16_t	ficHandler::get_ficRatio (void) {

@@ -32,54 +32,28 @@
   */
 
 	dabProcessor::dabProcessor	(deviceHandler	*inputDevice,
-	                                 uint8_t	dabMode,
-	                                 syncsignal_t	syncsignalHandler,
-	                                 systemdata_t	systemdataHandler,
-	                                 ensemblename_t	ensemblename_Handler,
-	                                 programname_t	programname_Handler,
-	                                 fib_quality_t	fibquality_Handler,
-	                                 audioOut_t	audioOut,
-	                                 bytesOut_t	bytesOut,
-	                                 dataOut_t	dataOut_handler,
-	                                 programdata_t	programdata,
-	                                 programQuality_t mscQuality,
-	                                 motdata_t	motdata_Handler,
+	                                 API_struct	*p,
 	                                 RingBuffer<std::complex<float>> *spectrumBuffer,
 	                                 RingBuffer<std::complex<float>> *iqBuffer,
 	                                 void		*userData):
-#ifdef	__TII_INCLUDED__
-	                                    tii_framedelay  (20),
-                                            tii_counter     (0),
-	                                    my_TII_Detector (dabMode),
-                                            my_tiiHandler   (nullptr),
-                                            my_tiiExHandler (nullptr),
-                                            tii_alfa        (-1.0F),
-                                            tii_resetFrameCount (-1),
-#endif
-	                                    params (dabMode),
+	                                    params (p -> dabMode),
 	                                    myReader (this,
 	                                              inputDevice,
 	                                              spectrumBuffer),
-	                                    phaseSynchronizer (dabMode,
+	                                    phaseSynchronizer (p -> dabMode,
 	                                                       DIFF_LENGTH),
-	                                    my_ofdmDecoder (dabMode,
+	                                    my_TII_Detector (p -> dabMode),
+	                                    my_ofdmDecoder (p -> dabMode,
 	                                                    iqBuffer),
-	                                    my_ficHandler (dabMode,
-	                                                   ensemblename_Handler,
-                                                           programname_Handler,
-                                                           fibquality_Handler,
+	                                    my_ficHandler (p,
 	                                                   userData),
-	                                    my_mscHandler  (dabMode,
-                                                            audioOut,
-                                                            dataOut_handler,
-                                                            bytesOut,
-                                                            mscQuality,
-                                                            motdata_Handler,
+	                                    my_mscHandler  (p,
                                                             userData) {
 	this	-> inputDevice		= inputDevice;
-	this	-> syncsignalHandler	= syncsignalHandler;
-	this	-> systemdataHandler	= systemdataHandler;
-	this	-> programdataHandler	= programdata;
+	this	-> syncsignalHandler	= p -> syncsignal_Handler;
+	this	-> systemdataHandler	= p -> systemdata_Handler;
+	this	-> programdataHandler	= p -> programdata_Handler;
+	this	-> show_tii		= p -> tii_data_Handler;
 	this	-> userData		= userData;
 	this	-> T_null		= params. get_T_null ();
 	this	-> T_s			= params. get_T_s ();
@@ -89,12 +63,13 @@
 	this	-> nrBlocks		= params. get_L ();
 	this	-> carriers		= params. get_carriers ();
 	this	-> carrierDiff		= params. get_carrierDiff ();
+	this	-> tii_counter		= 0;
 	isSynced			= false;
 	snr				= 0;
 	running. store (false);
 }
 
-	dabProcessor::~dabProcessor	(void) {
+	dabProcessor::~dabProcessor	() {
 	stop ();
 }
 
@@ -278,61 +253,25 @@ SyncOnPhase:
 
 	   float sum2 = myReader. get_sLevel ();
 	   snr	= 0.9 * snr + 0.1 * 20 * log10 ((sum2 + 0.005) / sum);
-#ifdef	__TII_INCLUDED__
 /*
  *      The TII data is encoded in the null period of the
  *      odd frames
  */
            if (params. get_dabMode () == 1) {
-              if ((my_tiiHandler || my_tiiExHandler)) {
-                 int32_t cifCounter = my_ficHandler. get_CIFcount ();
-                 if (wasSecond (cifCounter, &params)) {
-                    my_TII_Detector. addBuffer (ofdmBuffer, tii_alfa, cifCounter);
-                    tii_counter ++;
-                    if (tii_counter >= tii_framedelay) {
-                       if (my_tiiHandler) {
-                          int16_t mainId        = -1;
-                          int16_t subId         = -1;
-                          my_TII_Detector. processNULL (&mainId, &subId);
-                          my_tiiHandler (mainId, subId,
-                                         my_TII_Detector. getNumBuffers(),
-	                                 userData);
-	                } else {
-                          int numOut = 0;
-                          int outTii [24];
-                          float outAvgSNR [24];
-                          float outMinSNR [24];
-                          float outNxtSNR [24];
-                          my_TII_Detector. processNULL_ex (&numOut,
-                                                           outTii,
-                                                           outAvgSNR,
-                                                           outMinSNR,
-                                                           outNxtSNR);
-	                  if (numOut > 0)
-                             my_tiiExHandler (numOut,
-                                              outTii,
-                                              outAvgSNR,
-                                              outMinSNR,
-                                              outNxtSNR,
-                                              my_TII_Detector.getNumBuffers(),
-                                              my_TII_Detector.P_allAvg,
-                                              (int)T_u,
-                                              userData);
-                       }
-                    }
+	      if (wasSecond (my_ficHandler. get_CIFcount (), &params)) {
+	         my_TII_Detector. addBuffer (ofdmBuffer);
+	         if (++tii_counter >= 4) {
+	            uint16_t res =
+                          my_TII_Detector. processNULL ();
+	            if ((res != 0) && (show_tii != nullptr))
+	               show_tii (res);
 
-                    if (tii_counter >= tii_framedelay)
-                       tii_counter = 0;
-                    if (my_TII_Detector. getNumBuffers() >=
-                         tii_resetFrameCount &&
-                        (tii_resetFrameCount > 0)) {
-                       my_TII_Detector. reset ();
-                    }
+                    tii_counter = 0;
+	            my_TII_Detector. reset ();
                  }
               }
 
 	   }
-#endif
 	   if (fineOffset > carrierDiff / 2) {
 	      coarseOffset += carrierDiff;
 	      fineOffset -= carrierDiff;
@@ -344,7 +283,6 @@ SyncOnPhase:
 	   }
 	   goto Check_endofNull;
 	}
-	
 	catch (int e) {
 	   fprintf (stderr, "dab processor will stop\n");
 	}

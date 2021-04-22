@@ -38,11 +38,8 @@ class	protection;
 
 class	dataBackend: public virtualBackend {
 public:
-		dataBackend	(packetdata	*,
-	                         bytesOut_t	bytesOut,
-	                         motdata_t	motdataHandler,
-	                         void		*userData);
-		~dataBackend	(void);
+		dataBackend	(packetdata *, API_struct *, void *);
+		~dataBackend	();
 	int32_t	process		(int16_t *, int16_t);
 	void	stopRunning	(void);
 	void	start		(void);

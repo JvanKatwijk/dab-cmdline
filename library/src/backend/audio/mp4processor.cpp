@@ -108,20 +108,16 @@ void	WriteAudioMuxLengthBytes () {
   */
 
 	mp4Processor::mp4Processor (int16_t		bitRate,
-	                            audioOut_t		soundOut,
-	                            dataOut_t		dataOut,
-	                            programQuality_t	mscQuality,
-	                            motdata_t		motdata_Handler,
+	                            API_struct		*p,
 	                            void		*ctx):
-	                                  my_padHandler (dataOut,
-	                                                 motdata_Handler,
+	                                  my_padHandler (p,
 	                                                 ctx),
 	                                  my_rsDecoder (8, 0435, 0, 1, 10),
-	                                  aacDecoder (soundOut, ctx) {
-
+	                                  aacDecoder (p -> audioOut_Handler,
+	                                                             ctx) {
 	this	-> bitRate	= bitRate;	// input rate
-	this	-> soundOut	= soundOut;
-	this	-> mscQuality	= mscQuality;	//
+	this	-> soundOut	= p ->  audioOut_Handler;
+	this	-> mscQuality	= p -> program_quality_Handler;	//
 	this	-> ctx		= ctx;
 	superFramesize		= 110 * (bitRate / 8);
 	RSDims			= bitRate / 8;

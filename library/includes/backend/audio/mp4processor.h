@@ -41,10 +41,7 @@
 class	mp4Processor : public backendBase {
 public:
 			mp4Processor	(int16_t,
-	                                 audioOut_t,
-	                                 dataOut_t,
-	                                 programQuality_t,
-	                                 motdata_t,
+	                                 API_struct *,
 	                                 void	*);
 			~mp4Processor	(void);
 	void		addtoFrame	(uint8_t *);

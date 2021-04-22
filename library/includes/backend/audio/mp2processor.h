@@ -50,10 +50,7 @@ struct quantizer_spec {
 class	mp2Processor: public backendBase {
 public:
 			mp2Processor	(int16_t,
-	                                 audioOut_t,
-	                                 dataOut_t,
-	                                 programQuality_t,
-	                                 motdata_t,
+	                                 API_struct *,
 	                                 void	*);
 			~mp2Processor	(void);
 	void		addtoFrame	(uint8_t *);

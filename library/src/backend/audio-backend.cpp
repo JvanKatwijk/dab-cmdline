@@ -38,10 +38,7 @@
 //
 //	fragmentsize == Length * CUSize
 	audioBackend::audioBackend	(audiodata	*d,
-	                                 audioOut_t	soundOut,
-	                                 dataOut_t	dataOut,
-	                                 programQuality_t mscQuality,
-	                                 motdata_t	motdata_Handler,
+	                                 API_struct	*p,
 	                                 void		*ctx):
 	                                     virtualBackend (d -> startAddr,
 	                                                     d -> length),
@@ -74,18 +71,10 @@ int32_t i, j;
 	fprintf (stderr, "protection handler is %s\n",
 	                        shortForm ? "uep_protection" : "eep_protection");
 	if (dabModus == DAB) 
-	   our_backendBase = new mp2Processor (bitRate,
-	                                        soundOut,
-	                                        dataOut,
-	                                        mscQuality,
-	                                        motdata_Handler, ctx);
+	   our_backendBase = new mp2Processor (bitRate, p, ctx);
 	else
 	if (dabModus == DAB_PLUS) 
-	   our_backendBase = new mp4Processor (bitRate,
-	                                        soundOut,
-	                                        dataOut,
-	                                        mscQuality,
-	                                        motdata_Handler, ctx);
+	   our_backendBase = new mp4Processor (bitRate, p, ctx);
 	else		// cannot happen
 	   our_backendBase = new backendBase ();
 

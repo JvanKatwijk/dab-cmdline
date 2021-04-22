@@ -31,7 +31,6 @@
 #include	<atomic>
 #include	"dab-api.h"
 #include	"dab-constants.h"
-#include	"tii_table.h"
 
 	struct dablabel {
 	   std::string	label;
@@ -91,8 +90,7 @@
 
 class	fib_processor {
 public:
-		fib_processor		(ensemblename_t,
-	                                 programname_t,
+		fib_processor		(API_struct *,
 	                                 void	*);
 		~fib_processor		(void);
 	void	process_FIB		(uint8_t *, uint16_t);
@@ -110,21 +108,8 @@ public:
 
         std::complex<float>
                 get_coordinates (int16_t, int16_t, bool *);
-	void	reset			(void);
-//
-//	additional functions for ex-10
-	int32_t get_CIFcount            (void) const;
-        bool    has_CIFcount            (void) const;
-        void    newFrame                (void);
-
-//      Extended functions, contributed by Hayati Ayguen
-        std::complex<float>
-                get_coordinates     (int16_t, int16_t, bool *,
-                                     int16_t *pMainId,
-                                     int16_t *pSubId,
-                                     int16_t *pTD);
-        uint8_t getECC                  (bool *);
-        uint8_t getInterTabId           (bool *);
+	void	reset			();
+	int32_t get_CIFcount		();
 
 private:
 	ensemblename_t	ensemblenameHandler;
@@ -185,18 +170,10 @@ private:
 	channelMap	subChannels [64];
 	serviceComponent	ServiceComps [64];
 	serviceId	listofServices [64];
-	tii_table	coordinates;
         bool            dateFlag;
 //
-//	additional data for ex-10 functions
-	uint8_t         ecc_byte;
-        uint8_t         interTabId;
         bool            firstTime;
-        bool            ecc_Present;
-        bool            interTab_Present;
 	std::atomic<int32_t>  CIFcount;
-        std::atomic<bool>     hasCIFcount;
-//	end of additionall data for ex-10 functions
 	bool		isSynced;
 	mutex		fibLocker;
 //

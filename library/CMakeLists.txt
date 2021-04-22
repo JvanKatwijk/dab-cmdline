@@ -101,6 +101,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./includes/ofdm/timesyncer.h
          ./includes/ofdm/fic-handler.h
          ./includes/ofdm/fib-processor.h
+         ./includes/ofdm/tii_detector.h
          ./includes/backend/firecode-checker.h
          ./includes/backend/backend-base.h
          ./includes/backend/charsets.h
@@ -146,6 +147,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
          ./src/ofdm/timesyncer.cpp
          ./src/ofdm/fic-handler.cpp
          ./src/ofdm/fib-processor.cpp
+         ./src/ofdm/tii-detector.cpp
          ./src/backend/firecode-checker.cpp
          ./src/backend/backend-base.cpp
          ./src/backend/charsets.cpp

@@ -96,13 +96,12 @@
                                    {416,1,384}};
 
 //
-	fib_processor::fib_processor (ensemblename_t ensemblenameHandler,
-	                              programname_t  programnameHandler,
+	fib_processor::fib_processor (API_struct *p,
 	                              void	*userData) {
-	this	-> ensemblenameHandler	= ensemblenameHandler;
-	if (programnameHandler == nullptr)
+	this	-> ensemblenameHandler	= p ->  ensemblename_Handler;
+	if (p -> programname_Handler == nullptr)
 	   fprintf (stderr, "nullptr detected\n");
-	this	-> programnameHandler	= programnameHandler;
+	this	-> programnameHandler	= p ->  programname_Handler;
 	this	-> userData		= userData;
 	memset (dateTime, 0, 8 * sizeof (uint32_t));
 
@@ -288,7 +287,7 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 
 	(void)CN;
 	changeflag	= getBits_2 (d, 16 + 16);
-	if (changeflag == 0)
+	if (changeflag != 0)
 	   return;
 
 	EId			= getBits (d, 16, 16);
@@ -300,9 +299,7 @@ uint8_t	CN	= getBits_1 (d, 8 + 0);
 	occurrenceChange	= getBits_8 (d, 16 + 32);
 	(void)occurrenceChange;
 
-	CIFcount = highpart * 250 + lowpart;
-	hasCIFcount = true;
-
+	CIFcount. store (highpart * 250 + lowpart);
 	if (getBits (d, 34, 1))         // only alarm, just ignore
 	   return;
 
@@ -626,15 +623,6 @@ int16_t	offset	= 16;
 	                     getBits_4 (d, offset + 3);
 	dateTime [7] = (getBits_1 (d, offset + 7) == 1)? 30 : 0;
         uint16_t ecc = getBits (d, offset + 8, 8);
-
-        uint16_t internationalTabId = getBits (d, offset + 16, 8);
-        interTabId = internationalTabId & 0xFF;
-        interTab_Present = true;
-
-        if (!ecc_Present) {
-                ecc_byte = ecc & 0xFF;
-                ecc_Present = true;
-        }
 }
 
 //
@@ -865,39 +853,8 @@ int16_t	used	= 2;
 }
 
 int16_t	fib_processor::HandleFIG0Extension22 (uint8_t *d, int16_t used) {
-uint8_t MS;
-int16_t	mainId;
-int16_t	noSubfields;
-int	i;
-
-	mainId	= getBits_7 (d, used * 8 + 1);
-	(void)mainId;
-	MS	= getBits_1 (d, used * 8);
-	if (MS == 0) {		// fixed size
-	   int16_t latitudeCoarse = getBits (d, used * 8 + 8, 16);
-	   int16_t longitudeCoarse = getBits (d, used * 8 + 24, 16);
-
-	   coordinates. add_main (mainId,
-	                          latitudeCoarse * 90.0 / 32768.0,
-	                          longitudeCoarse * 180.0 / 32768.0);
-	   return used + 48 / 6;
-	}
-
-	//	MS == 1
-	noSubfields = getBits_3 (d, used * 8 + 13);
-	for (i = 0; i < noSubfields; i ++) {
-	   int16_t subId = getBits_5 (d, used * 8 + 16 + i * 48);
-	   int16_t TD    = getBits   (d, used * 8 + 16 + i * 48 +  5, 11);
-	   int16_t latOff = getBits  (d, used * 8 + 16 + i * 48 + 16, 16);
-	   int16_t lonOff = getBits  (d, used * 8 + 16 + i * 48 + 32, 16);
-	   tii_element s (subId, TD,
-	                        latOff * 90 / (16 * 32768.0),
-	                        lonOff * 180 / (16 * 32768.0));
-	   coordinates. add_element (&s);
-	}
-	   
-	used += (16 + noSubfields * 48) / 8;
-	return used;
+	(void)d; (void)used;
+	return 0;
 }
 //
 //
@@ -1266,7 +1223,6 @@ void	fib_processor::clearEnsemble (void) {
 int16_t i;
 
 	setupforNewFrame ();
-	coordinates. cleanUp ();
 	memset (ServiceComps, 0, sizeof (ServiceComps));
 	memset (subChannels, 0, sizeof (subChannels));
 	for (i = 0; i < 64; i ++) {
@@ -1499,53 +1455,12 @@ bool	fib_processor::syncReached	(void) {
 	return isSynced;
 }
 
-std::complex<float>	fib_processor::get_coordinates (int16_t mainId,
-	                                        int16_t subId,
-	                                        bool *success) {
-	coordinates. print_coordinates ();
-	return coordinates. get_coordinates (mainId, subId, success);
-}
-
-
-//	mainId < 0 (-1) => don't check mainId
-//	subId == -1 => deliver first available offset
-//	subId == -2 => deliver coarse coordinates
-std::complex<float>
-	fib_processor::get_coordinates (int16_t mainId,
-	                                int16_t subId, bool *success,
-	                                int16_t *pMainId,
-	                                int16_t *pSubId, int16_t *pTD) {
-	return coordinates. get_coordinates (mainId, subId, success, pMainId, pSubId, pTD);
-}
-
-uint8_t	fib_processor::getECC	(bool *success) {
-	*success = ecc_Present;
-	return ecc_byte;
-}
-
-uint8_t	fib_processor::getInterTabId	(bool *success) {
-	*success = interTab_Present;
-	return interTabId;
-}
-
 void	fib_processor::reset	(void) {
 	dateFlag		= false;
-	ecc_Present             = false;
-        interTab_Present        = false;
 	clearEnsemble	();
-	CIFcount	= 0;
-	hasCIFcount	= false;
 }
 
-int32_t		fib_processor::get_CIFcount (void) const {
-	return CIFcount;
-}
-
-bool		fib_processor::has_CIFcount (void) const {
-	return hasCIFcount;
-}
-
-void    fib_processor::newFrame (void) {
-        ++CIFcount;
+int32_t		fib_processor::get_CIFcount (void) {
+	return CIFcount. load ();
 }
 

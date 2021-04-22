@@ -39,37 +39,24 @@
 #include	"ringbuffer.h"
 #include	"dab-api.h"
 #include	"sample-reader.h"
-#ifdef	__TII_INCLUDED__
-#include	"tii_detector.h"
-#endif
+#include	"tii-detector.h"
 //
 class	deviceHandler;
 
 class dabProcessor {
 public:
 		dabProcessor  	(deviceHandler *,
-	                         uint8_t,		// Mode
-	                         syncsignal_t,
-	                         systemdata_t,
-	                         ensemblename_t,
-	                         programname_t,
-	                         fib_quality_t,
-	                         audioOut_t,
-	                         bytesOut_t,
-	                         dataOut_t,
-	                         programdata_t,
-	                         programQuality_t,
-	                         motdata_t,
+	                         API_struct	*,
 	                         RingBuffer<std::complex<float>> *,
                                  RingBuffer<std::complex<float>> *,
 	                         void	*);
-	virtual ~dabProcessor	(void);
-	void	reset			(void);
-	void	stop			(void);
-	void	setOffset		(int32_t);
-	void	start			(void);
-	bool	signalSeemsGood		(void);
-	void	show_Corrector		(int);
+	virtual ~dabProcessor	();
+	void	reset		();
+	void	stop		();
+	void	setOffset	(int);
+	void	start		();
+	bool	signalSeemsGood	();
+	void	show_Corrector	(int);
 //      inheriting from our delegates
 	void		setSelectedService	(std::string);
 	uint8_t		kindofService           (std::string);
@@ -86,46 +73,19 @@ public:
 	std::string	get_ensembleName        (void);
 	void		clearEnsemble           (void);
 	void		reset_msc		(void);
-#ifdef	__TII_INCLUDED__
-//	additions for example-10
-	void            setTII_handler          (tii_t tii_Handler,
-	                                         tii_ex_t tii_ExHandler,
-	                                         int tii_framedelay,
-	                                         float alfa, int resetFrameCount);
-
-        std::complex<float>
-                         get_coordinates (int16_t, int16_t, bool *);
-        std::complex<float>
-                         get_coordinates (int16_t, int16_t, bool *,
-                                          int16_t *pMainId,
-                                          int16_t *pSubId,
-                                          int16_t *pTD);
-        uint8_t         getECC                  (bool *);
-        uint8_t         getInterTabId           (bool *);
-#endif
 private:
-//
-#ifdef	__TII_INCLUDED__
-//	additions for example-10
-	TII_Detector	my_TII_Detector;
-	int             tii_framedelay;
-        int             tii_counter;
-        tii_t           my_tiiHandler;
-        tii_ex_t        my_tiiExHandler;
-        float           tii_alfa;
-        int             tii_resetFrameCount;
-        unsigned        tii_num;
-#endif
 	deviceHandler	*inputDevice;
 	dabParams	params;
 	sampleReader	myReader;
 	phaseReference	phaseSynchronizer;
+	TII_Detector	my_TII_Detector;
 	ofdmDecoder	my_ofdmDecoder;
 	ficHandler	my_ficHandler;
 	mscHandler	my_mscHandler;
 	syncsignal_t	syncsignalHandler;
 	systemdata_t	systemdataHandler;
 	programdata_t	programdataHandler;
+	tii_data_t	show_tii;
 	void		call_systemData (bool, int16_t, int32_t);
 	std::thread	threadHandle;
 	void		*userData;
@@ -141,6 +101,7 @@ private:
 	int32_t		carriers;
 	int32_t		carrierDiff;
 	bool		wasSecond	(int16_t, dabParams *);
+	int		tii_counter;
 virtual	void		run		(void);
 };
 #endif

@@ -20,7 +20,7 @@
  *    along with dab library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include	"fft_handler.h"
+#include	"fft-handler.h"
 #include	<cstring>
 
 	fft_handler::fft_handler (uint8_t dabMode): p (dabMode) {

@@ -49,8 +49,6 @@
 //	directories
 //	a. C++ Example, which gives a simple command line interface to
 //	   run DAB
-//	b. python, which gives a python program implementing a simple
-//	   command line interface to run DAB
 
 
 #include	<stdint.h>
@@ -151,10 +149,9 @@ typedef	struct {
 	typedef void (*motdata_t)(std::string, int, void *);
 //	is invoked (if not specified as NULL)
 //
-//	For Hayati's tii handling:
-//      TII
-        typedef void (*tii_t)(int16_t mainId, int16_t subId, unsigned num, void *);
-        typedef void (*tii_ex_t)(int numOut, int *outTii, float *outAvgSNR, float *outMinSNR, float *outNxtSNR, unsigned numAvg, const float *Pavg, int Pavg_T_u, void *userData);
+//	tii data - if available, the tii data is passed on as a single
+//	integer
+	typedef void (*tii_data_t)(int);
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -167,24 +164,29 @@ extern "C" {
 //	spectrumbuffer	and a constellation diagram.
 //
 //	The other parameters are as described above. For each of them a NULL
-//	can be passed as parameter, with the expected result.
+//	can be passed as parameter, with the expected result
 //
+typedef struct {
+	uint8_t		dabMode;
+	syncsignal_t	syncsignal_Handler;
+	systemdata_t	systemdata_Handler;
+	ensemblename_t	ensemblename_Handler;
+	programname_t	programname_Handler;
+	fib_quality_t	fib_quality_Handler;
+	audioOut_t	audioOut_Handler;
+	dataOut_t	dataOut_Handler;
+	bytesOut_t	bytesOut_Handler;
+	programdata_t	programdata_Handler;
+	programQuality_t    program_quality_Handler;
+	motdata_t	motdata_Handler;
+	tii_data_t	tii_data_Handler;
+} API_struct;
+
 void DAB_API	*dabInit   (deviceHandler       *,
-	            uint8_t             Mode,
-	            syncsignal_t        syncsignalHandler,
-	            systemdata_t        systemdataHandler,
-	            ensemblename_t      ensemblenameHandler,
-	            programname_t       programnamehandler,
-	            fib_quality_t       fib_qualityHandler,
-	            audioOut_t          audioOut_Handler,
-	            dataOut_t           dataOut_Handler,
-	            bytesOut_t		bytesOut,
-	            programdata_t       programdataHandler,
-	            programQuality_t    program_qualityHandler,
-	            motdata_t		motdata_Handler,
-	            RingBuffer<std::complex<float>> *spectrumBuffer,
-	            RingBuffer<std::complex<float>> *iqBuffer,
-	            void                *userData);
+	                    API_struct		*,
+	                    RingBuffer<std::complex<float>> *spectrumBuffer,
+	                    RingBuffer<std::complex<float>> *iqBuffer,
+	                    void                *userData);
 
 //	dabExit cleans up the library on termination
 void DAB_API	dabExit		(void *);

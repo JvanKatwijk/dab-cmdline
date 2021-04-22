@@ -23,7 +23,6 @@
 #include	"phasereference.h" 
 #include	"string.h"
 #include	"dab-params.h"
-#include	"fft_handler.h"
 /**
   *	\class phaseReference
   *	Implements the correlation that is used to identify

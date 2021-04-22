@@ -33,8 +33,7 @@
 //	fragmentsize == Length * CUSize
 	dataProcessor::dataProcessor	(int16_t	bitRate,
 	                                 packetdata	*pd,
-	                                 bytesOut_t	bytesOut,
-	                                 motdata_t	motdataHandler,
+	                                 API_struct	*p,
 	                                 void	        *ctx) {
 
 	this	-> bitRate		= pd -> bitRate;
@@ -43,7 +42,7 @@
 	this	-> packetAddress	= pd -> packetAddress;
 	this	-> DGflag		= pd -> DGflag;
 	this	-> FEC_scheme		= pd -> FEC_scheme;
-	this	-> bytesOut		= bytesOut;
+	this	-> bytesOut		= p  -> bytesOut_Handler;
 	this	-> ctx			= ctx;
 	switch (DSCTy) {
 	   default:
@@ -55,7 +54,7 @@
 	      break;
 
 	   case 60:
-	      my_dataHandler	= new motHandler (motdataHandler, ctx);
+	      my_dataHandler	= new motHandler (p -> motdata_Handler, ctx);
 	      break;
 	}
 

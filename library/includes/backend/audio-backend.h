@@ -40,12 +40,7 @@ class	audioSink;
 
 class	audioBackend:public virtualBackend {
 public:
-	audioBackend	(audiodata *,
-	                 audioOut_t,
-	                 dataOut_t,
-	                 programQuality_t,
-	                 motdata_t,
-	                 void	*);
+	audioBackend	(audiodata *, API_struct *, void	*);
 	~audioBackend	(void);
 int32_t	process		(int16_t *, int16_t);
 void	stopRunning	(void);

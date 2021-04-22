@@ -32,9 +32,8 @@
 //
 //	fragmentsize == Length * CUSize
 	dataBackend::dataBackend	(packetdata	*d,
-	                                 bytesOut_t	bytesOut,
-	                                 motdata_t	motdataHandler,
-	                                 void	*ctx) :
+	                                 API_struct	*p,
+	                                 void		*ctx):
                                          virtualBackend (d -> startAddr,
                                                          d -> length),
 	                                 outV (24 * d -> bitRate),
@@ -46,8 +45,7 @@ int32_t i, j;
         this    -> protLevel            = d -> protLevel;
         our_backendBase        = new dataProcessor (bitRate,
 	                                            d,
-                                                    bytesOut,
-	                                            motdataHandler,
+	                                            p,
                                                     ctx);
 	nextIn		= 0;
 	nextOut		= 0;

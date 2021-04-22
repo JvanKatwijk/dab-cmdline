@@ -35,8 +35,7 @@ class	dataProcessor:public backendBase {
 public:
 	dataProcessor	(int16_t	bitRate,
 	                 packetdata	*pd,
-	                 bytesOut_t     bytesOut,
-	                 motdata_t	motdataHandler,
+	                 API_struct	*p,
 	                 void		*ctx);
 	~dataProcessor	(void);
 void	addtoFrame	(uint8_t *);

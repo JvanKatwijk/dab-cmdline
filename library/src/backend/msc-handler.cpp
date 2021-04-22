@@ -41,22 +41,18 @@ int16_t	cifVector [55296];
 
 static int blocksperCIF [] = {18, 72, 0, 36};
 
-		mscHandler::mscHandler	(uint8_t	dabMode,
-	                                 audioOut_t	soundOut,
-	                                 dataOut_t	dataOut,
-	                                 bytesOut_t	bytesOut,
-	                                 programQuality_t mscQuality,
-	                                 motdata_t	motdata_Handler,
+		mscHandler::mscHandler	(API_struct	*p,
 	                                 void		*userData):
-	                                    params (dabMode),
-	                                    my_fftHandler (dabMode),
-	                                    myMapper (dabMode),
+	                                    params (p -> dabMode),
+	                                    my_fftHandler (p -> dabMode),
+	                                    myMapper (p -> dabMode),
 	                                    freeSlots (params. get_L ()) {
-	this	-> soundOut		= soundOut;
-	this	-> dataOut		= dataOut;
-	this	-> bytesOut		= bytesOut;
-	this	-> programQuality	= mscQuality;
-	this	-> motdata_Handler	= motdata_Handler;
+	this	-> p			= p;
+	this	-> soundOut		= p -> audioOut_Handler;
+	this	-> dataOut		= p -> dataOut_Handler;
+	this	-> bytesOut		= p -> bytesOut_Handler;
+	this	-> programQuality	= p -> program_quality_Handler;
+	this	-> motdata_Handler	= p -> motdata_Handler;
 	this	-> userData		= userData;
 	theData				= new std::complex<float> *[params. get_L ()];
 	for (int i = 0; i < params. get_L (); i ++)
@@ -66,7 +62,7 @@ static int blocksperCIF [] = {18, 72, 0, 36};
 	cifCount		= 0;	// msc blocks in CIF
 	theBackends. push_back (new virtualBackend (0, 0));
 	BitsperBlock		= 2 * params. get_carriers ();
-	numberofblocksperCIF	= blocksperCIF [(dabMode - 1) & 03];
+	numberofblocksperCIF	= blocksperCIF [(p -> dabMode - 1) & 03];
 
 	work_to_do. store (false);
 	running. store (false);
@@ -177,12 +173,7 @@ void	mscHandler::set_audioChannel (audiodata *d) {
 	mutexer. lock ();
 //
 //	we could assert here that theBackend == nullptr
-	theBackends. push_back (new audioBackend (d,
-	                                    soundOut,
-	                                    dataOut,
-	                                    programQuality,
-	                                    motdata_Handler,
-	                                    userData));
+	theBackends. push_back (new audioBackend (d, p, userData));
 	work_to_do. store (true);
 	mutexer. unlock ();
 }
@@ -190,10 +181,7 @@ void	mscHandler::set_audioChannel (audiodata *d) {
 
 void	mscHandler::set_dataChannel (packetdata *d) {
 	mutexer. lock ();
-	theBackends. push_back (new dataBackend (d,
-	                                   bytesOut,
-	                                   motdata_Handler,
-	                                   userData));
+	theBackends. push_back (new dataBackend (d, p, userData));
 	work_to_do. store (true);
 	mutexer. unlock ();
 }
