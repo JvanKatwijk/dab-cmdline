@@ -163,13 +163,22 @@ std::vector<uint8_t> result;
 //	MOT slide, to show
 	if (motdataHandler != nullptr) {
 	   if (name == "")
-	      realName = "no name";
+	      realName = "noname";
            else
 	      realName = name;
+#ifdef _MSC_VER
+	   TCHAR tempPath[MAX_PATH];
+	   GetTempPath(MAX_PATH, tempPath);
+	   std::string tempPathString(tempPath);
+	   realName = tempPathString + "\\" + realName;
+#else
 	   realName = "/tmp/" + realName;
+#endif
 	   FILE * temp = fopen (realName. c_str (), "w");
-	   fwrite (result.data (), 1, result. size (), temp);
-	   fclose (temp);
+           if (temp) {
+	      fwrite (result.data (), 1, result. size (), temp);
+	      fclose (temp);
+           }
 	   motdataHandler (realName, contentsubType, ctx);
 	}
 }
