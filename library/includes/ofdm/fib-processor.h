@@ -112,6 +112,7 @@ public:
 	int32_t get_CIFcount		();
 
 private:
+	API_struct	*theParameters;
 	ensemblename_t	ensemblenameHandler;
 	programname_t	programnameHandler;
 	void		*userData;

@@ -173,6 +173,10 @@ void	tii_data_Handler	(int s) {
 	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
 }
 
+void	timeHandler		(std::string s, void *ctx) {
+	fprintf (stderr, "%s\n", s. c_str ());
+}
+
 //
 //	Note: the function is called from the tdcHandler with a
 //	frame, either frame 0 or frame 1.
@@ -640,6 +644,7 @@ int	theDuration		= -1;	// no limit
 	interface. program_quality_Handler		= mscQuality;
 	interface. motdata_Handler	= motdata_Handler;
 	interface. tii_data_Handler	= tii_data_Handler;
+	interface. timeHandler		= timeHandler;
 
 	theRadio	= dabInit (theDevice,
 	                           &interface,

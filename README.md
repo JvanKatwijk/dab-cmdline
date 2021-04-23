@@ -90,15 +90,23 @@ such that the call to dabInit is basically simplified to
                                    nullptr              // Ctx
                                   );
 
-Examples 2, 3 and 4 are adapted, example 5 will soon follow.
+Examples 2, 3 and 4 are adapted, example 5  (and maybe 6) will soon follow.
 
 The obvious advantage is that adding a callback function for a specific
 purpose now does not change all of the intermediate functions in tbhe library,
-basically opne only modified
+basically opne only modifies
 
 	a. the structure
 	b. the main program for filling the structure and adding a handler
 	c. the affected function in the library
+
+
+New elements to the callbacks are
+
+	a. the tii data (mainID and subId), packed as 256 * mainId + subId
+	b. the time as string
+	
+see the dab-api for details
 
 --------------------------------------------------------------------------
 The examples

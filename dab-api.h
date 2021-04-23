@@ -114,6 +114,9 @@ typedef	struct {
 //	Each programname in the ensemble is sent once
 	typedef	void (*programname_t)(std::string, int32_t, void *);
 //
+//	thefib also sends the time as string
+	typedef void	(*theTime_t)(std::string, void *);
+	
 //	after selecting an audio program, the audiooutput, packed
 //	as PCM data (always two channels) is sent back
 	typedef void (*audioOut_t)(int16_t *,		// buffer
@@ -180,6 +183,7 @@ typedef struct {
 	programQuality_t    program_quality_Handler;
 	motdata_t	motdata_Handler;
 	tii_data_t	tii_data_Handler;
+	theTime_t	timeHandler;
 } API_struct;
 
 void DAB_API	*dabInit   (deviceHandler       *,

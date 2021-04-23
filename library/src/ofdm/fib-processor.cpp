@@ -98,6 +98,7 @@
 //
 	fib_processor::fib_processor (API_struct *p,
 	                              void	*userData) {
+	this	-> theParameters	= p;
 	this	-> ensemblenameHandler	= p ->  ensemblename_Handler;
 	if (p -> programname_Handler == nullptr)
 	   fprintf (stderr, "nullptr detected\n");
@@ -617,18 +618,89 @@ uint8_t		extensionFlag;
 //	Michael Hoehn
 void fib_processor::FIG0Extension9 (uint8_t *d) {
 int16_t	offset	= 16;
+int     signbit = getBits_1 (d, offset + 2);
 
 	dateTime [6] = (getBits_1 (d, offset + 2) == 1)?
 	                -1 * getBits_4 (d, offset + 3):
 	                     getBits_4 (d, offset + 3);
-	dateTime [7] = (getBits_1 (d, offset + 7) == 1)? 30 : 0;
-        uint16_t ecc = getBits (d, offset + 8, 8);
+//	7 indicates a possible remaining half our
+	dateTime [7] = (getBits_1 (d, offset + 7) == 1) ? 30 : 0;
+	if (signbit == 1)
+	   dateTime [7] = -dateTime [7];
 }
 
+std::string monthTable [] = {
+"jan", "feb", "mar", "apr", "may", "jun",
+"jul", "aug", "sep", "oct", "nov", "dec"};
+
+int	monthLength [] {
+31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 //
-void fib_processor::FIG0Extension10 (uint8_t *fig) {
+//	Time in 10 is given in UTC, for other time zones
+//	we add (or subtract) a number of Hours (half hours)
+void	adjustTime (int32_t *dateTime) {
+//	first adjust the half hour  in the amount of minutes
+	dateTime [4] += (dateTime [7] == 1) ? 30 : 0;
+	if (dateTime [4] >= 60) {
+	   dateTime [4] -= 60; dateTime [3] ++;
+	}
+
+	if (dateTime [4] < 0) {
+	   dateTime [4] += 60; dateTime [3] --;
+	}
+
+	dateTime [3] += dateTime [6];
+	if ((0 <= dateTime [3]) && (dateTime [3] <= 23))
+	   return;
+
+	if (dateTime [3] > 23) {
+	   dateTime [3] -= 24; dateTime [2] ++;
+	}
+
+	if (dateTime [3] < 0) {
+	   dateTime [3] += 24; dateTime [2] --;
+	}
+
+	if (dateTime [2] > monthLength [dateTime [1] - 1]) {
+	   dateTime [2] = 1; dateTime [1] ++;
+	   if (dateTime [1] > 12) {
+	      dateTime [1] = 1;
+	      dateTime [0] ++;
+	   }
+	}
+
+	if (dateTime [2] < 0) {
+	   if (dateTime [1] > 1) {
+	      dateTime [2] = monthLength [dateTime [1] - 1 - 1];
+	      dateTime [1] --;
+	   }
+	   else {
+	      dateTime [2] = monthLength [11];
+	      dateTime [1] = 12; dateTime [0] --;
+	   }
+	}
+}
+
+std::string	mapTime (int32_t *dateTime) {
+std::string result;
+char temp [20];
+	int hours	= dateTime [3];
+	if (hours < 0)	hours += 24;
+	if (hours >= 24) hours -= 24;
+
+	sprintf (temp, "%2d", hours);
+	std::string hoursasString = temp;
+	result. append (hoursasString);
+	result. append (":");
+	sprintf (temp, "%2d", dateTime [4]);
+	std::string minutesasString = temp;
+	result. append (minutesasString);
+	return result;
+}
+//
+void fib_processor::FIG0Extension10 (uint8_t *dd) {
 int16_t		offset = 16;
-int32_t		mjd	= getLBits (fig, offset + 1, 17);
+int32_t		mjd	= getLBits (dd, offset + 1, 17);
 // Modified Julian Date umrechnen (Nach wikipedia)
 int32_t J	= mjd + 2400001;
 int32_t j	= J + 32044;
@@ -646,19 +718,33 @@ int32_t d	= da - ((m + 4) * 153 / 5) + 122;
 int32_t Y	= y - 4800 + ((m + 2) / 12); 
 int32_t M	= ((m + 2) % 12) + 1; 
 int32_t D	= d + 1;
-	
-	dateTime [0] = Y;	// Jahr
-	dateTime [1] = M;	// Monat
-	dateTime [2] = D;	// Tag
-	dateTime [3] = getBits_5 (fig, offset + 21);	// Stunden
-	if (getBits_6 (fig, offset + 26) != dateTime [4]) 
-	   dateTime [5] =  0;	// Sekunden (Uebergang abfangen)
+uint32_t	theTime [6];
 
-	dateTime [4] = getBits_6 (fig, offset + 26);	// Minuten
-	if (fig [offset + 20] == 1)
-	   dateTime [5] = getBits_6 (fig, offset + 32);	// Sekunden
-	dateFlag	= true;
-//	emit newDateTime (dateTime);
+	theTime [0] = Y;	// Year
+	theTime [1] = M;	// Month
+	theTime [2] = D;	// Day
+	theTime [3] = getBits_5 (dd, offset + 21); // Hours
+	theTime [4] = getBits_6 (dd, offset + 26); // Minutes
+
+	if (getBits_6 (dd, offset + 26) != dateTime [4]) 
+	   theTime [5] =  0;	// Seconds (Ubergang abfangen)
+
+	if (dd [offset + 20] == 1)
+	   theTime [5] = getBits_6 (dd, offset + 32);	// Seconds
+//
+//	take care of different time zones
+	bool	change = false;
+	for (int i = 0; i < 5; i ++) {
+	   if (theTime [i] != dateTime [i])
+	      change = true;
+	   dateTime [i] = theTime [i];
+	}
+
+	if (change && theParameters -> timeHandler != nullptr) {
+	   adjustTime (dateTime);
+	   std::string timeString = mapTime (dateTime);
+	   theParameters ->  timeHandler (timeString, userData);
+	}
 }
 //
 //
@@ -1435,15 +1521,15 @@ serviceId *selectedService;
 //	in the fib structures, so release the lock
 void	fib_processor::addtoEnsemble	(const std::string &s, int32_t SId) {
 	fibLocker. unlock ();
-	if (programnameHandler != nullptr)
-	   programnameHandler (s, SId, userData);
+	if (theParameters -> programname_Handler != nullptr)
+	   theParameters -> programname_Handler (s, SId, userData);
 	fibLocker. lock ();
 }
 
 void	fib_processor::nameofEnsemble  (int id, const std::string &s) {
 	fibLocker. unlock ();
-	if (ensemblenameHandler != nullptr)
-	   ensemblenameHandler (s, id, userData);
+	if (theParameters -> ensemblename_Handler != nullptr)
+	   theParameters -> ensemblename_Handler (s, id, userData);
 	fibLocker. lock ();
 	isSynced	= true;
 }

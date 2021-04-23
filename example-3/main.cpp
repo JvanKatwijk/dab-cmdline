@@ -540,6 +540,7 @@ deviceHandler	*theDevice;
 	interface. program_quality_Handler		= mscQuality;
 	interface. motdata_Handler	= nullptr;
 	interface. tii_data_Handler	= tii_data_Handler;
+	interface. timeHandler		= nullptr;
 
 //	and with a sound device we can create a "backend"
 	theRadio	= (void *)dabInit (theDevice,

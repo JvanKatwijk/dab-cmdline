@@ -167,6 +167,7 @@ uint8_t Lambda	  [nroots + 1];
 uint8_t	rootTable [nroots];
 uint8_t	locTable  [nroots];
 uint8_t	omega	  [nroots + 1];
+#endif
 uint16_t lambda_degree, omega_degree;
 int16_t	rootCount;
 int16_t	i;

@@ -494,6 +494,7 @@ int	theDuration	= -1;		// infinite
 	interface. program_quality_Handler		= mscQuality;
 	interface. motdata_Handler	= nullptr;
 	interface. tii_data_Handler	= tii_data_Handler;
+	interface. timeHandler		= nullptr;
 
 	theRadio	= dabInit (theDevice,
 	                           &interface,
