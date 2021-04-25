@@ -54,7 +54,11 @@ public:
 private:
 
 	struct v	vp;
+#ifdef _MSC_VER
+_MM_ALIGN16	COMPUTETYPE Branchtab	[NUMSTATES / 2 * RATE];
+#else
 	COMPUTETYPE Branchtab	[NUMSTATES / 2 * RATE] ALIGN_16;
+#endif
 //	int	parityb		(uint8_t);
 	int	parity		(int);
 	void	partab_init	(void);
