@@ -174,7 +174,7 @@ std::vector<uint8_t> result;
 #else
 	   realName = "/tmp/" + realName;
 #endif
-	   FILE * temp = fopen (realName. c_str (), "w");
+	   FILE * temp = fopen (realName. c_str (), "wb");
            if (temp) {
 	      fwrite (result.data (), 1, result. size (), temp);
 	      fclose (temp);
