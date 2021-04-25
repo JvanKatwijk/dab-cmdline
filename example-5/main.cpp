@@ -32,6 +32,7 @@
 #include	"audiosink.h"
 #include	"filesink.h"
 #include	"dab-api.h"
+#include	"locking-queue.h"
 #include	"includes/support/band-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
@@ -55,9 +56,22 @@
 
 using std::cerr;
 using std::endl;
+//
+//      messages
+typedef struct {
+   int key;
+   std::string string;
+} message;
+
+static
+lockingQueue<message> messageQueue;
+
+#define	S_QUIT	0100
+#define	S_NEXT	0101
 
 void    printOptions	(void);	// forward declaration
 void	listener	(void);
+void	selectNext	(void);
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
@@ -91,7 +105,7 @@ static void sighandler (int signum) {
 }
 
 static
-void	syncsignalHandler (bool b, void *userData) {
+void	syncsignal_Handler (bool b, void *userData) {
 	timeSynced. store (b);
 	timesyncSet. store (true);
 	(void)userData;
@@ -103,7 +117,7 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	ensemblenameHandler (std::string name, int Id, void *userData) {
+void	ensemblename_Handler (std::string name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
 	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
@@ -113,7 +127,7 @@ std::vector<std::string> programNames;
 std::vector<int> programSIds;
 
 static
-void	programnameHandler (std::string s, int SId, void *userdata) {
+void	programname_Handler (std::string s, int SId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
 	   if (*it == s)
@@ -124,7 +138,7 @@ void	programnameHandler (std::string s, int SId, void *userdata) {
 }
 
 static
-void	programdataHandler (audiodata *d, void *ctx) {
+void	programdata_Handler (audiodata *d, void *ctx) {
 	(void)ctx;
 	fprintf (stderr, "\tstartaddress\t= %d\n", d -> startAddr);
 	fprintf (stderr, "\tlength\t\t= %d\n",     d -> length);
@@ -404,19 +418,24 @@ bool	err;
 	}
 //
 //	and with a sound device we can create a "backend"
+	API_struct interface;
+        interface. dabMode      = theMode;
+        interface. syncsignal_Handler   = syncsignal_Handler;
+        interface. systemdata_Handler   = systemData;
+        interface. ensemblename_Handler = ensemblename_Handler;
+        interface. programname_Handler  = programname_Handler;
+        interface. fib_quality_Handler  = fibQuality;
+        interface. audioOut_Handler     = pcmHandler;
+        interface. dataOut_Handler      = dataOut_Handler;
+        interface. bytesOut_Handler     = bytesOut_Handler;
+        interface. programdata_Handler  = programdata_Handler;
+        interface. program_quality_Handler              = mscQuality;
+        interface. motdata_Handler      = nullptr;
+        interface. tii_data_Handler     = nullptr;;
+        interface. timeHandler		= nullptr;
+
 	theRadio	= dabInit (theDevice,
-	                           theMode,
-	                           syncsignalHandler,
-	                           systemData,
-	                           ensemblenameHandler,
-	                           programnameHandler,
-	                           fibQuality,
-	                           pcmHandler,
-	                           dataOut_Handler,
-	                           bytesOut_Handler,
-	                           programdataHandler,
-	                           mscQuality,
-	                           NULL,		// no mot slides
+	                           &interface,
 	                           NULL,		// no spectrum shown
 	                           NULL,		// no constellations
 	                           NULL
@@ -471,7 +490,6 @@ bool	err;
 
 	run. store (true);
 	std::thread keyboard_listener = std::thread (&listener);
-
         std::cerr << "we try to start program " <<
                                                  programName << "\n";
         if (!is_audioService (theRadio, programName. c_str ())) {
@@ -492,9 +510,22 @@ bool	err;
         dabReset_msc (theRadio);
         set_audioChannel (theRadio, &ad);
 
-	while (run. load ())
-	   sleep (1);
+	while (run. load ()) {
+	   message m;
+	   while (!messageQueue. pop (10000, &m));
+	   switch (m. key) {
+	      case S_NEXT:
+	         selectNext ();
+	         break;
+	      case S_QUIT:
+	         run. store (false);
+	         break;
+	      default:
+	         break;
+	   }
+	}
 	theDevice	-> stopReader ();
+	keyboard_listener. join ();
 	dabStop	(theRadio);
 	dabExit	(theRadio);
 	delete theDevice;	
@@ -578,11 +609,15 @@ void	listener	(void) {
 	fprintf (stderr, "listener is running\n");
 	while (run. load ()) {
 	   char t = getchar ();
+	   message m;
 	   switch (t) {
-	      case '\n':  selectNext ();
+	      case '\n': 
+	         m.key = S_NEXT;
+	         m. string = "";
+	         messageQueue. push (m);
 	         break;
 	      default:
-	         fprintf (stderr, "unidentified %d (%c)\n", t, t);
+//	         fprintf (stderr, "unidentified %d (%c)\n", t, t);
 	   }
 	}
 }
