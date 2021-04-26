@@ -139,6 +139,7 @@ endif ()
 	     ../library/includes/ofdm/fic-handler.h
 	     ../library/includes/ofdm/fib-processor.cpp
 	     ../library/includes/ofdm/sample-reader.h
+	     ../library/includes/ofdm/tii-detector.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/backend-base.h
 	     ../library/includes/backend/charsets.h
@@ -164,7 +165,7 @@ endif ()
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
 	     ../library/includes/support/eep-protection.h
-	     ../library/includes/support/fft_handler.h
+	     ../library/includes/support/fft-handler.h
 	     ../library/includes/support/dab-params.h
 	     ../library/includes/support/tii_table.h
 	     ../library/includes/support/viterbi-spiral/viterbi-spiral.h
@@ -188,6 +189,7 @@ endif ()
 	     ../library/src/ofdm/sample-reader.cpp
 	     ../library/src/ofdm/fib-processor.cpp
 	     ../library/src/ofdm/fic-handler.cpp
+	     ../library/src/ofdm/tii-detector.cpp
 	     ../library/src/backend/firecode-checker.cpp
 	     ../library/src/backend/backend-base.cpp
 	     ../library/src/backend/charsets.cpp
@@ -212,7 +214,7 @@ endif ()
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
 	     ../library/src/support/uep-protection.cpp
-	     ../library/src/support/fft_handler.cpp
+	     ../library/src/support/fft-handler.cpp
 	     ../library/src/support/dab-params.cpp
 	     ../library/src/support/tii_table.cpp
 	     ../library/src/support/viterbi-spiral/viterbi-spiral.cpp

@@ -156,7 +156,6 @@ int8_t          *PI3;
 int8_t          *PI4;
 int8_t          *PI_X;
 
-
 	index	= findIndex (bitRate, protLevel);
 	if (index == -1) {
 	   fprintf (stderr, "%d (%d) has a problem\n", bitRate, protLevel);
@@ -223,7 +222,6 @@ int8_t          *PI_X;
 	      indexTable [viterbiCounter] = true;
 	   viterbiCounter ++;
 	}
-
 }
 
 	uep_protection::~uep_protection (void) {

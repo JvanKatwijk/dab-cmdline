@@ -306,11 +306,11 @@ PyGILState_STATE gstate;
 //	                   void                *userData);
 
 
+int32_t	frequency;
 
 PyObject *dabInit_p (PyObject *self, PyObject *args) {
 int	theMode	= 127;
 char	*theChannel;
-int32_t	frequency;
 int16_t	theGain;
 PyObject	*cbsH;		// callback for syncsignalHandler
 PyObject	*cbsD;		// callback for systemdataHandler

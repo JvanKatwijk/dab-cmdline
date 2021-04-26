@@ -89,7 +89,7 @@ void	syncsignalHandler (bool b, void *userData) {
 std::string	ensembleName;
 uint32_t	ensembleId;
 static
-void	ensemblenameHandler (std::string name, int Id, void *userData) {
+void	ensemblename_Handler (std::string name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
 	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
@@ -101,7 +101,7 @@ std::vector<std::string> programNames;
 std::vector<int> programSIds;
 
 static
-void	programnameHandler (std::string s, int SId, void *userdata) {
+void	programname_Handler (std::string s, int SId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
 	   if (*it == s)
@@ -112,7 +112,7 @@ void	programnameHandler (std::string s, int SId, void *userdata) {
 }
 
 static
-void	programdataHandler (audiodata *d, void *ctx) {
+void	programdata_Handler (audiodata *d, void *ctx) {
 	(void) *d;
 	(void)ctx;
 }
@@ -413,24 +413,30 @@ bool firstEnsemble = true;
 	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
 	   exit (32);
 	}
+
+//	and with a sound device we now can create a "backend"
+        API_struct interface;
+        interface. dabMode      = theMode;
+        interface. syncsignal_Handler   = syncsignalHandler;
+        interface. systemdata_Handler   = systemData;
+        interface. ensemblename_Handler = ensemblename_Handler;
+        interface. programname_Handler  = programname_Handler;
+        interface. fib_quality_Handler  = fibQuality;
+        interface. audioOut_Handler     = pcmHandler;
+        interface. dataOut_Handler      = dataOut_Handler;
+        interface. bytesOut_Handler     = bytesOut_Handler;
+        interface. programdata_Handler  = programdata_Handler;
+        interface. program_quality_Handler              = mscQuality;
+        interface. motdata_Handler	= nullptr;
+        interface. tii_data_Handler	= nullptr;
+        interface. timeHandler		= nullptr;
 //
 //	and with a sound device we can create a "backend"
 	theRadio	= dabInit (theDevice,
-	                           theMode,
-	                           syncsignalHandler,
-	                           systemData,
-	                           ensemblenameHandler,
-	                           programnameHandler,
-	                           fibQuality,
-	                           pcmHandler,
-	                           dataOut_Handler,
-	                           bytesOut_Handler,
-	                           programdataHandler,
-	                           mscQuality,
-	                           NULL,		// no mot slides
-	                           NULL,		// no spectrum shown
-	                           NULL,		// no constellations
-	                           NULL
+	                           &interface,
+	                           nullptr,		// no spectrum shown
+	                           nullptr,		// no constellations
+	                           nullptr
 	                          );
 	if (theRadio == NULL) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");

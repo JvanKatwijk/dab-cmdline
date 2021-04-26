@@ -11,6 +11,51 @@ A few callback functions provide the communication back from the
 library to the caller.
 The library interface is given in dab-api.h
 
+-------------------------------------------------------------------------
+IMPORTANT NOTICE
+-------------------------------------------------------------------------
+
+Since I was unhappy with passing lots of individual callback functions
+through the whole of the computing chain, I made (am making) a
+change to the API and the dabInit function in the API.
+
+Until recently one had to specify all individual callback functions
+as parameter to the dabInit function.
+
+The change is that now a struct "API_struct" is defined in the API,
+the fields of which are the references to the different callback functions
+such that the call to dabInit is basically simplified to
+
+	theRadio        = dabInit (theDevice,
+                                   &interface,
+                                   nullptr,             // no spectrum shown
+                                   nullptr,             // no constellations
+                                   nullptr              // Ctx
+                                  );
+
+Examples 2, 3, 4, 5 and 7 are adapted. Examples 6,  8, 9 and 10 are not
+supported anymore, as is the python example.
+
+The obvious advantage is that adding a callback function for a specific
+purpose now does not change all of the intermediate functions in tbhe library,
+basically opne only modifies
+
+	a. the structure
+	b. the main program for filling the structure and adding a handler
+	c. the affected function in the library
+
+New callback functions are
+
+	a. the tii data 
+	    typedef void (*tii_data_t)(int);
+	   where the int is encoded as mainId << 8 + subInt
+
+	b. the time 
+	   typedef void    (*theTime_t)(std::string, void *);
+	   where the time (hours::minutes) is passed as string
+	
+see the dab-api for details
+
 -----------------------------------------------------------------------
 NEW: Support for Pluto
 -----------------------------------------------------------------------
@@ -68,45 +113,6 @@ Supported devices
 and of course fileinput of ".raw" and ".sdr" files is supported, as
 well as input through the rtl_tcp driver.
 
--------------------------------------------------------------------------
-IMPORTANT NOTICE
--------------------------------------------------------------------------
-
-Since I was unhappy with passing lots of individual callback functions
-through the whole of the computing chain, I made (am making) a
-change to the API and the dabInit function in the API.
-
-Until recently one had to specify all individual callback functions
-as parameter to the dabInit function.
-
-The change is that now a struct "API_struct" is defined in the API,
-the fields of which are the references to the different callback functions
-such that the call to dabInit is basically simplified to
-
-	theRadio        = dabInit (theDevice,
-                                   &interface,
-                                   nullptr,             // no spectrum shown
-                                   nullptr,             // no constellations
-                                   nullptr              // Ctx
-                                  );
-
-Examples 2, 3 and 4 are adapted, example 5  (and maybe 6) will soon follow.
-
-The obvious advantage is that adding a callback function for a specific
-purpose now does not change all of the intermediate functions in tbhe library,
-basically opne only modifies
-
-	a. the structure
-	b. the main program for filling the structure and adding a handler
-	c. the affected function in the library
-
-
-New elements to the callbacks are
-
-	a. the tii data (mainID and subId), packed as 256 * mainId + subId
-	b. the time as string
-	
-see the dab-api for details
 
 --------------------------------------------------------------------------
 The examples

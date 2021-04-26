@@ -91,7 +91,7 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	ensemblenameHandler (std::string name, int Id, void *userData) {
+void	ensemblename_Handler (std::string name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
 	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
@@ -105,7 +105,7 @@ std::vector<int> programSIds;
 
 std::unordered_map <int, std::string> ensembleContents;
 static
-void	programnameHandler (std::string s, int SId, void *userdata) {
+void	programname_Handler (std::string s, int SId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
 	   if (*it == s)
@@ -117,7 +117,7 @@ void	programnameHandler (std::string s, int SId, void *userdata) {
 }
 
 static
-void	programdataHandler (audiodata *d, void *ctx) {
+void	programdata_Handler (audiodata *d, void *ctx) {
 	(void)ctx;
 	std::cerr << "\tstartaddress\t= " << d -> startAddr << "\n";
 	std::cerr << "\tlength\t\t= "     << d -> length << "\n";
@@ -139,7 +139,7 @@ void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
 //	as parameters the filename where the picture is stored
 //	d denotes the subtype of the picture 
 //	typedef void (*motdata_t)(std::string, int, void *);
-void	motdataHandler (std::string s, int d, void *ctx) {
+void	motdata_Handler (std::string s, int d, void *ctx) {
 	(void)s; (void)d; (void)ctx;
 	fprintf (stderr, "plaatje %s\n", s. c_str ());
 }
@@ -292,24 +292,29 @@ bool	err;
 	      exit (33);
 	   }
 	}
-//
+//	and with a sound device we now can create a "backend"
+        API_struct interface;
+        interface. dabMode      = theMode;
+        interface. syncsignal_Handler   = syncsignalHandler;
+        interface. systemdata_Handler   = systemData;
+        interface. ensemblename_Handler = ensemblename_Handler;
+        interface. programname_Handler  = programname_Handler;
+        interface. fib_quality_Handler  = fibQuality;
+        interface. audioOut_Handler     = pcmHandler;
+        interface. dataOut_Handler      = dataOut_Handler;
+        interface. bytesOut_Handler     = bytesOut_Handler;
+        interface. programdata_Handler  = programdata_Handler;
+        interface. program_quality_Handler              = mscQuality;
+        interface. motdata_Handler      = motdata_Handler;
+        interface. tii_data_Handler	= nullptr;
+        interface. timeHandler	 	= nullptr;
+
 //	and with a sound device we now can create a "backend"
 	theRadio	= dabInit (theDevice,
-	                           theMode,
-	                           syncsignalHandler,
-	                           systemData,
-	                           ensemblenameHandler,
-	                           programnameHandler,
-	                           fibQuality,
-	                           pcmHandler,
-	                           dataOut_Handler,
-	                           bytesOut_Handler,
-	                           programdataHandler,
-	                           mscQuality,
-	                           motdataHandler,	// MOT in PAD
-	                           NULL,		// no spectrum shown
-	                           NULL,		// no constellations
-	                           NULL		// Ctx
+	                           &interface,
+	                           nullptr,		// no spectrum shown
+	                           nullptr,		// no constellations
+	                           nullptr		// Ctx
 	                          );
 	if (theRadio == NULL) {
 	   std::cerr << "sorry, no radio available, fatal\n";

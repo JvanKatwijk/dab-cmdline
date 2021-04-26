@@ -35,7 +35,7 @@
 #ifdef  HAVE_SDRPLAY
 #include        "sdrplay-handler.h"
 #elif  HAVE_SDRPLAY_V3
-#include        "sdrplay-handler.h"
+#include        "sdrplay-handler-v3.h"
 #elif   HAVE_AIRSPY
 #include        "airspy-handler.h"
 #elif   HAVE_RTLSDR
