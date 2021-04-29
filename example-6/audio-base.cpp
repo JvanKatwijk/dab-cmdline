@@ -70,16 +70,16 @@ void	audioBase::audioOut	(int16_t *buffer,
 void	audioBase::audioOut_16000	(int16_t *V, int32_t amount) {
 DSPCOMPLEX outputBuffer [converter_16. getOutputsize ()];
 float      buffer       [2 * converter_16. getOutputsize ()];
-int16_t	i;
+int16_t	i, j;
 int32_t	result;
 
 	for (i = 0; i < amount; i ++)
 	   if (converter_16. convert (DSPCOMPLEX (V [2 * i] / 32767.0,
 	                                          V [2 * i + 1] / 32767.0),
 	                              outputBuffer, &result)) {
-	      for (i = 0; i < result; i ++) {
-	         buffer [2 * i    ] = real (outputBuffer [i]);
-	         buffer [2 * i + 1] = imag (outputBuffer [i]);
+	      for (j = 0; j < result; j ++) {
+	         buffer [2 * j    ] = real (outputBuffer [j]);
+	         buffer [2 * j + 1] = imag (outputBuffer [j]);
 	      }
 	   
 	      audioOutput (buffer, result);
@@ -91,16 +91,16 @@ int32_t	result;
 void	audioBase::audioOut_24000	(int16_t *V, int32_t amount) {
 DSPCOMPLEX outputBuffer [converter_24. getOutputsize ()];
 float      buffer       [2 * converter_24. getOutputsize ()];
-int16_t	i;
+int16_t	i, j;
 int32_t	result;
 
 	for (i = 0; i < amount; i ++)
 	   if (converter_24. convert (DSPCOMPLEX (V [2 * i] / 32767.0,
 	                                          V [2 * i + 1] / 32767.0),
 	                              outputBuffer, &result)) {
-	      for (i = 0; i < result; i ++) {
-	         buffer [2 * i    ] = real (outputBuffer [i]);
-	         buffer [2 * i + 1] = imag (outputBuffer [i]);
+	      for (j = 0; j < result; j ++) {
+	         buffer [2 * j    ] = real (outputBuffer [j]);
+	         buffer [2 * j + 1] = imag (outputBuffer [j]);
 	      }
 	   
 	      audioOutput (buffer, result);
@@ -112,16 +112,16 @@ int32_t	result;
 void	audioBase::audioOut_32000	(int16_t *V, int32_t amount) {
 DSPCOMPLEX outputBuffer [converter_32. getOutputsize ()];
 float      buffer       [2 * converter_32. getOutputsize ()];
-int32_t	i;
+int32_t	i, j;
 int32_t	result;
 
 	for (i = 0; i < amount; i ++) {
 	   if (converter_32. convert (DSPCOMPLEX (V [2 * i] / 32767.0,
 	                                          V [2 * i + 1] / 32767.0),
 	                              outputBuffer, &result)) {
-	      for (i = 0; i < result; i ++) {
-	         buffer [2 * i    ] = real (outputBuffer [i]);
-	         buffer [2 * i + 1] = imag (outputBuffer [i]);
+	      for (j = 0; j < result; j ++) {
+	         buffer [2 * j    ] = real (outputBuffer [j]);
+	         buffer [2 * j + 1] = imag (outputBuffer [j]);
 	      }
 	   
 	      audioOutput (buffer, result);

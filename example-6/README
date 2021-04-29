@@ -1,78 +1,16 @@
 
-		EX A M P L E  6
+Example 6
 
+Example 6 is a simple command line version of the DAB software. The
+input device is stdin, the output is either to the soundcard (default) or to a file
+(-O option).
 
-Example 6 is the internet controlled version of the cmdline version for dab.
+Other than example 1, it binds directly to the functionality implementing
+the DAB decoding.
 
-It is derived from example 2, so for configuing see example 2.
+All callbacks are defined, most of them with an empty body.
 
-===========================================================================
-FEEL FREE TO IMPROVE THE PROGRAM AND TO CONTRIBUTE
-===========================================================================
+See the file main.cpp for the command line options
 
-The basic idea is that the program is started - as a server (for a single client
-though).
-
-It will communicate with the outside world through two ports
-These ports can be set when configuring in the file "protocol.h"
-by setting a value to BASE_PORT.
-Default it is port 8765 (just a nice digit sequence).
-
-The program, when started, will listen to commands that are packed in packages of
-PACKET_SIZE. PACKET_SIZE is defined in protocol.h
-
-The structure of the packages is simple a sequence of PACKET_SIZE bytes
-   0xFF L K payload filler
-
-where L is the length of the payload,
-where K is the KEY, one on Q_GAIN, Q_CHANNEL and Q_SERVICE.
-where payload is the data (0-terminated strings) to be carrier.
-where filler is the unsused data to fill up the package to a size of PACKET_SIZE
-
-All three commands take a 0-terminated (i.e. C) string.
-
-Q_GAIN string will set the gain of the connected device to the value "string" is a representation of, a value in the range 0 .. 100;
-
-Q_CHANNEL string will set the frequency of the receiver to the frequency for
-channel "string", - note that the setting of the Band cannot be done (yet?)
-it is programmed in as a default.
-
-Q_SERVICE string will select the service "string" in the current ensemble.
-If no ensemble is detected, or the string is not recognized the behaviour
-is not completely defined.
-
-The program on its turn will send data out (port BASE_PORT + 1),
-in all cases the format of the message is
-the same as for the receiving packages:
-	0xFF L K payload filler
-
-where the key (K) is one of Q_ENSEMBLE, Q_SERVICE_NAME, Q_TEXT_MESSAGE 
-Q_PROGRAM_DATA.
-
-the packet with key Q_ENSEMBLE is sent as an ensemble identifier is recognized
-in the DAB stream. Each of the service identifiers is sent with a key
-Q_SERVICE_NAME, text messages (i.e. the "dynamic label") is sent using
-Q_TEXT_MESSAGE as key and some data describing the selected service (e.g.
-length, startaddress, bitRate) is sent with Q_PROGRAM_DATA as key.
-
-Two notes
-a. Support for charactersets is limited (still work to be done)
-b. as an example, the subdirectory "client" contains source
-for a very simple client using the Qt framework.
-
-
-===============================================================================
-
-Copyrights
-
------------------------------------------------------------------------------------
-	
-	Copyright (C)  2016, 2017
-	Jan van Katwijk (J.vanKatwijk@gmail.com)
-	Lazy Chair Computing
-
-All SDR-J software is made available under the GPL-2.0.
-The dab-library uses a number of GPL-ed libraries, all
-rights are gratefully acknowledged.
-All SDR-J software, among which dab-library is one - is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+Feel free to improve the program
 

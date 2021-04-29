@@ -101,15 +101,15 @@ void	syncsignal_Handler (bool b, void *userData) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	ensemblename_Handler (std::string name, int Id, void *userData) {
+void	ensemblename_Handler (const char *name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name. c_str (), (uint32_t)Id);
+	                          name, (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
 static
-void	programname_Handler (std::string s, int SId, void * userdata) {
-	fprintf (stderr, "%s (%X) is part of the ensemble\n", s. c_str (), SId);
+void	programname_Handler (const char * s, int SId, void * userdata) {
+	fprintf (stderr, "%s (%X) is part of the ensemble\n", s, SId);
 }
 
 static
@@ -126,9 +126,9 @@ void	programdata_Handler (audiodata *d, void *ctx) {
 //	The function is called from within the library with
 //	a string, the so-called dynamic label
 static
-void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
+void	dataOut_Handler (const char * dynamicLabel, void *ctx) {
 	(void)ctx;
-	fprintf (stderr, "%s\r", dynamicLabel. c_str ());
+	fprintf (stderr, "%s\r", dynamicLabel);
 }
 //
 //	Note: the function is called from the tdcHandler with a

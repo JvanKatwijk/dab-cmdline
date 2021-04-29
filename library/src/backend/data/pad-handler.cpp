@@ -105,8 +105,8 @@ int16_t	i;
 	      case 2:   // start of new fragment, extract the length
 	         if (firstSegment && !lastSegment) {
                     segmentNumber   = b [last - 2] >> 4;
-                    if (dynamicLabelText. size () > 0)
-                       dataOut (dynamicLabelText, ctx);
+                    if ((dataOut != nullptr) && (dynamicLabelText. size () > 0))
+                       dataOut (dynamicLabelText. c_str (), ctx);
                     dynamicLabelText. clear ();
                  }
 	
@@ -150,8 +150,8 @@ int16_t	i;
                                         shortpadData. size ());
                     dynamicLabelText. append (segmentText);
 	      shortpadData. resize (0);
-              if (dynamicLabelText. length () > 0)
-                 dataOut (dynamicLabelText, ctx);
+              if ((dataOut != nullptr) && (dynamicLabelText. length () > 0))
+                 dataOut (dynamicLabelText. c_str (), ctx);
               dynamicLabelText. clear ();
            }
 	}
@@ -301,8 +301,8 @@ int16_t  dataLength	= 0;
 
 //	if at the end, show the label
 	      if (last) {
-	         if (!moreXPad) {
-	            dataOut (dynamicLabelText, ctx);
+	         if ((dataOut != nullptr) && !moreXPad) {
+	            dataOut (dynamicLabelText. c_str (), ctx);
 	                              
 	         }
 	         else
@@ -330,8 +330,8 @@ int16_t  dataLength	= 0;
 	                                     (CharacterSet) charSet,
 	                                     dataLength);
 	   dynamicLabelText. append(segmentText);
-	   if (!moreXPad && isLastSegment) {
-	      dataOut (dynamicLabelText, ctx);
+	   if ((dataOut != nullptr) && !moreXPad && isLastSegment) {
+	      dataOut (dynamicLabelText. c_str (), ctx);
 	   }
 	}
 }

@@ -114,9 +114,7 @@ int		startIndex		= -1;
 
 notSynced:
 //Initing:
-#ifdef	__TII_INCLUDED__
 	   my_TII_Detector. reset ();
-#endif
            switch (myTimeSyncer. sync (T_null, T_F)) {
               case TIMESYNC_ESTABLISHED:
                  break;                 // yes, we are ready
@@ -152,7 +150,7 @@ notSynced:
 Check_endofNull:
 //	when we are here, we had a (more or less) decent frame,
 //	and we are ready for the new one.
-//	we just check that we are around the end of the null period
+//	we just check that we are indeed around the end of the null period
 
 	   myReader. getSamples (ofdmBuffer. data (),
 	                      T_u, coarseOffset + fineOffset);
@@ -235,7 +233,6 @@ SyncOnPhase:
 
 //	we integrate the newly found frequency error with the
 //	existing frequency error.
-//
 //	
 	   if (!correctionNeeded & (abs (arg (FreqCorr)) > 1.5)) {
 //	      fprintf (stderr, "resync with %d (%f)\n", startIndex, arg (FreqCorr));
@@ -350,43 +347,6 @@ std::string dabProcessor::get_serviceName (int32_t SId) {
 void    dabProcessor::reset_msc (void) {
         my_mscHandler. reset ();
 }
-#ifdef	__TII_INCLUDED__
-void    dabProcessor::setTII_handler (tii_t tii_Handler,
-	                              tii_ex_t tii_ExHandler,
-	                              int framedelay,
-	                              float alfa, int resetFrameCount) {
-	if (framedelay > 0)
-	   tii_framedelay = framedelay;
-	my_tiiHandler		= tii_Handler;
-	my_tiiExHandler		= tii_ExHandler;
-	tii_alfa		= alfa;
-	tii_resetFrameCount	= resetFrameCount;
-}
-
-std::complex<float>
-	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
-	                                 bool *success) {
-        return my_ficHandler. get_coordinates (mainId, subId, success);
-}
-
-std::complex<float>
-	dabProcessor::get_coordinates	(int16_t mainId, int16_t subId,
-	                                 bool *success,
-	                                 int16_t *pMainId, int16_t *pSubId,
-	                                 int16_t *pTD) {
-        return my_ficHandler. get_coordinates (mainId, subId, success,
-	                                            pMainId, pSubId, pTD);
-}
-
-uint8_t dabProcessor::getECC    (bool *success) {
-        return my_ficHandler. getECC (success);
-}
-
-uint8_t dabProcessor::getInterTabId     (bool *success) {
-        return my_ficHandler. getInterTabId (success);
-}
-
-#endif
 
 void    dabProcessor::set_audioChannel (audiodata *d) {
         my_mscHandler. set_audioChannel (d);

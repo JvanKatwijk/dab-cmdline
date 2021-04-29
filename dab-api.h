@@ -20,6 +20,7 @@
  *    along with DAB-library, if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 #ifndef		__DAB_API__
 #define		__DAB_API__
 #include	<stdio.h>
@@ -109,13 +110,13 @@ typedef	struct {
 //
 //	the ensemblename is sent whenever the library detects the
 //	name of the ensemble
-	typedef void (*ensemblename_t)(std::string, int32_t, void *);
+	typedef void (*ensemblename_t)(const char *, int32_t, void *);
 //
 //	Each programname in the ensemble is sent once
-	typedef	void (*programname_t)(std::string, int32_t, void *);
+	typedef	void (*programname_t)(const char *, int32_t, void *);
 //
-//	thefib also sends the time as string
-	typedef void	(*theTime_t)(std::string, void *);
+//	thefib sends the time as pair of integers
+	typedef void	(*theTime_t)(int hours, int minutes, void *);
 	
 //	after selecting an audio program, the audiooutput, packed
 //	as PCM data (always two channels) is sent back
@@ -126,7 +127,7 @@ typedef	struct {
 	                           void *);
 //
 //	dynamic label data, embedded in the audio stream, is sent as string
-	typedef void (*dataOut_t)(std::string, void *);
+	typedef void (*dataOut_t)(const char *, void *);
 //
 //	byte oriented data, emitted by various dataHandlers, is sent
 //	as array of uint8_t values (packed bytes)
@@ -146,11 +147,10 @@ typedef	struct {
 	typedef void (*programdata_t)(audiodata *, void *);
 
 //
-//	MOT pictures - i.e. slides encoded in the Program Associated data
-//	are stored in a file. Each time such a file is created, the
-//	function registered as
-	typedef void (*motdata_t)(std::string, int, void *);
-//	is invoked (if not specified as NULL)
+//	The data of MOT pictures - i.e. slides encoded in the
+//	Program Associated data is passed on as uint8_t data.
+	typedef void (*motdata_t)(uint8_t *, int,
+	                          const char *, int, void *);
 //
 //	tii data - if available, the tii data is passed on as a single
 //	integer

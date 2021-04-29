@@ -169,17 +169,18 @@ std::vector<uint8_t> result;
 #ifdef _MSC_VER
 	   TCHAR tempPath[MAX_PATH];
 	   GetTempPath(MAX_PATH, tempPath);
-	   std::string tempPathString(tempPath);
+	   std::string tempPathString (tempPath);
 	   realName = tempPathString + "\\" + realName;
 #else
 	   realName = "/tmp/" + realName;
 #endif
-	   FILE * temp = fopen (realName. c_str (), "wb");
-           if (temp) {
-	      fwrite (result.data (), 1, result. size (), temp);
-	      fclose (temp);
-           }
-	   motdataHandler (realName, contentsubType, ctx);
+//	   FILE * temp = fopen (realName. c_str (), "w+b");
+//	   if (temp) {
+//	      fwrite (result.data (), 1, result. size (), temp);
+//	      fclose (temp);
+//	   }
+	   motdataHandler (result. data (), result. size (),
+	                     realName. c_str (), contentsubType, ctx);
 	}
 }
 

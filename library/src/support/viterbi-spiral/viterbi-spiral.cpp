@@ -4,20 +4,20 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the eti-cmdline program
+ *    This file is part of the dab-cmdline program
  *
- *    eti-cmdline is free software; you can redistribute it and/or modify
+ *    dab-cmdline is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    eti-cmdline is distributed in the hope that it will be useful,
+ *    dab-cmdline is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with et-cmdline; if not, write to the Free Software
+ *    along with dab-cmdline; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	<stdio.h>
@@ -118,11 +118,6 @@ int32_t	i;
       }
 }
 //
-//
-//	The main use of the viterbi decoder is in handling the FIC blocks
-//	There are (in mode 1) 3 ofdm blocks, giving 4 FIC blocks
-//	There all have a predefined length. In that case we use the
-//	"fast" (i.e. spiral) code, otherwise we use the generic code
 	viterbiSpiral::viterbiSpiral (int16_t wordlength) {
 int polys [RATE] = POLYS;
 int16_t	i, state;
@@ -148,11 +143,11 @@ uint32_t	size;
 #else
 	if (posix_memalign ((void**)&data, 16,
 	                        (wordlength + (K - 1))/ 8 + 1)){
-	   printf("Allocation of data array failed\n");
+	   printf ("Allocation of data array failed\n");
 	}
 	if (posix_memalign ((void**)&symbols, 16,
 	                     RATE * (wordlength + (K - 1)) * sizeof(COMPUTETYPE))){
-	   printf("Allocation of symbols array failed\n");
+	   printf ("Allocation of symbols array failed\n");
 	}
 	if (posix_memalign ((void**)&(vp. decisions),
 	                    16,

@@ -33,8 +33,8 @@ such that the call to dabInit is basically simplified to
                                    nullptr              // Ctx
                                   );
 
-Examples 2, 3, 4, 5 and 7 are adapted. Examples 6,  8, 9 and 10 are not
-supported anymore, as is the python example.
+Examples 1,  2, 3, 4, 5 and 6 are adapted. Other examples - apart from the
+not supported pythoin example are deleted.
 
 The obvious advantage is that adding a callback function for a specific
 purpose now does not change all of the intermediate functions in tbhe library,
@@ -148,10 +148,7 @@ example 2 is the basic one, others are derived.
 	  on entering a stroke on the return key. It will cause the
 	  "next" (audio) service to be selected.
 
-	- example 6 is an experimental version where control is
-	  through an IP port. 
-	  
-	- example 7 is an experimental version where stdin is
+	- example 6 is an experimental version where stdin is
 	  used as input device (and the command line parameters are
 	  adapted to that)
 

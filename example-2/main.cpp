@@ -116,9 +116,9 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the 
 //	ensemble
 static
-void	ensemblenameHandler (std::string name, int Id, void *userData) {
+void	ensemblenameHandler (const char *name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name. c_str (), (uint32_t)Id);
+	                          name, (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
@@ -130,13 +130,14 @@ std::vector<int> programSIds;
 
 std::unordered_map <int, std::string> ensembleContents;
 static
-void	programnameHandler (std::string s, int SId, void *userdata) {
+void	programnameHandler (const char *s, int SId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
-	   if (*it == s)
+	   if (*it == std::string (s))
 	      return;
-	ensembleContents. insert (pair <int, std::string> (SId, s));
-	programNames. push_back (s);
+	ensembleContents. insert (pair <int, std::string> (SId,
+	                                                std::string (s)));
+	programNames. push_back (std::string (s));
 	programSIds . push_back (SId);
 	std::cerr << "program " << s << " is part of the ensemble\n";
 }
@@ -155,26 +156,27 @@ void	programdata_Handler (audiodata *d, void *ctx) {
 //	The function is called from within the library with
 //	a string, the so-called dynamic label
 static
-void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
+void	dataOut_Handler (const char * dynamicLabel, void *ctx) {
 	(void)ctx;
-	std::cerr << dynamicLabel << "\r";
+	std::cerr << std::string (dynamicLabel) << "\r";
 }
 //
 //	The function is called from the MOT handler, with
 //	as parameters the filename where the picture is stored
 //	d denotes the subtype of the picture 
 //	typedef void (*motdata_t)(std::string, int, void *);
-void	motdata_Handler (std::string s, int d, void *ctx) {
+void	motdata_Handler (uint8_t *data, int size,
+	                const char *s, int d, void *ctx) {
 	(void)s; (void)d; (void)ctx;
-//	fprintf (stderr, "plaatje %s\n", s. c_str ());
+	fprintf (stderr, "plaatje %s met lengte %d\n", s, size);
 }
 
 void	tii_data_Handler	(int s) {
-	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
+//	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
 }
 
-void	timeHandler		(std::string s, void *ctx) {
-	fprintf (stderr, "%s\n", s. c_str ());
+void	timeHandler		(int hours, int minutes, void *ctx) {
+	fprintf (stderr, "%2d:%2d\n", hours, minutes);
 }
 
 //

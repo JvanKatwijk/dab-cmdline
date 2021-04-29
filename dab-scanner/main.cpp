@@ -89,9 +89,9 @@ void	syncsignalHandler (bool b, void *userData) {
 std::string	ensembleName;
 uint32_t	ensembleId;
 static
-void	ensemblename_Handler (std::string name, int Id, void *userData) {
+void	ensemblename_Handler (const char *name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name. c_str (), (uint32_t)Id);
+	                          name, (uint32_t)Id);
 	ensembleRecognized. store (true);
 	ensembleName	= name;
 	ensembleId	= Id;
@@ -101,14 +101,14 @@ std::vector<std::string> programNames;
 std::vector<int> programSIds;
 
 static
-void	programname_Handler (std::string s, int SId, void *userdata) {
+void	programname_Handler (const char * s, int SId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
-	   if (*it == s)
+	   if (*it == std::string (s))
 	      return;
-	programNames. push_back (s);
+	programNames. push_back (std::string (s));
 	programSIds . push_back (SId);
-//	fprintf (stderr, "program %s is part of the ensemble\n", s. c_str ());
+	fprintf (stderr, "program %s is part of the ensemble\n", s);
 }
 
 static
@@ -116,14 +116,13 @@ void	programdata_Handler (audiodata *d, void *ctx) {
 	(void) *d;
 	(void)ctx;
 }
-
 //
 //	The function is called from within the library with
 //	a string, the so-called dynamic label
 static
-void	dataOut_Handler (std::string dynamicLabel, void *ctx) {
+void	dataOut_Handler (const char *dynamicLabel, void *ctx) {
 	(void)ctx;
-//	fprintf (stderr, "%s\n", dynamicLabel. c_str ());
+//	fprintf (stderr, "%s\n", dynamicLabel);
 }
 //
 //	Note: the function is called from the tdcHandler with a

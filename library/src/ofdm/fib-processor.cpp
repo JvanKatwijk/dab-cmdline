@@ -742,8 +742,9 @@ uint32_t	theTime [6];
 
 	if (change && theParameters -> timeHandler != nullptr) {
 	   adjustTime (dateTime);
-	   std::string timeString = mapTime (dateTime);
-	   theParameters ->  timeHandler (timeString, userData);
+//	   std::string timeString = mapTime (dateTime);
+	   theParameters ->  timeHandler (dateTime [3],
+	                                  dateTime [4], userData);
 	}
 }
 //
@@ -1522,14 +1523,14 @@ serviceId *selectedService;
 void	fib_processor::addtoEnsemble	(const std::string &s, int32_t SId) {
 	fibLocker. unlock ();
 	if (theParameters -> programname_Handler != nullptr)
-	   theParameters -> programname_Handler (s, SId, userData);
+	   theParameters -> programname_Handler (s. c_str (), SId, userData);
 	fibLocker. lock ();
 }
 
 void	fib_processor::nameofEnsemble  (int id, const std::string &s) {
 	fibLocker. unlock ();
 	if (theParameters -> ensemblename_Handler != nullptr)
-	   theParameters -> ensemblename_Handler (s, id, userData);
+	   theParameters -> ensemblename_Handler (s. c_str (), id, userData);
 	fibLocker. lock ();
 	isSynced	= true;
 }
