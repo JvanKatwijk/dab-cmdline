@@ -5,6 +5,7 @@
  *    Lazy Chair Computing
  *
  *    This file is part of the dab library
+ *
  *    dab library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -166,14 +167,14 @@ std::vector<uint8_t> result;
 	      realName = "noname";
            else
 	      realName = name;
-#ifdef _MSC_VER
-	   TCHAR tempPath[MAX_PATH];
-	   GetTempPath(MAX_PATH, tempPath);
-	   std::string tempPathString (tempPath);
-	   realName = tempPathString + "\\" + realName;
-#else
-	   realName = "/tmp/" + realName;
-#endif
+//#ifdef _MSC_VER
+//	   TCHAR tempPath[MAX_PATH];
+//	   GetTempPath(MAX_PATH, tempPath);
+//	   std::string tempPathString (tempPath);
+//	   realName = tempPathString + "\\" + realName;
+//#else
+//	   realName = "/tmp/" + realName;
+//#endif
 //	   FILE * temp = fopen (realName. c_str (), "w+b");
 //	   if (temp) {
 //	      fwrite (result.data (), 1, result. size (), temp);

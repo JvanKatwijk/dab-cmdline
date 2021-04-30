@@ -53,8 +53,13 @@ New callback functions are
 	b. the time 
 	   typedef void    (*theTime_t)(std::string, void *);
 	   where the time (hours::minutes) is passed as string
-	
-see the dab-api for details
+
+The handling of motdata is changed. In the previous version, slides
+were - automatically - written to a file. In the current version, the
+parameter profile of the motdata handling function is extended, the
+motdata is passed on as uint8_t array, the size of the data is passed,
+the name of the slides - as derived from the DAB data - is passed on.
+See the dab-api for details
 
 -----------------------------------------------------------------------
 NEW: Support for Pluto
