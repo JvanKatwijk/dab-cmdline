@@ -11,10 +11,6 @@ A few callback functions provide the communication back from the
 library to the caller.
 The library interface is given in dab-api.h
 
--------------------------------------------------------------------------
-IMPORTANT NOTICE
--------------------------------------------------------------------------
-
 Since I was unhappy with passing lots of individual callback functions
 through the whole of the computing chain, I made (am making) a
 change to the API and the dabInit function in the API.
@@ -62,14 +58,20 @@ the name of the slides - as derived from the DAB data - is passed on.
 See the dab-api for details
 
 -----------------------------------------------------------------------
-NEW: Support for Pluto
+Disclaimer
 -----------------------------------------------------------------------
 
-Just a few days ago I got the Adalm Pluto and added support for the Pluto
-for example 2. An experiment, with the Adalm Pluto and the SDRplay as input devices
-is recorded in a separate project (dab-pluto). In that project the approach
-of handling the input is changed and - since a lot of data handling is omitted -
-the software tree is simplified.
+The software is provided as is, it is available under the GPL-V2,
+the examples might or might not work.
+As far as I can see they work on my Linux-x86 box, no garantees are
+given that the library software or the examples will work on
+Windows or any other system.
+
+THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
+THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
+MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
+PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN
+ERROR BEFORE ASKING ME.
 
 ----------------------------------------------------------------------
 The C (C++) example programs
@@ -77,16 +79,12 @@ The C (C++) example programs
 
 A number of example programs is included in the source tree, they are meant to
 give an idea on how to use the library code, either as library or
-as "built-in" sources.
+as "built-in" sources. They might or might not work.
 
 Note that the library depends on a device, but does not include that device.
 The main program is responsible for ensuring that something is available
 to deliver input samples and something is available for handling the output.
 
-THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
-THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
-MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
-PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN ERROR BEFORE ASKING ME.
 
 Invocation of the example programs, with some parameters specified, is
 something like
