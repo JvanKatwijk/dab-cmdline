@@ -172,16 +172,20 @@ int16_t	i;
 	for (i = 0; i < gainsCount; i ++)
 	   fprintf (stderr, "%d.%d ", gains [i] / 10, gains [i] % 10);
 	fprintf (stderr, "\n");
-	theGain		= gain;
 	if (ppmCorrection != 0)
 	   rtlsdr_set_freq_correction (device, ppmCorrection);
 	if (autogain)
 	   rtlsdr_set_agc_mode (device, 1);
 	(void)(this -> rtlsdr_set_center_freq (device, frequency));
+	theGain = gain * gainsCount / 100;
+	if (theGain < 0)
+	   theGain = 0;
+	if (theGain >= gainsCount)
+	   theGain = gainsCount - 1;
 	fprintf (stderr, "effective gain: gain %d.%d\n",
-	                              gains [theGain * gainsCount / 100] / 10,
-	                              gains [theGain * gainsCount / 100] % 10);
-	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
+	                              gains [theGain] / 10,
+	                              gains [theGain] % 10);
+	rtlsdr_set_tuner_gain (device, gains [theGain]);
 
 	if ( this	-> deviceOptions && rtlsdr_set_opt_string )
 		rtlsdr_set_opt_string(device, deviceOptions, 1);
@@ -227,7 +231,7 @@ int32_t	r;
 	this	-> frequency	= frequency;
         (void)(this -> rtlsdr_set_center_freq (device, frequency));
 	workerHandle = std::thread (controlThread, this);
-	rtlsdr_set_tuner_gain (device, gains [theGain * gainsCount / 100]);
+	rtlsdr_set_tuner_gain (device, gains [theGain]);
 	if (autogain)
 	   rtlsdr_set_agc_mode (device, 1);
 	if ( this	-> deviceOptions && rtlsdr_set_opt_string )

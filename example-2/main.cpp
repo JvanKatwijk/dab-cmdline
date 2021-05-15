@@ -699,6 +699,7 @@ int	theDuration		= -1;	// no limit
 	   exit (22);
 	}
 
+	sleep (4);
 	run. store (true);
 	std::cerr << "we try to start program " <<
 	                                         programName << "\n";

@@ -306,7 +306,7 @@ int16_t	deg_lambda	= 0;
 	Lambda	[0]	= 1;
 	Corrector [1]	= 1;
 //
-	while (K <= nroots) {
+	while (K < nroots) {
 #ifdef _MSC_VER
 	   uint8_t *oldLambda = (uint8_t *)_alloca(nroots);
 #else
