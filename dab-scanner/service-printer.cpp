@@ -62,7 +62,7 @@ void	print_ensembleData (FILE *f,
 
 void	print_audioheader (FILE *f, bool jsonOutput) {
 	if (!jsonOutput) {
-	   fprintf (f, "\nAudio services\nprogram name;serviceId;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
+	   fprintf (f, "\nAudio services\ntype;program name;channel;serviceId;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
 	}
 }
 
@@ -70,6 +70,7 @@ void	print_audioService (FILE *f,
 	                    bool jsonOutput,
 	                    void *theRadio,
 	                    std::string serviceName,
+	                    std::string currentChannel,
 	                    audiodata *d,
 	                    bool *firstService) {
 	if (!d -> defined)
@@ -82,8 +83,9 @@ void	print_audioService (FILE *f,
 //	uint8_t countryId = (serviceId >> 12) & 0xF;
 
 	if (!jsonOutput) {
-	   fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%d;%s;%s;%s;\n",
+	   fprintf (f, "audioservice;%s;%s;%X;%d;%d;%d;%d;%s;%d;%s;%s;%s;\n",
 	               serviceName. c_str (),
+	               currentChannel. c_str (),
 	               serviceId,
 	               d -> subchId,
 	               d -> startAddr,
@@ -118,7 +120,7 @@ void	print_audioService (FILE *f,
 
 void	print_dataHeader (FILE *f, bool jsonOutput) {
 	if (!jsonOutput) {
-	   fprintf (f, "\n\n\nData Services\nprogram name;;serviceId;subchannelId;start address;length (CU); bit rate; FEC; prot level; appType; DSCTy; subService; \n\n");
+	   fprintf (f, "\n\n\nData Services\ntype;program name;channel;serviceId;subchannelId;start address;length (CU); bit rate; FEC; prot level; appType; DSCTy; subService; \n\n");
 	}
 }
 
@@ -126,6 +128,7 @@ void	print_dataService (FILE	*f,
 	                   bool jsonOutput,
 	                   void	*theRadio,
 	                   std::string	serviceName,
+	                   std::string currentChannel,
 	                   uint8_t	compnr,
 	                   packetdata	*d,
 	                   bool *firstService) {
@@ -140,8 +143,9 @@ void	print_dataService (FILE	*f,
 //	uint8_t countryId = (serviceId >> 12) & 0xF;
 	
 	if (!jsonOutput) {
-	   fprintf (f, "%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
+	   fprintf (f, "dataservice;%s;%s;%X;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
 	               serviceName. c_str (),
+	               currentChannel. c_str (),
 	               serviceId,
 	               d -> subchId,
 	               d -> startAddr,
