@@ -549,6 +549,7 @@ int	theDuration	= -1;		// infinite
 	   exit (22);
 	}
 
+	sleep (3);
 	run. store (true);
 	if (serviceIdentifier != -1) {
 	   char temp [255];

@@ -251,12 +251,12 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
 int16_t		gain		= 20;
 bool		autogain	= false;
 int		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:S:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Q";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Q:S:";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
