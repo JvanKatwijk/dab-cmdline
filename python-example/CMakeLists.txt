@@ -150,23 +150,23 @@ endif ()
 	include_directories (
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
-	           /usr/lib64/python3.5/site-packages/numpy/core/include/
+	           /usr/lib64/python3.9/site-packages/numpy/core/include/
 	           ./
 	           ../
 	           ../library/
 	           ../library/includes
 	           ../library/includes/ofdm
 	           ../library/includes/backend
-	           ../library/includes/backend/viterbi_768
 	           ../library/includes/backend/audio
 	           ../library/includes/backend/data
 	           ../library/includes/backend/data/mot
 	           ../library/includes/backend/data/journaline
-	           ../library/includes/various
+	           ../library/includes/support
+	           ../library/includes/support/viterbi-spiral
 	           /usr/include/
 	)
 
-	include_directories (/usr/include/python3.5m)
+	include_directories (/usr/include/python3.9)
 
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
@@ -174,7 +174,7 @@ endif ()
 	     ../device-handler.h
 	     ../ringbuffer.h
 	     ../library/includes/dab-constants.h
-	     ../library/includes/dab-class.h
+#	     ../library/includes/dab-class.h
 	     ../library/includes/dab-processor.h
 	     ../library/includes/ofdm/ofdm-decoder.h
 	     ../library/includes/ofdm/phasereference.h
@@ -182,7 +182,8 @@ endif ()
 	     ../library/includes/ofdm/freq-interleaver.h
 	     ../library/includes/ofdm/timesyncer.h
 	     ../library/includes/ofdm/fic-handler.h
-	     ../library/includes/ofdm/fib-processor.cpp
+	     ../library/includes/ofdm/fib-processor.h
+	     ../library/includes/ofdm/tii-detector.h
 	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/backend-base.h
@@ -203,15 +204,16 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-dir.h
 	     ../library/includes/backend/data/mot/mot-object.h
 	     ../library/includes/backend/data/data-processor.h
-         ../library/includes/support/band-handler.h
-	     ../library/includes/support/viterbi_768/viterbi-768.h
+	      ../library/includes/support/band-handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
 	     ../library/includes/support/eep-protection.h
-	     ../library/includes/support/fft_handler.h
+	     ../library/includes/support/fft-handler.h
 	     ../library/includes/support/dab-params.h
-	     ../library/includes/support/tii_table.h
+#	     ../library/includes/support/tii_table.h
+	     ../library/includes/support/viterbi-spiral/viterbi-spiral.h
+	     ../library/src/support/viterbi-spiral/spiral-no-sse.h
 	)
 
 	set (${objectName}_SRCS
@@ -223,7 +225,7 @@ endif ()
 	     ${${objectName}_SRCS}
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
-	     ../library/src/dab-class.cpp
+#	     ../library/src/dab-class.cpp
 	     ../library/src/dab-processor.cpp
 	     ../library/src/ofdm/ofdm-decoder.cpp
 	     ../library/src/ofdm/phasereference.cpp
@@ -233,6 +235,7 @@ endif ()
 	     ../library/src/ofdm/sample-reader.cpp
 	     ../library/src/ofdm/fib-processor.cpp
 	     ../library/src/ofdm/fic-handler.cpp
+	     ../library/src/ofdm/tii-detector.cpp
 	     ../library/src/backend/firecode-checker.cpp
 	     ../library/src/backend/backend-base.cpp
 	     ../library/src/backend/charsets.cpp
@@ -251,16 +254,17 @@ endif ()
 	     ../library/src/backend/data/mot/mot-dir.cpp
 	     ../library/src/backend/data/mot/mot-object.cpp
 	     ../library/src/backend/data/data-processor.cpp
-         ../library/src/support/band-handler.cpp
-	     ../library/src/support/viterbi_768/viterbi-768.cpp
-	     ../library/src/support/viterbi_768/spiral-no-sse.c
+	     ../library/src/support/band-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
 	     ../library/src/support/uep-protection.cpp
-	     ../library/src/support/fft_handler.cpp
+	     ../library/src/support/fft-handler.cpp
 	     ../library/src/support/dab-params.cpp
-	     ../library/src/support/tii_table.cpp
+#	     ../library/src/support/tii_table.cpp
+	     ../library/src/support/viterbi-spiral/viterbi-spiral.cpp
+	     ../library/src/support/viterbi-spiral/spiral-no-sse.c
+
 	)
 
 	include_directories (
@@ -272,7 +276,7 @@ endif ()
 	          ${SNDFILES_INCLUDE_DIRS}
 	)
 
-	list(APPEND extraLibs -lpython3.5m)
+	list(APPEND extraLibs -lpython3.9)
 #####################################################################
 
 	add_library (${objectName} SHARED

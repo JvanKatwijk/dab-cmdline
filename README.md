@@ -121,7 +121,7 @@ well as input through the rtl_tcp driver.
 The examples
 ---------------------------------------------------------------------------
 
-The examples 1 to 7 are basically simple variations on a single theme,
+The examples are basically simple variations on a single theme,
 example 2 is the basic one, others are derived.
 
 	- example 1 is the example where the main program is linked to
@@ -141,7 +141,7 @@ example 2 is the basic one, others are derived.
 	- example 4 has the sample functionality as examples 2 and 3, and
 	  here the library sources are "compiled in" as well. However,
 	  no sound decoding takes place. The MP2 frames (in case of DAB)
-	  or the AAC frames (in case of DAB+) are just emitted through stdout.
+	  and the AAC frames (in case of DAB+) are just emitted through stdout.
 	  The output can be processed by e.g. VLC.
 	  (Note that the AAC frames have 960 rather than 1024 samples,
 	   not all audio programs are capable of handling these).

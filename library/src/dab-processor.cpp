@@ -234,10 +234,10 @@ SyncOnPhase:
 //	we integrate the newly found frequency error with the
 //	existing frequency error.
 //	
-	   if (!correctionNeeded & (abs (arg (FreqCorr)) > 1.5)) {
+//	   if (!correctionNeeded & (abs (arg (FreqCorr)) > 1.5)) {
 //	      fprintf (stderr, "resync with %d (%f)\n", startIndex, arg (FreqCorr));
-	      goto notSynced;
-	   }
+//	      goto notSynced;
+//	   }
 	   fineOffset += 0.1 * arg (FreqCorr) / M_PI * (carrierDiff);
 
 //	at the end of the frame, just skip Tnull samples
