@@ -99,9 +99,11 @@
 	fib_processor::fib_processor (API_struct *p,
 	                              void	*userData) {
 	this	-> theParameters	= p;
+	if (p -> ensemblename_Handler == nullptr) 
+	   fprintf (stderr, "ensemblename_Handler is nullptr\n");
 	this	-> ensemblenameHandler	= p ->  ensemblename_Handler;
 	if (p -> programname_Handler == nullptr)
-	   fprintf (stderr, "nullptr detected\n");
+	   fprintf (stderr, "programname handler nullptr detected\n");
 	this	-> programnameHandler	= p ->  programname_Handler;
 	this	-> userData		= userData;
 	memset (dateTime, 0, 8 * sizeof (uint32_t));
@@ -743,8 +745,8 @@ uint32_t	theTime [6];
 	if (change && theParameters -> timeHandler != nullptr) {
 	   adjustTime (dateTime);
 //	   std::string timeString = mapTime (dateTime);
-	   theParameters ->  timeHandler (dateTime [3],
-	                                  dateTime [4], userData);
+//	   theParameters ->  timeHandler (dateTime [3],
+//	                                  dateTime [4], userData);
 	}
 }
 //
@@ -995,11 +997,10 @@ char		label [17];
 	      SId	= getBits (d, 16, 16);
 	      offset	= 32;
 	      if ((charSet <= 16)) { // EBU Latin based repertoire
-
 	         for (i = 0; i < 16; i ++) {
 	            label [i] = getBits_8 (d, offset + 8 * i);
 	         }
-//	         fprintf (stderr, "Ensemblename: %16s\n", label);
+//	         fprintf (stderr, "Ensemblename: %16s (%d)\n", label, charSet);
 	         {
 	            std::string name = toStringUsingCharset (
 	                                      (const char *) label,

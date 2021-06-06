@@ -249,8 +249,8 @@ int			lna_upperBound;
 //	these will change:
 	chParams	-> tunerParams. rfFreq. rfHz    = vfoFrequency;
 	chParams	-> tunerParams. gain.gRdB	= GRdB;
-	chParams	-> tunerParams. gain.LNAstate	= 3;
-//	chParams	-> tunerParams. gain.LNAstate	= lnaState;
+//	chParams	-> tunerParams. gain.LNAstate	= 3;
+	chParams	-> tunerParams. gain.LNAstate	= lnaState;
 	chParams	-> ctrlParams.agc.enable =
 	          autogain ?  sdrplay_api_AGC_100HZ :
 	                      sdrplay_api_AGC_DISABLE;

@@ -49,18 +49,19 @@ PyObject *PyInit_libdab_lib	(void);
 //
 //	deviceHandler is local to the python interface
 deviceHandler *theDevice;
+API_struct *interface;
 //
 //	We need to define 'C' callback functions, whose purpose
 //	is to call the appropriate Python function
-//	We keep it simple abd implement only a few callback functions,
+//	We keep it simple and implement only a few callback functions,
 //	the ones we think minimally needed
 //	
 //	typedef	void (*syncsignal_t)	(bool,		// time synced or not
 //	                                 void *);
-//	typedef void (*ensemblename_t)	(std::string,	// name
+//	typedef void (*ensemblename_t)	(char *,	// name
 //	                                 int32_t,	// Hex code
 //	                                 void *);
-//	typedef	void (*programname_t)	(std::string,	// name
+//	typedef	void (*programname_t)	(char *,	// name
 //	                                 int32_t,	// Id
 //	                                 void *);
 //	typedef void (*audioOut_t)	(int16_t *,	// buffer
@@ -68,7 +69,7 @@ deviceHandler *theDevice;
 //	                                 int32_t,	// samplerate
 //	                                 bool,		// stereo
 //	                                 void *);	// context
-//	typedef	void (*dataOut_t)	(std::string,
+//	typedef	void (*dataOut_t)	(char *,
 //	                                 void *);
 //	typedef void (*bytesOut_t)	(uint8_t *, 
 //	                                 int16_t,
@@ -172,13 +173,14 @@ PyGILState_STATE gstate;
 static
 PyObject *callbackEnsembleName	= NULL;
 static
-void	callback_ensembleName (std::string s, int32_t id, void *ctx) {
+void	callback_ensembleName (const char *s, int32_t id, void *ctx) {
 PyGILState_STATE gstate;
 PyObject *arglist;
 PyObject *result;
 
+	fprintf (stderr, "ensemblename %s. id %d\n", s, id);
 	gstate	= PyGILState_Ensure ();
-	arglist = Py_BuildValue ("(si)", s. c_str (), id);
+	arglist = Py_BuildValue ("(si)", s, id);
 	result  = PyEval_CallObject (callbackEnsembleName, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
@@ -190,13 +192,14 @@ PyObject *result;
 static
 PyObject *callbackProgramName	= NULL;
 static
-void	callback_programName (std::string s, int32_t id, void *ctx) {
+void	callback_programName (const char * s, int32_t id, void *ctx) {
 PyGILState_STATE gstate;
 PyObject *arglist;
 PyObject *result;
 
+	fprintf (stderr, "programname %s (%d)\n", s, id);
 	gstate	= PyGILState_Ensure ();
-	arglist = Py_BuildValue ("(si)", s. c_str (), id);
+	arglist = Py_BuildValue ("(si)", s, id);
 	result  = PyEval_CallObject (callbackProgramName, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
@@ -242,13 +245,13 @@ int	i;
 //	typedef	void (*dataOut_t)	(std::string, void *ctx);
 PyObject *callbackDataOut	= NULL;
 static
-void	callback_dataOut (std::string str, void *ctx) {
+void	callback_dataOut (const char * str, void *ctx) {
 PyObject *arglist;
 PyObject *result;
 PyGILState_STATE gstate;
 
 	gstate	= PyGILState_Ensure ();
-	arglist = Py_BuildValue ("z", str. c_str ());
+	arglist = Py_BuildValue ("z", str);
 	result  = PyEval_CallObject (callbackDataOut, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
@@ -323,6 +326,7 @@ PyObject	*cbpD;		// callback for program data
 PyObject	*cbpQ;		// callback for program Quality
 bandHandler	dabBand;
 void	*result;
+	interface = new API_struct;
 
 	(void)PyArg_ParseTuple (args,
 	                        "shhOOOOOOOOO",
@@ -436,8 +440,9 @@ void	*result;
 	try {
 #ifdef	HAVE_SDRPLAY
 	   theDevice	= new sdrplayHandler (frequency,
-	                                      3,
+	                                      0,
 	                                      theGain,
+	                                      4,
 	                                      true,
 	                                      0,
 	                                      0);
@@ -459,22 +464,43 @@ void	*result;
 	   fprintf (stdout, "allocating device failed\n");
 	   exit (21);
 	}
+
+	interface -> dabMode	= theMode;
+	interface -> syncsignal_Handler	= (syncsignal_t)callback_syncSignal;
+	interface -> systemdata_Handler	= (systemdata_t)callback_systemData;
+	interface -> ensemblename_Handler	= callback_ensembleName;
+	interface -> programname_Handler	= callback_programName;
+	interface -> fib_quality_Handler	= (fib_quality_t)callback_fibQuality;
+	interface -> audioOut_Handler	= (audioOut_t)callback_audioOut;
+	interface -> dataOut_Handler	= (dataOut_t)callback_dataOut;
+	interface -> bytesOut_Handler	= nullptr;
+	interface -> programdata_Handler	= (programdata_t)callback_programdata;
+	interface -> program_quality_Handler =
+	                                  (programQuality_t)callback_programQuality;
+	interface -> motdata_Handler	= nullptr;
+	interface -> tii_data_Handler	= nullptr;
+	interface -> timeHandler		= nullptr;
 	result = dabInit (theDevice,
-	                  theMode,
-	                  NULL,			// no spectrum shown
-	                  NULL,			// no constellation
-	                  (syncsignal_t)	&callback_syncSignal,
-	                  (systemdata_t)	&callback_systemData,
-	                  (ensemblename_t)	&callback_ensembleName,
-	                  (programname_t)	&callback_programName,
-	                  (fib_quality_t)	&callback_fibQuality,
-	                  (audioOut_t)		&callback_audioOut,
-	                  (dataOut_t)		&callback_dataOut,
-	                  (bytesOut_t)	        NULL,
-	                  (programdata_t)	&callback_programdata,
-	                  (programQuality_t)	&callback_programQuality,
-	                  NULL,			// no mot slides
-	                  NULL
+//	                  theMode,
+//	                  NULL,			// no spectrum shown
+//	                  NULL,			// no constellation
+//	                  (syncsignal_t)	&callback_syncSignal,
+//	                  (systemdata_t)	&callback_systemData,
+//	                  (ensemblename_t)	&callback_ensembleName,
+//	                  (programname_t)	&callback_programName,
+//	                  (fib_quality_t)	&callback_fibQuality,
+//	                  (audioOut_t)		&callback_audioOut,
+//	                  (dataOut_t)		&callback_dataOut,
+//	                  (bytesOut_t)	        NULL,
+//	                  (programdata_t)	&callback_programdata,
+//	                  (programQuality_t)	&callback_programQuality,
+//	                  NULL,			// no mot slides
+//	                  NULL
+//	                 );
+	                  interface,
+	                  nullptr,		// no spectrum shown
+	                  nullptr,	        // no constellation
+	                  nullptr	        //
 	                 );
 	if (result == NULL) {
 	   fprintf (stdout, "Sorry, did not work\n");
@@ -483,9 +509,8 @@ void	*result;
 
 	theDevice       -> setGain (theGain);
 //	if (autogain)
-//	   theDevice    -> set_autogain (autogain);
-        theDevice       -> setVFOFrequency (frequency);
-        theDevice       -> restartReader ();
+	   theDevice    -> set_autogain (true);
+        theDevice       -> restartReader (frequency);
 //
 
 	return PyCapsule_New (result, "library_object", NULL);
@@ -513,7 +538,7 @@ bool	b;
 
 	PyArg_ParseTuple (args, "O", &handle_capsule);
 	handle = PyCapsule_GetPointer (handle_capsule, "library_object");
-	b = theDevice	-> restartReader ();
+	b = theDevice	-> restartReader (frequency);
 	if (b) { 
 	   fprintf (stdout, "device restarted\n");
 	   dabStartProcessing (handle);
@@ -558,7 +583,10 @@ char		*s;
 	PyArg_ParseTuple (args, "sO", &s, &handle_capsule);
 	fprintf (stdout, "%s zou moeten worden gestart\n", s);
 	handle = PyCapsule_GetPointer (handle_capsule, "library_object");
-	dabService (s, handle);
+	audiodata ad;
+	dataforAudioService (handle, s, &ad, 0);
+	if (ad. defined)
+	  set_audioChannel (handle, &ad);
 	Py_RETURN_NONE;
 }
 

@@ -278,7 +278,7 @@ int16_t		ppmOffset	= 0;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
 #elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
-int16_t		lnaState	= 2;
+int16_t		lnaState	= 3;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
