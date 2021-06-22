@@ -30,7 +30,7 @@ such that the call to dabInit is basically simplified to
                                   );
 
 Examples 1,  2, 3, 4, 5 and 6 are adapted. Other examples - apart from the
-not supported pythoin example are deleted.
+python example are deleted.
 
 The obvious advantage is that adding a callback function for a specific
 purpose now does not change all of the intermediate functions in tbhe library,
@@ -109,7 +109,7 @@ Supported devices
 	- SDRplay RSP's (using 2.13 lib or 3.06 lib)
 	- AIRspy
 	- RTLSDR based devices
-	- HACKRF (only example programs 2, 3, 4, 8 and 9)
+	- HACKRF (only example programs 2, 3, 4)
 	- LimeSDR (only example programs 2, 3 and 4)
 	- Pluto (only example 2)
 
@@ -155,12 +155,12 @@ example 2 is the basic one, others are derived.
 	  used as input device (and the command line parameters are
 	  adapted to that)
 
-	The sourcetree contains directories for some other examples as well,
-	however, most recent changes were not applied, and these examples
-	are considered "obsolete".
+	- the python example seems to work, the cmake file now expects
+	  python3.9 (it should work with other versions as well, adapt the
+	  CMakeLists.tct file)
 
-	For all examples it holds that no garantee is given on their functioning,
-	feel free to improve.
+	For all examples it holds that NO garantee is
+	given on their functioning, feel free to improve.
 
 -------------------------------------------------------------------------------
 A simple DAB scanner
@@ -271,6 +271,10 @@ As soon as an ensemble is recognized, a callback function will be
 called. Recognition of a service within an ensemble also
 leads to calling a callback function, with the service name as parameter.
 
+	"dabReset_msc" will terminate operation of the handler(s) for the
+	currently selected service
+
+
 	"is_audioService" can be used to enquire whether or not a service
 	with a given name is a recognized audio service,
 
@@ -305,10 +309,6 @@ leads to calling a callback function, with the service name as parameter.
 
 	What might be useful is to enquire for subservices such as MOT
 	when opening an audio stream.
-
-	"dabReset_msc", when called, will stop all open handlers for services
-	and subservices.
-
 
 -----------------------------------------------------------------------
 A note on the callback functions
@@ -360,7 +360,7 @@ For the python-example read the README file in the python-example directory.
 HOWEVER: before running the example program one has to create an
 ADAPTED library.
 The CMakeLists.txt file for creating such an adapted library is in the python
-directory. Note that the python example is not maintained and a little obsolete.
+directory.
 
 
 =============================================================================
