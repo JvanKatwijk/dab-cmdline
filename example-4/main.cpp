@@ -80,6 +80,7 @@ std::atomic<bool>ensembleRecognized;
 tcpServer	tdcServer (8888);
 #endif
 
+FILE	*frameFile	= nullptr;
 std::string	programName		= "Classic FM";
 int32_t		serviceIdentifier	= -1;
 
@@ -176,7 +177,7 @@ void	frameHandler (int16_t *buffer, int size, int rate,
 //	Now we know that we have been cheating, the int16_t * buffer
 //	is actually an uint8_t * buffer, however, the size
 //	gives the correct amount of elements
-	fwrite ((void *)buffer, size, 1, stdout);
+	fwrite ((void *)buffer, size, 1, frameFile);
 }
 
 void    tii_data_Handler        (int s) {
@@ -208,35 +209,35 @@ uint8_t		theBand		= BAND_III;
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:p:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:p:f:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:f:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:f:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 int		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:f:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Q";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Qf:";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
-const char	*optionsString	= "D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "D:d:M:B:P:O:A:F:R:f:";
 #elif	HAVE_RAWFILES
 std::string	fileName;
 bool	repeater		= true;
-const char	*optionsString	= "D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "D:d:M:B:P:O:A:F:R:f:";
 #elif
 //	HAVE_RTL_TCP
 int		gain		= 50;
@@ -244,7 +245,7 @@ bool		autogain	= false;
 int		ppmOffset	= 0;
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:If:";
 #endif
 std::string	soundChannel	= "default";
 int16_t		timeSyncTime	= 5;
@@ -268,6 +269,7 @@ int	theDuration	= -1;		// infinite
 
 	std::setlocale (LC_ALL, "en-US.utf8");
 
+	frameFile	= stdout;
 	fprintf (stderr, "options are %s\n", optionsString);
 	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
@@ -295,6 +297,10 @@ int	theDuration	= -1;		// infinite
 
 	      case 'P':
 	         programName	= optarg;
+	         break;
+
+	      case 'f':
+	         frameFile	= fopen (optarg, "w+b");
 	         break;
 
 #ifdef	HAVE_WAVFILES
