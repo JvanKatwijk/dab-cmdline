@@ -141,7 +141,10 @@ example 2 is the basic one, others are derived.
 	- example 4 has the sample functionality as examples 2 and 3, and
 	  here the library sources are "compiled in" as well. However,
 	  no sound decoding takes place. The MP2 frames (in case of DAB)
-	  and the AAC frames (in case of DAB+) are just emitted through stdout.
+	  and the AAC frames (in case of DAB+) are just emitted
+	  into a file or to stdout. A flag "-f XXXX" to the command
+	  line of this example, if specified, output is written to
+	  the specified file, otherwise to stdout.
 	  The output can be processed by e.g. VLC.
 	  (Note that the AAC frames have 960 rather than 1024 samples,
 	   not all audio programs are capable of handling these).
