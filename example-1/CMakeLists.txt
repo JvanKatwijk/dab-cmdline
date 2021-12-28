@@ -142,6 +142,7 @@ endif ()
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	    ../
 	    ../devices
+	    ../library/includes/support
 	)
 #
         find_package(LibSampleRate)
@@ -161,7 +162,7 @@ endif ()
 	     ${${objectName}_HDRS}
 	     ../dab-api.h
 	     ../library/includes/dab-constants.h
-         ../library/includes/support/band-handler.h
+             ../library/includes/support/band-handler.h
 	     ./ringbuffer.h
 	     ./audio-base.h
 	     ./audiosink.h
