@@ -31,7 +31,7 @@
 #include	<vector>
 #include	"audiosink.h"
 #include	"dab-api.h"
-#include	"includes/support/band-handler.h"
+#include	"band-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
 #elif	HAVE_AIRSPY
@@ -368,8 +368,11 @@ deviceHandler	*theDevice;
 	}
 
 	run. store (true);
-	if (serviceId != -1) 
-	   programName = dab_getserviceName (theRadio, serviceId);
+	if (serviceId != -1) {
+	   char pn [255];
+	   dab_getserviceName (theRadio, serviceId, pn);
+	   programName = std::string (pn);
+	}
 
 	std::cerr << "we try to start program " <<
                                                  programName << "\n";
