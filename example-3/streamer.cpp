@@ -68,7 +68,7 @@ void	streamer::addBuffer	(void *buffer, int amount, int elsize) {
 
 int16_t lbuf [2 * 4800];
 void	streamer::run		(void) {
-int	period		= 10000;	// msec
+int	period		= 100000;	// usec
 int64_t nextStop	= (int64_t)(getMyTime ());
 	running. store (true);
 	while (running. load ()) {
