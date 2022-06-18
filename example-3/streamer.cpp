@@ -28,48 +28,52 @@
 #include	<stdlib.h>
 
 static inline
-int64_t         getMyTime       (void) {
+int64_t         getMyTime	() {
 struct timeval  tv;
 
         gettimeofday (&tv, NULL);
         return ((int64_t)tv. tv_sec * 1000000 + (int64_t)tv. tv_usec);
 }
 
-	streamer::streamer	(void) {
+	streamer::streamer	() {
 	theBuffer	= new RingBuffer <int16_t> (16 * 32768);
 	running. store (false);
+        workerHandle = std::thread (&streamer::run, this);
 }
 
-	streamer::~streamer	(void) {
+	streamer::~streamer	() {
 	stop ();
 	delete theBuffer;
 }
 
-void	streamer::stop		(void) {
-	running. store (false);
-	workerHandle. join ();
+void	streamer::stop		() {
+	if (running. load ()) {
+	   running. store (false);
+	   workerHandle. join ();
+	}
 }
 
-bool	streamer::isRunning	(void) {
+bool	streamer::isRunning	() {
 	return running. load ();
 }
 
 bool    streamer::restart (void) {
-        workerHandle = std::thread (&streamer::run, this);
-        return true;
+        return false;
 }
 //
 //
 //	amount is the number of 16 bit value, i.e. 2 values per sample
 void	streamer::addBuffer	(void *buffer, int amount, int elsize) {
 	(void)elsize;
-	theBuffer	-> putDataIntoBuffer (buffer, amount);
+	if (running. load ())
+	   theBuffer	-> putDataIntoBuffer (buffer, amount);
 }
 
 int16_t lbuf [2 * 4800];
-void	streamer::run		(void) {
+void	streamer::run		() {
 int	period		= 100000;	// usec
 int64_t nextStop	= (int64_t)(getMyTime ());
+
 	running. store (true);
 	while (running. load ()) {
 	   int a = theBuffer -> getDataFromBuffer (lbuf, 2 * 4800);
@@ -77,7 +81,7 @@ int64_t nextStop	= (int64_t)(getMyTime ());
 	   if (a < 2 * 4800)
 	      memset (&lbuf [a], 0, (4800 * 2 - a) * sizeof (int16_t));
 	   nextStop	= nextStop + period;
-	   fwrite (lbuf, 2 * 4800, 2, stdout);
+	   fwrite (lbuf, 2 * 4800, sizeof (int16_t), stdout);
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
 	}
