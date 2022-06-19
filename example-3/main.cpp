@@ -196,9 +196,8 @@ void	pcmHandler (int16_t *buffer, int size, int rate,
 #ifdef	STREAMER_OUTPUT
 	if (theStreamer == NULL)
 	   return;
-	if (!theStreamer -> isRunning ())
-	   theStreamer -> restart ();
-	theStreamer -> addBuffer (buffer, size, 2);
+	if (theStreamer -> isRunning ())
+	   theStreamer -> addBuffer (buffer, size, 2);
 #else
 	fwrite ((void *)buffer, size, 2, stdout);
 #endif
