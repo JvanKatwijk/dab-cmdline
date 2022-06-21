@@ -27,6 +27,7 @@
 #include	<signal.h>
 #include	<getopt.h>
 #include        <cstdio>
+#include	<fstream>
 #include        <iostream>
 #include	<complex>
 #include	<vector>
@@ -64,6 +65,7 @@
 #endif
 using std::cerr;
 using std::endl;
+std::string dirInfo;
 
 void    printOptions (void);	// forward declaration
 //	we deal with some callbacks, so we have some data that needs
@@ -118,6 +120,27 @@ void	ensemblename_Handler (const char * name, int Id, void *userData) {
 	                          name, (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
+//
+//      The function is called from the MOT handler, with
+//      as parameters the filename where the picture is stored
+//      d denotes the subtype of the picture
+//      typedef void (*motdata_t)(std::string, int, void *);
+static
+void    motdata_Handler (uint8_t * data, int size,
+                         const char *name, int d, void *ctx) {
+        (void)data; (void)size; (void)name; (void)d; (void)ctx;
+        std::string slideName;
+        slideName = dirInfo+"DABslide.jpg";
+        FILE * temp = fopen (slideName. c_str (), "w+b");
+           if (temp) {
+              fwrite (data, 1, size, temp);
+              fclose (temp);
+           }
+           else {
+              fprintf (stderr, "error writing to file %s\n", slideName. c_str());
+           }
+        fprintf (stderr, "slide %s\n", name);
+}
 
 static
 void	programname_Handler (const char *s, int SId, void * userdata) {
@@ -140,6 +163,14 @@ void	programdata_Handler (audiodata *d, void *ctx) {
 static
 void	dataOut_Handler (const char *label, void *ctx) {
 	(void)ctx;
+        std::string strLabel = std::string(label);
+        std::string strLabelfile = dirInfo+"DABlabel.txt";
+        std::ofstream out(strLabelfile);
+        out << strLabel;
+        if (!out) {
+           fprintf (stderr, "error writing to file %s\n", strLabelfile. c_str());
+        }
+        out.close();
 	fprintf (stderr, "%s\r", label);
 }
 //
@@ -225,45 +256,46 @@ int	main (int argc, char **argv) {
 uint8_t		theMode		= 1;
 std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
+bool		wantInfo	= false;
 #ifdef	HAVE_HACKRF
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:p:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:g:X:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:L:Qp:";
 #elif	HAVE_SDRPLAY_V3
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:L:Qp:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 int		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:S:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:p:S:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Q:S:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:p:Q:S:";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
-const char	*optionsString	= "D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "i:D:d:M:B:P:O:A:F:R:";
 #elif	HAVE_RAWFILES
 std::string	fileName;
 bool	repeater		= true;
-const char	*optionsString	= "D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "i:D:d:M:B:P:O:A:F:R:";
 #elif
 //	HAVE_RTL_TCP
 int		gain		= 50;
@@ -271,7 +303,7 @@ bool		autogain	= false;
 int		ppmOffset	= 0;
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
 int16_t		timeSyncTime	= 5;
@@ -297,6 +329,12 @@ deviceHandler	*theDevice;
 	fprintf (stderr, "options are %s\n", optionsString);
 	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
+	      case 'i':
+	         wantInfo = true;
+	         dirInfo = std::string (optarg);
+	         dirInfo += "/";
+	         break;
+
 	      case 'T':
 	         theDuration	= 60 * atoi (optarg);
 	         break;
@@ -533,11 +571,11 @@ deviceHandler	*theDevice;
 	interface. programname_Handler	= programname_Handler;
 	interface. fib_quality_Handler	= fibQuality;
 	interface. audioOut_Handler	= pcmHandler;
-	interface. dataOut_Handler	= dataOut_Handler;
+	interface. dataOut_Handler	= wantInfo == true ? dataOut_Handler : nullptr;
 	interface. bytesOut_Handler	= bytesOut_Handler;
 	interface. programdata_Handler	= programdata_Handler;
 	interface. program_quality_Handler		= mscQuality;
-	interface. motdata_Handler	= nullptr;
+	interface. motdata_Handler	= wantInfo == true ? motdata_Handler : nullptr;
 	interface. tii_data_Handler	= tii_data_Handler;
 	interface. timeHandler		= nullptr;
 
@@ -635,7 +673,8 @@ deviceHandler	*theDevice;
 void    printOptions (void) {
         std::cerr << 
 "                          dab-cmdline options are\n"
-"	                  -T duration\t halt after <duration>  minutes\n"
+"	                  -i path\tsave dynamic label and MOT slide to <path>\n"
+"	                  -T duration\thalt after <duration>  minutes\n"
 "	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
 "	                  -D number\tamount of time to look for an ensemble\n"
 "	                  -d number\tseconds to reach time sync\n"
