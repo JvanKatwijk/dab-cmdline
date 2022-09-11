@@ -612,15 +612,16 @@ deviceHandler	*theDevice;
            exit (22);
 	}
         else
-	   cerr << "there might be a DAB signal here" << endl;
+	   fprintf (stderr, "there might be a DAB signal here\n");
 
 	if (!ensembleRecognized. load ())
 	while (!ensembleRecognized. load () &&
                                      (--freqSyncTime >= 0)) {
-           std::cerr << freqSyncTime + 1 << "\r";
+	   fprintf (stderr, "Sleeping 1\n");
+//           std::cerr << freqSyncTime + 1 << std::endl;
            sleep (1);
         }
-        std::cerr << "\n";
+	fprintf (stderr, "\n");;
 
 	if (!ensembleRecognized. load ()) {
 	   fprintf (stderr, "no ensemble data found, fatal\n");
@@ -640,8 +641,7 @@ deviceHandler	*theDevice;
 	   programName = std::string (temp);
 	}
 
-	std::cerr << "we try to start program " <<
-                                                 programName << "\n";
+	fprintf (stderr,"we try to start program %s\n",programName.c_str());
 	if (!is_audioService (theRadio, programName. c_str ())) {
 	   std::cerr << "sorry  we cannot handle service " <<
                                                  programName << "\n";
