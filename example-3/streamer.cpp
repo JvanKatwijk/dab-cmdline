@@ -66,6 +66,7 @@ bool    streamer::restart (void) {
 void	streamer::addBuffer	(void *buffer, int amount, int elsize) {
 	(void)elsize;
 	if (running. load ())
+//	   fprintf (stderr, "putting data into buffer\n");
 	   theBuffer	-> putDataIntoBuffer (buffer, amount);
 }
 
@@ -77,10 +78,11 @@ int64_t nextStop	= (int64_t)(getMyTime ());
 	running. store (true);
 	while (running. load ()) {
 	   int a = theBuffer -> getDataFromBuffer (lbuf, 2 * 4800);
-//	   fprintf (stderr, " a = %d\n", a);
+//	   fprintf (stderr, "got data from buffer a = %d\n", a);
 	   if (a < 2 * 4800)
 	      memset (&lbuf [a], 0, (4800 * 2 - a) * sizeof (int16_t));
 	   nextStop	= nextStop + period;
+//	   fprintf (stderr, "writing data out\n");
 	   fwrite (lbuf, 2 * 4800, sizeof (int16_t), stdout);
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
