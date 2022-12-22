@@ -468,7 +468,7 @@ bool firstEnsemble = true;
 	   freqSyncTime		= 5;
 
 	   while (!timesyncSet. load () && (--timeSyncTime >= 0))
-	      sleep (1);
+	      sleep (4);
 
 	   if (!timeSynced. load ()) {
 	      theChannel = dabBand. nextChannel (theBand, theChannel);
@@ -526,6 +526,7 @@ bool firstEnsemble = true;
                                      jsonOutput,
 	                             theRadio,
 	                             programNames [i]. c_str (),
+	                             theChannel,
 	                             &ad,
 	                             &firstService);
 	         for (int j = 1; j < 5; j ++) {
@@ -538,6 +539,7 @@ bool firstEnsemble = true;
                                           jsonOutput,
                                           theRadio,
                                           programNames [i]. c_str (),
+                                          theChannel,
                                           j,
 	                                  &pd,
 	                                  &firstService);
@@ -560,6 +562,7 @@ bool firstEnsemble = true;
                                           jsonOutput,
                                           theRadio,
                                           programNames [i]. c_str (),
+                                          theChannel,
                                           j,
 	                                  &pd,
                                           &firstService);
@@ -577,6 +580,7 @@ bool firstEnsemble = true;
                                           jsonOutput,
                                           theRadio,
                                           programNames [i]. c_str (),
+                                          theChannel,
                                           j,
 	                                  &pd,
                                       &firstService);
