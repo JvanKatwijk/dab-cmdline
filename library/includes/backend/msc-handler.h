@@ -39,7 +39,7 @@
 #include	"dab-params.h"
 #include	"freq-interleaver.h"
 #include	"fft-handler.h"
-#include	"semaphore.h"
+#include	"dab-semaphore.h"
 
 class	virtualBackend;
 

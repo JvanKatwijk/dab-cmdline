@@ -32,7 +32,7 @@
 #include	"dab-api.h"
 #include	"virtual-backend.h"
 #include	"ringbuffer.h"
-#include	"semaphore.h"
+#include	"dab-semaphore.h"
 
 class	backendBase;
 class	protection;

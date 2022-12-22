@@ -28,7 +28,7 @@
 #include        <mutex>
 #include	<atomic>
 #include	<vector>
-#include	"semaphore.h"
+#include	"dab-semaphore.h"
 #include	"dab-api.h"
 #include	"virtual-backend.h"
 #include	"ringbuffer.h"

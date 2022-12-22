@@ -125,7 +125,7 @@ set (${objectName}_HDRS
     ./includes/support/protTables.h
     #	 ./includes/support/viterbi-handler.h
     ./includes/support/protection.h
-    ./includes/support/semaphore.h
+    ./includes/support/dab-semaphore.h
     ./includes/support/uep-protection.h
     ./includes/support/eep-protection.h
     ./includes/support/fft-handler.h
