@@ -70,7 +70,7 @@
 using std::cerr;
 using std::endl;
 
-void    printOptions (void);	// forward declaration
+void    printOptions ();	// forward declaration
 //	we deal with callbacks from different threads. So, if you extend
 //	the functions, take care and add locking whenever needed
 static
@@ -89,7 +89,7 @@ static
 std::atomic<bool>ensembleRecognized;
 
 static
-audioBase	*soundOut	= NULL;
+audioBase	*soundOut	= nullptr;
 
 #ifdef	DATA_STREAMER
 tcpServer	tdcServer (8888);
@@ -171,8 +171,9 @@ void	motdata_Handler (uint8_t *data, int size,
 	fprintf (stderr, "plaatje %s met lengte %d\n", s, size);
 }
 
-void	tii_data_Handler	(int s) {
-//	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
+void	tii_data_Handler	(int s, void *p) {
+	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
+	(void)p;
 }
 
 void	timeHandler		(int hours, int minutes, void *ctx) {

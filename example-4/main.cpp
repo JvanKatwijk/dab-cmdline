@@ -180,7 +180,8 @@ void	frameHandler (int16_t *buffer, int size, int rate,
 	fwrite ((void *)buffer, size, 1, frameFile);
 }
 
-void    tii_data_Handler        (int s) {
+void    tii_data_Handler        (int s, void *x) {
+	(void)x;
         fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
 }
 

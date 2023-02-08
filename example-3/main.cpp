@@ -209,7 +209,8 @@ int16_t i;
 	(void)ctx;
 }
 
-void    tii_data_Handler        (int s) {
+void    tii_data_Handler        (int s, void *x) {
+	(void)x;
 //	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
 }
 

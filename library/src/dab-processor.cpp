@@ -261,7 +261,7 @@ SyncOnPhase:
 	            uint16_t res =
                           my_TII_Detector. processNULL ();
 	            if ((res != 0) && (show_tii != nullptr))
-	               show_tii (res);
+	               show_tii (res, userData);
 
                     tii_counter = 0;
 	            my_TII_Detector. reset ();
@@ -373,5 +373,4 @@ bool    dabProcessor::wasSecond (int16_t cf, dabParams *p) {
               return (cf & 03) >= 2;
         }
 }
-
 

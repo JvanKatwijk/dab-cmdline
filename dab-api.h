@@ -154,7 +154,7 @@ typedef	struct {
 //
 //	tii data - if available, the tii data is passed on as a single
 //	integer
-	typedef void (*tii_data_t)(int);
+	typedef void (*tii_data_t)(int, void *);
 
 /////////////////////////////////////////////////////////////////////////
 //
