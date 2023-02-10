@@ -418,7 +418,7 @@ int	theDuration	= -1;		// infinite
 	      case 'I':
 	         basePort	= atoi (optarg);
 	         break;
-	      case "G":
+	      case 'G':
 	         gain		= atoi (optarg);
 	         break;
 

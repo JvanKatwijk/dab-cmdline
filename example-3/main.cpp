@@ -477,7 +477,7 @@ deviceHandler	*theDevice;
 	      case 'I':
 	         basePort	= atoi (optarg);
 	         break;
-	      case "G":
+	      case 'G':
 	         gain		= atoi (optarg);
 	         break;
 
