@@ -239,8 +239,7 @@ const char	*optionsString	= "D:d:M:B:P:O:A:F:R:f:";
 std::string	fileName;
 bool	repeater		= true;
 const char	*optionsString	= "D:d:M:B:P:O:A:F:R:f:";
-#elif
-//	HAVE_RTL_TCP
+#elif	HAVE_RTL_TCP
 int		gain		= 50;
 bool		autogain	= false;
 int		ppmOffset	= 0;
@@ -418,7 +417,7 @@ int	theDuration	= -1;		// infinite
 	      case 'I':
 	         basePort	= atoi (optarg);
 	         break;
-	      case "G":
+	      case 'G':
 	         gain		= atoi (optarg);
 	         break;
 
