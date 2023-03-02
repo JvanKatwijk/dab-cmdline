@@ -77,9 +77,9 @@ SF_INFO *sf_info;
 	repeater		= false;
 	this	-> eofHandler	= eofHandler;
 	this	-> userData	= userData;
-	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
+	_I_Buffer		= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 
-	sf_info		= (SF_INFO *)alloca (sizeof (SF_INFO));
+	sf_info			= (SF_INFO *)alloca (sizeof (SF_INFO));
 	sf_info	-> format	= 0;
 	filePointer	= sf_open (f. c_str (), SFM_READ, sf_info);
 	if (filePointer == NULL) {
@@ -87,12 +87,14 @@ SF_INFO *sf_info;
 	                                f. c_str ());
 	   throw (24);
 	}
+
 	if ((sf_info -> samplerate != 2048000) ||
 	    (sf_info -> channels != 2)) {
 	   fprintf (stderr, "This is not a recorded DAB file, sorry\n");
 	   sf_close (filePointer);
 	   throw (25);
 	}
+
 	currPos = (int64_t)(fileOffsetInSeconds * 2048000.0 );
 	sf_seek (filePointer, (sf_count_t)currPos, SEEK_SET);
 	running. store (false);

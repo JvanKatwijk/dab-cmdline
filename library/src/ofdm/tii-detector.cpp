@@ -107,8 +107,8 @@ uint8_t table [] = {
 };
 
 		TII_Detector::TII_Detector (uint8_t dabMode):
-	                                    params (dabMode),
-	                                    my_fftHandler (dabMode) {
+	                                         params (dabMode),
+	                                         my_fftHandler (dabMode) {
 int16_t	i;
 
 	this	-> T_u		= params. get_T_u();
@@ -121,10 +121,10 @@ int16_t	i;
 	            0.5 * cos (2 * M_PI * (float)i / T_u) +
 	            0.08 * cos (4 * M_PI * (float)i / T_u));
 
-	for (i = 0; i < 70; ++i) 
-	    invTable [table [i]] = i;
 	for (i = 71; i < 256; i ++)
 	   invTable [i] = -1;
+	for (i = 0; i < 70; ++i) 
+	    invTable [table [i]] = i;
 }
 
 		TII_Detector::~TII_Detector() {
@@ -176,7 +176,7 @@ uint8_t bits [] = {0x80, 0x40, 0x20, 0x10 , 0x08, 0x04, 0x02, 0x01};
 #define	GROUPSIZE	24
 uint16_t	TII_Detector::processNULL () {
 int i, j;
-float	hulpTable	[NUM_GROUPS * GROUPSIZE]; // collapses values
+float	hulpTable	[NUM_GROUPS * GROUPSIZE]; // collapsed values
 float	C_table		[GROUPSIZE];	// contains the values
 int	D_table		[GROUPSIZE];	// count of indices in C_table with data
 float	avgTable	[NUM_GROUPS];
@@ -258,7 +258,7 @@ float	avgTable	[NUM_GROUPS];
 	uint16_t pattern	= 0;
 	for (i = 0; i < 4; i ++) {
 	   float mmax	= 0;
-	   int ind		= -1;
+	   int ind	= -1;
 	   for (int k = 0; k < NUM_GROUPS; k ++) {
 	      if (x [k] > mmax) {
 	         mmax = x [k];
