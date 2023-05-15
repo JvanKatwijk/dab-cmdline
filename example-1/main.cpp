@@ -383,12 +383,19 @@ deviceHandler	*theDevice;
 	}
 
 	audiodata ad;
-	dataforAudioService (theRadio, programName. c_str (), &ad, 0);
-	if (!ad. defined) {
-	   std::cerr << "sorry  we cannot handle service " <<
+	if (run. store ) {
+	   dataforAudioService (theRadio, programName. c_str (), &ad, 0);
+	   if (!ad. defined) {
+	      std::cerr << "sorry  we cannot handle service " <<
                                                  programName << "\n";
-	   run. store (false);
+	      run. store (false);
+	   }
 	}
+
+	if (run. load ()) {
+           dabReset_msc (theRadio);
+           set_audioChannel (theRadio, &ad);
+        }
 
 	while (run. load ())
 	   sleep (1);
