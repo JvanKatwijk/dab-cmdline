@@ -82,7 +82,7 @@ void	syncsignalHandler (bool b, void *userData) {
 //	This function is called whenever the dab engine has taken
 //	some time to gather information from the FIC bloks
 //	the Boolean b tells whether or not an ensemble has been
-//	recognized, the names of the programs are in the 
+//	recognized, the names of the programs are in the
 //	ensemble
 static
 void	ensemblename_Handler (const char *name, int Id, void *userData) {
@@ -164,7 +164,7 @@ static
 void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 //	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
-	
+
 int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
@@ -186,7 +186,7 @@ bandHandler	dabBand;
 deviceHandler	*theDevice;
 
 	fprintf (stderr, "dab_cmdline, \
-	                  Copyright 2017 J van Katwijk, Lazy Chair Computing");
+	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
@@ -197,7 +197,7 @@ deviceHandler	*theDevice;
 	      case 'M':
 	         theMode	= atoi (optarg);
 	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
-	            theMode = 1; 
+	            theMode = 1;
 	         break;
 
 	      case 'B':
@@ -284,7 +284,8 @@ deviceHandler	*theDevice;
 	                                     0);
 #endif
 	}
-	catch (int e) {
+	catch (std::exception& ex) {
+     printf("Exception : %s\n",ex.what());
 	   fprintf (stderr, "allocating device failed, fatal\n");
 	   exit (32);
 	}
@@ -383,7 +384,7 @@ deviceHandler	*theDevice;
 	}
 
 	audiodata ad;
-	if (run. store ) {
+	if (run. load() ) {
 	   dataforAudioService (theRadio, programName. c_str (), &ad, 0);
 	   if (!ad. defined) {
 	      std::cerr << "sorry  we cannot handle service " <<
@@ -402,4 +403,3 @@ deviceHandler	*theDevice;
 	theDevice	-> stopReader ();
 	dabExit (theRadio);
 }
-

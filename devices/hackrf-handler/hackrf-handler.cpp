@@ -23,7 +23,7 @@
  */
 
 #include	"hackrf-handler.h"
-
+#include  "device-exceptions.h"
 #define	DEFAULT_GAIN	30
 
 	hackrfHandler::hackrfHandler  (int32_t	frequency,
@@ -42,39 +42,39 @@ int	res;
 //
 	res	= hackrf_init ();
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_init:");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
-	   throw (21);
+	   DEBUG_PRINT ("Problem with hackrf_init:");
+	   DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
+	   throw InitFailed();
 	}
 
 	res	= hackrf_open (&theDevice);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_open:");
-	   fprintf (stderr, "%s \n",
+	   DEBUG_PRINT ("Problem with hackrf_open:");
+	   DEBUG_PRINT ("%s \n",
 	                 hackrf_error_name (hackrf_error (res)));
-	   throw (22);
+	   throw OpeningFailed();
 	}
 
 	res	= hackrf_set_sample_rate (theDevice, 2048000.0);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_set_samplerate:");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
-	   throw (23);
+	   DEBUG_PRINT ("Problem with hackrf_set_samplerate:");
+	   DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
+	   throw SampleRateFailed();
 	}
 
 	res	= hackrf_set_baseband_filter_bandwidth (theDevice,
 	                                                        1750000);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_set_bw:");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
-	   throw (24);
+	   DEBUG_PRINT ("Problem with hackrf_set_bw:");
+	   DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
+	   throw BandwidthFailed();
 	}
 
 	res	= hackrf_set_freq (theDevice, frequency);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_set_freq: ");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
-	   throw (25);
+	   DEBUG_PRINT ("Problem with hackrf_set_freq: ");
+	   DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
+	   throw FrequencyFailed();
 	}
 
 	hackrf_device_list_t *deviceList = hackrf_device_list ();
@@ -86,9 +86,9 @@ int	res;
 	   (void) board_id;
 	}
 
-	if ((vgaGain <= 62) && (vgaGain >= 0)) 
+	if ((vgaGain <= 62) && (vgaGain >= 0))
            (void)hackrf_set_vga_gain (theDevice, vgaGain);
-	if ((lnaGain <= 40) && (lnaGain >= 0)) 
+	if ((lnaGain <= 40) && (lnaGain >= 0))
            (void)hackrf_set_lna_gain (theDevice, lnaGain);
 	(void)hackrf_set_amp_enable (theDevice, ampEnable);
 
@@ -109,8 +109,8 @@ int	res;
 	if ((newGain <= 40) && (newGain >= 0)) {
 	   res	= hackrf_set_lna_gain (theDevice, newGain);
 	   if (res != HACKRF_SUCCESS) {
-	      fprintf (stderr, "Problem with hackrf_lna_gain :\n");
-	      fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
+	      DEBUG_PRINT ("Problem with hackrf_lna_gain :\n");
+	      DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
 	      return;
 	   }
 	}
@@ -121,8 +121,8 @@ int	res;
 	if ((newGain <= 62) && (newGain >= 0)) {
 	   res	= hackrf_set_vga_gain (theDevice, newGain);
 	   if (res != HACKRF_SUCCESS) {
-	      fprintf (stderr, "Problem with hackrf_vga_gain :\n");
-	      fprintf (stderr, "%s \n",
+	      DEBUG_PRINT ("Problem with hackrf_vga_gain :\n");
+	      DEBUG_PRINT ("%s \n",
 	                 hackrf_error_name (hackrf_error (res)));
 	      return;
 	   }
@@ -156,24 +156,24 @@ int	res;
 
 	res     = hackrf_set_freq (theDevice, newFrequency);
         if (res != HACKRF_SUCCESS) {
-           fprintf (stderr, "Problem with hackrf_set_freq: \n");
-           fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
+           DEBUG_PRINT ("Problem with hackrf_set_freq: \n");
+           DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
            return false;
         }
         vfoFrequency = newFrequency;
 
-	res	= hackrf_start_rx (theDevice, callback, this);	
+	res	= hackrf_start_rx (theDevice, callback, this);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_start_rx :\n");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
+	   DEBUG_PRINT ("Problem with hackrf_start_rx :\n");
+	   DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
 	   return false;
 	}
 //
 //	reset the gain(s), since the amp-enable is to be reset
 //	after each change in frequency
-	if ((vgaGain <= 62) && (vgaGain >= 0)) 
+	if ((vgaGain <= 62) && (vgaGain >= 0))
            (void)hackrf_set_vga_gain (theDevice, vgaGain);
-	if ((lnaGain <= 40) && (lnaGain >= 0)) 
+	if ((lnaGain <= 40) && (lnaGain >= 0))
            (void)hackrf_set_lna_gain (theDevice, lnaGain);
 	(void)hackrf_set_amp_enable (theDevice, ampEnable);
 	running. store (hackrf_is_streaming (theDevice));
@@ -188,8 +188,8 @@ int	res;
 
 	res	= hackrf_stop_rx (theDevice);
 	if (res != HACKRF_SUCCESS) {
-	   fprintf (stderr, "Problem with hackrf_stop_rx :");
-	   fprintf (stderr, "%s \n", hackrf_error_name (hackrf_error (res)));
+	   DEBUG_PRINT ("Problem with hackrf_stop_rx :");
+	   DEBUG_PRINT ("%s \n", hackrf_error_name (hackrf_error (res)));
 	   return;
 	}
 	running. store (false);
@@ -198,7 +198,7 @@ int	res;
 //
 //	The brave old getSamples. For the hackrf, we get
 //	size still in I/Q pairs
-int32_t	hackrfHandler::getSamples (std::complex<float> *V, int32_t size) { 
+int32_t	hackrfHandler::getSamples (std::complex<float> *V, int32_t size) {
 	return _I_Buffer	-> getDataFromBuffer (V, size);
 }
 
@@ -213,4 +213,3 @@ void	hackrfHandler::resetBuffer	(void) {
 int16_t	hackrfHandler::bitDepth	(void) {
 	return 8;
 }
-

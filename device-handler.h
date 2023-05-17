@@ -30,6 +30,20 @@
 #include	<stdint.h>
 #include	<complex>
 #include	<thread>
+
+#define DEBUG_ENABLED
+
+#ifdef DEBUG_ENABLED
+#define DEBUG_PRINT(...) \
+    do { \
+				printf(__VA_ARGS__); \
+    } while (0)
+#else
+#define DEBUG_PRINT(...) \
+    do { } while (0)
+#endif
+
+
 using namespace std;
 
 class	deviceHandler {
@@ -58,4 +72,3 @@ protected:
 virtual		void	run		(void);
 };
 #endif
-

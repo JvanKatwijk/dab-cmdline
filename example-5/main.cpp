@@ -114,7 +114,7 @@ void	syncsignal_Handler (bool b, void *userData) {
 //	This function is called whenever the dab engine has taken
 //	some time to gather information from the FIC bloks
 //	the Boolean b tells whether or not an ensemble has been
-//	recognized, the names of the programs are in the 
+//	recognized, the names of the programs are in the
 //	ensemble
 static
 void	ensemblename_Handler (const char * name, int Id, void *userData) {
@@ -291,7 +291,7 @@ bool	err;
 	      case 'M':
 	         theMode	= atoi (optarg);
 	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
-	            theMode = 1; 
+	            theMode = 1;
 	         break;
 
 	      case 'B':
@@ -404,9 +404,10 @@ bool	err;
 #endif
 
 	}
-	catch (int e) {
-	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
-	   exit (32);
+  catch (std::exception& ex) {
+	   std::cerr << "allocating device failed (" << e << "), fatal\n";
+     printf("Exception : %s\n",ex.what());
+	   exit (1);
 	}
 //
 	if (soundOut == NULL) {	// not bound to a file?
@@ -528,7 +529,7 @@ bool	err;
 	keyboard_listener. join ();
 	dabStop	(theRadio);
 	dabExit	(theRadio);
-	delete theDevice;	
+	delete theDevice;
 	delete soundOut;
 }
 
@@ -572,7 +573,7 @@ int16_t	foundIndex	= -1;
 	   if (matches (programNames [i], programName)) {
 	      if (i == programNames. size () - 1)
 	         foundIndex = 0;
-	      else 
+	      else
 	         foundIndex = i + 1;
 	      break;
 	   }
@@ -611,7 +612,7 @@ void	listener	(void) {
 	   char t = getchar ();
 	   message m;
 	   switch (t) {
-	      case '\n': 
+	      case '\n':
 	         m.key = S_NEXT;
 	         m. string = "";
 	         messageQueue. push (m);
@@ -621,4 +622,3 @@ void	listener	(void) {
 	   }
 	}
 }
-

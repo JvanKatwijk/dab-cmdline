@@ -200,7 +200,7 @@ endif()
                            ${CMAKE_DL_LIBS}
     )
 
-    INSTALL (TARGETS ${objectName} 
+    INSTALL (TARGETS ${objectName}
                 LIBRARY DESTINATION ./lib)
 
     INSTALL (FILES ${${objectName}_HDRS} DESTINATION include/${objectName} COMPONENT devel)

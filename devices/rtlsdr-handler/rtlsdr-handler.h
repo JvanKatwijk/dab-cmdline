@@ -24,7 +24,7 @@
 #ifndef __RTLSDR_HANDLER__
 #define	__RTLSDR_HANDLER__
 
-#include        <dlfcn.h>
+#include  <dlfcn.h>
 #include	"ringbuffer.h"
 #include	"device-handler.h"
 #include	<thread>
@@ -133,4 +133,3 @@ private:
 	pfnrtlsdr_set_opt_string rtlsdr_set_opt_string;
 };
 #endif
-

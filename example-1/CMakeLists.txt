@@ -156,7 +156,7 @@ endif ()
             message(FATAL_ERROR "please install portaudio V19")
         endif ()
         list(APPEND extraLibs ${PORTAUDIO_LIBRARIES})
-	
+
 
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
@@ -206,4 +206,3 @@ configure_file(
 
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-

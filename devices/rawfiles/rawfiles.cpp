@@ -22,7 +22,7 @@
  *
  * 	File reader:
  *	For the (former) files with 8 bit raw data from the
- *	dabsticks 
+ *	dabsticks
  */
 #include        <stdio.h>
 #include        <unistd.h>
@@ -32,6 +32,7 @@
 #include        <time.h>
 #include        <cstring>
 #include        "rawfiles.h"
+#include        "device-exceptions.h"
 
 static inline
 int64_t         getMyTime       (void) {
@@ -51,10 +52,8 @@ struct timeval  tv;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
-	   fprintf (stderr, "file %s cannot open\n", f. c_str ());
-	   perror ("file ?");
 	   delete _I_Buffer;
-	   throw (31);
+	   throw OpeningFileFailed(f.c_str(),strerror(errno));
 	}
 
 	this	-> eofHandler	= nullptr;
@@ -71,10 +70,8 @@ struct timeval  tv;
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
-	   fprintf (stderr, "file %s cannot open\n", f. c_str ());
-	   perror ("file ?");
 	   delete _I_Buffer;
-	   throw (31);
+	   throw OpeningFileFailed(f.c_str(),strerror(errno));
 	}
 	currPos = (int64_t)(fileOffsetInSeconds * 2048000.0 * 2.0 );
 	fseek (filePointer, currPos, SEEK_SET);
@@ -133,7 +130,7 @@ bool	eofReached	= false;
 
 	running. store (true);
 	period		= (32768 * 1000) / (2 * 2048);	// full IQś read
-	fprintf (stderr, "Period = %ld\n", period);
+	DEBUG_PRINT ("Period = %ld\n", period);
 	bi		= new std::complex<float> [bufferSize];
 	nextStop	= getMyTime ();
 	while (running. load ()) {
@@ -169,7 +166,7 @@ bool	eofReached	= false;
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
 	}
-	fprintf (stderr, "taak voor replay eindigt hier\n");
+	// DEBUG_PRINT ("taak voor replay eindigt hier\n");
 }
 /*
  *	length is number of uints that we read.
@@ -185,8 +182,7 @@ uint8_t temp [2 * length];
 	currPos		+= n;
 	if (n < length) {
 	   fseek (filePointer, 0, SEEK_SET);
-//	   fprintf (stderr, "End of file, restarting\n");
+//	   DEBUG_PRINT ("End of file, restarting\n");
 	}
 	return	n / 2;
 }
-

@@ -22,6 +22,7 @@
  */
 
 #include	"sdrplay-handler.h"
+#include	"device-exceptions.h"
 
 	sdrplayHandler::sdrplayHandler  (int32_t	frequency,
 	                                 int16_t	ppm,
@@ -50,21 +51,20 @@ int	maxlna;
 	_I_Buffer	= NULL;
 	err		= mir_sdr_ApiVersion (&ver);
 	if (ver < 2.13) {
-	   fprintf (stderr, "please upgrade to sdrplay library 2.13\n");
-	   throw (24);
+	   throw WrongSdrPlayVersion();
 	}
 	(void)err;
 
 	mir_sdr_GetDevices (devDesc, &numofDevs, uint32_t (4));
 	if (numofDevs == 0) {
-	   fprintf (stderr, "Sorry, no device found\n");
-	   throw (25);
+	   DEBUG_PRINT ("Sorry, no device found\n");
+	   throw DeviceNotFound();
 	}
 
 	if (deviceIndex >= numofDevs)
 	   this -> deviceIndex = 0;
 	hwVersion = devDesc [deviceIndex]. hwVer;
-	fprintf (stderr, "sdrdevice found = %s, hw Version = %d\n",
+	DEBUG_PRINT ("sdrdevice found = %s, hw Version = %d\n",
 	                              devDesc [deviceIndex]. SerNo, hwVersion);
 	mir_sdr_SetDeviceIdx (deviceIndex);
 
@@ -81,7 +81,7 @@ int	maxlna;
 	   denominator	= 8192.0;
 	   maxlna	= 9;
 	}
-        else 
+        else
 	if (hwVersion == 1) {
            nrBits	= 12;
 	   denominator	= 2048.0;
@@ -99,11 +99,11 @@ int	maxlna;
 	   maxlna	= 9;
 	}
 
-	if (lnaState < 0) 
+	if (lnaState < 0)
 	   lnaState = 0;
 	if (lnaState > maxlna)
 	   lnaState = maxlna;
-	
+
 	_I_Buffer	= new RingBuffer<std::complex<float>>(1024 * 1024);
 
         mir_sdr_AgcControl (autoGain ?
@@ -126,7 +126,7 @@ int	maxlna;
 static
 void myStreamCallback (int16_t		*xi,
 	               int16_t		*xq,
-	               uint32_t		firstSampleNum, 
+	               uint32_t		firstSampleNum,
 	               int32_t		grChanged,
 	               int32_t		rfChanged,
 	               int32_t		fsChanged,
@@ -156,7 +156,7 @@ void	myGainChangeCallback (uint32_t	gRdB,
 	                      uint32_t	lnaGRdB,
 	                      void	*cbContext) {
 	(void)gRdB;
-	(void)lnaGRdB;	
+	(void)lnaGRdB;
 	(void)cbContext;
 }
 
@@ -183,7 +183,7 @@ int	localGRed	= GRdB;
 	                              (mir_sdr_GainChangeCallback_t)myGainChangeCallback,
 	                              this);
 	if (err != mir_sdr_Success) {
-	   fprintf (stderr, "Error %d on streamInit\n", err);
+	   DEBUG_PRINT ("Error %d on streamInit\n", err);
 	   return false;
 	}
 
@@ -203,7 +203,7 @@ void	sdrplayHandler::stopReader	(void) {
 }
 
 //	Note that the sdrPlay returns 12/14 bit values
-int32_t	sdrplayHandler::getSamples (std::complex<float> *V, int32_t size) { 
+int32_t	sdrplayHandler::getSamples (std::complex<float> *V, int32_t size) {
 	return  _I_Buffer	-> getDataFromBuffer (V, size);
 }
 
@@ -218,4 +218,3 @@ void	sdrplayHandler::resetBuffer	(void) {
 int16_t	sdrplayHandler::bitDepth	(void) {
 	return nrBits;
 }
-

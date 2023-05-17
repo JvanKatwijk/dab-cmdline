@@ -21,6 +21,7 @@
  */
 
 #include	"sdrplay-handler-v3.h"
+#include	"device-exceptions.h"
 
 
 	sdrplayHandler_v3::sdrplayHandler_v3  (uint32_t	frequency,
@@ -46,7 +47,7 @@
            usleep (1000);
         if (failFlag) {
            threadHandle. join ();
-           throw (21);
+           throw StartingThreadFailed ();
         }
 }
 
@@ -70,7 +71,7 @@ void	sdrplayHandler_v3::stopReader	() {
 //	The brave old getSamples. For the sdrplay, we get
 //	size still in I/Q pairs
 //
-int32_t	sdrplayHandler_v3::getSamples (std::complex<float> *V, int32_t size) { 
+int32_t	sdrplayHandler_v3::getSamples (std::complex<float> *V, int32_t size) {
 	return _I_Buffer. getDataFromBuffer (V, size);
 }
 
@@ -105,7 +106,7 @@ std::complex<float> localBuf [numSamples];
 	   localBuf [i] = std::complex<float> (((float)xi [i]) / denominator,
 	                                         ((float)xq [i]) / denominator);
 	int n = (int)(p -> _I_Buffer. GetRingBufferWriteAvailable ());
-	if (n >= (int)numSamples) 
+	if (n >= (int)numSamples)
 	   p -> _I_Buffer. putDataIntoBuffer (localBuf, numSamples);
 }
 
@@ -192,7 +193,7 @@ int			lna_upperBound;
 	   failFlag	= true;
 	   return;
 	}
-	
+
 	fprintf (stderr, "api version %f detected\n", apiVersion);
 //
 //	lock API while device selection is performed
@@ -223,7 +224,7 @@ int			lna_upperBound;
 //	we have a device, unlock
 	sdrplay_api_UnlockDeviceApi ();
 
-	err	= sdrplay_api_DebugEnable (chosenDevice -> dev, 
+	err	= sdrplay_api_DebugEnable (chosenDevice -> dev,
 	                                         (sdrplay_api_DbgLvl_t)1);
 
 //	retrieve device parameters, so they can be changed if needed
@@ -330,18 +331,18 @@ int			lna_upperBound;
 	running. store (false);
 //	normal exit:
 	err = sdrplay_api_Uninit	(chosenDevice -> dev);
-	if (err != sdrplay_api_Success) 
+	if (err != sdrplay_api_Success)
 	   fprintf (stderr, "sdrplay_api_Uninit failed %s\n",
 	                          sdrplay_api_GetErrorString (err));
 
 	err = sdrplay_api_ReleaseDevice	(chosenDevice);
-	if (err != sdrplay_api_Success) 
+	if (err != sdrplay_api_Success)
 	   fprintf (stderr, "sdrplay_api_ReleaseDevice failed %s\n",
 	                          sdrplay_api_GetErrorString (err));
 
 //	sdrplay_api_UnlockDeviceApi	(); ??
         sdrplay_api_Close               ();
-	if (err != sdrplay_api_Success) 
+	if (err != sdrplay_api_Success)
 	   fprintf (stderr, "sdrplay_api_Close failed %s\n",
 	                          sdrplay_api_GetErrorString (err));
 
@@ -354,4 +355,3 @@ closeAPI:
 	sdrplay_api_ReleaseDevice       (chosenDevice);
         sdrplay_api_Close               ();
 }
-

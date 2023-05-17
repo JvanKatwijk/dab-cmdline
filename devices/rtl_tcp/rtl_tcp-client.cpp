@@ -6,7 +6,7 @@
  *
  *    This file is part of the SDR-J.
  *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License. 
+ *    other work, made available through the GNU general Public License.
  *    All copyrights of the original authors are recognized.
  *
  *    SDR-J is free software; you can redistribute it and/or modify
@@ -27,6 +27,8 @@
  */
 
 #include	"rtl_tcp-client.h"
+#include  "device-exceptions.h"
+
 //
 	rtl_tcp_client::rtl_tcp_client	(std::string	hostname,
 	                                 int32_t	port,
@@ -44,8 +46,7 @@
 
 	theSocket = socket (AF_INET, SOCK_STREAM, 0);
 	if (theSocket < 0) {
-	   std::cerr << "Error: " << strerror (errno) << std::endl;
-	   throw (21);
+	   throw CreatingSocketFailed(strerror (errno));
 	}
 
 //	Fill in server IP address
@@ -55,20 +56,20 @@
 
 	struct hostent *host = gethostbyname (hostname. c_str ());
 	if (host == NULL) {
-	   std::cerr << "Error: " << strerror (errno) << std::endl;
-	   throw (22);
+	   throw GettingHostnameFailed( strerror (errno) );
 	}
 
 	server. sin_family	= AF_INET;
 	server. sin_port	= htons (basePort);
 
 //	Print a resolved address of server (the first IP of the host)
-	std::cerr << "server address = " <<
-	          (host->h_addr_list[0][0] & 0xff) << "." <<
-	          (host->h_addr_list[0][1] & 0xff) << "." <<
-	          (host->h_addr_list[0][2] & 0xff) << "." <<
-	          (host->h_addr_list[0][3] & 0xff) << ", port " <<
-	               static_cast<int>(basePort) << std::endl;
+	DEBUG_PRINT("server address = %d.%d.%d.%d, port %d",
+							host->h_addr_list[0][0] & 0xff,
+							host->h_addr_list[0][1] & 0xff,
+							host->h_addr_list[0][2] & 0xff,
+							host->h_addr_list[0][3] & 0xff,
+							static_cast<int>(basePort)
+						);
 
 //	write resolved IP address of a server to the address structure
 	memmove (&(server. sin_addr. s_addr), host -> h_addr_list [0], 4);
@@ -77,20 +78,19 @@
 	int res = connect (theSocket,
 	                      (struct sockaddr*) &server, sizeof (server));
 	if (res < 0) {
-	   std::cerr << "Error: " << strerror (errno) << std::endl;
-	   throw (23);
+	   throw ConnectingFailed(strerror (errno));
 	}
 //
 //	OK, we are connected,
 //	first allocate a large buffer
 	theBuffer	= new RingBuffer<uint8_t> (1024 * 1024);
 //	and set the parameters right
-	fprintf (stderr, "setting the rate to %d\n", theRate);
+	DEBUG_PRINT ("setting the rate to %d\n", theRate);
 	sendCommand (0x02, theRate);
-	fprintf (stderr, "setting the frequency to %d\n", vfoFrequency);
+	DEBUG_PRINT ("setting the frequency to %d\n", vfoFrequency);
 	sendCommand (0x01, vfoFrequency);
 	sendCommand (0x03, autogain);
-	fprintf (stderr, "setting the gain to %d\n", gain);
+	DEBUG_PRINT ("setting the gain to %d\n", gain);
 	sendCommand (0x04, 10 * gain);
 	sendCommand (0x05, ppm);
 //
@@ -112,7 +112,7 @@ void	rtl_tcp_client:: run (void) {
            uint8_t buffer [1024];
            int res = read (theSocket, buffer, 1024);
            if (res < 0) {
-              std::cerr << "Error: " << strerror(errno) << std::endl;
+						 	DEBUG_PRINT("Error: %s",strerror(errno));
 	      running. store (false);
               return;
            }
@@ -125,7 +125,7 @@ void	rtl_tcp_client:: run (void) {
 //	The brave old getSamples. For the dab stick, we get
 //	size: still in I/Q pairs, but we have to convert the data from
 //	uint8_t to std::complex<float>
-int32_t	rtl_tcp_client::getSamples (std::complex<float> *V, int32_t size) { 
+int32_t	rtl_tcp_client::getSamples (std::complex<float> *V, int32_t size) {
 int32_t	amount, i;
 uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
 //
@@ -164,4 +164,3 @@ void	rtl_tcp_client::stopReader (void) {
 	   threadHandle. join ();
 	}
 }
-

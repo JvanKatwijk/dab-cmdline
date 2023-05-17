@@ -40,23 +40,22 @@
 	_I_Buffer	= new RingBuffer<std::complex<float>>(INPUT_FRAMEBUFFERSIZE);
 	theFile	= fopen (fileName.c_str (), "rb");
 	if (theFile == nullptr) {
-	   fprintf (stderr, "file %s cannot open\n",
+	   DEBUG_PRINT ("file %s cannot open\n",
 	                                   fileName. c_str ());
-	   perror ("file ?");
 	   delete _I_Buffer;
-	   throw (31);
+	   throw OpeningFileFailed(fileName.c_str(),strerror(errno));
 	}
-	
+
 	bool	ok	= false;
 	theDescriptor	= new xmlDescriptor (theFile, &ok);
 	if (!ok) {
-	   fprintf (stderr, "%s probably not an xml file\n",
+	   DEBUG_PRINT ("%s probably not an xml file\n",
 	                               fileName. c_str ());
 	   delete _I_Buffer;
-	   throw (32);
+	   throw OpeningFileFailed(fileName.c_str(),"Not a xml file");
 	}
 
-	fprintf (stderr, "nrElements = %d\n",
+	DEBUG_PRINT ("nrElements = %d\n",
 	             theDescriptor -> blockList [0].nrElements);
 	theReader	= nullptr;
 }
@@ -108,4 +107,3 @@ int32_t	xml_fileReader::Samples	() {
 	   return 0;
 	return _I_Buffer -> GetRingBufferReadAvailable();
 }
-
