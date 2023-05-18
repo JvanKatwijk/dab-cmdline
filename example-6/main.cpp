@@ -88,7 +88,7 @@ void	syncsignalHandler (bool b, void *userData) {
 //	This function is called whenever the dab engine has taken
 //	some time to gather information from the FIC bloks
 //	the Boolean b tells whether or not an ensemble has been
-//	recognized, the names of the programs are in the 
+//	recognized, the names of the programs are in the
 //	ensemble
 static
 void	ensemblename_Handler (const char *name, int Id, void *userData) {
@@ -137,9 +137,9 @@ void	dataOut_Handler (const char *dynamicLabel, void *ctx) {
 //
 //	The function is called from the MOT handler, with
 //	as parameters the filename where the picture is stored
-//	d denotes the subtype of the picture 
+//	d denotes the subtype of the picture
 //	typedef void (*motdata_t)(std::string, int, void *);
-void	motdata_Handler (uint8_t * data, int size, 
+void	motdata_Handler (uint8_t * data, int size,
 	                 const char *name, int d, void *ctx) {
 	(void)data; (void)size; (void)name; (void)d; (void)ctx;
 //	fprintf (stderr, "plaatje %s\n", s. c_str ());
@@ -244,7 +244,7 @@ bool	err;
 	      case 'M':
 	         theMode	= atoi (optarg);
 	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
-	            theMode = 1; 
+	            theMode = 1;
 	         break;
 
 	      case 'P':
@@ -281,9 +281,10 @@ bool	err;
 	try {
 	   theDevice	= new stdinHandler ();
 	}
-	catch (int e) {
+  catch (std::exception& ex) {
 	   std::cerr << "allocating device failed (" << e << "), fatal\n";
-	   exit (32);
+     printf("Exception : %s\n",ex.what());
+	   exit (1);
 	}
 //
 	if (soundOut == NULL) {	// not bound to a file?
@@ -367,7 +368,7 @@ bool	err;
                                                  programName << "\n";
 	audiodata ad;
 	if (!is_audioService (theRadio, programName. c_str ())) {
-	   std::cerr << "sorry  we cannot handle service " << 
+	   std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
 	   run. store (false);
 	}
@@ -376,7 +377,7 @@ bool	err;
 	   dataforAudioService (theRadio,
 	                     programName. c_str (), &ad, 0);
 	   if (!ad. defined) {
-	      std::cerr << "sorry  we cannot handle service " << 
+	      std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
 	      run. store (false);
 	   }
@@ -392,12 +393,12 @@ bool	err;
 	theDevice	-> stopReader ();
 	dabReset (theRadio);
 	dabExit  (theRadio);
-	delete theDevice;	
+	delete theDevice;
 	delete soundOut;
 }
 
 void    printOptions (void) {
-        std::cerr << 
+        std::cerr <<
 "                          dab-cmdline options are\n\
                           -D number   amount of time to look for an ensemble\n\
 	                  -d number   seconds within a time sync should be reached\n\
@@ -407,4 +408,3 @@ void    printOptions (void) {
                           -A name     select the audio channel (portaudio)\n\
 	                  -O filename put the output into a file rather than through portaudio\n";
 }
-

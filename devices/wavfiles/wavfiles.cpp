@@ -46,22 +46,22 @@ SF_INFO *sf_info;
 	this	-> repeater	= repeater;
 	this	-> eofHandler	= nullptr;
 	this	-> userData	= nullptr;
-	
+
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
 
 	sf_info		= (SF_INFO *)alloca (sizeof (SF_INFO));
 	sf_info	-> format	= 0;
 	filePointer	= sf_open (f. c_str (), SFM_READ, sf_info);
 	if (filePointer == NULL) {
-	   fprintf (stderr, "file %s no legitimate sound file\n", 
+	   DEBUG_PRINT ("file %s no legitimate sound file\n",
 	                                f. c_str ());
-	   throw (24);
+	   throw OpeningFileFailed(f.c_str(),"Not a legitimate sound file");
 	}
 	if ((sf_info -> samplerate != 2048000) ||
 	    (sf_info -> channels != 2)) {
-	   fprintf (stderr, "This is not a recorded DAB file, sorry\n");
+	   DEBUG_PRINT ("This is not a recorded DAB file, sorry\n");
 	   sf_close (filePointer);
-	   throw (25);
+	   throw OpeningFileFailed(f.c_str(),"Not a DAB file");
 	}
 	currPos		= 0;
 	running. store (false);
@@ -83,16 +83,16 @@ SF_INFO *sf_info;
 	sf_info	-> format	= 0;
 	filePointer	= sf_open (f. c_str (), SFM_READ, sf_info);
 	if (filePointer == NULL) {
-	   fprintf (stderr, "file %s no legitimate sound file\n", 
+	   DEBUG_PRINT ("file %s no legitimate sound file\n",
 	                                f. c_str ());
-	   throw (24);
+	   throw OpeningFileFailed(f.c_str(),"Not a legitimate sound file");
 	}
 
 	if ((sf_info -> samplerate != 2048000) ||
 	    (sf_info -> channels != 2)) {
-	   fprintf (stderr, "This is not a recorded DAB file, sorry\n");
+	   DEBUG_PRINT ("This is not a recorded DAB file, sorry\n");
 	   sf_close (filePointer);
-	   throw (25);
+	   throw OpeningFileFailed(f.c_str(),"Not a DAB file");
 	}
 
 	currPos = (int64_t)(fileOffsetInSeconds * 2048000.0 );
@@ -154,7 +154,7 @@ bool	eofReached	= false;
 
 	running. store (true);
 	period		= (32768 * 1000) / 2048;	// full IQś read
-	fprintf (stderr, "Period = %ld\n", period);
+	DEBUG_PRINT ("Period = %ld\n", period);
 	bi		= new std::complex<float> [bufferSize];
 	nextStop	= getMyTime ();
 	while (running. load ()) {
@@ -188,7 +188,7 @@ bool	eofReached	= false;
 	   if (nextStop - getMyTime () > 0)
 	      usleep (nextStop - getMyTime ());
 	}
-	fprintf (stderr, "taak voor replay eindigt hier\n");
+	DEBUG_PRINT ("taak voor replay eindigt hier\n");
 	delete [] bi;
 }
 /*
@@ -201,10 +201,9 @@ float	temp [2 * length];
 	n = sf_readf_float (filePointer, temp, length);
 	if (n < length) {
 	   sf_seek (filePointer, 0, SEEK_SET);
-//	   fprintf (stderr, "End of file, restarting\n");
+//	   DEBUG_PRINT ("End of file, restarting\n");
 	}
 	for (i = 0; i < n; i ++)
 	   data [i] = std::complex<float> (temp [2 * i], temp [2 * i + 1]);
 	return	n & ~01;
 }
-

@@ -113,7 +113,7 @@ void	syncsignalHandler (bool b, void *userData) {
 //	This function is called whenever the dab engine has taken
 //	some time to gather information from the FIC bloks
 //	the Boolean b tells whether or not an ensemble has been
-//	recognized, the names of the programs are in the 
+//	recognized, the names of the programs are in the
 //	ensemble
 static
 void	ensemblenameHandler (const char *name, int Id, void *userData) {
@@ -163,7 +163,7 @@ void	dataOut_Handler (const char * dynamicLabel, void *ctx) {
 //
 //	The function is called from the MOT handler, with
 //	as parameters the filename where the picture is stored
-//	d denotes the subtype of the picture 
+//	d denotes the subtype of the picture
 //	typedef void (*motdata_t)(std::string, int, void *);
 void	motdata_Handler (uint8_t *data, int size,
 	                const char *s, int d, void *ctx) {
@@ -271,13 +271,13 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
 int16_t		gain		= 60;
 bool		autogain	= true;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Q";
-#elif	HAVE_SDRPLAY	
+#elif	HAVE_SDRPLAY
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
-#elif	HAVE_SDRPLAY_V3	
+#elif	HAVE_SDRPLAY_V3
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 3;
 bool		autogain	= false;
@@ -355,7 +355,7 @@ int	theDuration		= -1;	// no limit
 	      case 'M':
 	         theMode	= atoi (optarg);
 	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
-	            theMode = 1; 
+	            theMode = 1;
 	         break;
 
 	      case 'B':
@@ -415,14 +415,14 @@ int	theDuration		= -1;	// no limit
 	      case 'C':
 	         theChannel	= std::string (optarg);
 	         break;
-	
+
 	      case 'p':
 	         ppmOffset	= 0;
 	         break;
 
 #elif	HAVE_LIME
 	      case 'G':
-	      case 'g':	
+	      case 'g':
 	         gain		= atoi (optarg);
 	         break;
 
@@ -613,9 +613,10 @@ int	theDuration		= -1;	// no limit
 #endif
 
 	}
-	catch (int e) {
+	catch (std::exception& ex) {
 	   std::cerr << "allocating device failed (" << e << "), fatal\n";
-	   exit (32);
+		 printf("Exception : %s\n",ex.what());
+	   exit (1);
 	}
 	if (theDevice == nullptr) {
 	   fprintf (stderr, "no device selected, fatal\n");
@@ -705,7 +706,7 @@ int	theDuration		= -1;	// no limit
 	                                         programName << "\n";
 	audiodata ad;
 	if (!is_audioService (theRadio, programName. c_str ())) {
-	   std::cerr << "sorry  we cannot handle service " << 
+	   std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
 	   run. store (false);
 	   sleep (1);
@@ -718,7 +719,7 @@ int	theDuration		= -1;	// no limit
 	   dataforAudioService (theRadio,
 	                     programName. c_str (), &ad, 0);
 	   if (!ad. defined) {
-	      std::cerr << "sorry  we cannot handle service " << 
+	      std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
 	      run. store (false);
 	   }
@@ -737,12 +738,12 @@ int	theDuration		= -1;	// no limit
 	theDevice	-> stopReader ();
 //	dabReset (theRadio);
 	dabExit  (theRadio);
-	delete theDevice;	
+	delete theDevice;
 	delete soundOut;
 }
 
 void    printOptions (void) {
-	std::cerr << 
+	std::cerr <<
 "                          dab-cmdline options are\n"
 "	                  -T Duration\tstop after <Duration> seconds\n"
 "	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
@@ -791,4 +792,3 @@ void    printOptions (void) {
 "	                  -X antenna selection\n"
 "	                  -C channel\n";
 }
-

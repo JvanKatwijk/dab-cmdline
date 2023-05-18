@@ -23,6 +23,7 @@
 #include	"pluto-handler.h"
 #include	<unistd.h>
 #include	"dabFilter.h"
+#include  "device-exceptions.h"
 
 /* static scratch mem for strings */
 static char tmpstr[64];
@@ -116,94 +117,94 @@ struct iio_channel *chn = nullptr;
 	}
 
 	if (ctx == nullptr) {
-	   fprintf (stderr, "No pluto found, fatal\n");
-	   throw (24);
+	   DEBUG_PRINT ("No pluto found, fatal\n");
+	   throw NoInstanceFound();
 	}
 //
 //	step 2: look for availability of devices
 	if (iio_context_get_devices_count (ctx) <= 0) {
-	   fprintf (stderr, "no devices found, fatal");
-	   throw (25);
+	   DEBUG_PRINT ("no devices found, fatal");
+	   throw DeviceNotFound();
 	}
 
 	rx = iio_context_find_device (ctx, "cf-ad9361-lpc");
 	if (rx == nullptr) {
-	   fprintf (stderr, "No device found");
+	   DEBUG_PRINT ("No device found");
 	   iio_context_destroy (ctx);
-	   throw (26);
+	   throw DeviceNotFound();
 	}
 
-	fprintf (stderr, "found a device %s\n", iio_device_get_name (rx));
+	DEBUG_PRINT ("found a device %s\n", iio_device_get_name (rx));
 
-//	fprintf (stderr, "* Acquiring AD9361 phy channel %d\n", 0);
+//	DEBUG_PRINT ("* Acquiring AD9361 phy channel %d\n", 0);
 	struct iio_device *phys_dev = iio_context_find_device (ctx,
 	                                             "ad9361-phy");
 	if (phys_dev == nullptr) {
-	   fprintf (stderr, "cannot find device\n");
+	   DEBUG_PRINT ("cannot find device\n");
 	   iio_context_destroy (ctx);
-	   throw (27);
+	   throw DeviceNotFound();
 	}
 	chn = iio_device_find_channel (phys_dev,
                                        get_ch_name ("voltage", 0),
                                        false);
 	if (chn == nullptr) {
-	   fprintf (stderr, "cannot acquire phy channel %d\n", 0);
+	   DEBUG_PRINT ("cannot acquire phy channel %d\n", 0);
 	   iio_context_destroy (ctx);
-	   throw (27);
+	   throw OpeningFailed();
 	}
 
 	if (iio_channel_attr_write (chn, "rf_port_select",
 	                                            this -> rfport) < 0) {
-	   fprintf (stderr, "cannot select port\n");
+	   DEBUG_PRINT ("cannot select port\n");
 	   iio_context_destroy (ctx);
-	   throw (28);
+	   throw PortSelectFailed();
 	}
 
 	if (iio_channel_attr_write_longlong (chn, "rf_bandwidth",
 	                                             this -> bw_hz) < 0) {
-	   fprintf (stderr, "cannot select bandwidth\n");
+	   DEBUG_PRINT ("cannot select bandwidth\n");
 	   iio_context_destroy (ctx);
-	   throw (29);
+	   throw BandwidthFailed();
 	}
 
 	if (iio_channel_attr_write_longlong (chn, "sampling_frequency",
 	                                                 this -> fs_hz) < 0) {
-	   fprintf (stderr, "cannot set sampling frequency\n");
+	   DEBUG_PRINT ("cannot set sampling frequency\n");
 	   iio_context_destroy (ctx);
-	   throw (30);
+	   throw SampleRateFailed();
 	}
 //
 //	we use the channel for setting gains
 	this	-> gain_channel = chn;
 // Configure LO channel, when here, we know that phys_dev is not null
-//	fprintf (stderr, "* Acquiring AD9361 %s lo channel\n", "RX");
+//	DEBUG_PRINT ("* Acquiring AD9361 %s lo channel\n", "RX");
 	this -> lo_channel =
 	                iio_device_find_channel (phys_dev,
                                                  get_ch_name ("altvoltage", 0),
                                                  true);
 	if (this -> lo_channel == nullptr) {
-	   fprintf (stderr, "cannot find lo for channel\n");
+	   DEBUG_PRINT ("cannot find lo for channel\n");
 	   iio_context_destroy (ctx);
-	   throw (31);
+	   throw InterfaceFailed();
 	}
 
 	if (iio_channel_attr_write_longlong (this -> lo_channel,
 	                                     "frequency", this -> lo_hz) < 0) {
-	   fprintf (stderr, "cannot set local oscillator frequency\n");
+	   DEBUG_PRINT ("cannot set local oscillator frequency\n");
 	   iio_context_destroy (ctx);
-	   throw (32);
+	   throw FrequencyFailed();
 	}
 
         if (!get_ad9361_stream_ch (ctx, rx, 0, &rx0_i)) {
-	   fprintf (stderr, "RX chan i not found\n");
+	   DEBUG_PRINT ("RX chan i not found\n");
 	   iio_context_destroy (ctx);
-	   throw (33);
+	   throw OpeningChannelFailed("RX","i");
 	}
 
         if (!get_ad9361_stream_ch (ctx, rx, 1, &rx0_q)) {
-	   fprintf (stderr, "RX chan q not found");
+	   DEBUG_PRINT ("RX chan q not found");
 	   iio_context_destroy (ctx);
-	   throw (34);
+	   throw OpeningChannelFailed("RX","q");
 	}
 
         iio_channel_enable (rx0_i);
@@ -211,9 +212,9 @@ struct iio_channel *chn = nullptr;
 
         rxbuf = iio_device_create_buffer (rx, 256*1024, false);
 	if (rxbuf == nullptr) {
-	   fprintf (stderr, "could not create RX buffer, fatal");
+	   DEBUG_PRINT ("could not create RX buffer, fatal");
 	   iio_context_destroy (ctx);
-	   throw (35);
+	   throw CreatingBufferFailed();
 	}
 //
 	iio_buffer_set_blocking_mode (rxbuf, true);
@@ -222,15 +223,15 @@ struct iio_channel *chn = nullptr;
 	                                     "gain_control_mode", "manual");
 	   ret = iio_channel_attr_write_longlong (this -> gain_channel,
 	                                          "hardwaregain", gainValue);
-	   if (ret < 0) 
-	      fprintf (stderr, "error in initial gain setting");
+	   if (ret < 0)
+	      DEBUG_PRINT ("error in initial gain setting");
 	}
 	else {
 	   int ret = iio_channel_attr_write (this -> gain_channel,
 	                                     "gain_control_mode",
 	                                     "slow_attack");
 	   if (ret < 0)
-	      fprintf (stderr, "error in initial gain setting");
+	      DEBUG_PRINT ("error in initial gain setting");
 	}
 //
 //	and set up interpolation table
@@ -252,7 +253,7 @@ struct iio_channel *chn = nullptr;
 	                                     "filter_fir_config",
 	                                     dabFilter, strlen (dabFilter));
 	if (ret < 0)
-	   fprintf (stderr, "filter mislukt");
+	   DEBUG_PRINT ("filter mislukt");
 //	and enable it
 	ad9361_set_trx_fir_enable (phys_dev, 1);
 	running. store (false);
@@ -276,7 +277,7 @@ bool	plutoHandler::restartReader	(int32_t freq) {
 	                             (this -> lo_channel,
 	                                   "frequency", this -> lo_hz);
 	if (ret < 0) {
-	   fprintf (stderr, "error in selected frequency\n");
+	   DEBUG_PRINT ("error in selected frequency\n");
 	   return false;
 	}
 
@@ -345,4 +346,3 @@ void	plutoHandler::resetBuffer	() {
 }
 
 int16_t	plutoHandler::bitDepth		() { return 12;}
-

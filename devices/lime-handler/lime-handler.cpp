@@ -23,6 +23,7 @@
 
 #include	"lime-handler.h"
 #include	<unistd.h>
+#include  "device-exceptions.h"
 
 #define	FIFO_SIZE	32768
 static
@@ -37,58 +38,58 @@ lms_info_str_t limedevices [10];
 
 	int ndevs	= LMS_GetDeviceList (limedevices);
 	if (ndevs == 0) {	// no devices found
-	   throw (21);
+	   throw DeviceNotFound();
 	}
 
 	for (int i = 0; i < ndevs; i ++)
-	   fprintf (stderr, "device %s\n", limedevices [i]);
+	   DEBUG_PRINT ("device %s\n", limedevices [i]);
 
 	int res		= LMS_Open (&theDevice, NULL, NULL);
 	if (res < 0) {	// some error
-	   throw (22);
+	   throw OpeningFailed();
 	}
 
 	res		= LMS_Init (theDevice);
 	if (res < 0) {	// some error
 	   LMS_Close (&theDevice);
-	   throw (23);
+	   throw InitFailed();
 	}
 
 	res		= LMS_GetNumChannels (theDevice, LMS_CH_RX);
 	if (res < 0) {	// some error
 	   LMS_Close (&theDevice);
-	   throw (24);
+	   throw GetChannelsFailed();
 	}
 
-	fprintf (stderr, "device %s supports %d channels\n",
+	DEBUG_PRINT ("device %s supports %d channels\n",
 	                            limedevices [0], res);
 	res		= LMS_EnableChannel (theDevice, LMS_CH_RX, 0, true);
 	if (res < 0) {	// some error
 	   LMS_Close (theDevice);
-	   throw (24);
+	   throw OpeningChannelFailed("RX","0");
 	}
 
 	res	= LMS_SetSampleRate (theDevice, 2048000.0, 0);
 	if (res < 0) {
 	   LMS_Close (theDevice);
-	   throw (25);
+	   throw SampleRateFailed();
 	}
 
 	float_type host_Hz, rf_Hz;
 	res	= LMS_GetSampleRate (theDevice, LMS_CH_RX, 0,
 	                               &host_Hz, &rf_Hz);
 
-	fprintf (stderr, "samplerate = %f %f\n", (float)host_Hz, (float)rf_Hz);
-	
+	DEBUG_PRINT ("samplerate = %f %f\n", (float)host_Hz, (float)rf_Hz);
+
 	res		= LMS_GetAntennaList (theDevice,
 	                                      LMS_CH_RX, 0, antennas);
-	fprintf (stderr, "Antennes found: ");
+	DEBUG_PRINT ("Antennes found: ");
 	for (int i = 0; i < res; i ++)
-	   fprintf (stderr, "%s ", antennas [i]);
-	fprintf (stderr, "\n");
+	   DEBUG_PRINT ("%s ", antennas [i]);
+	DEBUG_PRINT ("\n");
 	for (int i = 0; i < res; i ++)
 	   if (std::string (antennas [i]). compare (antenna) == 0) {
-	      fprintf (stderr, "Auto selected (index = %d)\n", i);
+	      DEBUG_PRINT ("Auto selected (index = %d)\n", i);
 	      res	= LMS_SetAntenna (theDevice, LMS_CH_RX, 0, i);
 	   }
 
@@ -97,20 +98,20 @@ lms_info_str_t limedevices [10];
 	                                                 0, (float)frequency);
 	if (res < 0) {
 	   LMS_Close (theDevice);
-	   throw (26);
+	   throw FrequencyFailed();
 	}
 
 	res		= LMS_SetLPFBW (theDevice, LMS_CH_RX,
 	                                               0, 1536000.0);
 	if (res < 0) {
 	   LMS_Close (theDevice);
-	   throw (27);
+	   throw BandwidthFailed();
 	}
 
 	LMS_SetGaindB (theDevice, LMS_CH_RX, 0, gain);
 
 	LMS_Calibrate (theDevice, LMS_CH_RX, 0, 2500000.0, 0);
-	
+
 	theBuffer	= new RingBuffer<std::complex<float>> (64 * 32768);
 	running. store (false);
 }
@@ -132,7 +133,7 @@ int	res;
 
 	res = LMS_SetLOFrequency (theDevice, LMS_CH_RX, 0, (float)freq);
 	res = LMS_SetGaindB	   (theDevice, LMS_CH_RX, 0, gain);
-	fprintf (stderr, "freq set to %d\n", freq);
+	DEBUG_PRINT ("freq set to %d\n", freq);
 	stream. isTx            = false;
         stream. channel         = 0;
         stream. fifoSize        = FIFO_SIZE;
@@ -148,7 +149,7 @@ int	res;
 	threadHandle		= std::thread (&limeHandler::run, this);
 	return true;
 }
-	
+
 void	limeHandler::stopReader		(void) {
 	if (!running. load ())
 	   return;
@@ -178,7 +179,7 @@ int	res;
 lms_stream_status_t streamStatus;
 int	amountRead	= 0;
 
-	fprintf (stderr, "lime is working now\n");
+	DEBUG_PRINT ("lime is working now\n");
 	running. store (true);
 	while (running. load ()) {
 	   res = LMS_RecvStream (&stream, localBuffer,
@@ -189,8 +190,6 @@ int	amountRead	= 0;
 	      res	= LMS_GetStreamStatus (&stream, &streamStatus);
 	   }
 	}
-	(void)LMS_StopStream	(&stream);	
+	(void)LMS_StopStream	(&stream);
 	(void)LMS_DestroyStream	(theDevice, &stream);
 }
-
-

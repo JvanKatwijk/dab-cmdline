@@ -19,7 +19,7 @@
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * 	stdinHandler 
+ * 	stdinHandler
  *	takes the input bytes from stdin
  */
 #include        <stdio.h>
@@ -30,6 +30,7 @@
 #include        <time.h>
 #include        <cstring>
 #include        "stdin-handler.h"
+#include	      "device-exceptions.h"
 
 static inline
 int64_t         getMyTime       (void) {
@@ -44,12 +45,12 @@ struct timeval  tv;
 //
 	stdinHandler::stdinHandler (void) {
 	_I_Buffer	= new RingBuffer<std::complex<float>>(__BUFFERSIZE);
-	
+
 	filePointer	= stdin;
 	if (filePointer == NULL) {
-	   fprintf (stderr, "Cannot open stdin\n");
+	   DEBUG_PRINT ("Cannot open stdin\n");
 	   delete _I_Buffer;
-	   throw (31);
+	   throw OpeningFileFailed("stdin","idk shouldn't fail");
 	}
 	running. store (false);
 }
@@ -105,7 +106,7 @@ int64_t	nextStop;
 
 	running. store (true);
 	bi		= new std::complex<float> [bufferSize];
-	b2		= new uint8_t [bufferSize * 2]; 
+	b2		= new uint8_t [bufferSize * 2];
 	nextStop	= getMyTime ();
 	while (running. load ()) {
 	   while (_I_Buffer -> WriteSpace () < bufferSize + 10) {
@@ -129,6 +130,5 @@ int64_t	nextStop;
 
 	delete [] b2;
 	delete [] bi;
-	fprintf (stderr, "taak voor replay eindigt hier\n");
+	DEBUG_PRINT ("taak voor replay eindigt hier\n");
 }
-

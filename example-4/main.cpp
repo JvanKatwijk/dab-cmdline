@@ -99,7 +99,7 @@ void	syncsignal_Handler (bool b, void *userData) {
 //	This function is called whenever the dab engine has taken
 //	some time to gather information from the FIC bloks
 //	the Boolean b tells whether or not an ensemble has been
-//	recognized, the names of the programs are in the 
+//	recognized, the names of the programs are in the
 //	ensemble
 static
 void	ensemblename_Handler (const char *name, int Id, void *userData) {
@@ -215,7 +215,7 @@ const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:p:f:";
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
 const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:f:";
-#elif	HAVE_SDRPLAY	
+#elif	HAVE_SDRPLAY
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= false;
@@ -287,7 +287,7 @@ int	theDuration	= -1;		// infinite
 	      case 'M':
 	         theMode	= atoi (optarg);
 	         if (!((theMode == 1) || (theMode == 2) || (theMode == 4)))
-	            theMode = 1; 
+	            theMode = 1;
 	         break;
 
 	      case 'B':
@@ -330,14 +330,14 @@ int	theDuration	= -1;		// infinite
 	      case 'C':
 	         theChannel	= std::string (optarg);
 	         break;
-	
+
 	      case 'p':
 	         ppmOffset	= 0;
 	         break;
 
 #elif	HAVE_LIME
 	      case 'G':
-	      case 'g':	
+	      case 'g':
 	         gain		= atoi (optarg);
 	         break;
 
@@ -480,10 +480,12 @@ int	theDuration	= -1;		// infinite
 	                                      ppmOffset);
 #endif
 	}
-	catch (int e) {
+	catch (std::exception& ex) {
 	   std::cerr << "allocating device failed (" << e << "), fatal\n";
-	   exit (32);
+     printf("Exception : %s\n",ex.what());
+	   exit (1);
 	}
+
 //
 //	and with a sound device we now can create a "backend"
 	API_struct interface;
@@ -591,11 +593,11 @@ int	theDuration	= -1;		// infinite
 	theDevice	-> stopReader ();
 	dabStop	(theRadio);
 	dabExit	(theRadio);
-	delete theDevice;	
+	delete theDevice;
 }
 
 void    printOptions (void) {
-        std::cerr << 
+        std::cerr <<
 "                          dab-cmdline options are\n"
 "	                  -T duration\t stop after <duration> minutes\n"
 "	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
@@ -642,4 +644,3 @@ void    printOptions (void) {
 "                         -X antenna selection\n"
 "                         -C channel\n";
 }
-
