@@ -555,8 +555,7 @@ deviceHandler	*theDevice;
 #endif
 	}
 	catch (std::exception& ex) {
-	   fprintf (stderr, "allocating device failed (%d), fatal\n", e);
-     printf("Exception : %s\n",ex.what());
+	   fprintf(stderr, "Exception: %s", ex.what());
 	   exit (1);
 	}
 #ifdef	STREAMER_OUTPUT
