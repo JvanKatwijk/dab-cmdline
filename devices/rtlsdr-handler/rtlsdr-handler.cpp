@@ -29,7 +29,7 @@
 
 #include	"rtl-sdr.h"
 #include	"rtlsdr-handler.h"
-#include	"device-exceptions.h"
+#include	"../device-exceptions.h"
 
 #include	<chrono>
 #include	<ctime>
