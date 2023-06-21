@@ -555,7 +555,7 @@ deviceHandler	*theDevice;
 #endif
 	}
 	catch (std::exception& ex) {
-	   fprintf(stderr, "Exception: %s", ex.what());
+	   fprintf(stderr, "Exception: %s\n", ex.what());
 	   exit (1);
 	}
 #ifdef	STREAMER_OUTPUT

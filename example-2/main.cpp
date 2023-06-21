@@ -614,7 +614,7 @@ int	theDuration		= -1;	// no limit
 
 	}
 	catch (std::exception& ex) {
-	   fprintf(stderr, "Exception: %s", ex.what());
+	   fprintf(stderr, "Exception: %s\n", ex.what());
 	   exit (1);
 	}
 	if (theDevice == nullptr) {

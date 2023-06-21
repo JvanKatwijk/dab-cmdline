@@ -282,8 +282,7 @@ bool	err;
 	   theDevice	= new stdinHandler ();
 	}
   catch (std::exception& ex) {
-     fprintf(stderr, "Exception: %s", ex.what());
-	   //std::cerr << "Exception " << ex.what() << "), fatal\n";
+     fprintf(stderr, "Exception: %s\n", ex.what());
 	   exit (1);
 	}
 //
