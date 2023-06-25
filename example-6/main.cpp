@@ -281,9 +281,8 @@ bool	err;
 	try {
 	   theDevice	= new stdinHandler ();
 	}
-  catch (std::exception& ex) {
-	   std::cerr << "allocating device failed (" << e << "), fatal\n";
-     printf("Exception : %s\n",ex.what());
+	catch (std::exception& ex) {
+	   std::cerr << "allocating device failed (" << ex. what () << "), fatal\n";
 	   exit (1);
 	}
 //

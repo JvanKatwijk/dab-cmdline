@@ -168,6 +168,7 @@ endif ()
 	     ./audiosink.h
 	     ./newconverter.h
 	     ../devices/device-handler.h
+	     ../devices/device-exceptions.h
 	)
 
 	set (${objectName}_SRCS

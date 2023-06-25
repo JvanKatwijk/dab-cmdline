@@ -614,8 +614,8 @@ int	theDuration		= -1;	// no limit
 
 	}
 	catch (std::exception& ex) {
-	   std::cerr << "allocating device failed (" << e << "), fatal\n";
-		 printf("Exception : %s\n",ex.what());
+	   std::cerr << "allocating device failed, fatal: ";
+	   fprintf (stderr, "%s\n", ex.what());
 	   exit (1);
 	}
 	if (theDevice == nullptr) {

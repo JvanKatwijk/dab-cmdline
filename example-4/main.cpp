@@ -481,8 +481,7 @@ int	theDuration	= -1;		// infinite
 #endif
 	}
 	catch (std::exception& ex) {
-	   std::cerr << "allocating device failed (" << e << "), fatal\n";
-     printf("Exception : %s\n",ex.what());
+	   std::cerr << "allocating device failed (" << ex. what () << "), fatal\n";
 	   exit (1);
 	}
 

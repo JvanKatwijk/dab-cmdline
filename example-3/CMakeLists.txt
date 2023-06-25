@@ -410,6 +410,7 @@ add_definitions (-DSTREAMER_OUTPUT)
 	           ./
 	           ./server-thread
 	           ../
+	           ../devices
 	           ../library
 	           ../library/includes
 	           ../library/includes/ofdm
@@ -430,6 +431,7 @@ add_definitions (-DSTREAMER_OUTPUT)
 	     ./streamer.h
 	     ../dab-api.h
 	     ../devices/device-handler.h
+	     ../devices/device-exceptions.h
 	     ../library/includes/dab-constants.h
 	     ../library/includes/dab-processor.h
 	     ../library/includes/ofdm/phasereference.h

@@ -285,7 +285,7 @@ deviceHandler	*theDevice;
 #endif
 	}
 	catch (std::exception& ex) {
-     printf("Exception : %s\n",ex.what());
+	   printf("Exception : %s\n", ex.what ());
 	   fprintf (stderr, "allocating device failed, fatal\n");
 	   exit (32);
 	}

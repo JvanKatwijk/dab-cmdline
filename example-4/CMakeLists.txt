@@ -375,6 +375,7 @@ endif ()
 	           .
 	           ./
 	           ./server-thread
+	           ../devices
 	           ../
 	           ../library
 	           ../library/includes
@@ -394,6 +395,7 @@ endif ()
 	     ./ringbuffer.h
 	     ./server-thread/tcp-server.h
 	     ../devices/device-handler.h
+	     ../devices/device-exceptions.h
 	     ../dab-api.h
 	     ../library/includes/dab-constants.h
 	     ../library/includes/dab-processor.h

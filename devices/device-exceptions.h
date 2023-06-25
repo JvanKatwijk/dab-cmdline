@@ -8,8 +8,8 @@ class LibNotFound : public std::exception {
       char message[MAX_MESSAGE_SIZE];
 
     public:
-      LibNotFound(const char * libraryString) {
-        snprintf(this->message, MAX_MESSAGE_SIZE, "Library %s not found", libraryString);
+	LibNotFound (const char * libraryString) {
+	   snprintf (this -> message, MAX_MESSAGE_SIZE, "Library %s not found", libraryString);
       };
 
       const char * what () const noexcept override  {
@@ -98,8 +98,9 @@ class OpeningChannelFailed : public std::exception {
       char message[MAX_MESSAGE_SIZE];
 
     public:
-      OpeningChannelFailed(char * direction ,char * channel) {
-        snprintf(this->message, MAX_MESSAGE_SIZE, "Unable to open/enable %s channel %s", direction, channel);
+	OpeningChannelFailed(char * direction ,char * channel) {
+	   snprintf (this->message, MAX_MESSAGE_SIZE,
+	       "Unable to open/enable %s channel %s", direction, channel);
       };
 
       const char * what () const noexcept override  {
@@ -173,21 +174,20 @@ class NoInstanceFound : public std::exception {
 class BandwidthFailed : public std::exception {
     private:
     public:
-      BandwidthFailed(){};
+	BandwidthFailed(){};
 
-      const char * what () const noexcept override {
-          return "Unable to set bandwith";
-      }
+	const char *what () const noexcept override {
+	   return "Unable to set bandwith";
+	}
 };
 
 class PortSelectFailed : public std::exception {
-    private:
+private:
     public:
-      PortSelectFailed(){};
-
-      const char * what () const noexcept override {
-          return "Unable to set port";
-      }
+	PortSelectFailed(){};
+	const char * what () const noexcept override {
+	   return "Unable to set port";
+	}
 };
 
 class InterfaceFailed : public std::exception {

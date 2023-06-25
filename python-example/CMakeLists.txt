@@ -171,7 +171,8 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ../dab-api.h
-	     ../device-handler.h
+	     ../devices/device-handler.h
+	     ../devices/device-exceptions.h
 	     ../ringbuffer.h
 	     ../library/includes/dab-constants.h
 #	     ../library/includes/dab-class.h
