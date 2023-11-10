@@ -58,12 +58,14 @@ if (NOT ZLIB_FOUND)
 endif ()
 list(APPEND extraLibs ${ZLIB_LIBRARY})
 
-find_library (PTHREADS pthread)
-if (NOT(PTHREADS))
-    message (FATAL_ERROR "please install libpthread")
-else (NOT(PTHREADS))
-    set (extraLibs ${extraLibs} ${PTHREADS})
-endif (NOT(PTHREADS))
+if(NOT ANDROID)
+    find_library (PTHREADS pthread)
+    if (NOT(PTHREADS))
+        message (FATAL_ERROR "please install libpthread")
+    else (NOT(PTHREADS))
+        set (extraLibs ${extraLibs} ${PTHREADS})
+    endif (NOT(PTHREADS))
+endif ()
 
 #######################################################################
 #
