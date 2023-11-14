@@ -325,6 +325,7 @@ endif ()
 	           .
 	           ./
 	           ../
+                   ../devices
 	           ../library
 	           ../library/includes
 	           ../library/includes/ofdm
