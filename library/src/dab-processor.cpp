@@ -104,7 +104,7 @@ int		startIndex		= -1;
 	running. store (true);
 	my_ficHandler. reset ();
 	myReader. setRunning (true);
-	my_mscHandler. start ();
+//	my_mscHandler. start ();
 
 	try {
 	   myReader. reset ();
@@ -189,7 +189,6 @@ SyncOnPhase:
 	                  T_u - ofdmBufferIndex,
 	                  coarseOffset + fineOffset);
 	   my_ofdmDecoder. processBlock_0 (ofdmBuffer. data ());
-	   my_mscHandler.  process_mscBlock (ofdmBuffer. data (), 0);
 //
 //	if correction is needed (known by the fic handler)
 //	we compute the coarse offset in the phaseSynchronizer
@@ -222,13 +221,12 @@ SyncOnPhase:
 //	Note that only the first few blocks are handled locally
 //	The FIC/FIB handling is in this thread, so that there is
 //	no delay is "knowing" that we are synchronized
-	      if (ofdmSymbolCount < 4) {
-	         my_ofdmDecoder. decode (ofdmBuffer. data (),
+	      my_ofdmDecoder. decode (ofdmBuffer. data (),
 	                                 ofdmSymbolCount, ibits. data ());
+	      if (ofdmSymbolCount < 4) 
 	         my_ficHandler. process_ficBlock (ibits, ofdmSymbolCount);
-	      }
-	      my_mscHandler. process_mscBlock (&((ofdmBuffer. data ()) [T_g]),
-	                                                   ofdmSymbolCount);
+	      else
+	         my_mscHandler. process_mscBlock (ibits, ofdmSymbolCount);
 	   }
 
 //	we integrate the newly found frequency error with the

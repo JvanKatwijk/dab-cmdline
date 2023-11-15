@@ -31,7 +31,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 ########################################################################
 
 OPTION(RTLSDR   "Input: RTLSDR"   OFF)
-OPTION(SDRPLAY  "Input: SDRPlay"  OFF)
+OPTION(SDRPLAY  "Input: SDRPLAY"  OFF)
 OPTION(AIRSPY   "Input: AirSpy"   OFF)
 OPTION(HACKRF	"Input: HACKRF"	  OFF)
 OPTION(LIMESDR	"Input: LIMESDR"  OFF)
@@ -325,6 +325,7 @@ endif ()
 	           .
 	           ./
 	           ../
+	           ../devices
 	           ../library
 	           ../library/includes
 	           ../library/includes/ofdm

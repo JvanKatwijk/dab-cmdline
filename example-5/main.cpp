@@ -590,7 +590,7 @@ int16_t	foundIndex	= -1;
                                  programNames [foundIndex]. c_str ()))
 	   foundIndex = (foundIndex + 1) % programNames. size ();
 
-	programName = programNames [foundIndex];
+	programName	= programNames [foundIndex];
 	fprintf (stderr, "we now try to start program %s\n",
 	                                         programName. c_str ());
 

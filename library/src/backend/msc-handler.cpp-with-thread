@@ -1,7 +1,6 @@
 #
 /*
  *    Copyright (C) 2013 .. 2017
- *	update 2023
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -44,7 +43,10 @@ static int blocksperCIF [] = {18, 72, 0, 36};
 
 		mscHandler::mscHandler	(API_struct	*p,
 	                                 void		*userData):
-	                                    params (p -> dabMode) {
+	                                    params (p -> dabMode),
+	                                    my_fftHandler (p -> dabMode),
+	                                    myMapper (p -> dabMode),
+	                                    freeSlots (params. get_L ()) {
 	this	-> p			= p;
 	this	-> soundOut		= p -> audioOut_Handler;
 	this	-> dataOut		= p -> dataOut_Handler;
@@ -52,6 +54,10 @@ static int blocksperCIF [] = {18, 72, 0, 36};
 	this	-> programQuality	= p -> program_quality_Handler;
 	this	-> motdata_Handler	= p -> motdata_Handler;
 	this	-> userData		= userData;
+	theData				= new std::complex<float> *[params. get_L ()];
+	for (int i = 0; i < params. get_L (); i ++)
+	   theData [i] = new std::complex<float> [params. get_T_u ()];
+
 //	cifVector. resize (55296);
 	cifCount		= 0;	// msc blocks in CIF
 	theBackends. push_back (new virtualBackend (0, 0));
@@ -64,10 +70,19 @@ static int blocksperCIF [] = {18, 72, 0, 36};
 }
 
 	mscHandler::~mscHandler	() {
+	stop ();
+	for (int i = 0; i < params. get_L (); i ++)
+	   delete [] theData [i];
+	delete [] theData;
 }
 
 void	mscHandler::stop () {
-	locker. lock ();
+	if (running. load ()) {
+	   running. store (false);
+	   threadHandle. join ();
+	}
+
+	mutexer. lock ();
 	for (auto const &b : theBackends) {
 	   b -> stopRunning ();
 	   delete b;
@@ -75,7 +90,7 @@ void	mscHandler::stop () {
 
 	theBackends. resize (0);
 	work_to_do. store (false);
-	locker. unlock ();
+	mutexer. unlock ();
 }
 
 void	mscHandler::start	(void) {
@@ -83,12 +98,71 @@ void	mscHandler::start	(void) {
 	   fprintf (stderr, "cannot restart mscHandler, still active\n");
 	   return;
 	}
+//	else
+//	   fprintf (stderr, "starting mscHandler\n");
+	threadHandle = std::thread (&mscHandler::run, this);
 }
 
-void	mscHandler::reset	() {
+void	mscHandler::reset	(void) {
 	stop ();
 	start ();
 }
+
+//	The exteral world sees this
+void    mscHandler::process_mscBlock (std::complex<float> *b, int16_t blkno) {
+	while (running. load ())
+	   if (freeSlots. tryAcquire (200))
+	      break;
+
+	if (!running. load ())
+	   return;
+	memcpy (theData [blkno], b,
+	            params. get_T_u () * sizeof (std::complex<float>));
+	usedSlots. Release ();
+}
+
+void	mscHandler::run       (void) {
+int	currentBlock	= 0;
+std::vector<int16_t> ibits;
+
+	running. store (true);
+	fft_buffer	= my_fftHandler. getVector ();
+	ibits. resize (BitsperBlock);
+	while (running. load ()) {
+	   while (!usedSlots. tryAcquire (200))
+	      if (!running. load ())
+	         return;
+	   memcpy (fft_buffer, theData [currentBlock],
+	                 params. get_T_u () * sizeof (std::complex<float>));
+
+//      block 3 and up are needed as basis for demodulation the "mext" block
+//      "our" msc blocks start with blkno 4
+	   my_fftHandler. do_FFT ();
+	   if (currentBlock >= 4) {
+	      for (int i = 0; i < params. get_carriers (); i ++) {
+	         int16_t      index   = myMapper. mapIn (i);
+	         if (index < 0)
+	            index += params. get_T_u ();
+
+	         std::complex<float>  r1 = fft_buffer [index] *
+	                               conj (phaseReference [index]);
+	         float ab1    = jan_abs (r1);
+//	Recall:  the viterbi decoder wants 127 max pos, - 127 max neg
+//	we make the bits into softbits in the range -127 .. 127
+	         ibits [i]            =  - (real (r1) * 128) / ab1;
+	         ibits [params. get_carriers () + i]
+	                              =  - (imag (r1) * 128) / ab1;
+	      }
+	      process_mscBlock (ibits, currentBlock);
+	   }
+
+	   memcpy (phaseReference. data (), fft_buffer,
+	                 params. get_T_u () * sizeof (std::complex<float>));
+	   freeSlots. Release ();
+	   currentBlock = (currentBlock + 1) % (params. get_L ());
+	}
+}
+
 //
 //	Note, the set_xxx functions are called from within a
 //	different thread than the process_mscBlock method,
@@ -96,23 +170,23 @@ void	mscHandler::reset	() {
 //	the actual changing of the settings is done in the
 //	thread executing process_mscBlock
 void	mscHandler::set_audioChannel (audiodata *d) {
-	locker. lock ();
+	mutexer. lock ();
 //
 //	we could assert here that theBackend == nullptr
 	theBackends. push_back (new audioBackend (d, p, userData));
 	work_to_do. store (true);
-	locker. unlock ();
+	mutexer. unlock ();
 }
 
 
 void	mscHandler::set_dataChannel (packetdata *d) {
-	locker. lock ();
+	mutexer. lock ();
 	theBackends. push_back (new dataBackend (d, p, userData));
 	work_to_do. store (true);
-	locker. unlock ();
+	mutexer. unlock ();
 }
 
-void	mscHandler::process_mscBlock	(std::vector<int16_t> &fbits,
+void	mscHandler::process_mscBlock	(std::vector<int16_t> fbits,
 	                                 int16_t blkno) { 
 int16_t	currentblk;
 
@@ -126,7 +200,7 @@ int16_t	currentblk;
 	if (!work_to_do. load ())
 	   return;
 //	OK, now we have a full CIF
-	locker. lock ();
+	mutexer. lock ();
 	cifCount	= (cifCount + 1) & 03;
 	for (auto const& b: theBackends) {
 	   int startAddr	= b -> startAddr ();
@@ -143,6 +217,6 @@ int16_t	currentblk;
 	      (void) b -> process (myBegin, Length * CUSize);
 	   }
 	}
-	locker. unlock ();
+	mutexer. unlock ();
 }
 

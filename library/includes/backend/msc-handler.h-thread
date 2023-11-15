@@ -1,8 +1,6 @@
 #
 /*
  *    Copyright (C) 2013 .. 2017
- *	updated 2023
- *
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -27,7 +25,8 @@
  * 	MSC data
  */
 #
-#pragma once
+#ifndef	__MSC_HANDLER__
+#define	__MSC_HANDLER__
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -39,6 +38,8 @@
 #include	"dab-api.h"
 #include	"dab-params.h"
 #include	"freq-interleaver.h"
+#include	"fft-handler.h"
+#include	"dab-semaphore.h"
 
 class	virtualBackend;
 
@@ -48,24 +49,34 @@ public:
 		mscHandler		(API_struct *,
 	                                 void		*);
 		~mscHandler		();
-	void	process_mscBlock	(std::vector<int16_t> &, int16_t);
+	void	process_mscBlock	(std::complex<float> *, int16_t);
 	void	set_audioChannel	(audiodata	*);
 	void	set_dataChannel		(packetdata     *);
 	void	reset			();
 	void	stop			();
 	void	start			();
 private:
+virtual	void		run		();
+	void		process_mscBlock (std::vector<int16_t>, int16_t);
 	API_struct	*p;
 	dabParams	params;
+	fft_handler	my_fftHandler;
+	std::complex<float>	*fft_buffer;
+	interLeaver	myMapper;
 	audioOut_t	soundOut;
 	dataOut_t	dataOut;
 	bytesOut_t	bytesOut;
 	programQuality_t programQuality;
 	motdata_t	motdata_Handler;
 	void		*userData;
+	Semaphore       freeSlots;
+        Semaphore       usedSlots;
+        std::complex<float>  **theData;
 	std::atomic<bool>	running;
-	std::mutex	locker;
+
+	std::thread	threadHandle;
 	std::vector<complex<float> > phaseReference;
+	std::mutex	mutexer;
 	std::vector<virtualBackend *>theBackends;
 	int16_t		cifCount;
 	std::atomic<bool> work_to_do;
@@ -73,4 +84,5 @@ private:
 	int16_t		numberofblocksperCIF;
 };
 
+#endif
 
