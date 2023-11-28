@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
  *    DAB-library is free software; you can redistribute it and/or modify
@@ -20,8 +20,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__FIB_PROCESSOR__
-#define	__FIB_PROCESSOR__
+#pragma once
 #
 //
 #include	<stdint.h>
@@ -92,19 +91,21 @@ class	fib_processor {
 public:
 		fib_processor		(API_struct *,
 	                                 void	*);
-		~fib_processor		(void);
+		~fib_processor		();
 	void	process_FIB		(uint8_t *, uint16_t);
 
-	void	setupforNewFrame	(void);
-	void	clearEnsemble		(void);
-	bool	syncReached		(void);
+	void	setupforNewFrame	();
+	void	clearEnsemble		();
+	bool	syncReached		();
 	std::string nameFor		(int32_t);
-	int32_t	SIdFor			(std::string &);
-	uint8_t	kindofService		(std::string &);
-	void	dataforAudioService	(std::string &, audiodata *);
-	void	dataforDataService	(std::string &, packetdata *);
-	void	dataforAudioService	(std::string &, audiodata *, int16_t);
-	void	dataforDataService	(std::string &, packetdata *, int16_t);
+	int32_t	SIdFor			(const std::string &);
+	uint8_t	kindofService		(const std::string &);
+	void	dataforAudioService	(const std::string &, audiodata *);
+	void	dataforDataService	(const std::string &, packetdata *);
+	void	dataforAudioService	(const std::string &,
+	                                             audiodata *, int16_t);
+	void	dataforDataService	(const std::string &,
+	                                             packetdata *, int16_t);
 
         std::complex<float>
                 get_coordinates (int16_t, int16_t, bool *);
@@ -183,6 +184,4 @@ private:
 	void		nameofEnsemble  (int, const std::string &);
 	void		changeinConfiguration (void);
 };
-
-#endif
 

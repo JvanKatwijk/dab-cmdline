@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 20014 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
  *    Many of the ideas as implemented in DAB-cmdline are derived from
@@ -22,11 +22,9 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 
-#ifndef	__ENSEMBLE_HANDLER__
-#define	__ENSEMBLE_HANDLER__
+#pragma once
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -36,22 +34,21 @@
 
 class	ensembleHandler {
 public:
-		ensembleHandler		(void);
-		~ensembleHandler	(void);
+		ensembleHandler		();
+		~ensembleHandler	();
 	void	addtoEnsemble		(const std::string &, int32_t);
 	void	nameforEnsemble		(int id, const std::string &s);
-	std::string nameofEnsemble	(void);
-	bool	ensembleExists		(void);
+	std::string nameofEnsemble	();
+	bool	ensembleExists		();
 	std::string findService		(const std::string &);
 	std::string findService		(int32_t);
 	std::string getProgram		(int16_t);
-	void	clearEnsemble		(void);
-	std::list<std::string> data	(void);
-	int	size			(void);
+	void	clearEnsemble		();
+	std::list<std::string> data	();
+	int	size			();
 private:
 	std::list<std::string> stationList;
 	std::string ensembleName;
 	bool	ensembleFound	= false;
 	std::mutex	locker;
 };
-#endif

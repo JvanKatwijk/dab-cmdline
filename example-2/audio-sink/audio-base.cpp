@@ -28,19 +28,19 @@
  *	The class is the abstract sink for the data generated
  *	It will handle the "dumping" though
  */
-	audioBase::audioBase	(void):
+	audioBase::audioBase	():
 	                              converter_16 (16000, 48000, 2 * 1600),
 	                              converter_24 (24000, 48000, 2 * 2400),
 	                              converter_32 (32000, 48000, 4 * 3200) {
 }
 
-	audioBase::~audioBase	(void) {
+	audioBase::~audioBase	() {
 }
 
-void	audioBase::restart	(void) {
+void	audioBase::restart	() {
 }
 
-void	audioBase::stop	(void) {
+void	audioBase::stop		() {
 }
 //
 //	This one is a hack for handling different baudrates coming from
@@ -52,12 +52,15 @@ void	audioBase::audioOut	(int16_t *buffer,
 	   case 16000:	
 	      audioOut_16000 (buffer, amount / 2);
 	      return;
+
 	   case 24000:
 	      audioOut_24000 (buffer, amount / 2);
 	      return;
+
 	   case 32000:
 	      audioOut_32000 (buffer, amount / 2);
 	      return;
+
 	   default:
 	   case 48000:
 	      audioOut_48000 (buffer, amount / 2);

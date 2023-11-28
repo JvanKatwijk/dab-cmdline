@@ -22,8 +22,7 @@
  *
  *	Simple base class for combining uep and eep deconvolvers
  */
-#ifndef	__PROTECTION__
-#define	__PROTECTION__
+#pragma once
 
 #include	<stdint.h>
 #include	<vector>
@@ -34,7 +33,7 @@ class	protection: public viterbiSpiral {
 //class	protection: public viterbiHandler {
 public:
 		protection  	(int16_t, int16_t);
-virtual		~protection	(void);
+virtual		~protection	();
 virtual	bool	deconvolve	(int16_t *, int32_t, uint8_t *);
 protected:
         int16_t         bitRate;
@@ -42,5 +41,4 @@ protected:
         std::vector<uint8_t> indexTable;
         std::vector<int16_t> viterbiBlock;
 };
-#endif
 

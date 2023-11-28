@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
  *    DAB-library is free software; you can redistribute it and/or modify
@@ -20,8 +20,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__UEP_PROTECTION__
-#define	__UEP_PROTECTION__
+#pragma once
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -29,10 +28,9 @@
 
 	class uep_protection: public protection {
 public:
-		uep_protection (int16_t, int16_t);
-		~uep_protection	(void);
+		uep_protection	(int16_t, int16_t);
+		~uep_protection	();
 bool		deconvolve	(int16_t *, int32_t, uint8_t *);
 };
 
-#endif
 

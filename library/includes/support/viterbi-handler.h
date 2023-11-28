@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__VITERBI_HANDLER__
-#define	__VITERBI_HANDLER__
+#pragma once
 
 #include	<stdint.h>
 
@@ -30,7 +29,7 @@ class	viterbiHandler {
 
 public:
 		viterbiHandler	(int);
-		~viterbiHandler	(void);
+		~viterbiHandler	();
 	void	deconvolve	(int16_t *, uint8_t *);
 private:
 	int     costTable [16];
@@ -42,6 +41,3 @@ private:
 	int	**history;
 };
 
-#endif
-
-	

@@ -66,8 +66,10 @@
  */
 
 
+
 #ifndef __RINGBUFFER
 #define	__RINGBUFFER
+
 #include	<stdlib.h>
 #include	<stdio.h>
 #include	<string.h>
@@ -135,15 +137,13 @@ volatile	uint32_t	readIndex;
 		char		*buffer;
 public:
 	RingBuffer (uint32_t elementCount) {
-	if (((elementCount - 1) & elementCount) != 0)
-	    elementCount = 2 * 16384;	/* default	*/
 
-	bufferSize	= elementCount;
+	bufferSize	= checkVal (elementCount);
 	buffer		= new char [2 * bufferSize * sizeof (elementtype)];
 	writeIndex	= 0;
 	readIndex	= 0;
-	smallMask	= (elementCount)- 1;
-	bigMask		= (elementCount * 2) - 1;
+	smallMask	= (bufferSize)- 1;
+	bigMask		= (bufferSize * 2) - 1;
 }
 
 	~RingBuffer () {
@@ -316,6 +316,14 @@ int32_t	skipDataInBuffer (uint32_t n_values) {
 	return n_values;
 }
 
+int32_t	checkVal	(int32_t V) {
+	if ((V & (V - 1)) == 0)
+	   return V;
+	int val	= 1;
+	while (val < V)
+	   val <<= 1;
+	return val;
+}
+	 
 };
 #endif
-

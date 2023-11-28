@@ -2,13 +2,9 @@
 /*
  *    Copyright (C) 2013 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
- *    Many of the ideas as implemented in DAB-library are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are recognized.
- *
  *    DAB-library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -24,8 +20,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__GALOIS
-#define	__GALOIS
+#pragma once
 
 #include	<stdint.h>
 
@@ -54,5 +49,4 @@ public:
 	uint16_t inverse_poly	(uint16_t a);
 	uint16_t inverse_power	(uint16_t a);
 };
-#endif
 

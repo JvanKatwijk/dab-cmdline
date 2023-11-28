@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__PHASEREFERENCE__
-#define	__PHASEREFERENCE__
+#pragma once
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -35,7 +34,7 @@
 class phaseReference : public phaseTable {
 public:
 		phaseReference (uint8_t, int16_t);
-		~phaseReference	(void);
+		~phaseReference	();
 	int32_t	findIndex	(std::complex<float> *, int);
 	int16_t	estimateOffset	(std::complex<float> *);
 private:
@@ -49,5 +48,4 @@ private:
 	fft_handler	my_fftHandler;
 	std::complex<float>     *fft_buffer;
 };
-#endif
 

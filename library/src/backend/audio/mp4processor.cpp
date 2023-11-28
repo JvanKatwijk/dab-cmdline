@@ -140,7 +140,7 @@ void	WriteAudioMuxLengthBytes () {
 	aac_quality	= 0;
 }
 
-	mp4Processor::~mp4Processor (void) {
+	mp4Processor::~mp4Processor () {
 }
 //
 //	we add vector for vector to the superframe. Once we have

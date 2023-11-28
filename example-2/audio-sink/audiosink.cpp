@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the main program of the DAB library
+ *    This file is part of the DAB library
  *
  *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 	audioSink::audioSink	(int16_t latency,
 	                         std::string soundChannel,
 	                         bool *err):
-	                                             audioBase () {
+	                                  audioBase () {
 int32_t	i;
 	this	-> latency	= latency;
 	this	-> CardRate	= 48000;
@@ -144,7 +144,7 @@ int16_t	odev	= 0, i;
 	return true;
 }
 
-void	audioSink::restart	(void) {
+void	audioSink::restart	() {
 PaError err;
 
 	if (!Pa_IsStreamStopped (ostream))
@@ -157,7 +157,7 @@ PaError err;
 	   writerRunning	= true;
 }
 
-void	audioSink::stop	(void) {
+void	audioSink::stop	() {
 	if (Pa_IsStreamStopped (ostream))
 	   return;
 
@@ -231,7 +231,7 @@ const PaDeviceInfo *deviceInfo;
 	return "";
 }
 
-int16_t	audioSink::invalidDevice	(void) {
+int16_t	audioSink::invalidDevice	() {
 	return numofDevices + 128;
 }
 
@@ -239,15 +239,15 @@ bool	audioSink::isValidDevice (int16_t dev) {
 	return 0 <= dev && dev < numofDevices;
 }
 
-bool	audioSink::selectDefaultDevice (void) {
+bool	audioSink::selectDefaultDevice () {
 	return selectDevice ("default");
 }
 
-int32_t	audioSink::cardRate	(void) {
+int32_t	audioSink::cardRate	() {
 	return 48000;
 }
 
-int16_t	audioSink::numberofDevices	(void) {
+int16_t	audioSink::numberofDevices	() {
 	return numofDevices;
 }
 

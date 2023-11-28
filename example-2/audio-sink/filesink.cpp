@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the main program for the DAB library
+ *    This file is part of the DAB library
  *
  *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 	fileSink::fileSink	(std::string fileName, bool *success) {
 SF_INFO sf_info;
-	fprintf (stderr, "fase 1\n");
+
 	sf_info. samplerate	= 48000;
 	sf_info. channels	= 2;
 	sf_info. format	= SF_FORMAT_WAV | SF_FORMAT_PCM_16;
@@ -40,18 +40,18 @@ SF_INFO sf_info;
 	}
 	fprintf (stderr, "Opened %s\n", fileName. c_str ());
 	*success	= true;
-	audioOK = *success;
+	audioOK		= *success;
 }
 
-	fileSink::~fileSink	(void) {
+	fileSink::~fileSink	() {
 	   if (audioOK)
 	      sf_close (outputFile);
 }
 
-void	fileSink::stop		(void) {
+void	fileSink::stop		() {
 }
 
-void	fileSink::restart	(void) {
+void	fileSink::restart	() {
 }
 
 void	fileSink::audioOutput	(float *buffer, int32_t amount) {

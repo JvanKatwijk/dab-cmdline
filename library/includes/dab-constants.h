@@ -23,8 +23,7 @@
 //	Common definitions and includes for
 //	the DAB decoder
 
-#ifndef	__DAB_CONSTANTS__
-#define	__DAB_CONSTANTS__
+#pragma once
 #
 #include	<math.h>
 #include	<stdint.h>
@@ -51,8 +50,8 @@
 #undef min
 #undef max
 extern "C" {
-void sleep(int);
-void usleep(int usec);
+void sleep	(int);
+void usleep	(int usec);
 }
 #endif
 #else
@@ -126,7 +125,10 @@ float	re	= real (z);
 float	im	= imag (z);
 	if (re < 0) re = - re;
 	if (im < 0) im = - im;
-	return re + im;
+	if (re > im) 
+           return re + 0.5 * im;
+        else
+           return im + 0.5 * re; 
 }
 //
 
@@ -345,5 +347,4 @@ uint16_t	genpoly		= 0x1021;
 	crc	= ~((msg [len] << 8) | msg [len + 1]) & 0xFFFF;
 	return (crc ^ accumulator) == 0;
 }
-#endif
 

@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef __AUDIO_SINK__
-#define	__AUDIO_SINK__
+#pragma once
+
 #include	<portaudio.h>
 #include	<stdio.h>
 #include	"audio-base.h"
@@ -33,17 +33,17 @@
 class	audioSink  : public audioBase {
 public:
 	                audioSink		(int16_t, std::string, bool *);
-			~audioSink		(void);
-	void		stop			(void);
-	void		restart			(void);
+			~audioSink		();
+	void		stop			();
+	void		restart			();
 	bool		selectDevice		(const std::string);
-	bool		selectDefaultDevice	(void);
+	bool		selectDefaultDevice	();
 private:
-	int16_t		numberofDevices		(void);
+	int16_t		numberofDevices		();
 const	char		*outputChannelwithRate	(int16_t, int32_t);
-	int16_t		invalidDevice		(void);
+	int16_t		invalidDevice		();
 	bool		isValidDevice		(int16_t);
-	int32_t		cardRate		(void);
+	int32_t		cardRate		();
 
 	bool		OutputrateIsSupported	(int16_t, int32_t);
 	void		audioOutput		(float *, int32_t);
@@ -67,6 +67,4 @@ static	int		paCallback_o	(const void	*input,
 					 PaStreamCallbackFlags statusFlags,
 	                                 void		*userData);
 };
-
-#endif
 

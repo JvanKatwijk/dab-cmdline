@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB-library
  *    DAB-library is free software; you can redistribute it and/or modify
@@ -18,11 +18,10 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 #
-#ifndef	__FREQ_INTERLEAVER__
-#define	__FREQ_INTERLEAVER__
+#pragma once
+
 #include	<stdint.h>
 #include	"dab-constants.h"
 #include	"dab-params.h"
@@ -35,7 +34,7 @@
 class	interLeaver {
 public:
 		interLeaver	(uint8_t);
-		~interLeaver	(void);
+		~interLeaver	();
 	int16_t	mapIn		(int16_t);
 private:
 	dabParams	params;
@@ -43,6 +42,4 @@ private:
                                  int16_t, int16_t, int16_t *);
 	int16_t	*permTable;
 };
-
-#endif
 

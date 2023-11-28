@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __FFT_HANDLER__
-#define	__FFT_HANDLER__
+#pragma once
 //
 //	Simple wrapper around fftwf
 #include	"dab-constants.h"
@@ -33,10 +32,10 @@
 class	fft_handler {
 public:
 			fft_handler	(uint8_t);
-			~fft_handler	(void);
-	complex<float>	*getVector	(void);
-	void		do_FFT		(void);
-	void		do_iFFT		(void);
+			~fft_handler	();
+	complex<float>	*getVector	();
+	void		do_FFT		();
+	void		do_iFFT		();
 private:
 	dabParams	p;
 	int32_t		fftSize;
@@ -44,5 +43,4 @@ private:
 	fftwf_plan	plan;
 };
 
-#endif
 

@@ -24,8 +24,7 @@
 /*
  * 	FIC data
  */
-#ifndef	__FIC_HANDLER__
-#define	__FIC_HANDLER__
+#pragma once
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -42,19 +41,21 @@ class ficHandler: public viterbiSpiral {
 public:
 		ficHandler		(API_struct *,
 	                                 void	*);
-		~ficHandler		(void);
+		~ficHandler		();
 	void	process_ficBlock	(std::vector<int16_t>, int16_t);
-	void	clearEnsemble		(void);
-	bool	syncReached		(void);
-	int16_t	get_ficRatio		(void);
+	void	clearEnsemble		();
+	bool	syncReached		();
+	int16_t	get_ficRatio		();
 	std::string nameFor		(int32_t);
-	int32_t	SIdFor			(std::string &);
-	uint8_t	kindofService		(std::string &);
-	void	dataforDataService	(std::string &, packetdata *, int);
-	void	dataforAudioService	(std::string &, audiodata *, int);
+	int32_t	SIdFor			(const std::string &);
+	uint8_t	kindofService		(const std::string &);
+	void	dataforDataService	(const std::string &,
+	                                         packetdata *, int);
+	void	dataforAudioService	(const std::string &,
+	                                        audiodata *, int);
 //
-        int32_t get_CIFcount            (void);
-        void    reset                   (void);
+        int32_t get_CIFcount		();
+        void    reset			();
 
 private:
 	fib_processor	fibProcessor;
@@ -77,7 +78,4 @@ private:
 	uint8_t		shiftRegister [9];
 	void		show_ficCRC	(bool);
 };
-
-#endif
-
 

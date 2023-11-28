@@ -21,8 +21,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __AUDIO_BASE__
-#define	__AUDIO_BASE__
+#pragma once
+
 #include	<stdio.h>
 #include	<samplerate.h>
 #include	"newconverter.h"
@@ -36,10 +36,10 @@ using namespace std;
 
 class	audioBase {
 public:
-			audioBase		(void);
-virtual			~audioBase		(void);
-virtual	void		stop			(void);
-virtual	void		restart			(void);
+			audioBase		();
+virtual			~audioBase		();
+virtual	void		stop			();
+virtual	void		restart			();
 	void		audioOut		(int16_t *, int32_t, int32_t);
 private:
 	void		audioOut_16000		(int16_t *, int32_t);
@@ -52,5 +52,5 @@ private:
 protected:
 virtual	void		audioOutput		(float *, int32_t);
 };
-#endif
+
 

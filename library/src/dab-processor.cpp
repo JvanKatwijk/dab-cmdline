@@ -73,7 +73,7 @@
 	stop ();
 }
 
-void	dabProcessor::start	(void) {
+void	dabProcessor::start		() {
 	if (running. load ())
 	   return;
 	threadHandle	= std::thread (&dabProcessor::run, this);
@@ -87,7 +87,7 @@ void	dabProcessor::start	(void) {
    *	and sending them to the ofdmDecoder who will transfer the results
    *	Finally, estimating the small freqency error
    */
-void	dabProcessor::run	(void) {
+void	dabProcessor::run		() {
 std::complex<float>	FreqCorr;
 timeSyncer      myTimeSyncer (&myReader);
 int32_t		i;
@@ -285,12 +285,12 @@ SyncOnPhase:
 //	fprintf (stderr, "dabProcessor is shutting down\n");
 }
 
-void	dabProcessor:: reset	(void) {
+void	dabProcessor:: reset		() {
 	stop  ();
 	start ();
 }
 
-void	dabProcessor::stop	(void) {	
+void	dabProcessor::stop		() {	
 	if (running. load ()) {
 	   running. store (false);
 	   myReader. setRunning (false);
@@ -311,38 +311,44 @@ void	dabProcessor::show_Corrector (int freqOffset) {
 	                      freqOffset, userData);
 }
 
-bool	dabProcessor::signalSeemsGood	(void) {
+bool	dabProcessor::signalSeemsGood		() {
 	return isSynced;
 }
 //
 //	to be handled by delegates
-uint8_t dabProcessor::kindofService	(std::string s) {
-        return my_ficHandler. kindofService (s);
+uint8_t dabProcessor::kindofService		(const std::string &s) {
+std::string ss = s;
+        return my_ficHandler. kindofService (ss);
 }
 
-void    dabProcessor::dataforAudioService	(std::string s,audiodata *dd) {
-        my_ficHandler. dataforAudioService (s, dd, 0);
+void    dabProcessor::dataforAudioService	(const std::string &s,
+	                                                  audiodata *dd) {
+std::string ss = s;
+        my_ficHandler. dataforAudioService (ss, dd, 0);
 }
 
-void    dabProcessor::dataforAudioService	(std::string s,
+void    dabProcessor::dataforAudioService	(const std::string &s,
                                                   audiodata *d, int16_t c) {
-        my_ficHandler. dataforAudioService (s, d, c);
+std:string ss = s;
+        my_ficHandler. dataforAudioService (ss, d, c);
 }
 
-void    dabProcessor::dataforDataService	(std::string s,
+void    dabProcessor::dataforDataService	(const std::string &s,
                                                     packetdata *d, int16_t c) {
-        my_ficHandler. dataforDataService (s, d, c);
+std::string ss = s;
+        my_ficHandler. dataforDataService (ss, d, c);
 }
 
-int32_t	dabProcessor::get_SId		(std::string s) {
-	return my_ficHandler. SIdFor (s);
+int32_t	dabProcessor::get_SId		(const std::string &s) {
+std::string ss = s;
+	return my_ficHandler. SIdFor (ss);
 }
 
 std::string dabProcessor::get_serviceName (int32_t SId) {
 	return my_ficHandler. nameFor (SId);
 }
 
-void    dabProcessor::reset_msc (void) {
+void    dabProcessor::reset_msc		() {
         my_mscHandler. reset ();
 }
 
@@ -355,7 +361,7 @@ void    dabProcessor::set_dataChannel (packetdata *d) {
 	my_mscHandler. set_dataChannel (d);
 }
 
-void    dabProcessor::clearEnsemble     (void) {
+void    dabProcessor::clearEnsemble	() {
         my_ficHandler. reset ();
 }
 

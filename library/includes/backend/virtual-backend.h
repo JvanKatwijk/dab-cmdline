@@ -20,28 +20,24 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef __VIRTUAL_BACKEND__
-#define	__VIRTUAL_BACKEND__
+#pragma once
 
 #include	<stdint.h>
 #include	<stdio.h>
-
 
 #define	CUSize	(4 * 16)
 
 class	virtualBackend {
 public:
 		virtualBackend	(int16_t, int16_t);
-virtual		~virtualBackend	(void);
+virtual		~virtualBackend	();
 virtual int32_t	process		(int16_t *, int16_t);
-virtual void	stopRunning	(void);
-virtual	void	stop		(void);
-	int16_t	startAddr	(void);
-	int16_t	Length		(void);
+virtual void	stopRunning	();
+virtual	void	stop		();
+	int16_t	startAddr	();
+	int16_t	Length		();
 protected:
 	int16_t startAddress;
 	int16_t	segmentLength;
 };
-#endif
-
 

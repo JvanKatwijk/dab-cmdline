@@ -49,7 +49,7 @@
 	cnt				= 0;
 }
 
-	ofdmDecoder::~ofdmDecoder	(void) {
+	ofdmDecoder::~ofdmDecoder	() {
 }
 
 void	ofdmDecoder::processBlock_0 (std::complex<float> *buffer) {

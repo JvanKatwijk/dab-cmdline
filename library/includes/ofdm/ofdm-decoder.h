@@ -20,8 +20,7 @@
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__OFDM_DECODER__
-#define	__OFDM_DECODER__
+#pragma once
 
 #include	<stdint.h>
 #include	<vector>
@@ -40,7 +39,8 @@ public:
                                          RingBuffer<std::complex<float>> *);
 		~ofdmDecoder		(void);
 	void	processBlock_0		(std::complex<float> *);
-	void	decode		(std::complex<float> *, int32_t n, int16_t *);
+	void	decode			(std::complex<float> *,
+	                                       int32_t n, int16_t *);
 private:
 	dabParams	params;
 	fft_handler	my_fftHandler;
@@ -52,12 +52,9 @@ private:
 	int32_t		T_g;
 	int32_t		carriers;
 	int32_t		nrBlocks;
-	int16_t		getMiddle	(void);
+	int16_t		getMiddle	();
 	std::vector <complex<float> >	phaseReference;
 	std::complex<float>	*fft_buffer;
 	int32_t		blockIndex;
 };
-
-#endif
-
 

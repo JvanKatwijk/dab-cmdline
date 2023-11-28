@@ -20,8 +20,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__DATA_BACKEND__
-#define	__DATA_BACKEND__
+#pragma once
 
 #include	<stdio.h>
 #include        <thread>
@@ -41,8 +40,8 @@ public:
 		dataBackend	(packetdata *, API_struct *, void *);
 		~dataBackend	();
 	int32_t	process		(int16_t *, int16_t);
-	void	stopRunning	(void);
-	void	start		(void);
+	void	stopRunning	();
+	void	start		();
 private:
 	int16_t		fragmentSize;
 	int16_t		bitRate;
@@ -66,6 +65,4 @@ void	run		(void);
 	protection	*protectionHandler;
 	backendBase	*our_backendBase;
 };
-
-#endif
 

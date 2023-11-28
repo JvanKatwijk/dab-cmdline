@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef	__TII_DETECTOR__
-#define	__TII_DETECTOR__
+#pragma once
 
 #include	<cstdint>
 #include	"dab-params.h"
@@ -32,8 +31,8 @@
 class	TII_Detector {
 public:
 			TII_Detector	(uint8_t dabMode);
-			~TII_Detector();
-	void		reset();
+			~TII_Detector	();
+	void		reset		();
 	void		addBuffer	(std::vector<std::complex<float>>);
 	uint16_t	processNULL	();
 
@@ -51,5 +50,4 @@ private:
 	std::vector<float>	window;
 };
 
-#endif
 

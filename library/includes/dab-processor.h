@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__DAB_PROCESSOR__
-#define	__DAB_PROCESSOR__
+#pragma once
 /*
  *
  */
@@ -58,21 +57,23 @@ public:
 	bool	signalSeemsGood	();
 	void	show_Corrector	(int);
 //      inheriting from our delegates
-	void		setSelectedService	(std::string);
-	uint8_t		kindofService           (std::string);
-	void		dataforAudioService     (std::string,   audiodata *);
-	void		dataforAudioService     (std::string,
+	void		setSelectedService	(const std::string &);
+	uint8_t		kindofService		(const std::string &);
+	void		dataforAudioService	(const std::string &,
+	                                                       audiodata *);
+	void		dataforAudioService	(const std::string &,
 	                                             audiodata *, int16_t);
-	void		dataforDataService      (std::string,   packetdata *);
-	void		dataforDataService      (std::string,
+	void		dataforDataService	(const std::string &,
+	                                                packetdata *);
+	void		dataforDataService	(const std::string &,
 	                                             packetdata *, int16_t);
-	int32_t		get_SId			(std::string s);
+	int32_t		get_SId			(const std::string &s);
 	std::string	get_serviceName		(int32_t);
 	void		set_audioChannel        (audiodata *);
 	void		set_dataChannel         (packetdata *);
-	std::string	get_ensembleName        (void);
-	void		clearEnsemble           (void);
-	void		reset_msc		(void);
+	std::string	get_ensembleName	();
+	void		clearEnsemble		();
+	void		reset_msc		();
 private:
 	deviceHandler	*inputDevice;
 	dabParams	params;
@@ -102,7 +103,6 @@ private:
 	int32_t		carrierDiff;
 	bool		wasSecond	(int16_t, dabParams *);
 	int		tii_counter;
-virtual	void		run		(void);
+virtual	void		run		();
 };
-#endif
 

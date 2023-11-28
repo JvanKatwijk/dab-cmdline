@@ -22,8 +22,7 @@
  *	This charset handling was kindly added by Przemyslaw Wegrzyn	
  *	all rights acknowledged
  */
-#ifndef __CHARSETS_H__
-#define __CHARSETS_H__
+#pragma once
 
 #include	<cstring>
 #include	<string>
@@ -48,6 +47,4 @@ typedef enum {
  */
 std::string toStringUsingCharset(const char* buffer,
 	                         CharacterSet charset, int size = -1);
-
-#endif // CHARSETS_H
 

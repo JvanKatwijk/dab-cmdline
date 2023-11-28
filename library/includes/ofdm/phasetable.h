@@ -18,11 +18,9 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB-library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
  */
 #
-#ifndef	__PHASE_TABLE__
-#define	__PHASE_TABLE__
+#pragma once
 
 #include	<stdio.h>
 #include	<stdint.h>
@@ -38,13 +36,12 @@ struct phasetableElement {
 class phaseTable {
 public:
 		phaseTable 	(int16_t);
-		~phaseTable	(void);
-	float	get_Phi	(int32_t);
+		~phaseTable	();
+	float	get_Phi		(int32_t);
 private:
 
 	struct phasetableElement	*currentTable;
 	int16_t		Mode;
 	int32_t		h_table (int32_t i, int32_t j);
 };
-#endif
 

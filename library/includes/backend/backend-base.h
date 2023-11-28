@@ -21,8 +21,7 @@
  *
  */
 #
-#ifndef	__BACKEND_BASE__
-#define	__BACKEND_BASE__
+#pragma once
 
 #include	<stdint.h>
 #include	<stdio.h>
@@ -33,9 +32,8 @@
 
 class	backendBase {
 public:
-		backendBase	(void);
-virtual		~backendBase	(void);
+		backendBase	();
+virtual		~backendBase	();
 virtual	void	addtoFrame	(uint8_t *);
 };
-#endif
 

@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #
-#ifndef	__SAMPLE_READER__
-#define	__SAMPLE_READER__
+#pragma once
 /*
  *	Reading the samples from the input device. Since it has its own
  *	"state", we embed it into its own class
@@ -43,7 +42,7 @@ public:
                                          deviceHandler *theRig,
 	                       RingBuffer<std::complex<float>> *spectrumBuffer);
 
-			~sampleReader		(void);
+			~sampleReader		();
 		void	setRunning	(bool b);
 		float	get_sLevel	(void);
 	        void	reset		(void);
@@ -64,4 +63,3 @@ private:
 	        int32_t		corrector;
 };
 
-#endif

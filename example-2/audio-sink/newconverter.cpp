@@ -4,7 +4,7 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the main program of the DAB library
+ *    This file is part of the DAB library
  *
  *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ int	err;
 	inp			= 0;
 }
 
-	newConverter::~newConverter (void) {
+	newConverter::~newConverter () {
 	src_delete	(converter);
 	delete []	inBuffer;
 	delete []	outBuffer;
@@ -79,7 +79,7 @@ int	res;
 	return true;
 }
 
-int32_t		newConverter::getOutputsize (void) {
+int32_t		newConverter::getOutputsize () {
 	return outputLimit;
 }
 
