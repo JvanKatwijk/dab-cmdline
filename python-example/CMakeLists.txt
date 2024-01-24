@@ -1,4 +1,5 @@
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 3.5.0 )
+project(dab_lib)
 set (objectName dab_lib)
 add_definitions ( -Wall -g -std=c++11 -O3)
 #	modify if you want
@@ -35,6 +36,7 @@ endif ()
 
 ########################################################################
 	find_package (PkgConfig)
+	find_package (Python COMPONENTS Interpreter Development NumPy)
 ########################################################################
 #	The devices
 #
@@ -120,7 +122,7 @@ endif ()
 	endif()
 
 #######################################################################
-        find_package(FFTW3f)
+        find_package(FFTW3F)
         if (NOT FFTW3F_FOUND)
             message(FATAL_ERROR "please install FFTW3")
         endif ()
@@ -150,9 +152,10 @@ endif ()
 	include_directories (
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
-	           /usr/lib64/python3.9/site-packages/numpy/core/include/
+	           ${Python_NumPy_INCLUDE_DIRS}
 	           ./
 	           ../
+	           ../devices
 	           ../library/
 	           ../library/includes
 	           ../library/includes/ofdm
@@ -166,7 +169,7 @@ endif ()
 	           /usr/include/
 	)
 
-	include_directories (/usr/include/python3.9)
+	include_directories (${Python_INCLUDE_DIRS})
 
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
@@ -277,7 +280,6 @@ endif ()
 	          ${SNDFILES_INCLUDE_DIRS}
 	)
 
-	list(APPEND extraLibs -lpython3.9)
 #####################################################################
 
 	add_library (${objectName} SHARED
@@ -286,7 +288,7 @@ endif ()
 
 	target_link_libraries (${objectName}
 	                       ${FFTW3F_LIBRARIES}
-	                       ${extraLibs}
+	                       ${Python_LIBRARIES}
 	                       ${FAAD_LIBRARIES}
 	                       ${CMAKE_DL_LIBS}
 	)

@@ -128,6 +128,12 @@ def dataoutHandler(d):
     print("dataoutHandler = ", d)
 
 
+# the function motDataHandler is called whenever the inputstream contains
+# data to be displayed as picture
+def motDataHandler(data, name, d):
+    print("motDataHandler: %s of size %d" % (name, len(data)))
+
+
 def programdataHandler(q0, q1, q2, q3, q4):
     print("selected program ")
     print("   subchannel   ", q0)
@@ -218,6 +224,7 @@ theLibrary = dabInit(args.theChannel,
                      fib_qualityHandler,
                      audioOutHandler,
                      dataoutHandler,
+                     motDataHandler,
                      programdataHandler,
                      program_qualityHandler
                      )
