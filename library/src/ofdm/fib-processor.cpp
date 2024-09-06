@@ -720,7 +720,7 @@ int32_t d	= da - ((m + 4) * 153 / 5) + 122;
 int32_t Y	= y - 4800 + ((m + 2) / 12); 
 int32_t M	= ((m + 2) % 12) + 1; 
 int32_t D	= d + 1;
-uint32_t	theTime [6];
+int32_t	theTime [6];
 
 	theTime [0] = Y;	// Year
 	theTime [1] = M;	// Month

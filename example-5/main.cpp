@@ -48,6 +48,7 @@
 #include	"rtl_tcp-client.h"
 #endif
 
+#define DATA_STREAMER true
 #include	<atomic>
 #include	<thread>
 #ifdef	DATA_STREAMER
@@ -95,6 +96,12 @@ audioBase	*soundOut	= NULL;
 #ifdef	DATA_STREAMER
 tcpServer	tdcServer (8888);
 #endif
+
+// Relaxed matching
+bool matches(const std::string& s1, const std::string& s2) {
+    // Trim s1 to the length of s2 and compare
+    return s1.substr(0, s2.size()) == s2;
+}
 
 std::string	programName		= "Sky Radio";
 //int32_t		serviceIdentifier	= -1;
@@ -182,7 +189,8 @@ int16_t i;
 	localBuf [6] = 0x00;
 	localBuf [7] = type == 0 ? 0 : 0xFF;
 	for (i = 0; i < amount; i ++)
-	   localBuf [8 + i] = data;
+	   localBuf [8 + i] = data[i];
+	fprintf(stderr,"tdcServer::out[%d]\n",amount+8);
 	tdcServer. sendData (localBuf, amount + 8);
 #else
 	(void)data;
@@ -225,7 +233,7 @@ void	fibQuality	(int16_t q, void *ctx) {
 
 static
 void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
-//	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
+	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
 
 int	main (int argc, char **argv) {
@@ -244,6 +252,7 @@ std::string	soundChannel	= "default";
 int16_t		latency		= 10;
 int16_t		timeSyncTime	= 5;
 int16_t		freqSyncTime	= 10;
+int16_t		progSyncTime	= 5;
 bool		autogain	= false;
 int	opt;
 struct sigaction sigact;
@@ -275,7 +284,7 @@ bool	err;
 #if	(defined (HAVE_WAVFILES) && defined (HAVE_RAWFILES))
 	while ((opt = getopt (argc, argv, "D:d:M:B:P:A:L:S:F:O:")) != -1) {
 #elif   HAVE_RTL_TCP
-	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:QO:")) != -1) {
+	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:QO:")) != -1) { // Arg H has to be included
 #else
 	while ((opt = getopt (argc, argv, "D:d:M:B:C:P:G:A:L:S:H:I:QO:")) != -1) {
 #endif
@@ -412,8 +421,8 @@ bool	err;
 	if (soundOut == nullptr) {	// not bound to a file?
 	   soundOut	= new audioSink	(latency, soundChannel, &err);
 	   if (err) {
-	      fprintf (stderr, "no valid sound channel, fatal\n");
-	      exit (33);
+	      fprintf (stderr, "DBG: no valid sound channel\n"); // , fatal\n");
+	      //exit (33); // Be more tolerant to the guys, running this piece of software on a head- and phoneless server
 	   }
 	}
 //
@@ -490,26 +499,48 @@ bool	err;
 
 	run. store (true);
 	std::thread keyboard_listener = std::thread (&listener);
-        std::cerr << "we try to start program " <<
-                                                 programName << "\n";
-        if (!is_audioService (theRadio, programName. c_str ())) {
-           std::cerr << "sorry  we cannot handle service " <<
-                                                 programName << "\n";
-           run. store (false);
-	   exit (22);
-        }
+        /* std::cerr << "we try to start program " <<
+                                                 programName << "\n"; */
 
+	// Search Ensemble for selected programName
         audiodata ad;
-        dataforAudioService (theRadio, programName. c_str (), &ad, 0);
-        if (!ad. defined) {
-           std::cerr << "sorry  we cannot handle service " <<
-                                                 programName << "\n";
-           run. store (false);
-        }
-
-        dabReset_msc (theRadio);
-        set_audioChannel (theRadio, &ad);
-
+	packetdata pd;
+	ad.defined = pd.defined = false; // seems to be necessary
+	while ((ad. defined == pd .defined) && (--progSyncTime >= 0)) {
+	   for (uint8_t i = 0; i < programNames. size (); i ++) {
+	      if (matches (programNames [i], programName)) {
+		 programName = programNames [i];
+		 fprintf (stderr, "we now try to start program %s ", programName. c_str ());
+                 if (is_audioService (theRadio, programName. c_str ())) { 
+                    dataforAudioService (theRadio, programName. c_str (), &ad, 0);
+		    dabReset_msc (theRadio);
+     		    set_audioChannel (theRadio, &ad);
+     		    fprintf(stderr,"(audio) \n");
+                 } else if (is_dataService (theRadio, programName. c_str ())) {
+		    dataforDataService (theRadio, programName. c_str (), &pd, 0);
+		    dabReset_msc (theRadio);
+	     	    set_dataChannel (theRadio, &pd);
+	     	    fprintf(stderr,"\n"); // (data) is already part of the program name
+                 } else {
+		    fprintf(stderr,"Should not happen");
+                 }
+		 if (ad. defined == pd. defined) {
+		    std::cerr << "sorry  we cannot handle service " << programName << "\n";
+	      	    sighandler (9);
+		 }
+		 break;
+	      }
+	   }
+	   if (ad. defined == pd. defined) { 
+	   	fprintf (stderr, ">>> %d\r\r\r\r\r", progSyncTime);
+	   	if (progSyncTime == 0) { 
+	   	   programName = programNames [0]; // Fallback to first program of ensemble
+	   	   progSyncTime = 2;
+	   	}
+	   	sleep(1); 
+	   }
+	}
+	
 	while (run. load ()) {
 	   message m;
 	   while (!messageQueue. pop (10000, &m));
@@ -549,23 +580,17 @@ void    printOptions (void) {
 	                  -A name     select the audio channel (portaudio)\n\
 	                  -S hexnumber use hexnumber to identify program\n\n\
 	                  -O filename put the output into a file rather than through portaudio\n");
-}
+#ifdef HAVE_RTL_TCP
+	fprintf (stderr,
+"\n                          RTL_TCP server options\n\
+			  -H IP adress\n\
+	                  -I Port to connect to\n");
 
-bool	matches (std::string s1, std::string s2) {
-const char *ss1 = s1. c_str ();
-const char *ss2 = s2. c_str ();
-
-	while ((*ss1 != 0) && (*ss2 != 0)) {
-	   if (*ss2 != *ss1)
-	      return false;
-	   ss1 ++;
-	   ss2 ++;
-	}
-	return *ss2 == 0;
+#endif
 }
 
 void	selectNext	(void) {
-int16_t	i;
+uint8_t	i;
 int16_t	foundIndex	= -1;
 
 	for (i = 0; i < programNames. size (); i ++) {
@@ -606,7 +631,7 @@ int16_t	foundIndex	= -1;
 }
 
 void	listener	(void) {
-	fprintf (stderr, "listener is running\n");
+	fprintf (stderr, "listener::run\n");
 	while (run. load ()) {
 	   char t = getchar ();
 	   message m;

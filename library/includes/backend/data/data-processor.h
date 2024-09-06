@@ -28,6 +28,8 @@
 #include	<vector>
 #include	"dab-api.h"
 #include	"backend-base.h"
+#include    "reed-solomon.h"
+
 
 class	virtual_dataHandler;
 
@@ -47,15 +49,36 @@ private:
 	uint8_t		DGflag;
 	int16_t		FEC_scheme;
 	bytesOut_t	bytesOut;
+    programQuality_t        mscQuality; // taken from mp4processor.h
 	void		*ctx;
 	int16_t		crcErrors;
+	int16_t     frameCount;
+    int16_t     frameErrors;
+    int16_t     rsErrors;
+    int16_t     frame_quality;
+    int16_t     rs_quality;
+
 	std::vector<uint8_t> series;
 	uint8_t		packetState;
+	std::vector<uint8_t> ByteBuf;
+
+	int16_t		blockFillIndex;
+    int16_t     blocksInBuffer;
+    uint8_t		curMSC;
+    uint8_t		curPI;
+	std::vector<uint8_t> frameBytes;
+	std::vector<uint8_t> outVector;
+	uint8_t		RSDims;
+    reedSolomon my_rsDecoder;
+
 //
 //	result handlers
-	void		handleTDCAsyncstream 	(uint8_t *, int16_t);
-	void		handlePackets		(uint8_t *, int16_t);
-	void		handlePacket		(uint8_t *);
+	void		handleTDCAsyncstream (uint8_t *, int16_t);
+	void		handlePackets		 (uint8_t *, int16_t);
+	void		processRSData		 (uint8_t *, uint16_t, uint8_t &);
+	void		handleRSDF			 (uint8_t *);
+	void		applyFEC			 (void);
+	void		Packet2Arr			 (uint8_t *, int16_t, bool);
 	virtual_dataHandler *my_dataHandler;
 };
 

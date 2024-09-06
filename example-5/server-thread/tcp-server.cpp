@@ -68,7 +68,7 @@ void	tcpServer::run (int port) {
 	   fprintf (stderr, "Could not create socket");
 	   return;
 	}
-	fprintf (stderr, "Socket created");
+	fprintf (stderr, "Socket created on port %d ", port);
 	running. store (true);
 //	Prepare the sockaddr_in structure
 	server.sin_family = AF_INET;
@@ -83,7 +83,7 @@ void	tcpServer::run (int port) {
 	   return;
 	}
 	
-	fprintf (stderr, "I am now accepting connections ...\n");
+	fprintf (stderr, "\b, I am now accepting connections ...\n");
 //	Listen
 	listen (socket_desc , 3);
 	while (running) {
