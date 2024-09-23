@@ -509,21 +509,21 @@ bool	err;
 	while ((ad. defined == pd .defined) && (--progSyncTime >= 0)) {
 	   for (uint8_t i = 0; i < programNames. size (); i ++) {
 	      if (matches (programNames [i], programName)) {
-		 programName = programNames [i];
-		 fprintf (stderr, "we now try to start program %s ", programName. c_str ());
-                 if (is_audioService (theRadio, programName. c_str ())) { 
-                    dataforAudioService (theRadio, programName. c_str (), &ad, 0);
-		    dabReset_msc (theRadio);
+		 	programName = programNames [i];
+		 	fprintf (stderr, "we now try to start program %s \n", programName. c_str ());
+            if (is_audioService (theRadio, programName. c_str ())) { 
+                dataforAudioService (theRadio, programName. c_str (), &ad, 0);
+		    	dabReset_msc (theRadio);
      		    set_audioChannel (theRadio, &ad);
      		    fprintf(stderr,"(audio) \n");
-                 } else if (is_dataService (theRadio, programName. c_str ())) {
-		    dataforDataService (theRadio, programName. c_str (), &pd, 0);
-		    dabReset_msc (theRadio);
+            } else if (is_dataService (theRadio, programName. c_str ())) {
+		    	dataforDataService (theRadio, programName. c_str (), &pd, 0);
+		    	dabReset_msc (theRadio);
 	     	    set_dataChannel (theRadio, &pd);
-	     	    fprintf(stderr,"\n"); // (data) is already part of the program name
-                 } else {
+	     	    fprintf(stderr,"DBG: bitRate=%d length=%d prot=%d\n",pd.bitRate,pd.length,pd.protLevel); // (data) is already part of the program name
+            } else {
 		    fprintf(stderr,"Should not happen");
-                 }
+            }
 		 if (ad. defined == pd. defined) {
 		    std::cerr << "sorry  we cannot handle service " << programName << "\n";
 	      	    sighandler (9);
