@@ -1,4 +1,3 @@
-#
 /*
  *    Copyright (C) 2010, 2011, 2012
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -51,7 +50,7 @@
 
 //	Fill in server IP address
 	struct sockaddr_in server;
-	int serverAddrLen;
+//	int serverAddrLen;
 	bzero (&server, sizeof (server));
 
 	struct hostent *host = gethostbyname (hostname. c_str ());
@@ -63,7 +62,7 @@
 	server. sin_port	= htons (basePort);
 
 //	Print a resolved address of server (the first IP of the host)
-	DEBUG_PRINT("server address = %d.%d.%d.%d, port %d",
+	DEBUG_PRINT("server address = %d.%d.%d.%d, port %d\n",
 							host->h_addr_list[0][0] & 0xff,
 							host->h_addr_list[0][1] & 0xff,
 							host->h_addr_list[0][2] & 0xff,

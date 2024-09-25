@@ -329,7 +329,7 @@ std::string ss = s;
 
 void    dabProcessor::dataforAudioService	(const std::string &s,
                                                   audiodata *d, int16_t c) {
-std:string ss = s;
+std::string ss = s;
         my_ficHandler. dataforAudioService (ss, d, c);
 }
 

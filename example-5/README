@@ -10,6 +10,9 @@ It is an experimental extension of example. In example 5 a
 small keyboard listener is added such that touching the "return" key will select
 the "next" program (it will skip data services). All other keys are ignored.
 
+NOTE To use a data service, the name of the data program has to be passed by the
+     -P parameter (e.g. -P TPEG). The receipt data will be output via the TDC port (8888).
+
 Other than example 1, it binds directly to the functionality implementing
 the DAB decoding.
 

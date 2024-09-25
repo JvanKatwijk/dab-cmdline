@@ -9,3 +9,4 @@
 /python-example/build/
 # Ignore vscode data directory
 /.vscode/
+*~
