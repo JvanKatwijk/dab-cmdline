@@ -9,6 +9,12 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 #set (CMAKE_INSTALL_PREFIX /usr/local/bin)
 
+# Enable AddressSanitizer for GCC and Clang
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(SANITIZE_FLAGS "-fsanitize=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SANITIZE_FLAGS}")
+endif()
 
 if(MINGW)
     add_definitions ( -municode)

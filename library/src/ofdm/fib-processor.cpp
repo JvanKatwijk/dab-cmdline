@@ -161,7 +161,7 @@ uint8_t	*d		= p;
 void	fib_processor::process_FIG0 (uint8_t *d) {
 uint8_t	extension	= getBits_5 (d, 8 + 3);
 //uint8_t	CN	= getBits_1 (d, 8 + 0);
-
+	//fprintf(stderr,"DBG::FIB::FIG0: extension=%d\n", extension);
 	switch (extension) {
 	   case 0:
 	      FIG0Extension0 (d);
@@ -458,7 +458,6 @@ int16_t		numberofComponents;
 void	fib_processor::FIG0Extension3 (uint8_t *d) {
 int16_t	used	= 2;
 int16_t	Length	= getBits_5 (d, 3);
-
 	while (used < Length)
 	   used = HandleFIG0Extension3 (d, used);
 }
@@ -473,6 +472,7 @@ int16_t DSCTy           = getBits_6 (d, used * 8 + 18);
 int16_t SubChId         = getBits_6 (d, used * 8 + 24);
 int16_t packetAddress   = getBits (d, used * 8 + 30, 10);
 uint16_t CAOrg;
+//fprintf(stderr,"DBG::FIB::FIG0/3: used=%d SCId = %d, CAOrgflag = %d, DGflag = %d, DSCTy = %d, SubChId = %d, packetAddress = %d\n", used, SCId, CAOrgflag, DGflag, DSCTy, SubChId, packetAddress);
 
 serviceComponent *packetComp = find_packetComponent (SCId);
 serviceId	 *service;
@@ -510,11 +510,11 @@ serviceId	 *service;
            addtoEnsemble (serviceName, service -> serviceId);
 
         packetComp      -> is_madePublic = true;
-        packetComp      -> subchannelId = SubChId;
-        packetComp      -> DSCTy        = DSCTy;
-	packetComp	-> DGflag	= DGflag;
-        packetComp      -> packetAddress        = packetAddress;
-        return used;
+        packetComp      -> subchannelId  = SubChId;
+        packetComp      -> DSCTy         = DSCTy;
+		packetComp		-> DGflag		 = DGflag;
+        packetComp      -> packetAddress = packetAddress;
+		return used;
 }
 //
 //      Service component with CA in stream mode 6.3.3
@@ -720,7 +720,7 @@ int32_t d	= da - ((m + 4) * 153 / 5) + 122;
 int32_t Y	= y - 4800 + ((m + 2) / 12); 
 int32_t M	= ((m + 2) % 12) + 1; 
 int32_t D	= d + 1;
-uint32_t	theTime [6];
+int32_t	theTime [6];
 
 	theTime [0] = Y;	// Year
 	theTime [1] = M;	// Month
@@ -988,6 +988,7 @@ char		label [17];
 	extension	= getBits_3 (d, 8 + 5); 
 	label [16] = 0;
 	(void)Rfu;
+	//fprintf(stderr,"DBG::FIB::FIG1: charSet=%d, extension=%d\n", charSet, extension);
 	switch (extension) {
 /*
 	   default:
@@ -1467,7 +1468,7 @@ serviceId *selectedService;
 	   d	-> DGflag	= ServiceComps [j]. DGflag;
 	   d	-> packetAddress = ServiceComps [j]. packetAddress;
 	   d	-> appType	= ServiceComps [j]. appType;
-	   d	-> defined	= true;
+	   d	-> defined	= (ServiceComps [j]. DSCTy != 0)?true:false;
 	   break;
 	}
 	fibLocker. unlock ();
@@ -1514,7 +1515,7 @@ serviceId *selectedService;
 	   d	-> ASCTy	= ServiceComps [j]. ASCTy;
 	   d	-> language	= selectedService -> language;
 	   d	-> programType	= selectedService -> programType;
-	   d	-> defined	= true;
+	   d	-> defined	= (ServiceComps [j]. DSCTy != 0)?true:false;
 	   break;
 	}
 	fibLocker. unlock ();

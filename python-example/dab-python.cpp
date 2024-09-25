@@ -100,7 +100,7 @@ PyGILState_STATE gstate;
 
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("(b)", b);
-	result  = PyEval_CallObject (callbackSyncSignal, arglist);
+	result  = PyObject_CallObject (callbackSyncSignal, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -121,7 +121,7 @@ PyGILState_STATE gstate;
 
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("(bhi)", b, snr, offs);
-	result  = PyEval_CallObject (callbackSystemData, arglist);
+	result  = PyObject_CallObject (callbackSystemData, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -140,7 +140,7 @@ PyGILState_STATE gstate;
 
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("(h)", q);
-	result  = PyEval_CallObject (callbackFibQuality, arglist);
+	result  = PyObject_CallObject (callbackFibQuality, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result)
@@ -162,7 +162,7 @@ PyGILState_STATE gstate;
 
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("hhh", c1, c2, c3);
-	result  = PyEval_CallObject (callbackProgramQuality, arglist);
+	result  = PyObject_CallObject (callbackProgramQuality, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -181,7 +181,7 @@ PyObject *result;
 	fprintf (stderr, "ensemblename %s. id %d\n", s, id);
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("(si)", s, id);
-	result  = PyEval_CallObject (callbackEnsembleName, arglist);
+	result  = PyObject_CallObject (callbackEnsembleName, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -200,7 +200,7 @@ PyObject *result;
 	fprintf (stderr, "programname %s (%d)\n", s, id);
 	gstate	= PyGILState_Ensure ();
 	arglist = Py_BuildValue ("(si)", s, id);
-	result  = PyEval_CallObject (callbackProgramName, arglist);
+	result  = PyObject_CallObject (callbackProgramName, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -232,7 +232,7 @@ int	i;
 	theArray = PyArray_SimpleNewFromData (2, dims,
 	                            NPY_FLOAT, (void *)data);
 	arglist = Py_BuildValue ("Oii", theArray, size / 2, rate);
-	result  = PyEval_CallObject (callbackAudioOut, arglist);
+	result  = PyObject_CallObject (callbackAudioOut, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (theArray != NULL)
@@ -242,7 +242,32 @@ int	i;
 	PyGILState_Release (gstate);
 }
 
-//	typedef	void (*dataOut_t)	(std::string, void *ctx);
+PyObject *callbackMotData	= NULL;
+static
+void  callback_motData (uint8_t * data, int size,
+                         const char *name, int d, void *ctx) {
+  PyObject *arglist;
+  PyObject *result;
+  PyObject *theArray;
+  PyGILState_STATE gstate;
+
+  gstate	= PyGILState_Ensure ();
+  theArray = PyBytes_FromStringAndSize((const char*)data, size);
+	arglist = Py_BuildValue ("(Ozi)", theArray, name, d);
+	result  = PyObject_CallObject (callbackMotData, arglist);
+	if (arglist != NULL)
+     Py_DECREF (arglist);
+	if (theArray != NULL)
+	   Py_DECREF (theArray);
+	if (result != NULL)
+	   Py_DECREF (result);
+	PyGILState_Release (gstate);
+	(void)result;
+  (void)ctx;
+}
+
+
+//	typedef	void (*dataOut_t)	(char*, void *ctx);
 PyObject *callbackDataOut	= NULL;
 static
 void	callback_dataOut (const char * str, void *ctx) {
@@ -251,8 +276,8 @@ PyObject *result;
 PyGILState_STATE gstate;
 
 	gstate	= PyGILState_Ensure ();
-	arglist = Py_BuildValue ("z", str);
-	result  = PyEval_CallObject (callbackDataOut, arglist);
+	arglist = Py_BuildValue ("(z)", str);
+	result  = PyObject_CallObject (callbackDataOut, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -277,7 +302,7 @@ PyGILState_STATE gstate;
 	                                  d -> length,
 	                                  d -> bitRate,
 	                                  d -> ASCTy);
-	result  = PyEval_CallObject (callbackProgramData, arglist);
+	result  = PyObject_CallObject (callbackProgramData, arglist);
 	if (arglist != NULL)
 	   Py_DECREF (arglist);
 	if (result != NULL)
@@ -322,6 +347,7 @@ PyObject	*cbpN;		// callback for program name
 PyObject	*cbfQ;		// callback for fib quality
 PyObject	*cbaO;		// callback for audioOut
 PyObject	*cbdO;		// callback for dataOut
+PyObject	*cbmO;		// callback for motData
 PyObject	*cbpD;		// callback for program data
 PyObject	*cbpQ;		// callback for program Quality
 bandHandler	dabBand;
@@ -329,7 +355,7 @@ void	*result;
 	interface = new API_struct;
 
 	(void)PyArg_ParseTuple (args,
-	                        "shhOOOOOOOOO",
+	                        "shhOOOOOOOOOO",
 	                         &theChannel,
 	                         &theGain,
 	                         &theMode,
@@ -340,6 +366,7 @@ void	*result;
 	                         &cbfQ,
 	                         &cbaO,
 	                         &cbdO,
+	                         &cbmO,
 	                         &cbpD,
 	                         &cbpQ
 	                       );
@@ -377,6 +404,11 @@ void	*result;
 	}
 
 	if (!PyCallable_Check (cbdO)) {
+	   PyErr_SetString(PyExc_TypeError, "parameter for ensemble must be callable");
+	   goto err;
+	}
+
+	if (!PyCallable_Check (cbmO)) {
 	   PyErr_SetString(PyExc_TypeError, "parameter for ensemble must be callable");
 	   goto err;
 	}
@@ -425,6 +457,11 @@ void	*result;
 	if (callbackDataOut != NULL)
 	   Py_XDECREF (callbackDataOut);
 	callbackDataOut	= cbdO;
+
+	Py_XINCREF (cbmO);
+	if (callbackMotData != NULL)
+	   Py_XDECREF (callbackMotData);
+	callbackMotData	= cbmO;
 
 	Py_XINCREF (cbpD);
 	if (callbackProgramData != NULL)
@@ -477,26 +514,10 @@ void	*result;
 	interface -> programdata_Handler	= (programdata_t)callback_programdata;
 	interface -> program_quality_Handler =
 	                                  (programQuality_t)callback_programQuality;
-	interface -> motdata_Handler	= nullptr;
+	interface -> motdata_Handler	= callback_motData;
 	interface -> tii_data_Handler	= nullptr;
 	interface -> timeHandler		= nullptr;
 	result = dabInit (theDevice,
-//	                  theMode,
-//	                  NULL,			// no spectrum shown
-//	                  NULL,			// no constellation
-//	                  (syncsignal_t)	&callback_syncSignal,
-//	                  (systemdata_t)	&callback_systemData,
-//	                  (ensemblename_t)	&callback_ensembleName,
-//	                  (programname_t)	&callback_programName,
-//	                  (fib_quality_t)	&callback_fibQuality,
-//	                  (audioOut_t)		&callback_audioOut,
-//	                  (dataOut_t)		&callback_dataOut,
-//	                  (bytesOut_t)	        NULL,
-//	                  (programdata_t)	&callback_programdata,
-//	                  (programQuality_t)	&callback_programQuality,
-//	                  NULL,			// no mot slides
-//	                  NULL
-//	                 );
 	                  interface,
 	                  nullptr,		// no spectrum shown
 	                  nullptr,	        // no constellation
@@ -613,8 +634,6 @@ static struct PyModuleDef dab_lib = {
 };
 
 PyObject *PyInit_libdab_lib (void) {
-	if (!PyEval_ThreadsInitialized ())
-	   PyEval_InitThreads ();
 	import_array ();
 	return PyModule_Create (&dab_lib);
 }
