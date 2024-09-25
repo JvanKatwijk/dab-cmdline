@@ -25,21 +25,21 @@
  */
 #include	"device-handler.h"
 
-	deviceHandler::deviceHandler (void) {
+	deviceHandler::deviceHandler () {
 	lastFrequency	= 100000;
 }
 
-	deviceHandler::~deviceHandler (void) {
+	deviceHandler::~deviceHandler () {
 }
 
 bool	deviceHandler::restartReader	(int32_t) {
 	return true;
 }
 
-void	deviceHandler::stopReader	(void) {
+void	deviceHandler::stopReader	() {
 }
 
-void	deviceHandler::run		(void) {
+void	deviceHandler::run		() {
 }
 
 int32_t	deviceHandler::getSamples	(std::complex<float> *v,
@@ -49,22 +49,22 @@ int32_t	deviceHandler::getSamples	(std::complex<float> *v,
 	return 0;
 }
 
-int32_t	deviceHandler::Samples		(void) {
+int32_t	deviceHandler::Samples		() {
 	return 0;
 }
 
-int32_t	deviceHandler::defaultFrequency	(void) {
+int32_t	deviceHandler::defaultFrequency	() {
 	return 220000000;
 }
 
-void	deviceHandler::resetBuffer	(void) {
+void	deviceHandler::resetBuffer	() {
 }
 
 void	deviceHandler::setGain		(int32_t x) {
 	(void)x;
 }
 
-bool	deviceHandler::has_autogain	(void) {
+bool	deviceHandler::has_autogain	() {
 	return false;
 }
 

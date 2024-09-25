@@ -54,16 +54,17 @@ public:
 	                                 int16_t	lnaState,
 	                                 bool		autogain,
 	                                 uint16_t       deviceIndex,
-	                                 int16_t        antenna);
+	                                 int16_t        antenna,
+	                                 bool		X_dump = false;
 
-		~sdrplayHandler		(void);
+		~sdrplayHandler		();
 
 	bool	restartReader		(int32_t);
-	void	stopReader		(void);
+	void	stopReader		();
 	int32_t	getSamples		(std::complex<float> *, int32_t);
-	int32_t	Samples			(void);
-	void	resetBuffer		(void);
-	int16_t	bitDepth		(void);
+	int32_t	Samples			();
+	void	resetBuffer		();
+	int16_t	bitDepth		();
 //
 //	need to be visible, since being accessed from 
 //	within the callback
@@ -82,6 +83,8 @@ private:
 	int16_t		lnaState;
 	std::atomic<bool>	running;
 	mir_sdr_AgcControlT agcMode;
+	bool		X_dump;
+	void		setup_xmlDump ();
 };
 #endif
 

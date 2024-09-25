@@ -30,13 +30,15 @@
 	                                       int16_t	lnaState,
 	                                       bool	autogain,
 	                                       uint16_t	deviceIndex,
-	                                       int16_t	antenna):
+	                                       int16_t	antenna,
+	                                       bool	X_dump):
 	                                          _I_Buffer (4 * 1024 * 1024) {
 	this	-> vfoFrequency	= frequency;
 	this	-> ppmCorrection	= ppmCorrection;
 	this	-> GRdB		= GRdB;
 	this	-> lnaState	= lnaState;
 	this	-> autogain	= autogain;
+	this	-> X_dump	= X_dump;
 	failFlag                = false;
 //
 //	we start the actual handler, but we have to wait until
@@ -49,9 +51,12 @@
            threadHandle. join ();
            throw StartingThreadFailed ();
         }
+
 }
 
 	sdrplayHandler_v3::~sdrplayHandler_v3 () {
+	if (X_dump)
+	   close_xmlDump ();
 	stopReader ();
 }
 
@@ -285,14 +290,15 @@ int			lna_upperBound;
 	      nrBits		= 12;
 	      break;
 	   case 4:		// RSP-Dx
+	   case 7:		// RSP-Dx_2
 	      lna_upperBound	= 26;
 	      denominator	= 2048.0;
 	      nrBits		= 14;
 	      break;
-	   default:
 	   case 255:		// RSP-1A
+	   case 6:		// RSP-1B
 	      lna_upperBound	= 9;
-	      denominator	= 8192.0;
+	      denominator	= 4096.0;
 	      nrBits		= 14;
 	      break;
 	}
@@ -355,3 +361,10 @@ closeAPI:
 	sdrplay_api_ReleaseDevice       (chosenDevice);
         sdrplay_api_Close               ();
 }
+
+void	sdrplayHandler_v3::setup_xmlDump () {
+}
+
+void	sdrplayHandler_v3::close_mlDump () {
+}
+

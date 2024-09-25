@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2014 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB library
  *
@@ -30,7 +30,8 @@
 	                                 int16_t	lnaState,
 	                                 bool		autoGain,
 	                                 uint16_t	deviceIndex,
-	                                 int16_t	antenna) {
+	                                 int16_t	antenna,
+	                                 bool		X_dump) {
 int	err;
 float	ver;
 mir_sdr_DeviceT devDesc [4];
@@ -44,6 +45,7 @@ int	maxlna;
 	   GRdB = 30;
 	this	-> lnaState		= lnaState;
         this    -> deviceIndex          = deviceIndex;
+	this	-> X_dump		= X_dump;
         this    -> agcMode		= autoGain ?
 	                                     mir_sdr_AGC_100HZ :
 	                                     mir_sdr_AGC_DISABLE;
@@ -112,11 +114,15 @@ int	maxlna;
         if (!autoGain)
            mir_sdr_RSP_SetGr (GRdB, lnaState, 1, 0);
 
+	if (X_dump)
+	   setup_xmlDump ();
 	running. store (false);
 }
 
-	sdrplayHandler::~sdrplayHandler	(void) {
+	sdrplayHandler::~sdrplayHandler	() {
 	stopReader ();
+	if (X_dump)
+	   close_xmlDump ();
 	if (numofDevs > 0)
 	   mir_sdr_ReleaseDeviceIdx ();
 	if (_I_Buffer != NULL)
@@ -194,7 +200,7 @@ int	localGRed	= GRdB;
         return true;
 }
 
-void	sdrplayHandler::stopReader	(void) {
+void	sdrplayHandler::stopReader	() {
 	if (!running. load ())
 	   return;
 
@@ -211,10 +217,14 @@ int32_t	sdrplayHandler::Samples	(void) {
 	return _I_Buffer	-> GetRingBufferReadAvailable ();
 }
 
-void	sdrplayHandler::resetBuffer	(void) {
+void	sdrplayHandler::resetBuffer	() {
 	_I_Buffer	-> FlushRingBuffer ();
 }
 
-int16_t	sdrplayHandler::bitDepth	(void) {
+int16_t	sdrplayHandler::bitDepth	() {
 	return nrBits;
 }
+
+void	sdrplayHandler::setup_xmlDump	() {
+}
+

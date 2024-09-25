@@ -50,7 +50,8 @@
 	      break;
 
 	   case 5:			// do know yet
-	      my_dataHandler	= new tdc_dataHandler (appType, bytesOut, ctx);
+	      if (appType == 4)
+	         my_dataHandler	= new tdc_dataHandler (appType, bytesOut, ctx);
 	      break;
 
 	   case 60:
@@ -61,7 +62,7 @@
 	packetState	= 0;
 }
 
-	dataProcessor::~dataProcessor	(void) {
+	dataProcessor::~dataProcessor	() {
 	delete		my_dataHandler;
 }
 
