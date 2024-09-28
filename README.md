@@ -57,6 +57,7 @@ motdata is passed on as uint8_t array, the size of the data is passed,
 the name of the slides - as derived from the DAB data - is passed on.
 See the dab-api for details
 
+
 -----------------------------------------------------------------------
 Disclaimer
 -----------------------------------------------------------------------
@@ -153,6 +154,8 @@ example 2 is the basic one, others are derived.
 	  It contains a simple "keyboard listener", that will react
 	  on entering a stroke on the return key. It will cause the
 	  "next" (audio) service to be selected.
+	  In example 5 there is support for tdc packet handling,
+	  and - thanks to stefan Juhl - support for FEC protected packets.
 
 	- example 6 is an experimental version where stdin is
 	  used as input device (and the command line parameters are
@@ -161,6 +164,10 @@ example 2 is the basic one, others are derived.
 	- the python example seems to work, the cmake file now expects
 	  python3.9 (it should work with other versions as well, adapt the
 	  CMakeLists.tct file)
+
+	- the scanner example is what the name suggests, it scans the band
+	  and shows the content of the channels that carry (detectable)
+	  DAB data
 
 	For all examples it holds that NO garantee is
 	given on their functioning, feel free to improve.
@@ -175,7 +182,7 @@ and collects and emits data about the ensembles and services encountered.
 Output can be sent to a file - ASCII - that can be interpreted
 by Libre Office Calc or similar programs.
 
-The dab-scanner supports rtlsdr, sdrplay, airspy, hackrf, and lime sdr.
+The dab-scanner supports rtlsdr, sdrplay (with support for the 2.13 lib and the 3.XX libraries), airspy, hackrf, and lime sdr.
 
 ![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 

@@ -27,9 +27,7 @@
  */
 	audioSink::audioSink	(int16_t latency,
 	                         std::string soundChannel,
-	                         bool *err):
-	                                             audioBase () {
-int32_t	i;
+	                         bool *err): audioBase () {
 	this	-> latency	= latency;
 	this	-> CardRate	= 48000;
 	_O_Buffer		= new RingBuffer<float>(2 * 32768);
@@ -43,19 +41,19 @@ int32_t	i;
 	portAudio	= true;
 	fprintf (stderr, "Hostapis: %d\n", Pa_GetHostApiCount ());
 
-	for (i = 0; i < Pa_GetHostApiCount (); i ++)
+	for (int i = 0; i < Pa_GetHostApiCount (); i ++)
 	   fprintf (stderr, "Api %d is %s\n", i, Pa_GetHostApiInfo (i) -> name);
 
 	numofDevices	= Pa_GetDeviceCount ();
 	outTable	= new int16_t [numofDevices + 1];
-	for (i = 0; i < numofDevices; i ++)
+	for (int i = 0; i < numofDevices; i ++)
 	   outTable [i] = -1;
 	ostream		= NULL;
 	*err =  !selectDevice (soundChannel);
 }
 
-	audioSink::~audioSink	(void) {
-	if ((ostream != NULL) && !Pa_IsStreamStopped (ostream)) {
+	audioSink::~audioSink	() {
+	if ((ostream != nullptr) && !Pa_IsStreamStopped (ostream)) {
 	   paCallbackReturn = paAbort;
 	   (void) Pa_AbortStream (ostream);
 	   while (!Pa_IsStreamStopped (ostream))
@@ -63,7 +61,7 @@ int32_t	i;
 	   writerRunning = false;
 	}
 
-	if (ostream != NULL)
+	if (ostream != nullptr)
 	   Pa_CloseStream (ostream);
 
 	if (portAudio)

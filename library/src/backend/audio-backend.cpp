@@ -68,8 +68,8 @@ int32_t i, j;
 	   protectionHandler	= new eep_protection (bitRate,
 	                                              protLevel);
 
-	fprintf (stderr, "protection handler is %s\n",
-	                        shortForm ? "uep_protection" : "eep_protection");
+//	fprintf (stderr, "protection handler is %s\n",
+//	                        shortForm ? "uep_protection" : "eep_protection");
 	if (dabModus == DAB) 
 	   our_backendBase = new mp2Processor (bitRate, p, ctx);
 	else
@@ -78,7 +78,7 @@ int32_t i, j;
 	else		// cannot happen
 	   our_backendBase = new backendBase ();
 
-	fprintf (stderr, "we have now %s\n", dabModus == DAB_PLUS ? "DAB+" : "DAB");
+//	fprintf (stderr, "we have now %s\n", dabModus == DAB_PLUS ? "DAB+" : "DAB");
 	tempX . resize (fragmentSize);
 	nextIn			= 0;
 	nextOut			= 0;
@@ -99,14 +99,14 @@ int32_t i, j;
 	start ();
 }
 
-	audioBackend::~audioBackend	(void) {
+	audioBackend::~audioBackend	() {
 int16_t	i;
 	if (running. load ()) {
 	   running. store (false);
 	   threadHandle. join ();
 	}
+//	delete our_backendBase;
 	delete protectionHandler;
-	delete our_backendBase;
 	for (i = 0; i < 16; i ++) 
 	   delete[]  interleaveData [i];
 	delete [] interleaveData;
@@ -122,6 +122,8 @@ void	audioBackend::start		(void) {
 }
 
 int32_t	audioBackend::process	(int16_t *v, int16_t cnt) {
+	if (!running. load ())
+	   return 0;
 	while (!freeSlots. tryAcquire (200))
 	   if (!running. load ())
 	      return 0;

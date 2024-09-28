@@ -35,7 +35,7 @@
 #include        "device-exceptions.h"
 
 static inline
-int64_t         getMyTime       (void) {
+int64_t         getMyTime       () {
 struct timeval  tv;
 
         gettimeofday (&tv, NULL);
@@ -53,7 +53,7 @@ struct timeval  tv;
 	filePointer	= fopen (f. c_str (), "rb");
 	if (filePointer == NULL) {
 	   delete _I_Buffer;
-	   throw OpeningFileFailed(f.c_str(),strerror(errno));
+	   throw OpeningFileFailed (f.c_str(),strerror(errno));
 	}
 
 	this	-> eofHandler	= nullptr;
@@ -80,11 +80,12 @@ struct timeval  tv;
 	running. store (false);
 }
 
-	rawFiles::~rawFiles (void) {
-	if (running. load ())
+	rawFiles::~rawFiles () {
+	if (running. load ()) {
+	   running. store (false);
 	   workerHandle. join ();
-	running. store (false);
-	fclose (filePointer);
+	   fclose (filePointer);
+	}
 	delete _I_Buffer;
 }
 
@@ -95,10 +96,11 @@ bool	rawFiles::restartReader	(int32_t frequency) {
 	return true;
 }
 
-void	rawFiles::stopReader	(void) {
-       if (running. load ())
+void	rawFiles::stopReader	() {
+       if (running. load ()) {
+	   running. store (false);
            workerHandle. join ();
-        running. store (false);
+	}
 }
 
 int32_t	rawFiles::getSamples	(std::complex<float> *V, int32_t size) {
@@ -120,7 +122,7 @@ int32_t	rawFiles::Samples (void) {
 //
 //	The actual interface to the filereader is in a separate thread
 //
-void	rawFiles::run (void) {
+void	rawFiles::run () {
 int32_t	t, i;
 std::complex<float>	*bi;
 int32_t	bufferSize	= 32768;

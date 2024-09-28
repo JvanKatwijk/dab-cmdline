@@ -1468,7 +1468,7 @@ serviceId *selectedService;
 	   d	-> DGflag	= ServiceComps [j]. DGflag;
 	   d	-> packetAddress = ServiceComps [j]. packetAddress;
 	   d	-> appType	= ServiceComps [j]. appType;
-	   d	-> defined	= (ServiceComps [j]. DSCTy != 0)?true:false;
+	   d	-> defined	= true;
 	   break;
 	}
 	fibLocker. unlock ();
@@ -1515,7 +1515,7 @@ serviceId *selectedService;
 	   d	-> ASCTy	= ServiceComps [j]. ASCTy;
 	   d	-> language	= selectedService -> language;
 	   d	-> programType	= selectedService -> programType;
-	   d	-> defined	= (ServiceComps [j]. DSCTy != 0)?true:false;
+	   d	-> defined	= true;
 	   break;
 	}
 	fibLocker. unlock ();

@@ -30,6 +30,7 @@
 #include	"dab-semaphore.h"
 #include	"dab-api.h"
 #include	"virtual-backend.h"
+#include	"data-processor.h"
 #include	"ringbuffer.h"
 
 class	backendBase;
@@ -63,6 +64,6 @@ void	run		(void);
 	int16_t		nextOut;
 
 	protection	*protectionHandler;
-	backendBase	*our_backendBase;
+	dataProcessor	our_backendBase;
 };
 
