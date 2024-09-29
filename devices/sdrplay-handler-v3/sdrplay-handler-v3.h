@@ -41,7 +41,8 @@ public:
                                    int16_t	lnaState,
                                    bool		autogain,
                                    uint16_t	deviceIndex,
-                                   int16_t	antenna);
+                                   int16_t	antenna,
+	                           bool		X_dump = false);
 
 		~sdrplayHandler_v3	();
 	bool    restartReader           (int32_t);
@@ -74,5 +75,8 @@ private:
         uint16_t                deviceIndex;
 	int16_t			antenna;
 	int16_t			nrBits;
+	bool			X_dump;
+	void			setup_xmlDump	();
+	void			close_xmlDump	();
 };
 

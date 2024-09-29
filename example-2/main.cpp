@@ -276,13 +276,15 @@ int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+bool		X_dump		= false;
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:X";
 #elif	HAVE_SDRPLAY_V3
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 3;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:";
+const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:X";
+bool		X_dump		= false;
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
@@ -466,6 +468,10 @@ int	theDuration		= -1;	// no limit
 	         ppmOffset	= atoi (optarg);
 	         break;
 
+	      case 'X':
+	         X_dump		= true;
+	         break;
+
 #elif	HAVE_SDRPLAY_V3
 	      case 'G':
 	         GRdB		= atoi (optarg);
@@ -485,6 +491,10 @@ int	theDuration		= -1;	// no limit
 
 	      case 'p':
 	         ppmOffset	= atoi (optarg);
+	         break;
+
+	      case 'X':
+	         X_dump		= true;
 	         break;
 
 #elif	HAVE_AIRSPY
@@ -570,7 +580,8 @@ int	theDuration		= -1;	// no limit
 	                                      lnaState,
 	                                      autogain,
 	                                      0,
-	                                      0);
+	                                      0,
+	                                      X_dump);
 #elif	HAVE_SDRPLAY_V3
 	   theDevice	= new sdrplayHandler_v3 (frequency,
 	                                      ppmOffset,
@@ -578,7 +589,8 @@ int	theDuration		= -1;	// no limit
 	                                      lnaState,
 	                                      autogain,
 	                                      0,
-	                                      0);
+	                                      0,
+	                                      X_dump);
 #elif	HAVE_AIRSPY
 	   theDevice	= new airspyHandler (frequency,
 	                                     ppmOffset,

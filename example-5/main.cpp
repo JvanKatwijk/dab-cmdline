@@ -1,3 +1,4 @@
+#
 /*
  *    Copyright (C) 2015, 2016, 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
@@ -66,12 +67,17 @@ typedef struct {
 static
 lockingQueue<message> messageQueue;
 
+std::string	theChannel	= "11C";
+deviceHandler	*theDevice	= nullptr;
+
 #define	S_QUIT	0100
 #define	S_NEXT	0101
+#define	S_UPARROW	0102
+#define	S_DOWNARROW	0103
 
-void    printOptions	(void);	// forward declaration
-void	listener	(void);
-void	selectNext	(void);
+void    printOptions	();	// forward declaration
+void	listener	();
+void	selectNextService	();
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
@@ -231,7 +237,6 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 int	main (int argc, char **argv) {
 // Default values
 uint8_t		theMode		= 1;
-std::string	theChannel	= "11C";
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
 #ifdef	HAVE_SDRPLAY
@@ -248,7 +253,6 @@ bool		autogain	= false;
 int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
-deviceHandler	*theDevice;
 #ifdef	HAVE_WAVFILES
 std::string	fileName;
 #elif	HAVE_RAWFILES
@@ -515,10 +519,7 @@ bool	err;
 	   while (!messageQueue. pop (10000, &m));
 	   switch (m. key) {
 	      case S_NEXT:
-	         selectNext ();
-	         break;
-	      case S_QUIT:
-	         run. store (false);
+	         selectNextService ();
 	         break;
 	      default:
 	         break;
@@ -564,7 +565,7 @@ const char *ss2 = s2. c_str ();
 	return *ss2 == 0;
 }
 
-void	selectNext	(void) {
+void	selectNextService	() {
 int16_t	i;
 int16_t	foundIndex	= -1;
 
@@ -605,18 +606,25 @@ int16_t	foundIndex	= -1;
         set_audioChannel (theRadio, &ad);
 }
 
-void	listener	(void) {
+#define	MAX_STRING_SIZE	100
+void	listener	() {
+char input [MAX_STRING_SIZE] = {0};
+
 	fprintf (stderr, "listener is running\n");
 	while (run. load ()) {
-	   char t = getchar ();
 	   message m;
-	   switch (t) {
-	      case '\n':
-	         m.key = S_NEXT;
-	         m. string = "";
-	         messageQueue. push (m);
-	         break;
-	      default:;
+	   fgets (input, sizeof (input), stdin);
+	   int inputLen	= strlev (input):
+	   for (int i = 0; i < inputLen; i ++)
+	      switch (input [i]) {
+	         case '\n':
+	            m.key = S_NEXT;
+	            m. string = "";
+	            messageQueue. push (m);
+	            i = inputLen;	// leave the loop
+	            break;
+
+	         default:;
 //	         fprintf (stderr, "unidentified %d (%c)\n", t, t);
 	   }
 	}
