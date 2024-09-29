@@ -122,7 +122,6 @@ void	ensemblenameHandler (const char *name, int Id, void *userData) {
 	ensembleRecognized. store (true);
 }
 
-
 std::vector<std::string> programNames;
 std::vector<int> programSIds;
 
@@ -172,7 +171,7 @@ void	motdata_Handler (uint8_t *data, int size,
 }
 
 void	tii_data_Handler	(int s, void *p) {
-	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
+//	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
 	(void)p;
 }
 

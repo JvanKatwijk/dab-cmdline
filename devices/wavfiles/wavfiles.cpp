@@ -28,6 +28,7 @@
 #include	<time.h>
 #include	<cstring>
 #include	"wavfiles.h"
+#include	"device-exceptions.h"
 
 static inline
 int64_t		getMyTime	(void) {

@@ -11,6 +11,53 @@ A few callback functions provide the communication back from the
 library to the caller.
 The library interface is given in dab-api.h
 
+----------------------------------------------------------------------
+The C (C++) example programs
+------------------------------------------------------------------------
+
+A number of example programs is included in the source tree, they are meant to
+give an idea on how to use the library code, either as library or
+as "built-in" sources. They might or might not work.
+
+Note that the library depends on a device, but does not include that device.
+The main program is responsible for ensuring that something is available
+to deliver input samples and something is available for handling the output.
+
+
+Invocation of the example programs, with some parameters specified, is
+something like
+     
+	dab-sdrplay-x -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
+
+In this case, the example program was built with the SDRplay as device (other
+possibilities are DABsticks, AIRspy devices, HACKRF and Lime SDR devices (and some
+of the example programs can be configured to take file input)).
+Furthermore, the example program will set the tuner to Band III, channel 12C,
+will select the service "Radio 4". The Gain of the tuner is set to 80 (on 
+a scale from 1 .. 100), the main program will select "default" as
+audio output device.
+The Library code will be set to interpret the input as being of Mode 1.
+
+![example 3 with sdrplay input](/example-3.png?raw=true)
+
+----------------------------------------------------------------------
+Supported devices
+----------------------------------------------------------------------
+
+	- SDRplay RSP's (using 2.13 lib or 3.06 lib)
+	- AIRspy
+	- RTLSDR based devices
+	- HACKRF (only example programs 2, 3, 4)
+	- LimeSDR (only example programs 2, 3 and 4)
+	- Pluto (only example 2)
+
+and of course fileinput of ".raw" and ".sdr" files is supported, as
+well as input through the rtl_tcp driver.
+
+-----------------------------------------------------------------
+Change in the API
+-----------------------------------------------------------------
+
 Since I was unhappy with passing lots of individual callback functions
 through the whole of the computing chain, I made (am making) a
 change to the API and the dabInit function in the API.
@@ -57,6 +104,7 @@ motdata is passed on as uint8_t array, the size of the data is passed,
 the name of the slides - as derived from the DAB data - is passed on.
 See the dab-api for details
 
+
 -----------------------------------------------------------------------
 Disclaimer
 -----------------------------------------------------------------------
@@ -72,50 +120,6 @@ THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
 MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
 PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN
 ERROR BEFORE ASKING ME.
-
-----------------------------------------------------------------------
-The C (C++) example programs
-------------------------------------------------------------------------
-
-A number of example programs is included in the source tree, they are meant to
-give an idea on how to use the library code, either as library or
-as "built-in" sources. They might or might not work.
-
-Note that the library depends on a device, but does not include that device.
-The main program is responsible for ensuring that something is available
-to deliver input samples and something is available for handling the output.
-
-
-Invocation of the example programs, with some parameters specified, is
-something like
-     
-	dab-sdrplay-x -M 1 -B "BAND III" -C 12C -P "Radio 4" -G 80 -A default
-
-In this case, the example program was built with the SDRplay as device (other
-possibilities are DABsticks, AIRspy devices, HACKRF and Lime SDR devices (and some
-of the example programs can be configured to take file input)).
-Furthermore, the example program will set the tuner to Band III, channel 12C,
-will select the service "Radio 4". The Gain of the tuner is set to 80 (on 
-a scale from 1 .. 100), the main program will select "default" as
-audio output device.
-The Library code will be set to interpret the input as being of Mode 1.
-
-![example 3 with sdrplay input](/example-3.png?raw=true)
-
-----------------------------------------------------------------------
-Supported devices
-----------------------------------------------------------------------
-
-	- SDRplay RSP's (using 2.13 lib or 3.06 lib)
-	- AIRspy
-	- RTLSDR based devices
-	- HACKRF (only example programs 2, 3, 4)
-	- LimeSDR (only example programs 2, 3 and 4)
-	- Pluto (only example 2)
-
-and of course fileinput of ".raw" and ".sdr" files is supported, as
-well as input through the rtl_tcp driver.
-
 
 --------------------------------------------------------------------------
 The examples
@@ -153,6 +157,8 @@ example 2 is the basic one, others are derived.
 	  It contains a simple "keyboard listener", that will react
 	  on entering a stroke on the return key. It will cause the
 	  "next" (audio) service to be selected.
+	  In example 5 there is support for tdc packet handling,
+	  and - thanks to stefan Juhl - support for FEC protected packets.
 
 	- example 6 is an experimental version where stdin is
 	  used as input device (and the command line parameters are
@@ -161,6 +167,10 @@ example 2 is the basic one, others are derived.
 	- the python example seems to work, the cmake file now expects
 	  python3.9 (it should work with other versions as well, adapt the
 	  CMakeLists.tct file)
+
+	- the scanner example is what the name suggests, it scans the band
+	  and shows the content of the channels that carry (detectable)
+	  DAB data
 
 	For all examples it holds that NO garantee is
 	given on their functioning, feel free to improve.
@@ -175,7 +185,7 @@ and collects and emits data about the ensembles and services encountered.
 Output can be sent to a file - ASCII - that can be interpreted
 by Libre Office Calc or similar programs.
 
-The dab-scanner supports rtlsdr, sdrplay, airspy, hackrf, and lime sdr.
+The dab-scanner supports rtlsdr, sdrplay (with support for the 2.13 lib and the 3.XX libraries), airspy, hackrf, and lime sdr.
 
 ![dab scanner with sdrplay input](/dab-scanner/dab-scanner.png?raw=true)
 

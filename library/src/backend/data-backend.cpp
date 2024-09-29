@@ -23,10 +23,8 @@
 #
 #include	"dab-constants.h"
 #include	"data-backend.h"
-#include	"backend-base.h"
 #include	"eep-protection.h"
 #include	"uep-protection.h"
-#include	"data-processor.h"
 #include	<chrono>
 
 //
@@ -37,24 +35,23 @@
                                          virtualBackend (d -> startAddr,
                                                          d -> length),
 	                                 outV (24 * d -> bitRate),
-	                                 freeSlots (20) {
-int32_t i, j;
+	                                 freeSlots (20),
+	                                 our_backendBase (d -> bitRate,
+	                                                  d,
+	                                                  p,
+	                                                  ctx) {
         this    -> fragmentSize         = d -> length * CUSize;
         this    -> bitRate              = d -> bitRate;
         this    -> shortForm            = d -> shortForm;
         this    -> protLevel            = d -> protLevel;
-        our_backendBase        = new dataProcessor (bitRate,
-	                                            d,
-	                                            p,
-                                                    ctx);
 	nextIn		= 0;
 	nextOut		= 0;
-	for (i = 0; i < 20; i ++)
+	for (int i = 0; i < 20; i ++)
 	   theData [i] = new int16_t [fragmentSize];
 
 	tempX. resize (fragmentSize);
 	interleaveData		= new int16_t *[16]; // the size
-	for (i = 0; i < 16; i ++) {
+	for (int i = 0; i < 16; i ++) {
 	   interleaveData [i] = new int16_t [fragmentSize];
 	   memset (interleaveData [i], 0, fragmentSize * sizeof (int16_t));
 	}
@@ -74,9 +71,9 @@ int32_t i, j;
 	uint8_t shiftRegister [9];
 	disperseVector. resize (24 * bitRate);
 	memset (shiftRegister, 1, 9);
-	for (i = 0; i < bitRate * 24; i ++) {
+	for (int i = 0; i < bitRate * 24; i ++) {
 	   uint8_t b = shiftRegister [8] ^ shiftRegister [4];
-	   for (j = 8; j > 0; j--)
+	   for (int j = 8; j > 0; j--)
 	      shiftRegister [j] = shiftRegister [j - 1];
 	   shiftRegister [0] = b;
 	   disperseVector [i] = b;
@@ -85,23 +82,22 @@ int32_t i, j;
 	start ();
 }
 
-	dataBackend::~dataBackend (void) {
-int16_t	i;
+	dataBackend::~dataBackend () {
 	if (running. load ()) {
-	   threadHandle. join ();
 	   running. store (false);
+	   threadHandle. join ();
 	}
 
 	delete protectionHandler;
-	for (i = 0; i < 16; i ++)
+	for (int i = 0; i < 16; i ++)
 	   delete[] interleaveData [i];
 	delete[]	interleaveData;
-	for (i = 0; i < 20; i ++)
+	for (int i = 0; i < 20; i ++)
 	   delete [] theData [i];
-	delete	our_backendBase;
 }
 
-void    dataBackend::start         (void) {
+void    dataBackend::start         () {
+	running. store (true);
         threadHandle = std::thread (&dataBackend::run, this);
 }
 
@@ -118,7 +114,7 @@ int32_t	dataBackend::process	(int16_t *v, int16_t cnt) {
 
 const   int16_t interleaveMap[] = {0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
 
-void	dataBackend::run	(void) {
+void	dataBackend::run	() {
 int16_t	i;
 int16_t	countforInterleaver	= 0;
 int16_t interleaverIndex	= 0;
@@ -126,7 +122,7 @@ int16_t interleaverIndex	= 0;
 	running. store (true);
 	while (running. load ()) {
 	   while (!usedSlots. tryAcquire (200))
-	      if (!running)
+	      if (!running. load ())
 	         return;
 
 	   for (i = 0; i < fragmentSize; i ++) {
@@ -154,12 +150,12 @@ int16_t interleaverIndex	= 0;
 //	What we get here is a long sequence (24 * bitrate) of bits, not packed
 //	but forming a DAB packet
 //	we hand it over to make an MSC data group
-	   our_backendBase -> addtoFrame (outV. data ());
+	   our_backendBase. addtoFrame (outV. data ());
 	}
 }
 
 //	It might take a msec for the task to stop
-void	dataBackend::stopRunning (void) {
+void	dataBackend::stopRunning () {
 	running. store (false);
 	threadHandle. join ();
 }

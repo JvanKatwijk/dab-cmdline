@@ -1,0 +1,597 @@
+#
+/*
+ *    Copyright (C) 2015
+ *    Jan van Katwijk (J.vanKatwijk@gmail.com)
+ *    Lazy Chair Programming
+ *
+ *    Added Reed-Solomon-Decoder for Packet Data in 2024
+ *    by Stefan Juhl (stefanjuhl75@gmail.com)
+ *
+ *    This file is part of DAB library
+ *    DAB library is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    DAB library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with DAB library; if not, write to the Free Software
+ *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+#include	"dab-constants.h"
+#include	"data-processor.h"
+#include	"virtual-datahandler.h"
+#include	"mot-handler.h"
+#include	"tdc-datahandler.h"
+#include	<vector>
+#include	<cstdint>
+#include	<cctype> // Für isprint
+#include	<iostream>
+#include	<random>
+#include	<algorithm> // Für std::reverse
+
+
+// Arrays for Reed-Solomon Data Field and Packet CRC Flag
+uint8_t rsf[12][16];	    // Data Field
+//uint8_t pcf[94];		    // Packet CRC Flag
+bool chkRS = false;          // Check Reed-Solomon Decoder
+uint8_t maxCorruptBytes=8;	// Packet CRC Flag
+uint64_t packets=0;	        // Global Packet Counter
+uint64_t skipped=0;	        // Global Packet Counter
+uint8_t cntPkt=0;           // Packet Counter
+uint64_t PktSum=0;          // Sum of Packet Lengths
+
+// CRC calculation
+uint16_t calc_crc_bits(uint8_t *data, uint32_t size) {
+    uint16_t crc = 0xFFFF; // Initial value
+    const ushort generator = 0x1021; /* divisor is 16bit */
+
+    for (size_t byteIndex = 0; byteIndex < size; byteIndex++) {
+          crc ^= (ushort(data[byteIndex]<<15));
+          if ( crc & 0x8000 ) { crc = (ushort((crc<<1) ^ generator));
+          } else { crc <<= 1; }
+    }
+    return ~crc;
+}
+
+/*	The packet CRC shall be a 16-bit CRC word calculated on
+ *	the packet header and the packet data field. It shall be
+ *	generated according to the procedure defined in annex E.
+ *	The generation shall be based on the polynomial
+ *	Recommendation ITU-T X.25 / Annex E of
+ *	ETSI EN 300 401 V2.1.1 (2017-01)
+ */
+uint16_t	calc_crc_bytes (const std::vector<uint8_t>& outVector,
+	                                       size_t start, int16_t len) {
+uint16_t accumulator = 0xFFFF;
+uint16_t genpoly = 0x1021;
+
+	for (int i = 0; i < len; i++) {
+	   int16_t data = outVector[start + i] << 8;
+	   for (int j = 8; j > 0; j--) {
+	      if ((data ^ accumulator) & 0x8000)
+	         accumulator = ((accumulator << 1) ^ genpoly) & 0xFFFF;
+	      else
+	         accumulator = (accumulator << 1) & 0xFFFF;
+	      data = (data << 1) & 0xFFFF;
+	   }
+	}
+
+//	CRC-Wert berechnen
+	uint16_t crc = ~accumulator & 0xFFFF;
+	return crc;
+}
+
+void	printArrayAsHex (uint8_t* array, size_t size) {
+
+	for (size_t i = 0; i < size; ++i) {
+//	   Print each byte as a two-digit hexadecimal value
+	   fprintf (stderr, "%02x", array[i]);
+//	   Optionally: print a new line after every 16 values for readability
+	   if ((i + 1) % 24 == 0) {
+	      fprintf (stderr,"\n     ");
+	   }
+	}
+	fprintf (stderr, "\n");
+}
+
+
+//	Hilfsfunktion zum Ausgeben eines Arrays als ASCII-Zeichen
+void	printArrayAsASCII (const uint8_t* data, size_t length) {
+	for (size_t i = 3; i < (length-5); i++) {
+	   if (isprint (data [i])) {
+	      fprintf (stderr, "%c", data [i]);
+	   } else {
+	      fprintf (stderr, "_");
+	   }
+	}
+	fprintf (stderr, "\n");
+}
+
+//	class dataProcessor
+//	The main function of this class is to assemble the
+//	MSCdatagroups and dispatch to the appropriate handler
+//
+//	fragmentsize == Length * CUSize
+	dataProcessor::dataProcessor	(int16_t	bitRate,
+	                                 packetdata	*pd,
+	                                 API_struct	*p,
+	                                 void	        *ctx):
+	                                 my_rsDecoder (8, 0435, 0, 1, 16) {
+	this	-> bitRate		= pd -> bitRate;
+	this	-> DSCTy		= pd -> DSCTy;
+	this	-> appType		= pd -> appType;
+	this	-> packetAddress	= pd -> packetAddress;
+	this	-> DGflag		= pd -> DGflag;
+	this	-> FEC_scheme		= pd -> FEC_scheme;
+	this    -> pdlen		= pd -> length * 4;
+	this	-> bytesOut		= p  -> bytesOut_Handler;
+// added S. Juhl
+	this    -> mscQuality		= p  -> program_quality_Handler;
+	this	-> ctx			= ctx;
+        RSDims				= 12; 	 // mp4: 8 -> 12 rows
+
+        frameBytes. resize (0);
+	outVector. resize (RSDims * 188); 
+
+        blockFillIndex  = 0;
+        blocksInBuffer  = 0;
+        curMSC		= 16;
+        curPI		= 255;
+
+        frameCount      = 0;
+        frameErrors     = 0;
+        rsErrors        = 0;
+        crcErrors	= 0;
+
+        frame_quality   = 0;
+        rs_quality      = 0;
+
+	fprintf (stderr, "** DBG: dataProcessor: appType=%d FEC=%d DSCTy=%d len=%d(", pd -> appType, FEC_scheme, pd -> DSCTy, pd->length);
+	switch (DSCTy) {
+	   default:
+	      my_dataHandler	= new virtual_dataHandler ();
+	      break;
+
+	   case 5:			// do know yet
+	      if (appType == 4)
+	         my_dataHandler	= new tdc_dataHandler (appType, bytesOut, ctx);
+	      break;
+
+	   case 60:
+	      my_dataHandler	= new motHandler (p -> motdata_Handler, ctx);
+	      break;
+	}
+}
+
+	dataProcessor::~dataProcessor	() {
+	delete		my_dataHandler;
+}
+
+void	dataProcessor::addtoFrame (uint8_t *outV) {
+//	There is - obviously - some exception, that is
+//	when the DG flag is on and there are no datagroups for DSCTy5
+
+	if (++frameCount >= 100) {
+	   frameCount    = 0;
+	   frame_quality = 1 * (100 - frameErrors);
+	   rs_quality    = 100 * (1 - rsErrors/12);
+	   if (mscQuality != nullptr)
+	      mscQuality (frame_quality, rs_quality, 1*(100-crcErrors), ctx);
+	   frameErrors = crcErrors = rsErrors = 0;
+	}
+
+	if ((this -> DSCTy == 5) &&
+	    (this -> DGflag)) {			// no datagroups
+	      handleTDCAsyncstream (outV, 24 * bitRate);
+	}
+	else 
+        if (outV == nullptr) {
+            fprintf (stderr, "AddressSanitizer: Null pointer in addtoFrame\n");
+            exit(22);
+        }
+	handlePackets (outV, 24 * bitRate);	// Data group packets
+}
+
+// Helper function to process RS data (8 Bit to 1 Byte)
+uint8_t	dataProcessor::processRSData (uint8_t *data, uint16_t ind) { 
+uint8_t temp = 0;
+	for (uint8_t j = 0; j < 8; j++) {
+	   temp = (temp << 1) | (data [(ind + 2) * 8 + j] & 0x01);
+	}
+	return temp;
+}
+
+uint8_t AppDTCnt	= 0;
+//
+// While for a full mix data and audio there will be a single packet in a
+// data compartment, for an empty mix, there may be many more
+/*	VERIFIED!   TPEG		appType=4	 FEC=1 344 / ETSI TS 103 551
+	TBD         TPEG_MM		appType=4	 FEC=0 152
+	VERIFIED!   PPP-RTK-AdV	appType=1500 FEC=1 192
+*/
+void	dataProcessor::handlePackets (uint8_t *data, int16_t length) {
+//	Calculate packetLength and address
+uint8_t  packetLength = (getBits_2(data, 0) + 1) * 24;  // 24/48/72/96 bytes
+uint16_t address      =  getBits(data, 6, 10);          // 0 -> only for padding
+
+	if (packetLength > dataProcessor::pdlen)
+	   packetLength = dataProcessor::pdlen;
+    
+//	Check packet for FEC address
+	if (address == 1022) {
+	   handleRSdata (data);      // Reed-Solomon protected packet
+	   if (dataProcessor::pdlen == packetLength)
+	      return;
+
+// If present, process further FEC packets
+	   for (uint8_t cp = 1;
+                cp < (dataProcessor::pdlen/packetLength); cp++) {
+// define a new pointer to the position of 2nd FEC packet
+	      uint8_t *dataz = data + cp * packetLength + 8;
+ // Get address of the 2nd part
+	      address = getBits (dataz, 6, 10);
+	      if (address == 1022) { // another one?
+	         handleRSdata (dataz);
+	         return;
+	      } 
+// skip the FEC packet
+	      data += (address != 1022)?24*8:0;
+	   }	// end for loop 
+	}	// end address = 1022
+	else
+	if (packetLength != dataProcessor::pdlen) {
+//	define a new pointer for 2nd part of the packet
+	   uint8_t *dataz = data + 1 * packetLength + 8;
+//	Get address of the 2nd part
+	   address = getBits (dataz, 6, 10); 
+//	Has to be done, BEFORE processing RS data bytes!
+	   handleAppData (data, packetLength - 5);
+	   if (address == 1022) { 
+	      handleRSdata (dataz);
+	      return;
+	   } 
+//	skip the first part of the packet        
+	   data += (address != 1022) ? 24 * 8 : 0;
+	}
+       
+
+	handleAppData (data, packetLength-5);
+}
+
+// Handle sequence of FEC packets and RS decoding
+void	dataProcessor::handleRSdata (uint8_t *data) {
+const uint16_t RS_PACKET_SIZE	= 22;   // Number of bytes in each RS packet
+const uint16_t MAX_ROWS		= 12;   // Number of rows in RS matrix
+const bool debug = false;
+    
+uint16_t rs_dt_pos	= 0;
+uint8_t col, row, temp	= 0;
+uint8_t Counter;	// = getBits_4(data, 2);
+    
+//	Process Reed-Solomon data
+	for (uint8_t j = 0; j < 1; j++ ) { // j < (DFcnt); j++) {
+	   Counter = getBits_4 (data, j * 24 * 8 + 2); // Counter 0..7
+	   if (true) { 
+	      if (debug)
+	         fprintf (stderr,
+	                  "DBG::handleRSdata:j=%d:Counter#%2d ", j, Counter);
+	      for (int i = 0; i < RS_PACKET_SIZE; i++) { 
+	         temp = processRSData (data, i + 24 * j);
+//	Assign to rsf matrix
+	         rs_dt_pos = RS_PACKET_SIZE * Counter + i;
+	         row = rs_dt_pos / MAX_ROWS;
+	         col = rs_dt_pos % MAX_ROWS;
+	         if (rs_dt_pos < 192) {
+	            rsf [col][row] = temp;
+	            if (debug) {
+	               fprintf (stderr, "%02x", temp);
+	            }
+	         }
+	         else
+	         if (debug) {
+	            fprintf (stderr,
+	                     "%s%02x", (rs_dt_pos == 192)?"|":"",temp); 
+	         }
+	         if (debug && Counter < 0xff) fprintf(stderr, "\n");
+	      }
+	   }
+	}
+        
+//	Apply FEC when all parts are received
+	if (!frameBytes. empty() && Counter >= 8)
+	   applyFEC (); 
+}
+
+// Simulate data corruption by randomly changing bytes in an array
+void corruptData(uint8_t* array, size_t arraySize, size_t numCorruptBytes) {
+    if (numCorruptBytes > arraySize) {
+        std::cerr << "Fehler: Anzahl der zu korrumpierenden Bytes übersteigt die Arraygröße." << std::endl;
+        return;
+    }
+
+    // Initalize random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());  // Mersenne-Twister-Engine für Zufallszahlen
+    std::uniform_int_distribution<> byteIndexDistr(0, arraySize - 1);  // Zufällige Position im Array
+    std::uniform_int_distribution<> byteValueDistr(0, 255);  // Zufälliger Bytewert
+
+    // Randomly corrupt bytes
+    for (size_t i = 0; i < numCorruptBytes; ++i) {
+        size_t index = byteIndexDistr(gen);  // Wähle zufälligen Index im Array
+        //uint8_t oldValue = array[index];     // Alter Wert für Debugging
+        array[index] = byteValueDistr(gen);  // Setze zufälligen neuen Wert
+
+        /* Debug-Ausgabe, falls gewünscht
+        std::cout << "Byte an Position " << index << " geändert von "
+                  << static_cast<int>(oldValue) << " zu "
+                  << static_cast<int>(array[index]) << std::endl;*/
+    }
+}
+
+#include <cstring> // Für memcmp
+#include <cstdio>  // Für fprintf
+// Reed-Solomon decoder verification
+/* NOTE see -> https://scholarworks.calstate.edu/downloads/vh53wz89h
+		(204, 188) REED-SOLOMON CODE ENCODER/DECODER DESIGN, SYNTHESIS, AND SIMULATION ...
+		A graduate project submitted in partial fulfillment of the requirements
+		For the degree of Master of Science in Electrical Engineering
+		By Haoyi Zhang
+		sample data table for dt[0]=1, dt[1]=2 .. dt[187]=188
+		k=51 -> 0xc3e75ac28e7055ab3ff2fb9a015221de */
+void dataProcessor::verifyRSdecoder(uint8_t* rsIn, uint8_t* rseIn, uint8_t* rsOut) { 
+    if (memcmp(rseIn, rsOut, 188) == 0 && !chkRS) {
+        fprintf(stderr,"applyFEC::verifyRSdecoder\n");
+        /* fprintf(stderr,"FEC: ");
+        printArrayAsHex(rsIn, 204); */
+        corruptData(rsIn, 188, maxCorruptBytes); // Simulate data corruption
+        /* fprintf(stderr,"COR: ");
+        printArrayAsHex(rsIn, 188); */
+        my_rsDecoder.dec(rsIn, rsOut, 51);
+        uint8_t rsc = memcmp(rseIn, rsOut, 188);
+        if (rsc == 0) {
+            /* fprintf(stderr,"REC: ");
+            printArrayAsHex(rsOut, 188); */
+            fprintf(stderr,"-> SUCESSFULLY recovered %d corrupted bytes.\n", maxCorruptBytes);
+            chkRS = true;
+        } else {
+            fprintf(stderr,"failed recovering %d corrupted bytes - retrying.\n", maxCorruptBytes);
+            maxCorruptBytes--;
+        }
+    }
+}
+
+//	Apply reed solomon forward error correction
+//	(204, 188) Reed-Solomon code is a truncated version
+//	of RS(255, 239) code. It deletes the
+//	first 51 symbols of RS(255, 239) code since they are all zeros.
+void	dataProcessor::applyFEC () {
+//	Use dynamic memory allocation to avoid frequent stack allocation
+//	Fill up Application Data Table up to 2256 bytes, tbd if necessary
+const bool debug = false;
+uint8_t* rsIn = new uint8_t[204];
+uint8_t* rsOut = new uint8_t[188];
+uint8_t* rseIn = new uint8_t[188];
+//uint8_t pcf[94];		    // Packet CRC Flag
+uint8_t rsc[RSDims];        // RS Result Checker
+
+uint16_t k;
+uint8_t rsek = 0, base = 0; // rse
+    
+	if (debug)
+	   fprintf (stderr,
+	            "DBG: applyFEC on frameBytes[%ld]\n", frameBytes. size ());
+    
+//	Helper function to fill rsIn and rseIn
+	auto fillRsIn = [&](uint16_t j, uint16_t k) {
+	   uint32_t index = (base + j + k * RSDims) % (RSDims * 204);
+	   if (index < frameBytes. size ()) {
+	      rsIn [k] = frameBytes [index];
+	      if (k < 188) {
+	         rseIn [k] = rsIn [k];
+	      }
+	   }
+	   else {
+	      rsIn [k] = 0;
+	   }
+	};
+
+// Apply forward error correction
+	for (uint16_t j = 0; j < RSDims; j++) {
+	   if (debug)
+	      fprintf (stderr, "Row#%02d: ", j + 1);
+	   for (k = 0; k < 204; k++) {
+	      fillRsIn (j, k);
+	      if (k > 187) {
+	         rsIn [k] = rsf [j][k - 188];  // Copy RS Data Field
+	         if (debug)
+	            fprintf (stderr, "%02x", rsf[j][k - 188]);
+	      } 
+	   }
+// braces or rsek += rse; necessary
+	   rsc [j] = ((my_rsDecoder.dec (rsIn, rsOut, 51) < 0) ? 1 : 0);
+	   if (debug)
+	      fprintf (stderr, " %s\n",rsc[j]?"X":"✓");
+	   rsek += rsc[j];
+//	Copy the corrected data to outVector
+	   for (k = 0; k < 188; k++) {
+	      outVector [j + k * RSDims] = rsOut[k]; // Bypass Out[k];
+	   }
+	}
+	fprintf (stderr,
+	         "FEC::RSQ[<%d Err.Bytes] %.1f%% crc=%d\n",
+	         maxCorruptBytes, 100.0 - 100 * rsek / 12, crcErrors);
+    
+//	Post-FEC check for efficiency of RS Decoder
+	verifyRSdecoder (rsIn, rseIn, rsOut);
+
+//	Process packet stream
+	processOutVector (outVector);
+    
+//	Clean up and update error count
+	frameBytes. resize (0);
+	rsErrors += rsek;
+
+//	Free dynamically allocated memory
+	delete[] rsIn;
+	delete[] rsOut;
+	delete[] rseIn;
+}
+
+// convert Bytes back to bit vector
+std::vector<uint8_t> bytes_to_bits (const std::vector<uint8_t>& bytes) {
+std::vector<uint8_t> bits;
+	for (uint8_t byte : bytes) {
+	   for (int i = 7; i >= 0; --i) {
+	      bits.push_back((byte >> i) & 0x01);
+	   } 
+	}
+	return bits;
+}
+
+//	Function to parse FEC processed packet,
+//	see section 5.3.2 of ETSI EN 300 401 V2.1.1 (2017-01)
+void	dataProcessor::processOutVector (const std::vector<uint8_t>& outVector){
+const bool debug = false;
+uint16_t boi=0; 
+uint8_t  packet_length; 
+uint8_t  continuity_index;
+uint8_t  packet_number = 1;
+uint8_t  firstlast_flags;
+uint16_t packet_adrress;
+uint8_t  command_flag;
+uint8_t  useable_length;
+uint16_t packet_crc;
+uint16_t check_crc;
+uint8_t  crc_chk_len;
+
+	while (boi < outVector. size ()) {
+//  2 bits
+	   packet_length    = ((outVector[boi] >> 6) & 0x03) * 24 + 24;
+//  2 bits
+	   continuity_index =  (outVector[boi] & 0x30) >> 4;
+//  2 bits
+	   firstlast_flags  =  (outVector[boi] & 0x0C) >> 2;     
+// 10 bits
+	   packet_adrress   = 
+	                 (outVector[boi] & 0x03) << 8 | outVector[boi + 1];
+//  1 bit
+	   command_flag     =  (outVector[boi + 2] & 0x80) >> 7;
+//  7 bits, <= 91
+	   useable_length   =  (outVector[boi + 2] & 0x7F); 
+    
+//	Data validity checks: packet length, useable data length,
+//	continuity index
+	   if (packet_length > dataProcessor::pdlen)
+	      packet_length = dataProcessor::pdlen;
+	   if (useable_length == 0 || useable_length > 91 ||
+	        (useable_length > dataProcessor::pdlen))
+	      useable_length = packet_length - 5;
+
+//	Calculate CRC check length and perform CRC extraktion and calculation
+	   crc_chk_len      =  packet_length <= dataProcessor::pdlen ?
+	                                  packet_length - 2 : 22;
+	   packet_crc       =  ((outVector [boi + crc_chk_len ]) << 8)  |
+	                        outVector [boi + crc_chk_len + 1];
+	   check_crc        =  calc_crc_bytes (outVector, boi, crc_chk_len); 
+        
+	   if (check_crc != 0x604b) {  // don't care about zeroed packets ...
+//	Check Sequence Continuity
+	      if (curPI > 4 || continuity_index == ((curPI + 1) % 4)) {
+	         curPI = continuity_index;
+	      }
+	      else {
+	         fprintf (stderr,
+	                   "DBG::Continuity Error: %d -> %d\n",
+	                    curPI, continuity_index);
+	         series. resize (0);
+	         curPI=0xff;
+	         return;
+	      }
+            
+//	CRC Check
+	      std::vector<uint8_t> relevant_bytes (outVector.begin() + boi + 3,
+	                     outVector.begin() + boi + 3 + useable_length);
+//	Konvertieren Sie die Bytes in Bits
+	      std::vector<uint8_t> bits = bytes_to_bits (relevant_bytes);
+//	Fügen Sie die Bits zum series-Array hinzu
+	      series. insert (series. end (), bits. begin (), bits. end ());
+
+	      switch (firstlast_flags) {
+	         case 0: // Middle packet
+	            break;
+	         case 2: // First packet
+	            if (series. size () > 0) {
+                        // TBD, what if series is not empty?
+                    }   
+                    break;
+                case 1: // Last packet
+                case 3: // Single packet
+                    my_dataHandler	-> add_mscDatagroup (series); 
+                    series. resize (0);
+                    break;
+	      }
+	   }
+	   boi += crc_chk_len + 2; 
+	   packet_number++;
+	}   
+}
+
+//
+//	Copy data buffer to series array and check crc of packet
+void	dataProcessor::handleAppData (uint8_t *data, int16_t length) {
+uint16_t currentLength	= frameBytes.size();
+uint16_t ccrc		= calc_crc_bits(data, (length +5 - 2) * 8);
+uint16_t pcrc		= getBits(data, (length +5 - 2) * 8, 16);
+uint8_t temp; 
+const bool debug = false;
+
+	crcErrors += (ccrc != pcrc)?1:0;
+	if (debug)
+	   fprintf (stderr, "DBG::handleAppData: length=%d -> |",length);
+    
+	frameBytes. resize (currentLength + (length + 5));
+	for (uint8_t i = 0; i < (length + 5); i++ ) {
+           temp = 0;
+	   for (uint8_t bit = 0; bit < 8; ++bit) {
+	      temp |= (data[i * 8 + bit] & 1) << (7 - bit);
+	   }
+
+	   frameBytes [currentLength + i] = temp;
+	   if (debug) { 
+	      fprintf (stderr, "%02x", temp);
+	      if (i == length + 2) {
+	         fprintf (stderr, "|");
+	      }
+	   }
+	}
+	if (debug)
+	   fprintf (stderr, "|%s\n", (ccrc!=pcrc)?"X":"");
+}
+
+//
+//
+//	Really no idea what to do here
+void	dataProcessor::handleTDCAsyncstream (uint8_t *data, int16_t length) {
+int16_t	packetLength	= (getBits_2 (data, 0) + 1) * 24;
+int16_t	continuityIndex	= getBits_2 (data, 2);
+int16_t	firstLast	= getBits_2 (data, 4);
+int16_t	address		= getBits   (data, 6, 10);
+uint16_t command	= getBits_1 (data, 16);
+int16_t	usefulLength	= getBits_7 (data, 17);
+    fprintf (stderr, "DBG: dataProcessor::handleTDCAsyncstream\n");
+	(void)	length;
+	(void)	packetLength;
+	(void)	continuityIndex;
+	(void)	firstLast;
+	(void)	address;
+	(void)	command;
+	(void)	usefulLength;
+	if (!check_CRC_bits (data, packetLength * 8))
+	   return;
+}

@@ -83,8 +83,8 @@ int16_t	i;
 }
 //
 //
-	interLeaver::~interLeaver (void) {
-	delete	permTable;
+	interLeaver::~interLeaver () {
+	delete []	permTable;
 }
 //
 //	according to the standard, the map is a function from

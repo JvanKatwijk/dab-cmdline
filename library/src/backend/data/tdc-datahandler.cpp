@@ -29,15 +29,22 @@
 	this	-> ctx		= ctx;
 }
 
-	tdc_dataHandler::~tdc_dataHandler (void) {
+	tdc_dataHandler::~tdc_dataHandler () {
 }
 
 void	tdc_dataHandler::add_mscDatagroup (std::vector<uint8_t> m) {
 int32_t offset  = 0;
 uint8_t *data   = (uint8_t *)(m. data ());
 int32_t size    = m. size ();
-int16_t i;
+uint8_t  crcflg  = getBits (data,  1, 1);  // CRC presence flag
 
+//
+//	if the crc flag is ON, check the CRC of the datagroup
+	if (crcflg != 0) {
+	   if  (check_CRC_bits (data, size - 16))
+	      fprintf (stderr, "msc crc is OK\n");
+	}
+	   
 //      we maintain offsets in bits, the "m" array has one bit per byte
         while (offset < size) {
            while (offset + 16 < size) {
@@ -47,6 +54,7 @@ int16_t i;
               else
                  offset += 8;
            }
+
            if (offset + 16 >= size)
               return;
 
@@ -62,25 +70,27 @@ int16_t i;
 //
 //      OK, prepare to check the crc
            uint8_t checkVector [18];
-//
+	
 //      first the syncword and the length
-           for (i = 0; i < 4; i ++)
+           for (uint16_t i = 0; i < 4; i ++)
               checkVector [i] = getBits (data, offset + i * 8, 8);
 //
 //      we skip the crc in the incoming data and take the frametype
            checkVector [4] = getBits (data, offset + 6 * 8, 8);
 
-	   int size = length < 11 ? length : 11;
-           for (i = 0; i < size; i ++)
+	   int fsize = length < 11 ? length : 11;
+           for (uint16_t i = 0; i < fsize; i ++)
               checkVector [5 + i] = getBits (data,  offset + 7 * 8 + i * 8, 8);
-           checkVector [5 + length] = getBits (data, offset + 4 * 8, 8);
-           checkVector [5 + length + 1] =
+           checkVector [5 + fsize] = getBits (data, offset + 4 * 8, 8);
+           checkVector [5 + fsize + 1] =
                                          getBits (data, offset + 5 * 8, 8);
-           if (check_crc_bytes (checkVector, 5 + length + 2) != 0) {
+
+           if (!check_crc_bytes (checkVector, 5 + fsize)){
               fprintf (stderr, "crc failed\n");
               return;
            }
 
+//	   fprintf (stderr, "frametype %d\n", frametypeIndicator);
            if (frametypeIndicator == 0)
               offset = handleFrame_type_0 (data, offset + 7 * 8, length);
            else
@@ -105,9 +115,9 @@ uint8_t	buffer [length];
 #endif
 
 	(void)noS;
-	for (i = 0; i < length; i ++)
+	for (i = 0; i < length; i ++) 
 	   buffer [i] = getBits (data, offset + i * 8, 8);
-
+	
 	if (bytesOut != nullptr)
 	   bytesOut (buffer, length, 0, ctx);
 	return offset + length * 8;
@@ -115,18 +125,37 @@ uint8_t	buffer [length];
 
 int32_t tdc_dataHandler::handleFrame_type_1 (uint8_t *data,
                                              int32_t offset, int32_t length) {
-int16_t i;
 #ifdef _MSC_VER
 uint8_t	*buffer = (uint8_t *)_alloca(length);
 #else
 uint8_t	buffer [length];
 #endif
+int	lOffset;
+int	llengths	= length - 4;
 
-	for (i = 0; i < length; i ++)
+	for (int i = 0; i < length; i ++)
 	   buffer [i] = getBits (data, offset + i * 8, 8);
 
 	if (bytesOut != nullptr)
 	   bytesOut (buffer, length, 1, ctx);
+
+	if (getBits (data, offset + 24, 8) == 0) {	// no encryption
+	   lOffset	= offset + 4 * 8;
+	   do {
+	      int compInd	= getBits (data, lOffset, 8);	
+	      int flength	= getBits (data, lOffset + 8, 16);
+//	      int crc		= getBits (data, lOffset + 3 * 8, 8);
+//#if 0
+	      fprintf (stderr, "segment %d, length %d\n",
+	                                 compInd, flength);
+	      for (int i = 5; i < flength; i ++)
+	         fprintf (stderr, "%c", buffer [i]);
+	      fprintf (stderr, "\n");
+//#endif
+	      lOffset	+= (flength + 5) * 8;
+	      llengths -= flength + 5;
+	   } while (llengths > 10);
+	}
         return offset + length * 8;
 }
 

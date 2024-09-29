@@ -9,6 +9,12 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 #set (CMAKE_INSTALL_PREFIX /usr/local/bin)
 
+# Enable AddressSanitizer for GCC and Clang
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(SANITIZE_FLAGS "-fsanitize=address")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SANITIZE_FLAGS}")
+endif()
 
 if(MINGW)
     add_definitions ( -municode)
@@ -39,9 +45,19 @@ if(DEFINED SDRPLAY)
    set(objectName dab-sdrplay-5)
 endif ()
 
+if(DEFINED SDRPLAY_V3)
+	set(SDRPLAY_V3 true)
+	set(objectName dab-sdrplay-5)
+endif ()
+
 if(DEFINED RTLSDR)
    set(RTLSDR true)
    set(objectName dab-rtlsdr-5)
+endif ()
+
+if( DEFINED PLUTO)
+	set(PLUTOSDR true)
+	set(objectName dab-pluto-5)
 endif ()
 
 if(DEFINED WAVFILES)
@@ -57,6 +73,11 @@ endif ()
 if(DEFINED RTL_TCP)
    set(RTL_TCP true)
    set(objectName dab-rtl_tcp-5)
+endif ()
+
+if(XMLFILES)
+	set(XMLFILES true)
+	set (objectName dab-xml-5)
 endif ()
 
 if (DEFINED SERVER)
@@ -166,6 +187,64 @@ endif ()
 	 add_definitions (-DHAVE_SDRPLAY)
 	endif (SDRPLAY)
 
+	if (SDRPLAY_V3)
+	   find_path (SDRPLAYLIB_INCLUDE_DIR
+                      NAMES sdrplay_api.h
+                      PATHS
+                      /usr/local/include/
+	   )
+           include_directories (${SDRPLAYLIB_INCLUDE_DIR})
+
+           find_library (SDRPLAYLIB sdrplay_api)
+           if(NOT(SDRPLAYLIB))
+              message(FATAL_ERROR "please install -lsdrplay_api")
+           else(NOT(SDRPLAYLIB))
+              list (APPEND extraLibs ${SDRPLAYLIB})
+           endif(NOT(SDRPLAYLIB))
+
+	   include_directories (
+	     ../devices/sdrplay-handler-v3
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/sdrplay-handler-v3/sdrplay-handler-v3.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/sdrplay-handler-v3/sdrplay-handler-v3.cpp
+	   )
+
+	   add_definitions (-DHAVE_SDRPLAY_V3)
+	endif (SDRPLAY_V3)
+
+	if (PLUTOSDR)
+           find_library (PLUTOLIB iio)
+           if(NOT(PLUTOLIB))
+              message(FATAL_ERROR "please install libiio")
+           else(NOT(PLUTOLIB))
+              list (APPEND extraLibs ${PLUTOLIB} "libad9361.so")
+           endif(NOT(PLUTOLIB))
+
+	   include_directories (
+	     ../devices/pluto
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/pluto/dabFilter.h
+	        ../devices/pluto/pluto-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/pluto/pluto-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_PLUTO)
+	endif (PLUTOSDR)
+
 	if (AIRSPY)
            find_package(LibAIRSPY)
            if (NOT LIBAIRSPY_FOUND)
@@ -256,6 +335,29 @@ endif ()
            add_definitions (-DHAVE_RAWFILES)
         endif()
 
+	if (XMLFILES)
+	   include_directories (
+	     ../devices/xml-filereader
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/xml-filereader/rapidxml.hpp
+	        ../devices/xml-filereader/xml-filereader.h
+	        ../devices/xml-filereader/xmlreader.h
+	        ../devices/xml-filereader/element-reader.h
+	        ../devices/xml-filereader/xml-descriptor.h
+	   )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/xml-filereader/xml-filereader.cpp
+	        ../devices/xml-filereader/xml-reader.cpp
+	        ../devices/xml-filereader/xml-descriptor.cpp
+	   )
+
+	   add_definitions (-DHAVE_XMLFILES)
+	endif (XMLFILES)
 #######################################################################
 #
 #	Here we really start
@@ -316,6 +418,7 @@ endif ()
 	     ../library/includes/backend/audio/mp2processor.h 
 	     ../library/includes/backend/data/virtual-datahandler.h 
 	     ../library/includes/backend/data/tdc-datahandler.h 
+#	     ../library/includes/backend/data/adv-datahandler.h 
 	     ../library/includes/backend/data/pad-handler.h 
 	     ../library/includes/backend/data/data-processor.h
 	     ../library/includes/backend/data/mot/mot-handler.h 
@@ -366,6 +469,7 @@ endif ()
 	     ../library/src/backend/audio/mp2processor.cpp 
 	     ../library/src/backend/data/virtual-datahandler.cpp 
 	     ../library/src/backend/data/tdc-datahandler.cpp 
+#	     ../library/src/backend/data/adv-datahandler.cpp 
 	     ../library/src/backend/data/pad-handler.cpp 
 	     ../library/src/backend/data/data-processor.cpp
 	     ../library/src/backend/data/mot/mot-handler.cpp 

@@ -6,9 +6,11 @@ input device is fixed, depending on a setting in the CMakeLists.txt
 file. The output is either to the soundcard (default) or to a file
 (-O option).
 
-It is an experimental extension of example. In example 5 a
+It is an experimental extension of example 2. In example 5 a
 small keyboard listener is added such that touching the "return" key will select
-the "next" program (it will skip data services). All other keys are ignored.
+the "next" program. All other keys are ignored.
+With 'a' key visibility of the DLS is controlled, with the 'b' key
+the visibility of the quality indicator.
 
 Other than example 1, it binds directly to the functionality implementing
 the DAB decoding.
@@ -21,7 +23,7 @@ FEEL FREE TO IMPROVE THE PROGRAM
 
 Points to note:
 
-The "-W" parameter (to specify Waiting time) is changed into tw
+The "-W" parameter (to specify Waiting time) is changed into two
 parameters
 	"-d" to indicate the time within which timesynchronization must be
 	accomplished;
@@ -46,3 +48,6 @@ header into account
 
 The bytesOut function puts the data into a simple TCP server that can be 
 read from port 8888 (depending on the configuration).
+
+Added is the possibility to use xml files as input device.
+

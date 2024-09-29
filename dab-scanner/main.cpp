@@ -53,14 +53,14 @@
 using std::cerr;
 using std::endl;
 
-void    printOptions	(void);	// forward declaration
+void    printOptions	();	// forward declaration
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
 std::atomic<bool> run;
 
 static
-void	*theRadio	= NULL;
+void	*theRadio	= nullptr;
 
 static
 std::atomic<bool>timeSynced;
@@ -140,7 +140,7 @@ static
 void	bytesOut_Handler (uint8_t *data, int16_t amount,
 	                  uint8_t type, void *ctx) {
 	(void)data;
-	(void)amount;
+	(void)amount; (void)type;
 	(void)ctx;
 }
 //
@@ -235,7 +235,7 @@ bool firstEnsemble = true;
 	   switch (opt) {
 	      case 'F':
 	         outFile	= fopen (optarg, "w");
-	         if (outFile == NULL)
+	         if (outFile == nullptr)
 	            outFile = stderr;
 	         break;
 
@@ -437,7 +437,7 @@ bool firstEnsemble = true;
 	                           nullptr,		// no constellations
 	                           nullptr
 	                          );
-	if (theRadio == NULL) {
+	if (theRadio == nullptr) {
 	   fprintf (stderr, "sorry, no radio available, fatal\n");
 	   exit (4);
 	}

@@ -2,7 +2,7 @@
 /*
  *    Copyright (C) 2012 .. 2017
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB library
  *
@@ -75,15 +75,15 @@ public:
 	                                 uint16_t	deviceIndex = 0,
 	                                 const char *	deviceSerial = 0,
 	                                 const char *	deviceOpts = 0 );
-			~rtlsdrHandler	(void);
+			~rtlsdrHandler	();
 //	interface to the reader
 	bool		restartReader	(int32_t	frequency);
-	void		stopReader	(void);
+	void		stopReader	();
 	int32_t		getSamples	(std::complex<float> *, int32_t);
-	int32_t		Samples		(void);
-	void		resetBuffer	(void);
-	int16_t		maxGain		(void);
-	int16_t		bitDepth	(void);
+	int32_t		Samples		();
+	void		resetBuffer	();
+	int16_t		maxGain		();
+	int16_t		bitDepth	();
 	void		startDumping	(std::string, uint32_t);
 	void		stopDumping	();
 //

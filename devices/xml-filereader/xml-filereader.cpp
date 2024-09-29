@@ -27,7 +27,7 @@
 #include	<fcntl.h>
 #include	<sys/time.h>
 #include	<ctime>
-
+#include	"device-exceptions.h"
 #include	"xml-descriptor.h"
 #include	"xml-reader.h"
 

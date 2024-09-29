@@ -365,6 +365,6 @@ closeAPI:
 void	sdrplayHandler_v3::setup_xmlDump () {
 }
 
-void	sdrplayHandler_v3::close_mlDump () {
+void	sdrplayHandler_v3::close_xmlDump () {
 }
 

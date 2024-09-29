@@ -83,7 +83,7 @@ class OpeningFileFailed : public std::exception {
       char message[MAX_MESSAGE_SIZE];
 
     public:
-      OpeningFileFailed(char * file ,char * error) {
+      OpeningFileFailed (const char * file, char * error) {
         snprintf(this->message, MAX_MESSAGE_SIZE, "Unable to open %s because: %s", file, error);
       };
 

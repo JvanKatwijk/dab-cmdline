@@ -78,8 +78,8 @@ int i, j, root, iprim;
 	   generator [i] = myGalois. poly2power (generator [i]);
 }
 
-	reedSolomon::~reedSolomon	(void) {
-	delete generator;
+	reedSolomon::~reedSolomon	() {
+	delete [] generator;
 }
 
 //
