@@ -2,30 +2,27 @@
 /*
  *    Copyright (C) 2014
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License. 
- *    All copyrights of the original authors are recognized.
+ *    This file is part of the DAB library
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    DAB library is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    DAB library is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-#ifndef __EXTIO_HANDLER
-#define	__EXTIO_HANDLER
+#ifndef __EXTIO_HANDLER_
+#define	__EXTIO_HANDLER_
 #
 #include	<QWidget>
 #include	<QComboBox>
@@ -44,21 +41,21 @@ class		virtualReader;
 
 typedef	int	(*pfnExtIOCallback) (int cnt, int status, float IQoffs, void *IQdata);
 typedef bool (STDCALL *pfnInitHW)(char *, char *, int& ); // 
-typedef bool (STDCALL *pfnOpenHW)(void);
-typedef void (STDCALL *pfnCloseHW)(void);
+typedef bool (STDCALL *pfnOpenHW)();
+typedef void (STDCALL *pfnCloseHW)();
 typedef int  (STDCALL *pfnStartHW)(long);
-typedef void (STDCALL *pfnStopHW)(void);
+typedef void (STDCALL *pfnStopHW)();
 typedef int  (STDCALL *pfnSetHWLO)(long);
 typedef	void (STDCALL *pfnSetCallback)(pfnExtIOCallback funcptr);
-typedef int  (STDCALL *pfnGetStatus)(void);
+typedef int  (STDCALL *pfnGetStatus)();
 //
-typedef long (STDCALL *pfnGetHWLO)(void);
-typedef	long (STDCALL *pfnGetHWSR)(void);
+typedef long (STDCALL *pfnGetHWLO)();
+typedef	long (STDCALL *pfnGetHWSR)();
 typedef void (STDCALL *pfnRawDataReady)(long, void *, void *, int);
-typedef void (STDCALL *pfnShowGUI)(void);
-typedef void (STDCALL *pfnHideGUI)(void);
-typedef long (STDCALL *pfnGetTune)(void);
-typedef	uint8_t (STDCALL *pfnGetMode)(void);
+typedef void (STDCALL *pfnShowGUI)();
+typedef void (STDCALL *pfnHideGUI)();
+typedef long (STDCALL *pfnGetTune)();
+typedef	uint8_t (STDCALL *pfnGetMode)();
 typedef void (STDCALL *pfnModeChanged)(char);
 typedef void (STDCALL *pfnTuneChanged)(long freq);
 typedef void (STDCALL *pfnIfLimitsChanged)(long low, long high);

@@ -55,6 +55,11 @@ if(DEFINED RTLSDR)
    set(objectName dab-rtlsdr-5)
 endif ()
 
+if( DEFINED PLUTO)
+	set(PLUTOSDR true)
+	set(objectName dab-pluto-5)
+endif ()
+
 if(DEFINED WAVFILES)
    set(WAVFILES true)
    set(objectName dab-files-5)
@@ -213,6 +218,32 @@ endif ()
 
 	   add_definitions (-DHAVE_SDRPLAY_V3)
 	endif (SDRPLAY_V3)
+
+	if (PLUTOSDR)
+           find_library (PLUTOLIB iio)
+           if(NOT(PLUTOLIB))
+              message(FATAL_ERROR "please install libiio")
+           else(NOT(PLUTOLIB))
+              list (APPEND extraLibs ${PLUTOLIB} "libad9361.so")
+           endif(NOT(PLUTOLIB))
+
+	   include_directories (
+	     ../devices/pluto
+	   )
+
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/pluto/dabFilter.h
+	        ../devices/pluto/pluto-handler.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/pluto/pluto-handler.cpp
+	   )
+
+	 add_definitions (-DHAVE_PLUTO)
+	endif (PLUTOSDR)
 
 	if (AIRSPY)
            find_package(LibAIRSPY)

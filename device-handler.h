@@ -1,8 +1,8 @@
 #
 /*
- *    Copyright (C) 2010, 2011, 2012
+ *    Copyright (C) 2010, 2011, 2012, 2024
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
- *    Lazy Chair Programming
+ *    Lazy Chair Computing
  *
  *    This file is part of the DAB library
  *
@@ -48,17 +48,17 @@ using namespace std;
 
 class	deviceHandler {
 public:
-			deviceHandler 	(void);
-virtual			~deviceHandler 	(void);
-virtual		int32_t	defaultFrequency	(void);
+			deviceHandler 	();
+virtual			~deviceHandler 	();
+virtual		int32_t	defaultFrequency	();
 virtual		bool	restartReader	(int32_t);
-virtual		void	stopReader	(void);
+virtual		void	stopReader	();
 virtual		int32_t	getSamples	(std::complex<float> *, int32_t);
-virtual		int32_t	Samples		(void);
-virtual		void	resetBuffer	(void);
-virtual		int16_t	bitDepth	(void) { return 10;}
+virtual		int32_t	Samples		();
+virtual		void	resetBuffer	();
+virtual		int16_t	bitDepth	() { return 10;}
 virtual		void	setGain		(int32_t);
-virtual		bool	has_autogain	(void);
+virtual		bool	has_autogain	();
 virtual		void	set_autogain	(bool);
 //
 //	for the sdrplay
@@ -69,6 +69,6 @@ protected:
 		int32_t	lastFrequency;
 	        int32_t	vfoOffset;
 	        int	theGain;
-virtual		void	run		(void);
+virtual		void	run		();
 };
 #endif

@@ -51,6 +51,8 @@
 #include	"xml-filereader.h"
 #elif	HAVE_RTL_TCP
 #include	"rtl_tcp-client.h"
+#elif   HAVE_PLUTO
+#include        "pluto-handler.h"
 #endif
 
 #define DATA_STREAMER true
@@ -255,7 +257,7 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 
 int	main (int argc, char **argv) {
 // Default values
-std::string	commandParams	= "";
+std::string	optionsString	= "";
 uint8_t		theMode		= 1;
 uint8_t		theBand		= BAND_III;
 int16_t		ppmCorrection	= 0;
@@ -274,21 +276,24 @@ int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 #if defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES) || defined (HAVE_XMLFILES)
-	commandParams		= "D:d:M:B:P:A:L:S:F:O:";
+	optionsString		= "D:d:M:B:P:A:L:S:F:O:";
 std::string	fileName;
 bool            repeater        = true;
 #elif HAVE_RTL_TCP
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
-	commandParams	="D:d:M:B:P:A:L:S:F:OR:";
-
+	optionsString	="D:d:M:B:P:A:L:S:F:OR:";
+#elif   HAVE_PLUTO
+int16_t         gain            = 60;
+bool            autogain        = true;
+const char      *optionsString  = "T:D:d:M:B:P:O:A:C:G:Q";
 #endif
 bool	err;
 
 	fprintf (stderr, "dab_cmdline V 1.0 example 5,\n \
 	                  Copyright 2017 J van Katwijk, Lazy Chair Computing\n");
-	if (commandParams == "")
-	   commandParams = "D:d:M:B:C:P:G:A:L:S:H:I:QO:";
+	if (optionsString == "")
+	   optionsString = "D:d:M:B:C:P:G:A:L:S:H:I:QO:";
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
@@ -300,7 +305,7 @@ bool	err;
 
 //	For file input we do not need options like Q, G and C,
 //	We do need an option to specify the filename
-	while ((opt = getopt (argc, argv, commandParams. c_str ())) != -1) {
+	while ((opt = getopt (argc, argv, optionsString. c_str ())) != -1) {
 	   switch (opt) {
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
@@ -358,11 +363,11 @@ bool	err;
 	      case 'L':
 	         latency	= atoi (optarg);
 	         break;
-#endif
 
 	      case 'Q':
 	         autogain	= true;
 	         break;
+#endif
 
 #ifdef	HAVE_RTL_TCP
 	      case 'H':
@@ -422,6 +427,9 @@ bool	err;
 	                                     ppmCorrection,
 	                                     theGain,
 	                                     autogain);
+#elif   HAVE_PLUTO
+           theDevice    = new plutoHandler  frequency,
+	                                     theGain, autogain);
 #elif	HAVE_WAVFILES
 	   theDevice	= new wavFiles (fileName);
 #elif	HAVE_RAWFILES
