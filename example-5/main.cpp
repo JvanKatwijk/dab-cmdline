@@ -275,10 +275,10 @@ bool		autogain	= false;
 int	opt;
 struct sigaction sigact;
 bandHandler	dabBand;
-#if defined (HAVE_WAVFILES) || defined (HAVE_RAWFILES) || defined (HAVE_XMLFILES)
-	optionsString		= "D:d:M:B:P:A:L:S:F:O:";
+#if	defined(HAVE_WAVFILES) || defined (HAVE_RAWFILES) || defined (HAVE_XMLFILES)
 std::string	fileName;
 bool            repeater        = true;
+	optionsString		= "D:d:M:B:P:A:L:S:F:O:";
 #elif HAVE_RTL_TCP
 std::string	hostname = "127.0.0.1";		// default
 int32_t		basePort = 1234;		// default
@@ -364,9 +364,6 @@ bool	err;
 	         latency	= atoi (optarg);
 	         break;
 
-	      case 'Q':
-	         autogain	= true;
-	         break;
 #endif
 
 #ifdef	HAVE_RTL_TCP
@@ -378,6 +375,9 @@ bool	err;
 	         basePort	= atoi (optarg);
 	         break;
 #endif
+	      case 'Q':
+	         autogain	= true;
+	         break;
 	      case 'O':
 	         soundOut	= new fileSink (std::string (optarg), &err);
 	         if (!err) {
@@ -671,6 +671,7 @@ int16_t	foundIndex	= -1;
 void	listener	() {
 char input [MAX_STRING_SIZE] = {0};
 
+	fprintf (stderr, "listener is running\n");
 	while (run. load ()) {
 	   message m;
 	   fgets (input, sizeof (input), stdin);
@@ -683,6 +684,7 @@ char input [MAX_STRING_SIZE] = {0};
 	            messageQueue. push (m);
 	            i = inputLen;	// leave the loop
 	            break;
+
 	         case 'x':
 	         case 'q':
 	            m. key = S_QUIT;
