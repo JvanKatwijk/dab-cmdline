@@ -228,3 +228,7 @@ int16_t	sdrplayHandler::bitDepth	() {
 void	sdrplayHandler::setup_xmlDump	() {
 }
 
+void	sdrplayHandler::close_xmlDump	() {
+}
+
+

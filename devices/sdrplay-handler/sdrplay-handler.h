@@ -55,7 +55,7 @@ public:
 	                                 bool		autogain,
 	                                 uint16_t       deviceIndex,
 	                                 int16_t        antenna,
-	                                 bool		X_dump = false;
+	                                 bool		X_dump = false);
 
 		~sdrplayHandler		();
 
@@ -84,7 +84,8 @@ private:
 	std::atomic<bool>	running;
 	mir_sdr_AgcControlT agcMode;
 	bool		X_dump;
-	void		setup_xmlDump ();
+	void		setup_xmlDump	();
+	void		close_xmlDump	();
 };
 #endif
 

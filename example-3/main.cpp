@@ -288,7 +288,7 @@ const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:p:S:";
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:p:Q:S:";
+const char	*optionsString	= "i:T:D:d:M:B:P:O:A:C:G:p:QS:";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
