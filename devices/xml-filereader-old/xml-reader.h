@@ -38,7 +38,7 @@ class	xml_Reader {
 public:
 			xml_Reader (FILE		*f,
 	                            xmlDescriptor	*fd,
-	                            uint64_t		filePointer,
+	                            uint32_t		filePointer,
 	                            RingBuffer<std::complex<float>> *b,
 	                            bool		continue_on_eof);
 			~xml_Reader	();
@@ -47,15 +47,15 @@ private:
 	bool		continue_on_eof;
 	FILE		*file;
 	xmlDescriptor	*fd;
-	uint64_t	filePointer;
+	uint32_t	filePointer;
 	RingBuffer<std::complex<float>> *sampleBuffer;
-	uint64_t	nrElements;
-	uint64_t	samplesToRead;
+	int		nrElements;
+	int		samplesToRead;
 	std::atomic<bool> running;
 	void		run ();
 	std::thread	threadHandle;
-	uint64_t	compute_nrSamples 	(FILE *f, int blockNumber);
-	uint64_t	readSamples		(FILE *f, 
+	int		compute_nrSamples 	(FILE *f, int blockNumber);
+	int		readSamples		(FILE *f, 
 	                                       void(xml_Reader::*)(FILE *,
 	                                          std::complex<float> *, int));
 	void		readElements_IQ		(FILE *f,

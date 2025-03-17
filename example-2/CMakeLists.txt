@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 3.25 )
 set (objectName dab_cmdline-2)
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
 #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
@@ -164,6 +164,7 @@ endif ()
         if (NOT FFTW3F_FOUND)
             message(FATAL_ERROR "please install FFTW3")
         endif ()
+        list(APPEND extraLibs ${FFTW3F_LIBRARIES})
 
         find_package(Faad)
         if (NOT FAAD_FOUND )
@@ -665,7 +666,6 @@ endif ()
         endif()
 
 	target_link_libraries (${objectName}
-	                       ${FFTW3F_LIBRARIES}
 	                       ${extraLibs}
 	                       ${FAAD_LIBRARIES}
 	                       ${CMAKE_DL_LIBS}

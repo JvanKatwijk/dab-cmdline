@@ -49,7 +49,7 @@ private:
 	std::atomic<bool>	running;
 	std::string		fileName;
 	RingBuffer<std::complex<float>>	*_I_Buffer;
-	uint64_t		filePointer;
+	uint32_t		filePointer;
 	xmlDescriptor		*theDescriptor;
 	xml_Reader		*theReader;
 };

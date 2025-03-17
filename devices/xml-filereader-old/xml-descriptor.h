@@ -35,9 +35,9 @@ public:
 			~Blocks		() {}
 	int		blockNumber;
 	int		nrElements;
-	std::string	typeofUnit;
+	std::string		typeofUnit;
 	int		frequency;
-	std::string	modType;
+	std::string		modType;
 };
 
 class xmlDescriptor {
@@ -65,7 +65,7 @@ public:
 	             	                 std::string	byteOrder);
 	void		addChannelOrder (int channelOrder,
 	                                 std::string Value);
-	void		add_dataBlock (int currBlock,  uint64_t Count,
+	void		add_dataBlock (int currBlock,  int Count,
                                        int  blockNumber, std::string Unit);
 	void		add_freqtoBlock	(int blockno, int freq);
 	void		add_modtoBlock (int blockno, std::string modType);

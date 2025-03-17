@@ -75,7 +75,7 @@ void	xmlDescriptor::addChannelOrder (int channelOrder, std::string Value) {
 	   this -> iqOrder = "QI";
 }
 
-void	xmlDescriptor::add_dataBlock (int currBlock,  uint64_t Count,
+void	xmlDescriptor::add_dataBlock (int currBlock,  int Count,
                                       int  blockNumber, std::string Unit) {
 Blocks	b;
 	b. blockNumber	= blockNumber;
@@ -241,9 +241,7 @@ int	zeroCount = 0;
 	               if (std::string (attr -> name ()) == "Channel")
 	                  Unit = std::string (attr -> value ());
 	            }
-	            char *nix;
-	            add_dataBlock (currBlock,
-	                         std::strtol (Count. c_str (), &nix, 10),
+	            add_dataBlock (currBlock, std::stoi (Count),
 	                                      std::stoi (Number), Unit);
 
 	            xml_node <>* subsubNode = subNode -> first_node ();
