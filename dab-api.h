@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef		__DAB_API__
-#define		__DAB_API__
+#pragma once
 #include	<stdio.h>
 #include	<stdint.h>
 #include	<string>
@@ -45,7 +44,7 @@
 
 //	Experimental API for controlling the dab software library
 //
-//	Version 3.0
+//	Version 4.0
 //	Examples of the use of the DAB-API library are found in the
 //	directories
 //	a. C++ Example, which gives a simple command line interface to
@@ -54,12 +53,16 @@
 
 #include	<stdint.h>
 #include	"device-handler.h"
+#include	"dab-constants.h"
 //
 //
 //	This struct (a pointer to) is returned by callbacks of the type
 //	programdata_t. It contains parameters, describing the service.
 typedef struct {
 	bool	defined;
+	std::string	serviceName;
+	std::string	shortName;
+	uint32_t	SId;
 	int16_t subchId;
 	int16_t	startAddr;
 	bool	shortForm;	// false EEP long form
@@ -77,6 +80,11 @@ typedef struct {
 //
 typedef	struct {
 	bool	defined;
+	std::string serviceName;
+	std::string shortName;
+	uint32_t	SId;
+	int16_t		programType;
+	
 	int16_t	subchId;
 	int16_t	startAddr;
 	bool	shortForm;
@@ -85,8 +93,6 @@ typedef	struct {
 	int16_t	bitRate;
 	int16_t	ASCTy;
 	int16_t	language;
-	int16_t	programType;
-	bool	is_madePublic;
 } audiodata;
 
 //////////////////////// C A L L B A C K F U N C T I O N S ///////////////
@@ -110,10 +116,11 @@ typedef	struct {
 //
 //	the ensemblename is sent whenever the library detects the
 //	name of the ensemble
-	typedef void (*ensemblename_t)(const char *, int32_t, void *);
+	typedef void (*name_of_ensemble_t)(const std::string &, int32_t, void *);
 //
 //	Each programname in the ensemble is sent once
-	typedef	void (*programname_t)(const char *, int32_t, void *);
+	typedef	void (*serviceName_t)(const std::string &,
+	                                  int32_t, uint16_t, void *);
 //
 //	thefib sends the time as pair of integers
 	typedef void	(*theTime_t)(int hours, int minutes, void *);
@@ -154,7 +161,7 @@ typedef	struct {
 //
 //	tii data - if available, the tii data is passed on as a single
 //	integer
-	typedef void (*tii_data_t)(int, void *);
+	typedef void (*tii_data_t)(tiiData *, void *);
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -173,8 +180,8 @@ typedef struct {
 	uint8_t		dabMode;
 	syncsignal_t	syncsignal_Handler;
 	systemdata_t	systemdata_Handler;
-	ensemblename_t	ensemblename_Handler;
-	programname_t	programname_Handler;
+	name_of_ensemble_t	name_of_ensemble;
+	serviceName_t	serviceName;
 	fib_quality_t	fib_quality_Handler;
 	audioOut_t	audioOut_Handler;
 	dataOut_t	dataOut_Handler;
@@ -215,37 +222,41 @@ void DAB_API	dabReset_msc		(void *);
 //
 //	is_audioService will return true id the main service with the
 //	name is an audioservice
-bool DAB_API	is_audioService		(void *, const char *);
+bool DAB_API	is_audioService		(void *, const std::string &);
 //
 //	is_dataService will return true id the main service with the
 //	name is a dataservice
-bool DAB_API	is_dataService		(void *, const char *);
+bool DAB_API	is_dataService		(void *, const std::string &);
 //
 //	dataforAudioService will search for the audiodata of the i-th
 //	(sub)service with the name as given. If no such service exists,
 //	the "defined" bit in the struct will be set to false;
-void DAB_API	dataforAudioService	(void *, const char *, audiodata *, int);
+void DAB_API	dataforAudioService	(void *, const std::string &,
+	                                            audiodata &, int);
 //
 //	dataforDataService will search for the packetdata of the i-th
 //	(sub)service with the name as given. If no such service exists,
 //	the "defined" bit in the struct will be set to false;
-void DAB_API	dataforDataService	(void *, const char *, packetdata *, int);
+void DAB_API	dataforDataService	(void *, const std::string &,
+	                                           packetdata &, int);
 //
 //	set-audioChannel will add - if properly defined - a handler
 //	for handling the audiodata as described in the parameter
 //	to the list of active handlers
-void DAB_API	set_audioChannel	(void *, audiodata *);
+void DAB_API	set_audioChannel	(void *, audiodata &);
 //
 //	set-dataChannel will add - if properly defined - a handler
 //	for handling the packetdata as described in the parameter
 //	to the list of active handlers
-void DAB_API	set_dataChannel		(void *, packetdata *);
+void DAB_API	set_dataChannel		(void *, packetdata &);
 //
 //	mapping from a name to a Service identifier is done 
-int32_t DAB_API dab_getSId		(void *, const char*);
+int32_t DAB_API dab_getSId		(void *, const std::string &);
 //
 //	and the other way around, mapping the service identifier to a name
-void DAB_API	dab_getserviceName	(void *, int32_t, char *);
+std::string DAB_API	dab_getserviceName	(void *, uint32_t /* SId */);
 }
-#endif
+//
+//	extract the name of the ensemble
+std::string DAB_API	get_ensembleName	(void *);
 

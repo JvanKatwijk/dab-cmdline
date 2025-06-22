@@ -252,7 +252,7 @@ int	dataProcessor::addPacket (uint8_t *vec,
 	                          int fillPointer) {
 	int16_t	packetLength	= (getBits_2 (vec, 0) + 1) * 24;
 //	Assert theBuffer. size () == RDIMS * FRAMESIZE + 48
-	if (fillPointer + packetLength > theBuffer. size ()) {
+	if ((uint32_t)fillPointer + packetLength > theBuffer. size ()) {
 	   clear_FECtable ();
 	   return 0;
 	}
@@ -261,7 +261,7 @@ int	dataProcessor::addPacket (uint8_t *vec,
 	   uint8_t temp = 0;
 	   for (int j = 0; j < 8; j ++)
 	      temp = (temp << 1) | (vec [i * 8 + j] == 0 ? 0 : 1);
-	   if (fillPointer + i >= theBuffer. size ())
+	   if ((uint32_t)fillPointer + i >= theBuffer. size ())
 	      fprintf (stderr, "%d is too large\n", fillPointer + i);
 	   else
 	   theBuffer [fillPointer + i] = temp;
@@ -366,6 +366,7 @@ uint8_t rsOut	[FRAMESIZE];
 
 	for (int i = 0; i < RSDIMS; i ++) {
 	   int xx = my_rsDecoder. dec (table [i], rsOut, 51);
+	   (void)xx;
 //	   fprintf (stderr, "rs decoder says %d\n", xx);
 	   for (int j = 0; j < FRAMESIZE; j ++)
 	      table [i][j] = rsOut [j];

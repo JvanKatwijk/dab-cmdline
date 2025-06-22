@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __LIME_HANDLER__
-#define	__LIME_HANDLER__
+#pragma once
 
 #include	<atomic>
 #include	<vector>
@@ -36,14 +35,14 @@ public:
 			limeHandler		(int32_t	frequency,
 	                                         int16_t	gain,
 	                                         std::string	antenna);
-			~limeHandler		(void);
+			~limeHandler		();
 	bool		restartReader		(int32_t);
-	void		stopReader		(void);
+	void		stopReader		();
 	int32_t         getSamples              (std::complex<float> *,
                                                                   int32_t);
-        int32_t         Samples                 (void);
-        void            resetBuffer             (void);
-        int16_t         bitDepth                (void);
+        int32_t         Samples                 ();
+        void            resetBuffer             ();
+        int16_t         bitDepth                ();
 
 private:
 	std::atomic<bool>	running;
@@ -55,8 +54,7 @@ private:
 	RingBuffer<std::complex<float>> *theBuffer;
 	lms_stream_meta_t 	meta;
         lms_stream_t		stream;
-        void			run		(void);
+        void			run		();
 };
 
-#endif
 

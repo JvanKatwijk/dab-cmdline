@@ -74,6 +74,8 @@ using namespace std;
 
 #define	CURRENT_VERSION	"2.0alfa"
 
+#include	<complex>
+typedef	std::complex<float> Complex;
 #define		DAB		0100
 #define		DAB_PLUS	0101
 
@@ -89,6 +91,19 @@ using namespace std;
 
 #define		DIFF_LENGTH	42
 #define		THRESHOLD	3
+
+typedef struct  {
+	uint8_t		ecc;
+	uint32_t	EId;
+        uint8_t         mainId;
+        uint8_t         subId;
+        float           strength;
+        float           phase; 
+        bool            norm;
+        int             index; 
+        bool            collision;
+        uint16_t        pattern;
+} tiiData;
 
 static inline
 bool	isIndeterminate (float x) {

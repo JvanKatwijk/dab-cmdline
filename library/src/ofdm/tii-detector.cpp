@@ -26,8 +26,11 @@
 #include	<cinttypes>
 //
 
+#define	SECTION_SIZE	192
+#define	NR_SECTIONS	4
+constexpr float F_DEG_PER_RAD = (float)(180.0 / M_PI);
 static
-uint8_t table [] = {
+uint8_t patternTable [] = {
 	0017,		// 0 0 0 0 1 1 1 1		0
 	0027,		// 0 0 0 1 0 1 1 1		1
 	0033,		// 0 0 0 1 1 0 1 1		2
@@ -107,170 +110,327 @@ uint8_t table [] = {
 };
 
 		TII_Detector::TII_Detector (uint8_t dabMode):
-	                                         params (dabMode),
-	                                         my_fftHandler (dabMode) {
-int16_t	i;
+	                                      params (dabMode),
+	                                      theTable (dabMode),
+	                                      T_u (params. get_T_u ()),
+                                              T_g (params. get_T_g ()),
+                                             carriers (params. get_carriers ()),
+	                                      my_fftHandler (dabMode) {
 
-	this	-> T_u		= params. get_T_u();
-	carriers		= params. get_carriers();
-	theBuffer. resize	(T_u);
-	fft_buffer		= my_fftHandler. getVector();	
-	window. resize 		(T_u);
-	for (i = 0; i < T_u; i ++)
-	   window [i]  = (0.42 -
-	            0.5 * cos (2 * M_PI * (float)i / T_u) +
-	            0.08 * cos (4 * M_PI * (float)i / T_u));
+	
+	nullSymbolBuffer. resize (T_u);
+        window. resize (T_u);
+        for (int i = 0; i < T_u; i ++)
+           window [i] = 0.54 - 0.46 * cos (2 * M_PI * (float)i / T_u);
 
-	for (i = 71; i < 256; i ++)
-	   invTable [i] = -1;
-	for (i = 0; i < 70; ++i) 
-	    invTable [table [i]] = i;
+        table_2. resize (carriers / 2);
+        int teller = 0;
+        for (int carrier = - carriers / 2;
+                       carrier < carriers / 2; carrier += 2) {
+           int index    = carrier < 0 ? carrier + T_u : carrier + 1;
+           table_2 [teller ++] = theTable. refTable [index] *
+                                 conj (theTable. refTable [index + 1]);
+        }
+	reset ();
 }
 
 		TII_Detector::~TII_Detector() {
 }
 
 
+void    TII_Detector::resetBuffer       () {
+        for (int i = 0; i < T_u; i ++)
+           nullSymbolBuffer [i] = Complex (0, 0);
+}
+
 void	TII_Detector::reset() {
-	for (int i = 0; i < T_u; i ++)
-	   theBuffer [i] = std::complex<float> (0, 0);
+	resetBuffer();
+        memset ((void *)decodedBuffer, 0, carriers / 2 * sizeof (Complex));
 }
 
 //	To eliminate (reduce?) noise in the input signal, we might
 //	add a few spectra before computing (up to the user)
-void	TII_Detector::addBuffer (std::vector<std::complex<float>> v) {
-int	i;
+void	TII_Detector::addBuffer (const std::vector<Complex>  &v) {
+Complex tmpBuffer [T_u];
 
-	for (i = 0; i < T_u; i ++)
-	   fft_buffer [i] = cmul (v [i], window [i]);
-	my_fftHandler. do_FFT();
-
-	for (i = 0; i < T_u; i ++)
-	   theBuffer [i] += fft_buffer [i];
+	for (int i = 0; i < T_u; i ++)
+           tmpBuffer [i] = v [T_g + i];
+	my_fftHandler. fft (tmpBuffer);
+	for (int i = 0; i < T_u; i ++)
+	   nullSymbolBuffer [i] += tmpBuffer [i];
 }
-//
-//	Note that the input is fft output, not yet reodered
-void	TII_Detector::collapse (std::complex<float> *inVec, float *outVec) {
-int	i;
-	for (i = 0; i < carriers / 8; i ++) {	
-	   int carr = - carriers / 2 + 2 * i;
-	   outVec [i] = abs (real (inVec [(T_u + carr) % T_u] *
-	                            conj (inVec [(T_u + carr + 1) % T_u])));
-	   carr	= - carriers / 2 + 1 * carriers / 4 + 2 * i;
-	   outVec [i] += abs (real (inVec [(T_u + carr) % T_u] *
-	                            conj (inVec [(T_u + carr + 1) % T_u])));
-	   carr	= - carriers / 2 + 2 * carriers / 4 + 2 * i + 1;
-	   outVec [i] += abs (real (inVec [(T_u + carr) % T_u] *
-	                            conj (inVec [(T_u + carr + 1) % T_u])));
 
-	   carr	= - carriers / 2 + 3 * carriers / 4 + 2 * i + 1;
-	   outVec [i] += abs (real (inVec [(T_u + carr) % T_u] *
-	                            conj (inVec [(T_u + carr + 1) % T_u])));
+void	TII_Detector::collapse (const Complex *inVec,
+	                          Complex *etsiVec, Complex *nonetsiVec,
+	                          bool tiiFilter) {
+Complex buffer [carriers / 2];
+bool	carrierDelete	= false;
+	memcpy (buffer, inVec, carriers / 2 * sizeof (Complex));
+
+	int nrSections	= tiiFilter ? 2 : 4;
+//	a single carrier cannot be a TII carrier.
+	if (carrierDelete) {
+	   for (int i = 0; i < SECTION_SIZE; i++) {
+	      float x [4];
+	      float max = 0;
+	      float sum = 0;
+	      int index = 0;
+	      for (int j = 0; j < nrSections; j++) {
+	         x [j] = jan_abs (buffer [i + j * SECTION_SIZE]);
+		 sum += x [j];
+		 if (x [j] > max) {
+	            max = x[j];
+	            index = j;
+	         }
+	      }
+
+	      float min = (sum - max) / 3;
+	      if (sum < max * 1.5 && max > 0.0) {
+	         buffer [i + index * SECTION_SIZE] *= min / max;
+	      }
+	   }
+	}
+
+	for (int i = 0; i < SECTION_SIZE; i++) {
+	   etsiVec [i]	= Complex (0, 0);
+	   nonetsiVec [i] =  Complex (0, 0);
+	   for (int j = 0; j < nrSections; j++) {
+	      Complex x = buffer [i + j * SECTION_SIZE];
+	      etsiVec [i] += x;
+	      nonetsiVec [i] += x * conj (table_2 [i + j * SECTION_SIZE]);
+	   }
 	}
 }
 
+//	We determine first the offset of the "best fit",
+//	the offset indicates the subId
+static uint8_t bits [] = {0x80, 0x40, 0x20, 0x10 , 0x08, 0x04, 0x02, 0x01};
+
+// Sort the elements according to their strength
 static
-uint8_t bits [] = {0x80, 0x40, 0x20, 0x10 , 0x08, 0x04, 0x02, 0x01};
-
-#define	NUM_GROUPS	8
-#define	GROUPSIZE	24
-uint16_t	TII_Detector::processNULL () {
-int i, j;
-float	hulpTable	[NUM_GROUPS * GROUPSIZE]; // collapsed values
-float	C_table		[GROUPSIZE];	// contains the values
-int	D_table		[GROUPSIZE];	// count of indices in C_table with data
-float	avgTable	[NUM_GROUPS];
-
-//	we map the "carriers" carriers (complex values) onto
-//	a collapsed vector of "carriers / 8" length, 
-//	considered to consist of 8 segments of 24 values
-//	Each "value" is the sum of 4 pairs of subsequent carriers,
-//	taken from the 4 quadrants -768 .. 385, 384 .. -1, 1 .. 384, 385 .. 768
-
-	collapse (theBuffer. data(), hulpTable);
-//
-//	since the "energy levels" in the different GROUPSIZE'd values
-//	may differ, we compute an average for each of the
-//	NUM_GROUPS GROUPSIZE - value groups. 
-
-	memset (avgTable, 0, NUM_GROUPS * sizeof (float));
-	for (i = 0; i < NUM_GROUPS; i ++) {
-	   avgTable [i] = 0;
-	   for (j = 0; j < GROUPSIZE; j ++) 
-	      avgTable [i] += hulpTable [i * GROUPSIZE + j];
-
-	   avgTable [i] /= GROUPSIZE;
-	}
-//
-//	Determining the offset is then easy, look at the corresponding
-//	elements in the NUM_GROUPS sections and mark the highest ones.
-//	The summation of the high values are stored in the C_table,
-//	the number of times the limit is reached in the group
-//	is recorded in the D_table
-//
-//	So, basically we look into GROUPSIZE colums of NUMGROUPS
-//	values and look for the maximum
-//	Threshold 4 * avgTable is 6 dB, we consider that a minimum
-//	measurement shows that that is a reasonable value,
-//	alternatively, we could take the "minValue" as reference
-//	and "raise" the threshold. However, that might be
-//	too  much for 8-bit incoming values
-	memset (D_table, 0, GROUPSIZE * sizeof (int));
-	memset (C_table, 0, GROUPSIZE * sizeof (float));
-//
-//	We gebruiken C en D table alleen maar om de begin offset
-//	te kunnen vinden
-	for (i = 0; i < GROUPSIZE; i ++) {
-	   for (j = 0; j < NUM_GROUPS; j ++) {
-	      if (hulpTable [j * GROUPSIZE + i] > 4 * avgTable [j]) {
-	         C_table [i] += hulpTable [j * GROUPSIZE + i];
-	         D_table [i] ++;
-	      }
-	   }
-	}
-
-//	we extract from this result the highest values that
-//	meet the constraint of 4 values being sufficiently high
-	float	maxTable	= 0;
-	int	maxIndex	= -1;
-	
-	for (j = 0; j < GROUPSIZE; j ++) {
-	   if ((D_table [j] >= 4) && (C_table [j] > maxTable)) {
-	      maxTable = C_table [j];
-	      maxIndex = j;
-	      break;
-	   }
-	}
-//
-	if (maxIndex < 0)
+int	fcmp (const void *a, const void *b) {
+	tiiData *element1 = (tiiData *)a;
+	tiiData *element2 = (tiiData *)b;
+	if (element1 -> strength > element2 -> strength)
+	   return -1;
+	else
+	if (element1 -> strength < element2 -> strength)
+	   return 1;
+	else
 	   return 0;
-
-//	The - almost - final step is then to figure out which
-//	group contributed most, obviously only where maxIndex  > 0
-//	we start with collecting the values of the correct
-//	elements of the NUM_GROUPS groups
-
-	float x [NUM_GROUPS];
-	for (i = 0; i < NUM_GROUPS; i ++) 
-	   x [i] = hulpTable [maxIndex + GROUPSIZE * i];
-//
-//	we extract the four max values as bits
-	uint16_t pattern	= 0;
-	for (i = 0; i < 4; i ++) {
-	   float mmax	= 0;
-	   int ind	= -1;
-	   for (int k = 0; k < NUM_GROUPS; k ++) {
-	      if (x [k] > mmax) {
-	         mmax = x [k];
-	         ind  = k;
-	      }
-	   }
-
-	   if (ind != -1) {
-	      x [ind] = 0;
-	      pattern |= bits [ind];
-	   }
-	}
-	return  maxIndex + (invTable [pattern]) * 256;
 }
 
+std::vector<tiiData> TII_Detector::processNULL (int16_t threshold_db) { 
+//	collapsed ETSI float values
+float	etsi_floatTable [NUM_GROUPS * GROUPSIZE];	
+//	collapsed non-ETSI float values
+float	nonetsi_floatTable [NUM_GROUPS * GROUPSIZE];
+//	collapsed ETSI complex values
+
+Complex etsiTable [NUM_GROUPS * GROUPSIZE];
+//	collapsed non-ETSI complex values
+Complex nonetsiTable [NUM_GROUPS * GROUPSIZE];
+
+float	max = 0;		// abs value of the strongest carrier
+float	noise = 1e9;	// noise level
+std::vector<tiiData> theResult;		// results
+float	avg_etsi	[NUM_GROUPS];
+float	avg_nonetsi	[NUM_GROUPS];
+
+	tiiThreshold	= 4;
+bool	tiiFilter	= true;
+float threshold = pow (10, (float)threshold_db / 10); // threshold above noise
+int Teller = 0;
+
+	for (int32_t idx = -carriers / 2; idx < carriers / 2; idx += 2) {
+	   const int32_t fftIdx = idx < 0 ? idx + T_u : idx + 1;
+	   decodedBuffer [Teller++] += 
+	       nullSymbolBuffer [fftIdx] * conj (nullSymbolBuffer [fftIdx + 1]);
+	}
+
+	collapse (decodedBuffer, etsiTable, nonetsiTable, tiiFilter);
+
+
+// fill the float tables, determine the abs value of the strongest carrier
+	for (int i = 0; i < NUM_GROUPS * GROUPSIZE; i++) {
+	   float x = jan_abs (etsiTable [i]);
+	   etsi_floatTable [i] = x;
+	   if (x > max)
+	      max = x;
+	   x = jan_abs (nonetsiTable [i]);
+	   nonetsi_floatTable [i] = x;
+	   if (x > max)
+	      max = x;
+	}
+
+	for (int group = 0; group < NUM_GROUPS; group ++) {
+	   avg_etsi [group] = 0;
+	   avg_nonetsi [group] = 0;
+	   for (int j = 0; j < GROUPSIZE; j ++) {
+	      avg_etsi [group] += etsi_floatTable [group * GROUPSIZE + j];
+	      avg_nonetsi [group] += nonetsi_floatTable [group * GROUPSIZE + j];
+	   }
+	   avg_etsi [group] /= GROUPSIZE;
+	   avg_nonetsi [group] /= GROUPSIZE;
+	}
+//	determine the noise level by taking the level of the lowest group
+	for (int subId = 0; subId < GROUPSIZE; subId++) {
+	   float avg = 0;
+	   for (int i = 0; i < NUM_GROUPS; i++)
+	      avg += etsi_floatTable [subId + i * GROUPSIZE];
+	   avg /= NUM_GROUPS;
+	   if (avg < noise)
+	      noise = avg;
+	}
+
+	for (int subId = 0; subId < GROUPSIZE; subId++) {
+	   tiiData element;
+	   Complex sum		= Complex (0,0);
+	   Complex etsi_sum	= Complex (0,0);
+	   Complex nonetsi_sum	= Complex (0,0);
+	   int count		= 0;
+	   int etsi_count	= 0;
+	   int nonetsi_count	= 0;
+	   int pattern		= 0;
+	   int etsi_pattern	= 0;
+	   int nonetsi_pattern	= 0;
+	   int mainId		= 0;
+	   bool norm		= false;
+	   Complex *cmplx_ptr	= nullptr;;
+	   float *float_ptr	= nullptr;
+//	The number of times the limit is reached in the group is counted
+	   for (int i = 0; i < NUM_GROUPS; i++) {
+	      float etsi_noiseLevel = tiiFilter ? avg_etsi [i] : noise;
+	      float nonetsi_noiseLevel = tiiFilter ? avg_nonetsi [i] : noise;
+	      if (etsi_floatTable [subId + i * GROUPSIZE] >
+	                                      etsi_noiseLevel * threshold) {
+	         etsi_count++;
+	         etsi_pattern	|= bits [i];
+	         etsi_sum	+= etsiTable [subId + GROUPSIZE * i]; 
+	      }
+	      if (nonetsi_floatTable [subId + i * GROUPSIZE] >
+	                                    nonetsi_noiseLevel * threshold) {
+	         nonetsi_count++;
+	         nonetsi_pattern |= bits [i];
+	         nonetsi_sum += nonetsiTable [subId + GROUPSIZE * i];
+	      }
+	   }
+//
+	   if ((etsi_count >= 4) || (nonetsi_count >= 4))  {
+	      if (jan_abs (nonetsi_sum) > jan_abs (etsi_sum)) {
+	         norm		= true;
+	         sum		= nonetsi_sum;
+	         cmplx_ptr	= nonetsiTable;
+	         float_ptr	= nonetsi_floatTable;
+	         count		= nonetsi_count;
+	         pattern	= nonetsi_pattern;
+	      }
+	      else {
+	         sum		= etsi_sum;
+	         cmplx_ptr	= etsiTable;
+	         float_ptr	= etsi_floatTable;
+	         count		= etsi_count;
+	         pattern	= etsi_pattern;
+	      }
+	   }
+
+//	Find the Main Id that matches the pattern
+	   if (count == 4) {
+	      for (; mainId < (int)nrPatterns (); mainId++)
+	         if (getPattern (mainId) == pattern)
+	            break;
+	   }
+
+//	Find the best match. We extract the four max values as bits
+	   else
+	   if (count > 4) {
+	      float mm = 0;
+	      for (int k = 0; k < (int)nrPatterns (); k++) {
+	         Complex val = Complex (0, 0);
+	         for (int i = 0; i < NUM_GROUPS; i++) {
+	            if (getPattern (k) & bits [i]) {
+	               val += cmplx_ptr [subId + GROUPSIZE * i];
+	            }
+	         }
+
+	         if (jan_abs (val) > mm) {
+	            mm = jan_abs (val);
+	            sum = val;
+	            mainId = k;
+	         }
+	      }
+	   }	// end if (count > 4),  List the result
+
+	   if (count >= 4) {
+	      element. mainId	= mainId;
+	      element. subId	= subId;
+	      element. strength = jan_abs (sum) / max / (tiiFilter ? 2 : 4);
+	      element. phase	= arg (sum) * F_DEG_PER_RAD;
+	      element. norm	= norm;
+	      element. collision	= false;
+	      element. pattern	= getPattern (mainId);
+	      theResult. push_back (element);
+	   }
+	(void)float_ptr;
+//
+////	Collisions still to be done
+//	   if ((count > 4) && (selected_subId != 0)) {
+//	      sum = Complex (0,0);
+//
+////	Calculate the level of the second main ID
+//	      for (int i = 0; i < NUM_GROUPS; i++) {
+//	         if ((getPattern (mainId) & bits [i]) == 0) {
+//	            int index = subId + GROUPSIZE * i;
+//	            if (float_ptr [index] > noise * threshold)
+//	               sum += cmplx_ptr [index];
+//	         }
+//	      }
+//
+//	      if (subId == selected_subId) { // List all possible main IDs
+//	         for (int k = 0; k < (int)nrPatterns (); k++) {
+//	            int pattern2 = getPattern (k) & pattern;
+//	            int count2 = 0;
+//	            for (int i = 0; i < NUM_GROUPS; i++)
+//	               if (pattern2 & bits [i])
+//	                  count2++;
+//	            if ((count2 == 4) && (k != mainId)) {
+//	               element. mainId		= k;
+//	               element. subId		= selected_subId;
+//	               element. strength	= jan_abs(sum) / max / (count - 4);
+//	               element. phase		= arg(sum) * F_DEG_PER_RAD;
+//	               element. norm		= norm;
+//	               element. collision	= true;
+//	               element. pattern		= getPattern (mainId);
+//	               theResult. push_back (element);
+//	            }
+//	         }
+//	      }
+//	      else { // List only additional main ID 99
+////	         element. mainId = 99;
+////	         element. strength = abs(sum)/max/(count-4);
+////	         element. phase = arg(sum) * F_DEG_PER_RAD;
+////	         element. norm = norm;
+////	         theResult.push_back(element);
+//	      }
+//	   }
+	}
+//	fprintf(stderr, "max =%.0f, noise = %.1fdB\n", max, 10 * log10(noise/max));
+	if (max > 4000)
+//	if (max > 4000000)
+	   for (int i = 0; i < carriers / 2; i++)
+	      decodedBuffer [i] *= 0.9;
+	resetBuffer();
+	qsort (theResult. data (), theResult. size(),
+	                     sizeof (tiiData), &fcmp);
+	return theResult;
+}
+
+ 
+uint16_t        TII_Detector::getPattern (int n) {
+        return patternTable [n]; 
+}
+ 
+uint16_t        TII_Detector::nrPatterns () {
+        return (uint16_t)sizeof (patternTable);
+}
+ 

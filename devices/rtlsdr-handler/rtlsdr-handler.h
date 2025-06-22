@@ -21,10 +21,9 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __RTLSDR_HANDLER__
-#define	__RTLSDR_HANDLER__
+#pragma once
 
-#include  <dlfcn.h>
+#include	<dlfcn.h>
 #include	"ringbuffer.h"
 #include	"device-handler.h"
 #include	<thread>
@@ -132,4 +131,4 @@ private:
 	pfnrtlsdr_get_device_name rtlsdr_get_device_name;
 	pfnrtlsdr_set_opt_string rtlsdr_set_opt_string;
 };
-#endif
+

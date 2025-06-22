@@ -34,6 +34,7 @@ public:
 			fft_handler	(uint8_t);
 			~fft_handler	();
 	complex<float>	*getVector	();
+	void		fft		(Complex *);
 	void		do_FFT		();
 	void		do_iFFT		();
 private:

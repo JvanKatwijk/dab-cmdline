@@ -30,7 +30,7 @@
 #include	<stdint.h>
 #include	<vector>
 #include	"viterbi-spiral.h"
-#include	"fib-processor.h"
+#include	"fib-decoder.h"
 #include	<mutex>
 #include	<string>
 #include	"dab-api.h"
@@ -46,19 +46,20 @@ public:
 	void	clearEnsemble		();
 	bool	syncReached		();
 	int16_t	get_ficRatio		();
-	std::string nameFor		(int32_t);
-	int32_t	SIdFor			(const std::string &);
-	uint8_t	kindofService		(const std::string &);
-	void	dataforDataService	(const std::string &,
-	                                         packetdata *, int);
-	void	dataforAudioService	(const std::string &,
-	                                        audiodata *, int);
-//
+	int	get_SId			(int);
+	std::string	get_serviceName	(uint32_t /* SId */);
+	uint8_t	serviceType		(int);
+	void	audioData		(int, audiodata &);
+	void	packetData		(int, packetdata &);
+	int	getServiceComp		(const std::string &);
         int32_t get_CIFcount		();
         void    reset			();
+	uint8_t	get_ecc			();
+	uint32_t	get_EId			();
+	std::string get_ensembleName	();
 
 private:
-	fib_processor	fibProcessor;
+	fibDecoder	fibHandler;
 	fib_quality_t	fib_qualityHandler;
 	dabParams	params;
 	void		*userData;

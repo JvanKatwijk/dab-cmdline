@@ -40,6 +40,53 @@ The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
 
+---------------------------------------------------------------------
+Handling TII data
+---------------------------------------------------------------------
+
+As (probably) known, most DAB(+) transmissions are transmitted at the
+same time by more than a single transmitter. Each transmitter then
+adds some encoding to the so-called NULL segment of the DAB frame,
+that identifies the transmitter.
+
+In Qt-DAB the TII data is by default decoded and - after consulting
+a databae - transformed into the name of the transmitter and some
+additional data.
+
+As an experiment, example-2 is modified to download the database and
+show some info on the transmitters begin received.
+
+Shown below is the output of a recording
+
+	program KLASSIK RADIO    is part of the ensemble
+	program RADIO BOB!       is part of the ensemble
+	program Absolut relax    is part of the ensemble
+	program SCHLAGERPARADIES is part of the ensemble
+	program Dlf              is part of the ensemble
+	program ENERGY           is part of the ensemble
+	program Schwarzwaldradio is part of the ensemble
+	program PPP-RTK-AdV      is part of the ensemble
+	program DRadio DokDeb    is part of the ensemble
+	there might be a DAB signal here
+	ensemble DR Deutschland   is (10BC) recognized
+	program ERF Plus         is part of the ensemble
+	16 1 -> DE 5C DR Deutschland Hamburg/Heinrich-Hertz-Turm 53.563122 9.975833
+	
+	16 2 -> DE 5C DR Deutschland Hamburg/Moorfleet 53.519230 10.102853
+	we try to start program radio horeb
+	for service radio horeb we find index 7
+		startaddress	= 156
+		length		= 36
+		subChId		= 5
+		protection	= 2
+		bitrate		= 48
+
+It shows that two transmitters are identified, with the transmitter's name and
+the coordinates
+
+As said, the "feature" is still experimental and further work is
+being done
+
 ----------------------------------------------------------------------
 Supported devices
 ----------------------------------------------------------------------

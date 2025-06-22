@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __HACKRF_HANDLER__
-#define	__HACKRF_HANDLER__
+#pragma once
 
 #include	"ringbuffer.h"
 #include	<atomic>
@@ -62,5 +61,5 @@ private:
 	void		setLNAGain		(int);
 	void		setVGAGain		(int);
 };
-#endif
+
 

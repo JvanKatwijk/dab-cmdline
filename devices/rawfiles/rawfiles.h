@@ -20,8 +20,7 @@
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__RAW_FILES__
-#define	__RAW_FILES__
+#pragma once
 
 #include        "ringbuffer.h"
 #include        "device-handler.h"
@@ -61,5 +60,4 @@ virtual	void		run		(void);
 	int64_t		currPos;
 };
 
-#endif
 

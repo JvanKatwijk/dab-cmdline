@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2016, 2017
+ *    Copyright (C) 2016, 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -33,8 +33,10 @@
 
 	dabProcessor::dabProcessor	(deviceHandler	*inputDevice,
 	                                 API_struct	*p,
-	                                 RingBuffer<std::complex<float>> *spectrumBuffer,
-	                                 RingBuffer<std::complex<float>> *iqBuffer,
+	                                 RingBuffer<std::complex<float>> *
+	                                                  spectrumBuffer,
+	                                 RingBuffer<std::complex<float>> *
+	                                                  iqBuffer,
 	                                 void		*userData):
 	                                    params (p -> dabMode),
 	                                    myReader (this,
@@ -64,6 +66,7 @@
 	this	-> carriers		= params. get_carriers ();
 	this	-> carrierDiff		= params. get_carrierDiff ();
 	this	-> tii_counter		= 0;
+	this	-> threshold		= 6;
 	isSynced			= false;
 	snr				= 0;
 	running. store (false);
@@ -104,12 +107,11 @@ int		startIndex		= -1;
 	running. store (true);
 	my_ficHandler. reset ();
 	myReader. setRunning (true);
-//	my_mscHandler. start ();
 
 	try {
 	   myReader. reset ();
 	   for (i = 0; i < T_F / 2; i ++) {
-	      jan_abs (myReader. getSample (0));
+	     (void)jan_abs (myReader. getSample (0));
 	   }
 
 notSynced:
@@ -130,6 +132,7 @@ notSynced:
               case NO_END_OF_DIP_FOUND:
                  goto notSynced;
            }
+
 	   myReader. getSamples (ofdmBuffer. data (),
 	                         T_u, coarseOffset + fineOffset);
 
@@ -256,11 +259,17 @@ SyncOnPhase:
 	      if (wasSecond (my_ficHandler. get_CIFcount (), &params)) {
 	         my_TII_Detector. addBuffer (ofdmBuffer);
 	         if (++tii_counter >= 4) {
-	            uint16_t res =
-                          my_TII_Detector. processNULL ();
-	            if ((res != 0) && (show_tii != nullptr))
-	               show_tii (res, userData);
-
+	            std::vector<tiiData> res =
+                          my_TII_Detector. processNULL (threshold);
+	            if ((res. size () > 0) && (show_tii != nullptr)) {
+	               uint8_t the_ecc	= my_ficHandler. get_ecc ();
+	               uint16_t the_EId	= my_ficHandler. get_EId ();
+	               for (auto &d : res) {
+	                  d. ecc	= the_ecc;
+	                  d. EId	= the_EId;
+	                  show_tii (&d, userData);
+	               }
+	            }
                     tii_counter = 0;
 	            my_TII_Detector. reset ();
                  }
@@ -278,6 +287,7 @@ SyncOnPhase:
 	   }
 	   goto Check_endofNull;
 	}
+
 	catch (int e) {
 	   fprintf (stderr, "dab processor will stop\n");
 	}
@@ -316,53 +326,67 @@ bool	dabProcessor::signalSeemsGood		() {
 }
 //
 //	to be handled by delegates
-uint8_t dabProcessor::kindofService		(const std::string &s) {
-std::string ss = s;
-        return my_ficHandler. kindofService (ss);
+uint8_t dabProcessor::serviceType		(const std::string &s) {
+int index	= my_ficHandler. getServiceComp (s);
+	fprintf (stderr, "for service %s we find index %d\n",
+	                  s. c_str (), index);
+        return my_ficHandler. serviceType (index);
 }
 
 void    dabProcessor::dataforAudioService	(const std::string &s,
-	                                                  audiodata *dd) {
-std::string ss = s;
-        my_ficHandler. dataforAudioService (ss, dd, 0);
+	                                                  audiodata &ad) {
+	int index	= my_ficHandler. getServiceComp (s);
+	my_ficHandler. audioData (index, ad);
 }
 
 void    dabProcessor::dataforAudioService	(const std::string &s,
-                                                  audiodata *d, int16_t c) {
-std::string ss = s;
-        my_ficHandler. dataforAudioService (ss, d, c);
+	                                            audiodata &ad, int16_t o) {
+	(void)o;
+	int index	= my_ficHandler. getServiceComp (s);
+	my_ficHandler. audioData (index, ad);
 }
 
 void    dabProcessor::dataforDataService	(const std::string &s,
-                                                    packetdata *d, int16_t c) {
-std::string ss = s;
-        my_ficHandler. dataforDataService (ss, d, c);
+                                                    packetdata &pd) {
+	int index	= my_ficHandler. getServiceComp (s);
+	my_ficHandler. packetData (index, pd);
+}
+
+void    dabProcessor::dataforDataService	(const std::string &s,
+                                                    packetdata &pd, int16_t o) {
+	(void)o;
+	int index	= my_ficHandler. getServiceComp (s);
+	my_ficHandler. packetData (index, pd);
 }
 
 int32_t	dabProcessor::get_SId		(const std::string &s) {
-std::string ss = s;
-	return my_ficHandler. SIdFor (ss);
+int index	= my_ficHandler. getServiceComp (s);
+	return my_ficHandler. get_SId (index);
 }
-
+//
 std::string dabProcessor::get_serviceName (int32_t SId) {
-	return my_ficHandler. nameFor (SId);
+	return my_ficHandler. get_serviceName (SId);
 }
 
 void    dabProcessor::reset_msc		() {
         my_mscHandler. reset ();
 }
 
-void    dabProcessor::set_audioChannel (audiodata *d) {
+void    dabProcessor::set_audioChannel (audiodata &d) {
         my_mscHandler. set_audioChannel (d);
-	programdataHandler (d, userData);
+	programdataHandler (&d, userData);
 }
 
-void    dabProcessor::set_dataChannel (packetdata *d) {
+void    dabProcessor::set_dataChannel (packetdata &d) {
 	my_mscHandler. set_dataChannel (d);
 }
 
 void    dabProcessor::clearEnsemble	() {
         my_ficHandler. reset ();
+}
+
+std::string dabProcessor::get_ensembleName	() {
+	return my_ficHandler. get_ensembleName ();
 }
 
 bool    dabProcessor::wasSecond (int16_t cf, dabParams *p) {

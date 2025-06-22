@@ -36,6 +36,7 @@
 #include	"filesink.h"
 #include	"dab-api.h"
 #include	"includes/support/band-handler.h"
+#include	"tii-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
 #elif	HAVE_SDRPLAY_V3
@@ -77,7 +78,7 @@ static
 std::atomic<bool> run;
 
 static
-void	*theRadio	= NULL;
+void	*theRadio	= nullptr;
 
 static
 std::atomic<bool>timeSynced;
@@ -85,6 +86,7 @@ std::atomic<bool>timeSynced;
 static
 std::atomic<bool>timesyncSet;
 
+tiiHandler	the_tiiHandler;
 static
 std::atomic<bool>ensembleRecognized;
 
@@ -116,9 +118,9 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the
 //	ensemble
 static
-void	ensemblenameHandler (const char *name, int Id, void *userData) {
+void	name_of_ensemble (const std::string &name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name, (uint32_t)Id);
+	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
@@ -129,13 +131,12 @@ std::vector<int> programSIds;
 
 std::unordered_map <int, std::string> ensembleContents;
 static
-void	programnameHandler (const char *s, int SId, void *userdata) {
-	for (std::vector<std::string>::iterator it = programNames.begin();
-	             it != programNames. end(); ++it)
-	   if (*it == std::string (s))
+void	serviceName (const std::string &s, int SId,
+	                               uint16_t subChId, void *userdata) {
+	for (auto it : programNames)
+	   if (it == s)
 	      return;
-	ensembleContents. insert (pair <int, std::string> (SId,
-	                                                std::string (s)));
+	ensembleContents. insert (pair <int, std::string> (SId, s));
 	programNames. push_back (std::string (s));
 	programSIds . push_back (SId);
 	std::cerr << "program " << s << " is part of the ensemble\n";
@@ -157,7 +158,7 @@ void	programdata_Handler (audiodata *d, void *ctx) {
 static
 void	dataOut_Handler (const char * dynamicLabel, void *ctx) {
 	(void)ctx;
-	std::cerr << std::string (dynamicLabel) << "\r";
+//	std::cerr << std::string (dynamicLabel) << "\r";
 }
 //
 //	The function is called from the MOT handler, with
@@ -167,16 +168,17 @@ void	dataOut_Handler (const char * dynamicLabel, void *ctx) {
 void	motdata_Handler (uint8_t *data, int size,
 	                const char *s, int d, void *ctx) {
 	(void)s; (void)d; (void)ctx;
-	fprintf (stderr, "plaatje %s met lengte %d\n", s, size);
+//	fprintf (stderr, "plaatje %s met lengte %d\n", s, size);
 }
 
-void	tii_data_Handler	(int s, void *p) {
-//	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
-	(void)p;
+void	tii_data_Handler	(tiiData *theData, void *ctx) {
+	the_tiiHandler. add (*theData);
+	(void)ctx;
 }
 
 void	timeHandler		(int hours, int minutes, void *ctx) {
-	fprintf (stderr, "%2d:%2d\n", hours, minutes);
+//	fprintf (stderr, "%2d:%2d\n", hours, minutes);
+	(void)ctx;
 }
 
 //
@@ -249,7 +251,7 @@ void	fibQuality	(int16_t q, void *ctx) {
 
 static
 void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
-	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
+//	fprintf (stderr, "msc quality = %d %d %d\n", fe, rsE, aacE);
 }
 
 int	main (int argc, char **argv) {
@@ -323,9 +325,10 @@ int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice	= nullptr;
+
 bool	err;
 int	theDuration		= -1;	// no limit
-
+//tiiHandler the_tiiHandler;
 	std::cerr << "dab_cmdline example II,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
@@ -648,8 +651,8 @@ int	theDuration		= -1;	// no limit
 	interface. dabMode	= theMode;
 	interface. syncsignal_Handler	= syncsignalHandler;
 	interface. systemdata_Handler	= systemData;
-	interface. ensemblename_Handler	= ensemblenameHandler;
-	interface. programname_Handler	= programnameHandler;
+	interface. name_of_ensemble	= name_of_ensemble;
+	interface. serviceName		= serviceName;
 	interface. fib_quality_Handler	= fibQuality;
 	interface. audioOut_Handler	= pcmHandler;
 	interface. dataOut_Handler	= dataOut_Handler;
@@ -728,7 +731,7 @@ int	theDuration		= -1;	// no limit
 
 	if (run. load ()) {
 	   dataforAudioService (theRadio,
-	                     programName. c_str (), &ad, 0);
+	                     programName. c_str (), ad, 0);
 	   if (!ad. defined) {
 	      std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
@@ -738,7 +741,7 @@ int	theDuration		= -1;	// no limit
 
 	if (run. load ()) {
 	   dabReset_msc (theRadio);
-	   set_audioChannel (theRadio, &ad);
+	   set_audioChannel (theRadio, ad);
 	}
 
 	while (run. load () && (theDuration != 0)) {

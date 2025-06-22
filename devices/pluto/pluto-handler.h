@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2020
+ *    Copyright (C) 2020 .. 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -21,8 +21,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __PLUTO_HANDLER__
-#define	__PLUTO_HANDLER__
+#pragma once
 
 #include	<atomic>
 #include	<iio.h>
@@ -74,5 +73,6 @@ private:
 	int16_t			mapTable_int	[DAB_RATE / DIVIDER];
 	float			mapTable_float	[DAB_RATE / DIVIDER];
 };
-#endif
+
+
 

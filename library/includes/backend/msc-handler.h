@@ -49,8 +49,8 @@ public:
 	                                 void		*);
 		~mscHandler		();
 	void	process_mscBlock	(std::vector<int16_t> &, int16_t);
-	void	set_audioChannel	(audiodata	*);
-	void	set_dataChannel		(packetdata     *);
+	void	set_audioChannel	(audiodata	&);
+	void	set_dataChannel		(packetdata     &);
 	void	reset			();
 	void	stop			();
 	void	start			();

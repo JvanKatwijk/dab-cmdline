@@ -163,35 +163,35 @@ uint8_t	extension	= getBits_5 (d, 8 + 3);
 //uint8_t	CN	= getBits_1 (d, 8 + 0);
 	//fprintf(stderr,"DBG::FIB::FIG0: extension=%d\n", extension);
 	switch (extension) {
-	   case 0:
+	   case 0:	// ensemble information (6.4.1)
 	      FIG0Extension0 (d);
 	      break;
 
-	   case 1:
+	   case 1:	// subchannel organization (6.2.1)
 	      FIG0Extension1 (d);
 	      break;
 
-	   case 2:
+	   case 2:	// service organization (6.3.1)
 	      FIG0Extension2 (d);
 	      break;
 
-	   case 3:
+	   case 3:	// service component in packet mode (6.3.2)
 	      FIG0Extension3 (d);
 	      break;
 
-	   case 4:
+	   case 4:	// service component with CA (6.3.3)
 	      FIG0Extension4 (d);
 	      break;
 
-	   case 5:
+	   case 5:	// service component language
 	      FIG0Extension5 (d);
 	      break;
 
-	   case 6:
+	   case 6:	// service linking information (8.1.15)
 	      FIG0Extension6 (d);
 	      break;
 
-	   case 7:
+	   case 7:	:
 	      FIG0Extension7 (d);
 	      break;
 

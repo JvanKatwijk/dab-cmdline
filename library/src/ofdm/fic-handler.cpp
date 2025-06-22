@@ -42,7 +42,7 @@
 	                                void		*userData):
 	                                      viterbiSpiral (768),
 //	                                      viterbiHandler (768),
-	                                      fibProcessor (p,
+	                                      fibHandler (p,
 	                                                    userData),
 	                                                    params (p -> dabMode) {
 int16_t	i, j, k;
@@ -195,42 +195,40 @@ int16_t	inputCount	= 0;
 	   }
 	   show_ficCRC (true);
 	   fibProtector. lock ();
-	   fibProcessor. process_FIB (p, ficno);
+	   fibHandler. process_FIB (p, ficno);
 	   fibProtector. unlock ();
 	}
 }
 
 void	ficHandler::clearEnsemble (void) {
 	fibProtector. lock ();
-	fibProcessor. clearEnsemble ();
+	fibHandler. clear_ensemble ();
 	fibProtector. unlock ();
 }
 
-uint8_t	ficHandler::kindofService	(const std::string &s) {
+uint8_t	ficHandler::serviceType	(int index) {
 uint8_t	result;
 	fibProtector. lock ();
-	result	= fibProcessor. kindofService (s);
+	result	= fibHandler. serviceType (index);
 	fibProtector. unlock ();
 	return result;
 }
 
-void	ficHandler::dataforAudioService	(const std::string &s,
-	                                         audiodata *d, int c) {
+void	ficHandler::audioData	(int index, audiodata &ad) {
 	fibProtector. lock ();
-	fibProcessor. dataforAudioService (s, d, c);
+	fibHandler. audioData (index, ad);
 	fibProtector. unlock ();
 }
 
-void	ficHandler::dataforDataService	(const std::string &s,
-	                                         packetdata *d, int c) {
+void	ficHandler::packetData	(int index, packetdata &pd) {
 	fibProtector. lock ();
-	fibProcessor. dataforDataService (s, d, c);
+	fibHandler. packetData (index, pd );
 	fibProtector. unlock ();
 }
 
 int32_t ficHandler::get_CIFcount        () {
 //	no lock, because using std::atomic<> in fib_processor class
-        return fibProcessor. get_CIFcount();
+        return fibHandler. get_CIFcount();
 }
 
 int16_t	ficHandler::get_ficRatio	() {
@@ -238,15 +236,7 @@ int16_t	ficHandler::get_ficRatio	() {
 }
 
 bool	ficHandler::syncReached		() {
-	return fibProcessor. syncReached ();
-}
-
-std::string ficHandler::nameFor (int32_t serviceId) {
-	return fibProcessor. nameFor (serviceId);
-}
-
-int32_t	ficHandler::SIdFor	(const std::string &name) {
-	return fibProcessor. SIdFor (name);
+	return fibHandler. syncReached ();
 }
 
 static	int 	pos	= 0;
@@ -263,6 +253,30 @@ void	ficHandler::show_ficCRC (bool b) {
 }
 
 void	ficHandler::reset		() {
-	fibProcessor. reset ();
+	fibHandler. reset ();
+}
+
+int	ficHandler::getServiceComp	(const std::string &s) {
+	return fibHandler. getServiceComp (s);
+}
+
+int	ficHandler::get_SId		(int index) {
+	return fibHandler. get_SId (index);
+}
+
+std::string ficHandler::get_serviceName	(uint32_t SId) {
+	return fibHandler. get_serviceName (SId);
+}
+
+uint8_t	ficHandler::get_ecc	() {
+	return fibHandler. get_ecc ();
+}
+
+uint32_t ficHandler::get_EId	() {
+	return fibHandler. get_EId ();
+}
+
+std::string ficHandler::get_ensembleName () {
+	return fibHandler. get_ensembleName ();
 }
 

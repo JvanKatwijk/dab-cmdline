@@ -22,8 +22,8 @@
  *
  */
 
-#ifndef	__RTL_TCP_CLIENT
-#define	__RTL_TCP_CLIENT
+#pragma once
+
 #include	<iostream>
 #include	<sstream>
 #include	<errno.h>
@@ -81,5 +81,4 @@ virtual	void		run		();
 	void		sendCommand (uint8_t cmd, uint32_t param);
 };
 
-#endif
 

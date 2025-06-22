@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2016, 2017
+ *    Copyright (C) 2016, 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -58,52 +58,52 @@ void	dabReset_msc	(void *Handle) {
 	((dabProcessor *)Handle) -> reset_msc ();
 }
 
-bool	is_audioService	(void *Handle, const char *name) {
-	return ((dabProcessor *)Handle) -> kindofService (std::string (name)) ==
+bool	is_audioService	(void *Handle, const std::string &name) {
+	return ((dabProcessor *)Handle) -> serviceType (name) ==
 	                               AUDIO_SERVICE;
 }
 
-bool	is_dataService	(void *Handle, const char *name) {
-	return ((dabProcessor *)Handle) -> kindofService (std::string (name)) ==
+bool	is_dataService	(void *Handle, const std::string &name) {
+	return ((dabProcessor *)Handle) -> serviceType (name) ==
 	                               PACKET_SERVICE;
 }
 
-void    dataforAudioService     (void *Handle,
-	                         const char *name,
-	                         audiodata *d, int o) {
+void    dataforAudioService     (void *Handle, const std::string &name,
+	                                     audiodata &d, int o) {
 	((dabProcessor *)Handle) -> dataforAudioService (name, d, o);
 }
 
-void    dataforDataService      (void *Handle,
-	                         const char *name, packetdata *pd, int o) {
+void    dataforDataService      (void *Handle, const std::string &name,
+	                                     packetdata &pd, int o) {
 	((dabProcessor *)Handle) -> dataforDataService (name, pd, o);
 }
 
-void    set_audioChannel        (void *Handle, audiodata *ad) {
+void    set_audioChannel        (void *Handle, audiodata &ad) {
 	((dabProcessor *)Handle) -> set_audioChannel (ad);
 }
 
-void    set_dataChannel         (void *Handle, packetdata *pd) {
+void    set_dataChannel         (void *Handle, packetdata &pd) {
 	((dabProcessor *)Handle) -> set_dataChannel (pd);
 }
 
-int32_t dab_getSId      (void *Handle, const char* c_s) {
-	std::string s(c_s);
-	return ((dabProcessor *)Handle) -> get_SId (s);
+int32_t dab_getSId      (void *Handle, const std::string &c_s) {
+	return ((dabProcessor *)Handle) -> get_SId (c_s);
+}
+//
+std::string	dab_getserviceName (void *Handle, uint32_t SId) {
+	return ((dabProcessor *)Handle) -> get_serviceName (SId);
+	
 }
 
-void	dab_getserviceName (void *Handle, int32_t SId, char *out) {
-	std::string s = ((dabProcessor *)Handle) -> get_serviceName (SId);
-	const char * t = s. c_str ();
-	(void)strcpy (out, t);
+std::string	get_ensembleName	(void *Handle) {
+	return ((dabProcessor *)Handle) -> get_ensembleName	();
 }
 
 #ifdef _MSC_VER
 #include <windows.h>
 extern "C" {
 
-void usleep(int usec)
-{
+void	usleep(int usec) {
 	HANDLE timer;
 	LARGE_INTEGER ft;
 
@@ -115,10 +115,10 @@ void usleep(int usec)
 	CloseHandle(timer);
 }
 
-void sleep(int seconds)
-{
-    Sleep (seconds*1000);
+void sleep(int seconds) {
+    Sleep (seconds * 1000);
+}
 }
 
-}
 #endif
+

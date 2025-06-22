@@ -41,11 +41,19 @@
 	   fftwf_free (vector);
 }
 
+void	fft_handler::fft	(Complex *v) {
+	for (int i = 0; i < fftSize; i ++)
+	   vector [i] = v [i];
+	fftwf_execute (plan);
+	for (int i = 0; i < fftSize; i ++)
+	   v [i] = vector [i];
+}
+
 complex<float>	*fft_handler::getVector () {
 	return vector;
 }
 //
-void	fft_handler::do_FFT (void) {
+void	fft_handler::do_FFT () {
 	fftwf_execute (plan);
 }
 

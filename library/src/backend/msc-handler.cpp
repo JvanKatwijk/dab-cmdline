@@ -95,19 +95,18 @@ void	mscHandler::reset	() {
 //	so, a little bit of locking seems wise while
 //	the actual changing of the settings is done in the
 //	thread executing process_mscBlock
-void	mscHandler::set_audioChannel (audiodata *d) {
+void	mscHandler::set_audioChannel (audiodata &d) {
 	locker. lock ();
 //
 //	we could assert here that theBackend == nullptr
-	theBackends. push_back (new audioBackend (d, p, userData));
+	theBackends. push_back (new audioBackend (&d, p, userData));
 	work_to_do. store (true);
 	locker. unlock ();
 }
 
-
-void	mscHandler::set_dataChannel (packetdata *d) {
+void	mscHandler::set_dataChannel (packetdata &d) {
 	locker. lock ();
-	theBackends. push_back (new dataBackend (d, p, userData));
+	theBackends. push_back (new dataBackend (&d, p, userData));
 	work_to_do. store (true);
 	locker. unlock ();
 }

@@ -165,7 +165,7 @@ sdrplay_api_ErrT        err;
 sdrplay_api_DeviceT     devs [6];
 float			apiVersion;
 uint32_t                ndev;
-int			lna_upperBound;
+int			lna_upperBound = 4;
 
 	chosenDevice	= nullptr;
 	deviceParams	= nullptr;

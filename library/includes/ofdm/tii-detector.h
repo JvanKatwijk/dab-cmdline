@@ -26,28 +26,48 @@
 #include	<cstdint>
 #include	"dab-params.h"
 #include	"fft-handler.h"
+#include	"phasetable.h"
 #include	<vector>
+
+#define NUM_GROUPS      8
+#define GROUPSIZE       24
+
+
+typedef std::complex<float> Complex;
+typedef struct {
+        int index;
+        float value;
+        bool    norm;
+} resultPair;
+
 
 class	TII_Detector {
 public:
 			TII_Detector	(uint8_t dabMode);
 			~TII_Detector	();
 	void		reset		();
-	void		addBuffer	(std::vector<std::complex<float>>);
-	uint16_t	processNULL	();
+	void		addBuffer	(const std::vector<Complex> &);
+	std::vector<tiiData> processNULL	(int16_t);
+
 
 private:
-	void			collapse	(std::complex<float> *,
-	                                         float *);
-	int16_t			depth;
-	uint8_t			invTable [256];
-	dabParams		params;
-	fft_handler		my_fftHandler;
-	int16_t			T_u;
-	int16_t			carriers;
-	std::complex<float>	*fft_buffer;
-	std::vector<complex<float> >	theBuffer;
+	dabParams	params;
+	phaseTable	theTable;
+	std::vector<Complex> table_2;
+	void		resetBuffer	();
+	uint16_t	getPattern	(int);
+	uint16_t	nrPatterns	();
+	std::vector<Complex>	nullSymbolBuffer;
 	std::vector<float>	window;
+	int16_t		T_u;
+	int16_t		T_g;
+	int16_t		carriers;	
+	fft_handler	my_fftHandler;
+	Complex		decodedBuffer [768];
+	void		collapse	(const Complex *, 
+	                                 Complex *, Complex *, bool);
+
+	int		tiiThreshold;
 };
 
 

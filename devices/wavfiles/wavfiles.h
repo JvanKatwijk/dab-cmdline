@@ -19,8 +19,7 @@
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__WAV_FILES__
-#define	__WAV_FILES__
+#pragma once
 
 #include	<sndfile.h>
 #include        "ringbuffer.h"
@@ -42,7 +41,7 @@ public:
 	uint8_t		myIdentity	(void);
 	int32_t		Samples		(void);
 	bool		restartReader	(int32_t);
-	void		stopReader	(void);
+	void		stopReader	();
 	
 private:
 	std::string	fileName;
@@ -51,15 +50,14 @@ private:
 	device_eof_callback_t	eofHandler;
 	void		*userData;
 	
-virtual	void		run		(void);
+virtual	void		run		();
 	int32_t		readBuffer	(std::complex<float> *, int32_t);
 	RingBuffer<std::complex<float>>	*_I_Buffer;
 	std::thread     workerHandle;
 	int32_t		bufferSize;
 	SNDFILE		*filePointer;
 	std::atomic<bool> running;
-	int64_t		currPos;
+	uint64_t	currPos;
 };
 
-#endif
 

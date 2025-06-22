@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2016, 2017
+ *    Copyright (C) 2016, 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -57,23 +57,22 @@ public:
 	bool	signalSeemsGood	();
 	void	show_Corrector	(int);
 //      inheriting from our delegates
-	void		setSelectedService	(const std::string &);
-	uint8_t		kindofService		(const std::string &);
+	uint8_t		serviceType		(const std::string &);
 	void		dataforAudioService	(const std::string &,
-	                                                       audiodata *);
+	                                                       audiodata &);
 	void		dataforAudioService	(const std::string &,
-	                                             audiodata *, int16_t);
+	                                             audiodata &, int16_t);
 	void		dataforDataService	(const std::string &,
-	                                                packetdata *);
+	                                                packetdata &);
 	void		dataforDataService	(const std::string &,
-	                                             packetdata *, int16_t);
+	                                             packetdata &, int16_t);
 	int32_t		get_SId			(const std::string &s);
 	std::string	get_serviceName		(int32_t);
-	void		set_audioChannel        (audiodata *);
-	void		set_dataChannel         (packetdata *);
+	void		set_audioChannel        (audiodata &);
+	void		set_dataChannel         (packetdata &);
+	void		reset_msc		();
 	std::string	get_ensembleName	();
 	void		clearEnsemble		();
-	void		reset_msc		();
 private:
 	deviceHandler	*inputDevice;
 	dabParams	params;
@@ -92,6 +91,7 @@ private:
 	void		*userData;
 	std::atomic<bool>	running;
 	bool		isSynced;
+	int		threshold;
 	int		snr;
 	int32_t		T_null;
 	int32_t		T_u;

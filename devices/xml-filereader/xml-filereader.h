@@ -20,8 +20,7 @@
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__XML_FILEREADER__
-#define	__XML_FILEREADER__
+#pragma once
 
 #include	<string>
 #include	<atomic>
@@ -54,5 +53,4 @@ private:
 	xml_Reader		*theReader;
 };
 
-#endif
 
