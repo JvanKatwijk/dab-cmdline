@@ -637,7 +637,6 @@ int	theDuration		= -1;	// no limit
 	   exit (33);
 	}
 
-	the_tiiHandler. start ();
 //
 	if (soundOut == NULL) {	// not bound to a file?
 	   soundOut	= new audioSink	(latency, soundChannel, &err);
@@ -740,6 +739,7 @@ int	theDuration		= -1;	// no limit
 	   }
 	}
 
+	the_tiiHandler. start ();
 	if (run. load ()) {
 	   dabReset_msc (theRadio);
 	   set_audioChannel (theRadio, ad);

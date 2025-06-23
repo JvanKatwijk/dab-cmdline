@@ -38,3 +38,30 @@ read from port 8888 (depending on the configuration).
 
 Sound output now is written in PCM format, i.e. a regular wav file
 
+
+==========================================================================
+Example-2 and TII data
+----------------------------------------------------------------------------
+
+Eample 2 is now equipped with a handler for decoding TII data. 
+In the current setup the handler starts when a selected audio service starts.
+On startup of the handler, it will look for a database with names and other
+data for the various transmitters.
+
+Note that on an X64 Linux PC (and under Windows) a separate program
+exists to download a copy of the database.
+For e.g. RPI based system, there is no (not yet?) such a separate
+program to download a copy of the database. However, a reasonably recent
+copy of the database can be downloaded from the Qt-DAB repository.
+The directory "helpers" (I am dutch so I use from time to time dutch words)
+one sees a file "tiiFile.zip". Download that file to the home directory
+and unzip. It will create a file ".tiiFile.tii", i.e. the database being
+looked for by the program.
+
+In the current setup the tii handler will for each transmitter detected
+print a line
+
+	EId mainId subId -> country channel ensemble transmitter latitude longitude (power altitude height)
+
+This is currently Work in Progress, feel free to suggest enhancements
+
