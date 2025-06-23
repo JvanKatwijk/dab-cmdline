@@ -91,9 +91,9 @@ void	syncsignalHandler (bool b, void *userData) {
 //	recognized, the names of the programs are in the
 //	ensemble
 static
-void	ensemblename_Handler (const char *name, int Id, void *userData) {
+void	name_of_ensemble (const std::string &name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name, (uint32_t)Id);
+	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
@@ -105,13 +105,14 @@ std::vector<int> programSIds;
 
 std::unordered_map <int, std::string> ensembleContents;
 static
-void	programname_Handler (const char * s, int SId, void *userdata) {
+void	serviceName (const std::string &s, int SId,
+	                                uint16_t subChId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
-	   if (*it == std::string (s))
+	   if (*it == s)
 	      return;
-	ensembleContents. insert (pair <int, std::string> (SId, std::string (s)));
-	programNames. push_back (std::string (s));
+	ensembleContents. insert (pair <int, std::string> (SId, s));
+	programNames. push_back (s);
 	programSIds . push_back (SId);
 	std::cerr << "program " << s << " is part of the ensemble\n";
 }
@@ -298,8 +299,8 @@ bool	err;
         interface. dabMode      = theMode;
         interface. syncsignal_Handler   = syncsignalHandler;
         interface. systemdata_Handler   = systemData;
-        interface. ensemblename_Handler = ensemblename_Handler;
-        interface. programname_Handler  = programname_Handler;
+        interface. name_of_ensemble 	= name_of_ensemble;
+        interface. serviceName		= serviceName;
         interface. fib_quality_Handler  = fibQuality;
         interface. audioOut_Handler     = pcmHandler;
         interface. dataOut_Handler      = dataOut_Handler;
@@ -374,7 +375,7 @@ bool	err;
 
 	if (run. load ()) {
 	   dataforAudioService (theRadio,
-	                     programName. c_str (), &ad, 0);
+	                     programName. c_str (), ad, 0);
 	   if (!ad. defined) {
 	      std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
@@ -384,7 +385,7 @@ bool	err;
 
 	if (run. load ()) {
 	   dabReset_msc (theRadio);
-	   set_audioChannel (theRadio, &ad);
+	   set_audioChannel (theRadio, ad);
 	}
 
 	while (run. load ())

@@ -3,14 +3,6 @@
 
 	tiiHandler::tiiHandler	() {
 	has_dataBase	= false;
-	std::string home_dir = getenv ("HOME");
-	std::string fileName = home_dir + "/.txdata.tii";
-	fprintf (stderr, "de filename = %s\n", fileName. c_str ());
-	the_dataBase = theReader. readFile (fileName);
-	fprintf (stderr, "size %d\n", the_dataBase. size ());
-	if (the_dataBase. size () > 10)
-	   has_dataBase = true;
-	threadHandle	= std::thread (&tiiHandler::run, this);
 }
 
 	tiiHandler::~tiiHandler	() {
@@ -18,6 +10,24 @@
 	   running. store (false);
 	   threadHandle. join ();
 	}
+}
+
+void	tiiHandler::stop	() {
+	if (running. load ()) {
+	   running. store (false);
+	   threadHandle. join ();
+	}
+}
+
+void	tiiHandler::start	() {
+	std::string home_dir = getenv ("HOME");
+	std::string fileName = home_dir + "/.txdata.tii";
+	the_dataBase = theReader. readFile (fileName);
+	if (the_dataBase. size () > 10)
+	   has_dataBase = true;
+	else
+	   fprintf (stderr, "Note: no database found,\n output is limited\n");
+	threadHandle	= std::thread (&tiiHandler::run, this);
 }
 
 void	tiiHandler::add (tiiData p) {
@@ -53,7 +63,8 @@ void	tiiHandler::run	() {
 	         fprintf (stderr, "not found %X %d %d\n",
 	                            xx. EId, xx. mainId, xx. subId);	
 	      else 
-	         fprintf (stderr, "%d %d -> %s %s %s %s %f %f\n",
+	         fprintf (stderr, " %X %d %d -> %s %s %s %s %f %f (%d %d %d\n",
+	                        handle -> Eid,
 	                        handle -> mainId,
 	                        handle -> subId,
 	                        handle -> country. c_str (),
@@ -61,7 +72,10 @@ void	tiiHandler::run	() {
 	                        handle -> ensemble. c_str (),
 	                        handle -> transmitterName. c_str (),
 	                        (double)handle -> latitude,
-	                        (double)handle -> longitude);
+	                        (double)handle -> longitude,
+	                        (int)handle -> power,
+	                        (int)handle -> altitude,
+	                        (int)handle -> height);
 	      tiiTable. push_back (xx);
 	   }
 	}

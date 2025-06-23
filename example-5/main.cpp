@@ -86,8 +86,8 @@ std::string	programName	= "";
 void    printOptions	();	// forward declaration
 void	listener	();
 void	selectNextService	();
-void	startAudio	(const std::string &, audiodata *);
-void	startData	(const std::string &, packetdata *);
+void	startAudio	(const std::string &, audiodata &);
+void	startData	(const std::string &, packetdata &);
 //	we deal with some callbacks, so we have some data that needs
 //	to be accessed from global contexts
 static
@@ -141,9 +141,9 @@ void	syncsignal_Handler (bool b, void *userData) {
 //	recognized, the names of the programs are in the
 //	ensemble
 static
-void	ensemblename_Handler (const char * name, int Id, void *userData) {
+void	name_of_ensemble (const std::string &name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name, (uint32_t)Id);
+	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 
@@ -151,14 +151,15 @@ std::vector<std::string> programNames;
 std::vector<int> programSIds;
 
 static
-void	programname_Handler (const char *s, int SId, void *userdata) {
+void	serviceName (const std::string &s, int SId,
+	                         uint16_t subChId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
-	   if (*it == std::string (s))
+	   if (*it == s)
 	      return;
-	programNames. push_back (std::string (s));
+	programNames. push_back (s);
 	programSIds . push_back (SId);
-	fprintf (stderr, "program %s is part of the ensemble\n", s);
+	fprintf (stderr, "program %s. c_str () is part of the ensemble\n", s);
 }
 
 static
@@ -464,8 +465,8 @@ bool	err;
         interface. dabMode		= theMode;
         interface. syncsignal_Handler   = syncsignal_Handler;
         interface. systemdata_Handler   = systemData;
-        interface. ensemblename_Handler = ensemblename_Handler;
-        interface. programname_Handler  = programname_Handler;
+        interface. name_of_ensemble	= name_of_ensemble;
+        interface. serviceName 		= serviceName;
         interface. fib_quality_Handler  = fibQuality;
         interface. audioOut_Handler     = pcmHandler;
         interface. dataOut_Handler      = dataOut_Handler;
@@ -558,11 +559,11 @@ bool	err;
 	                  "we now try to start program %s \n",
 	                          programName. c_str ());
 	         if (is_audioService (theRadio, programName. c_str ())) { 
-	            startAudio (programName, &ad);
+	            startAudio (programName, ad);
 	         }
 	         else
 	         if (is_dataService (theRadio, programName. c_str ())) {
-	            startData (programName, &pd);
+	            startData (programName, pd);
 	         }
 	         else {
 		    fprintf (stderr,"Should not happen");
@@ -659,11 +660,11 @@ int16_t	foundIndex	= -1;
 	                                         programName. c_str ());
 
 	if (is_audioService (theRadio, programName. c_str ())) {
-	   startAudio (programName, &ad);
+	   startAudio (programName, ad);
 	}
 	else
 	if (is_dataService (theRadio, programName. c_str ())) {
-	   startData (programName, &pd);
+	   startData (programName, pd);
 	}
 }
 
@@ -707,14 +708,14 @@ char input [MAX_STRING_SIZE] = {0};
 	}
 }
 
-void	startAudio (const std::string &serviceName, audiodata *ad) {
-	dataforAudioService (theRadio, serviceName. c_str (), ad, 0);
+void	startAudio (const std::string &serviceName, audiodata &ad) {
+	dataforAudioService (theRadio, serviceName, ad, 0);
 	dabReset_msc (theRadio);
 	set_audioChannel (theRadio, ad);
 }
 
-void	startData (const std::string &serviceName, packetdata *pd) {
-	dataforDataService (theRadio, serviceName. c_str (), pd, 0);
+void	startData (const std::string &serviceName, packetdata &pd) {
+	dataforDataService (theRadio, serviceName, pd, 0);
 	dabReset_msc (theRadio);
 	set_dataChannel (theRadio, pd);
 }

@@ -637,6 +637,7 @@ int	theDuration		= -1;	// no limit
 	   exit (33);
 	}
 
+	the_tiiHandler. start ();
 //
 	if (soundOut == NULL) {	// not bound to a file?
 	   soundOut	= new audioSink	(latency, soundChannel, &err);
@@ -750,6 +751,7 @@ int	theDuration		= -1;	// no limit
 	   sleep (1);
 	}
 	theDevice	-> stopReader ();
+	the_tiiHandler. stop ();
 //	dabReset (theRadio);
 	dabExit  (theRadio);
 	delete theDevice;

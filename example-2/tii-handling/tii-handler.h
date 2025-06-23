@@ -17,6 +17,8 @@ public:
 	tiiHandler	();
 
 	~tiiHandler	();
+void	start		();
+void	stop		();
 void	add		(tiiData theData);
 
 private:

@@ -31,6 +31,7 @@
 #include        <iostream>
 #include	<complex>
 #include	<vector>
+#include	<atomic>
 #include	"dab-api.h"
 #include	"includes/support/band-handler.h"
 #ifdef  HAVE_SDRPLAY
@@ -115,9 +116,9 @@ void	syncsignal_Handler (bool b, void *userData) {
 //	recognized, the names of the programs are in the
 //	ensemble
 static
-void	ensemblename_Handler (const char * name, int Id, void *userData) {
+void	name_of_ensemble (const std::string &name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name, (uint32_t)Id);
+	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 }
 //
@@ -143,8 +144,9 @@ void    motdata_Handler (uint8_t * data, int size,
 }
 
 static
-void	programname_Handler (const char *s, int SId, void * userdata) {
-	fprintf (stderr, "%s (%X) is part of the ensemble\n", s, SId);
+void	serviceName (const std::string &s, int SId, uint16_t subChId,
+	                                              void * userdata) {
+	fprintf (stderr, "%s (%X) is part of the ensemble\n", s. c_str (), SId);
 }
 
 static
@@ -209,9 +211,9 @@ int16_t i;
 	(void)ctx;
 }
 
-void    tii_data_Handler        (int s, void *x) {
+void    tii_data_Handler        (tiiData *theData, void *x) {
+	(void)theData;
 	(void)x;
-//	fprintf (stderr, "mainId %d, subId %d\n", s >> 8, s & 0xFF);
 }
 
 //
@@ -567,8 +569,8 @@ deviceHandler	*theDevice;
 	interface. dabMode	= theMode;
 	interface. syncsignal_Handler	= syncsignal_Handler;
 	interface. systemdata_Handler	= systemData;
-	interface. ensemblename_Handler	= ensemblename_Handler;
-	interface. programname_Handler	= programname_Handler;
+	interface. name_of_ensemble	= name_of_ensemble;
+	interface. serviceName		= serviceName;
 	interface. fib_quality_Handler	= fibQuality;
 	interface. audioOut_Handler	= pcmHandler;
 	interface. dataOut_Handler	= wantInfo == true ? dataOut_Handler : nullptr;
@@ -637,8 +639,7 @@ deviceHandler	*theDevice;
 	run. store (true);
 	if (serviceIdentifier != -1) {
 	   char temp [255];
-	   dab_getserviceName (theRadio, serviceIdentifier, temp);
-	   programName = std::string (temp);
+	   programName = dab_getserviceName (theRadio, serviceIdentifier);
 	}
 
 	fprintf (stderr,"we try to start program %s\n",programName.c_str());
@@ -649,7 +650,7 @@ deviceHandler	*theDevice;
 	}
 
 	audiodata ad;
-	dataforAudioService (theRadio, programName. c_str (), &ad, 0);
+	dataforAudioService (theRadio, programName. c_str (), ad, 0);
 	if (!ad. defined) {
 	   std::cerr << "sorry  we cannot handle service " <<
                                                  programName << "\n";
@@ -657,7 +658,7 @@ deviceHandler	*theDevice;
 	}
 
 	dabReset_msc (theRadio);
-	set_audioChannel (theRadio, &ad);
+	set_audioChannel (theRadio, ad);
 
 	while (run. load () && (theDuration != 0)) {
 	   if (theDuration > 0)

@@ -396,12 +396,18 @@ endif ()
 	     ../devices/device-exceptions.h
 	     ../library/includes/dab-constants.h
 	     ../library/includes/dab-processor.h
+	     ../library/includes/bit-extractors.h
+             ../library/includes/time-converter.h
 	     ../library/includes/ofdm/phasereference.h
 	     ../library/includes/ofdm/phasetable.h
 	     ../library/includes/ofdm/freq-interleaver.h
 	     ../library/includes/ofdm/timesyncer.h
 	     ../library/includes/ofdm/fic-handler.h
-	     ../library/includes/ofdm/fib-processor.cpp
+	     ../library/includes/ofdm/fic-handler.h
+             ../library/includes/ofdm/fib-table.h
+             ../library/includes/ofdm/ensemble.h
+             ../library/includes/ofdm/fib-config.h
+             ../library/includes/ofdm/fib-decoder.h
 	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/ofdm/tii-detector.h
 	     ../library/includes/backend/firecode-checker.h
@@ -447,14 +453,17 @@ endif ()
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
 	     ../library/src/dab-processor.cpp
+	     ../library/src/time-converter.cpp
 	     ../library/src/ofdm/ofdm-decoder.cpp
 	     ../library/src/ofdm/phasereference.cpp
 	     ../library/src/ofdm/phasetable.cpp
 	     ../library/src/ofdm/freq-interleaver.cpp
 	     ../library/src/ofdm/timesyncer.cpp
 	     ../library/src/ofdm/sample-reader.cpp
-	     ../library/src/ofdm/fib-processor.cpp
 	     ../library/src/ofdm/fic-handler.cpp
+	     ../library/src/ofdm/ensemble.cpp
+             ../library/src/ofdm/fib-config.cpp
+             ../library/src/ofdm/fib-decoder.cpp
 	     ../library/src/ofdm/tii-detector.cpp
 	     ../library/src/backend/firecode-checker.cpp
 	     ../library/src/backend/backend-base.cpp

@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 3.25 )
-set (objectName dab_cmdline-2)
+set (objectName dab_cmdline-4)
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
 #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -O3 -pg")
@@ -41,7 +41,6 @@ OPTION(RTL_TCP  "Input: RTL_TCP"  OFF)
 OPTION(SDRPLAY_V3  "Input: SDRPlay_V3"  OFF)
 OPTION(WAVFILES "Input: WAVFILES" OFF)
 OPTION(RAWFILES "Input: RAWFILES" OFF)
-OPTION(XMLFILES "Input: XMLFILES" OFF)
 OPTION(SERVER	"CReate TDC server"	  OFF)
 
 OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
@@ -529,6 +528,9 @@ endif ()
 	     ../library/includes/backend/msc-handler.h
 	     ../library/includes/backend/virtual-backend.h
 	     ../library/includes/backend/audio-backend.h
+	     ../library/includes/backend/audio/faad-decoder.h
+             ../library/includes/backend/audio/mp4processor.h
+             ../library/includes/backend/audio/mp2processor.h
 	     ../library/includes/backend/data-backend.h
 	     ../library/includes/backend/data/virtual-datahandler.h 
 	     ../library/includes/backend/data/tdc-datahandler.h 
@@ -576,6 +578,8 @@ endif ()
 	     ../library/src/backend/msc-handler.cpp
 	     ../library/src/backend/virtual-backend.cpp
 	     ../library/src/backend/audio-backend.cpp
+	     ../library/src/backend/audio/mp4processor.cpp 
+             ../library/src/backend/audio/mp2processor.cpp 
 	     ../library/src/backend/data-backend.cpp
 	     ../library/src/backend/data/virtual-datahandler.cpp 
 	     ../library/src/backend/data/tdc-datahandler.cpp 
