@@ -300,6 +300,7 @@ deviceHandler	*theDevice;
 //	and with a sound device we now can create a "backend"
         API_struct interface;
         interface. dabMode      = theMode;
+	interface. thresholdValue	= 10;
         interface. syncsignal_Handler   = syncsignalHandler;
         interface. systemdata_Handler   = systemData;
         interface. ensemblename_Handler = ensemblename_Handler;

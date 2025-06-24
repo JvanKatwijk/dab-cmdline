@@ -383,7 +383,8 @@ void	padHandler::build_MSC_segment (std::vector<uint8_t> data) {
 int32_t size    = (int)(data. size ()) <
 	                 dataGroupLength ? data. size () :
                                                     dataGroupLength;
-
+	if (size <= 2)
+	   return;
 	uint8_t		groupType	=  data [0] & 0xF;
 	uint8_t		continuityIndex = (data [1] & 0xF) >> 4;
 	uint8_t		repetitionIndex =  data [1] & 0xF;

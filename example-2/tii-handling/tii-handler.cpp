@@ -45,7 +45,7 @@ void	tiiHandler::run	() {
 	      if (known (xx))
 	         continue;
 	      if ((xx. ecc == 0) || (xx. EId == 0)) {
-	         fprintf (stderr, "No further data: %d %d \n",
+	         fprintf (stderr, "No further data available to decode: %d %d \n",
 	                                                 xx. mainId,
 	                                                 xx. subId);
 	         tiiTable. push_back  (xx);
@@ -60,13 +60,14 @@ void	tiiHandler::run	() {
 
 	      cacheElement *handle = lookup (xx);	// in tii database
 	      if (handle == nullptr) 
-	         fprintf (stderr, "not found %X %d %d\n",
+	         fprintf (stderr, "not found in database %X %d %d\n",
 	                            xx. EId, xx. mainId, xx. subId);	
 	      else 
-	         fprintf (stderr, " %X %d %d -> %s %s %s %s %f %f (%d %d %d\n",
+	         fprintf (stderr, " %X %d %d\t-> %f %s %s %s %s %f %f (%d %d %d)\n",
 	                        handle -> Eid,
 	                        handle -> mainId,
 	                        handle -> subId,
+	                        xx. strength,
 	                        handle -> country. c_str (),
 	                        handle -> channel. c_str (),
 	                        handle -> ensemble. c_str (),

@@ -3,23 +3,20 @@
  *    Copyright (C) 2015
  *    Sebastian Held <sebastian.held@imst.de>
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License.
- *    All copyrights of the original authors are recognized.
+ *    This file is adapted for use with dab-cmdline
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    dab-cmdline is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    dab-cmdline is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with dab-cmdline; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include	"uhd-input.h"
@@ -59,7 +56,7 @@ void	uhd_streamer::stop (void) {
 	   wait(1);
 }
 
-void	uhd_streamer::run (void) {
+void	uhd_streamer::run () {
 	while (!m_stop_signal_called) {
 //	get write position, ignore data2 and size2
 	   int32_t size1, size2;
@@ -153,7 +150,7 @@ void	uhd_streamer::run (void) {
 	*success 		= true;
 }
 
-	uhdInput::~uhdInput (void) {
+	uhdInput::~uhdInput () {
 	if (theBuffer != NULL) {
 	   stopReader();
 	   uhdSettings	-> beginGroup ("uhdSettings");
@@ -181,7 +178,7 @@ int32_t freq = m_usrp -> get_rx_freq ();
 	return freq;
 }
 
-bool	uhdInput::restartReader	(void) {
+bool	uhdInput::restartReader	() {
 	if (m_workerHandle != 0)
 	   return true;
 
@@ -201,7 +198,7 @@ void	uhdInput::stopReader	(void) {
 }
 //
 //	not used:
-uint8_t	uhdInput::myIdentity	(void) {
+uint8_t	uhdInput::myIdentity	() {
 	return DAB_STICK;
 }
 
@@ -212,11 +209,11 @@ int32_t	uhdInput::getSamples	(DSPCOMPLEX *v, int32_t size) {
 	return size;
 }
 
-int32_t	uhdInput::Samples		(void) {
+int32_t	uhdInput::Samples		() {
 	return theBuffer -> GetRingBufferReadAvailable();
 }
 
-void	uhdInput::resetBuffer	(void) {
+void	uhdInput::resetBuffer	() {
 	theBuffer -> FlushRingBuffer();
 }
 
@@ -224,7 +221,7 @@ void	uhdInput::set_fCorrection	(int32_t f) {
 	(void)f;
 }
 
-int16_t	uhdInput::maxGain		(void) {
+int16_t	uhdInput::maxGain		() {
 	uhd::gain_range_t range = m_usrp->get_rx_gain_range();
 	return	range.stop();
 }
@@ -240,7 +237,7 @@ void	uhdInput::set_KhzOffset	(int32_t o) {
 	vfoOffset	= o;
 }
 
-int16_t	uhdInput::bitDepth	(void) {
+int16_t	uhdInput::bitDepth	() {
 	return 16;
 }
 

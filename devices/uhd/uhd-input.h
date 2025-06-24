@@ -22,8 +22,7 @@
  *    along with SDR-J; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef	__UHDINPUT
-#define	__UHDINPUT
+#pragma once
 
 #include "virtual-input.h"
 
@@ -55,19 +54,19 @@ Q_OBJECT
 	friend class uhd_streamer;
 public:
 		uhdInput (QSettings *dabSettings, bool *success);
-virtual	 	~uhdInput 	(void);
+virtual	 	~uhdInput 	();
 virtual	void	setVFOFrequency	(int32_t freq);
-virtual	int32_t	getVFOFrequency	(void);
+virtual	int32_t	getVFOFrequency	();
 	bool	legalFrequency	(int32_t) {return true;}
-	int32_t	defaultFrequency	(void) {return 100000000;}
-virtual	bool	restartReader	(void);
-virtual	void	stopReader	(void);
+	int32_t	defaultFrequency	() {return 100000000;}
+virtual	bool	restartReader	();
+virtual	void	stopReader	();
 virtual	int32_t	getSamples	(DSPCOMPLEX *, int32_t size);
-virtual	int32_t	Samples		(void);
-	uint8_t	myIdentity	(void);
-virtual	void	resetBuffer	(void);
-virtual	int16_t	maxGain		(void);
-	int16_t	bitDepth	(void);
+virtual	int32_t	Samples		();
+	uint8_t	myIdentity	();
+virtual	void	resetBuffer	();
+virtual	int16_t	maxGain		();
+	int16_t	bitDepth	();
 //
 private:
 	QSettings	*uhdSettings;
@@ -83,5 +82,4 @@ private slots:
 	void	set_fCorrection	(int);
 	void	set_KhzOffset	(int);
 };
-#endif
 

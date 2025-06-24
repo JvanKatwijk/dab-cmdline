@@ -178,6 +178,7 @@ extern "C" {
 //
 typedef struct {
 	uint8_t		dabMode;
+	int16_t		thresholdValue;
 	syncsignal_t	syncsignal_Handler;
 	systemdata_t	systemdata_Handler;
 	name_of_ensemble_t	name_of_ensemble;

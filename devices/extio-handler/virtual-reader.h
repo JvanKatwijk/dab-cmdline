@@ -3,8 +3,7 @@
 //	For the different formats for input, we have
 //	different readers, with one "mother" reader.
 //	Note that the cardreader is quite different here
-#ifndef	__VIRTUAL_READER
-#define	__VIRTUAL_READER
+#pragma once
 
 #include	<stdint.h>
 #include	<stdio.h>
@@ -39,5 +38,4 @@ private:
 	
 };
 
-#endif
 

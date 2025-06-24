@@ -4,8 +4,7 @@
 //	different readers, with one "mother" reader.
 //	Note that the cardreader is quite different here
 //	and its code is elsewhere
-#ifndef	__COMMON_READERS
-#define	__COMMON_READERS
+#pragma once
 
 #include	"virtual-reader.h"
 
@@ -49,5 +48,4 @@ private:
 	int16_t		convIndex;
 };
 
-#endif
 

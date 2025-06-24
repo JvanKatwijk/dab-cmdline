@@ -145,11 +145,11 @@ void	serviceName (const std::string &s, int SId,
 static
 void	programdata_Handler (audiodata *d, void *ctx) {
 	(void)ctx;
-	std::cerr << "\tstartaddress\t= " << d -> startAddr << "\n";
-	std::cerr << "\tlength\t\t= "     << d -> length << "\n";
-	std::cerr << "\tsubChId\t\t= "    << d -> subchId << "\n";
-	std::cerr << "\tprotection\t= "   << d -> protLevel << "\n";
-	std::cerr << "\tbitrate\t\t= "    << d -> bitRate << "\n";
+//	std::cerr << "\tstartaddress\t= " << d -> startAddr << "\n";
+//	std::cerr << "\tlength\t\t= "     << d -> length << "\n";
+//	std::cerr << "\tsubChId\t\t= "    << d -> subchId << "\n";
+//	std::cerr << "\tprotection\t= "   << d -> protLevel << "\n";
+//	std::cerr << "\tbitrate\t\t= "    << d -> bitRate << "\n";
 }
 
 //
@@ -263,59 +263,59 @@ uint8_t		theBand		= BAND_III;
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "D:d:M:B:P:O:A:C:G:g:p:";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:g:X:";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:g:X:";
 #elif	HAVE_PLUTO
 int16_t		gain		= 60;
 bool		autogain	= true;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Q";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:Q";
 #elif	HAVE_SDRPLAY
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
 bool		X_dump		= false;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:X";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:L:Qp:X";
 #elif	HAVE_SDRPLAY_V3
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 3;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:L:Qp:X";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:L:Qp:X";
 bool		X_dump		= false;
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:b";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:p:b";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:p:Q";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:p:Q";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:F:R:";
 #elif	HAVE_RAWFILES
 std::string	fileName;
 bool	repeater		= true;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:F:R:";
 #elif	HAVE_XMLFILES
 std::string	fileName;
 bool		repeater	= true;
-const char	*optionsString	= "T:D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:F:R:";
 #elif	HAVE_RTL_TCP
 int		gain		= 50;
 bool		autogain	= false;
 int		ppmOffset	= 0;
 std::string	hostname	= "127.0.0.1";	// default
 int32_t		basePort	= 1234;		// default
-const char	*optionsString	= "T:D:d:M:B:P:O:A:C:G:Qp:H:I";
+const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
@@ -325,7 +325,7 @@ int		opt;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice	= nullptr;
-
+int16_t		thresholdValue	= 6;		// default;
 bool	err;
 int	theDuration		= -1;	// no limit
 //tiiHandler the_tiiHandler;
@@ -345,6 +345,9 @@ int	theDuration		= -1;	// no limit
 	fprintf (stderr, "options are %s\n", optionsString);
 	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
+	      case 't':
+	         thresholdValue	= atoi (optarg);
+	         break;
 	      case 'T':
 	         theDuration	= 60 * atoi (optarg);	// minutes
 	         break;
@@ -649,6 +652,7 @@ int	theDuration		= -1;	// no limit
 //	and with a sound device we now can create a "backend"
 	API_struct interface;
 	interface. dabMode	= theMode;
+	interface. thresholdValue	= thresholdValue;
 	interface. syncsignal_Handler	= syncsignalHandler;
 	interface. systemdata_Handler	= systemData;
 	interface. name_of_ensemble	= name_of_ensemble;

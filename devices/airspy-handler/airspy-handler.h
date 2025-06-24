@@ -14,8 +14,7 @@
  *	jan van Katwijk
  *	Lazy Chair Computing
  */
-#ifndef __AIRSPY_HANDLER__
-#define	__AIRSPY_HANDLER__
+#pragma once
 
 #include	"ringbuffer.h"
 #include	"device-handler.h"
@@ -151,7 +150,6 @@ static
 	int		callback(airspy_transfer_t *);
 	int		data_available (void *buf, int buf_size);
 const	char *		getSerial (void);
-	int	open (void);
+	int		open (void);
 };
 
-#endif

@@ -66,7 +66,7 @@
 	this	-> carriers		= params. get_carriers ();
 	this	-> carrierDiff		= params. get_carrierDiff ();
 	this	-> tii_counter		= 0;
-	this	-> threshold		= 6;
+	this	-> threshold		= p -> thresholdValue;
 	isSynced			= false;
 	snr				= 0;
 	running. store (false);

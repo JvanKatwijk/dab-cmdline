@@ -3,8 +3,7 @@
 //	For the different formats for input, we have
 //	different readers, with one "mother" reader.
 //	Note that the cardreader is quite different here
-#ifndef	__READER
-#define	__READER
+#pragma once
 
 #include	<stdint.h>
 #include	<stdio.h>
@@ -162,5 +161,4 @@ int16_t bitDepth	(void) {
 }
 };
 
-#endif
 

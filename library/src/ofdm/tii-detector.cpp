@@ -19,6 +19,10 @@
  *    You should have received a copy of the GNU General Public License
  *    along with DAB library; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *	
+ *	This implementation of the TII decoder is a modified version
+ *	of the TII decoder used in Qt-DAB, which is itself derived
+ *	from the TII decoder is DABstar and was developed by Rolf Zerr
  */
 
 #include	"tii-detector.h"
@@ -109,7 +113,7 @@ uint8_t patternTable [] = {
 	0360		// 1 1 1 1 0 0 0 0		69
 };
 
-		TII_Detector::TII_Detector (uint8_t dabMode):
+		TII_Detector::TII_Detector (uint8_t dabMode): 
 	                                      params (dabMode),
 	                                      theTable (dabMode),
 	                                      T_u (params. get_T_u ()),
@@ -154,7 +158,7 @@ void	TII_Detector::addBuffer (const std::vector<Complex>  &v) {
 Complex tmpBuffer [T_u];
 
 	for (int i = 0; i < T_u; i ++)
-           tmpBuffer [i] = v [T_g + i];
+           tmpBuffer [i] = v [T_g + i] * window [i];
 	my_fftHandler. fft (tmpBuffer);
 	for (int i = 0; i < T_u; i ++)
 	   nullSymbolBuffer [i] += tmpBuffer [i];
@@ -214,10 +218,7 @@ int	fcmp (const void *a, const void *b) {
 	if (element1 -> strength > element2 -> strength)
 	   return -1;
 	else
-	if (element1 -> strength < element2 -> strength)
-	   return 1;
-	else
-	   return 0;
+	return (element1 -> strength < element2 -> strength) ? 1 : 0;
 }
 
 std::vector<tiiData> TII_Detector::processNULL (int16_t threshold_db) { 

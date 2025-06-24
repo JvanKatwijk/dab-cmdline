@@ -490,6 +490,7 @@ int	theDuration	= -1;		// infinite
 //	and with a sound device we now can create a "backend"
 	API_struct interface;
 	interface. dabMode		= theMode;
+	interface. thresholdValue	= 6;
 	interface. syncsignal_Handler	= syncsignal_Handler;
 	interface. systemdata_Handler	= systemData;
 	interface. name_of_ensemble	= name_of_ensemble;
