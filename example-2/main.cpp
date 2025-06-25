@@ -727,26 +727,21 @@ int	theDuration		= -1;	// no limit
 	   std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
 	   run. store (false);
-	   sleep (1);
-	   dabExit (theRadio);
-	   delete theDevice;
-	   exit (22);
 	}
-
-	if (run. load ()) {
+	else {
+	   autiodata ad;
 	   dataforAudioService (theRadio,
 	                     programName. c_str (), ad, 0);
-	   if (!ad. defined) {
+	   if (ad. defined) {
+	      the_tiiHandler. start ();
+	      dabReset_msc (theRadio);
+	      set_audioChannel (theRadio, ad);
+	   }
+	   else {
 	      std::cerr << "sorry  we cannot handle service " <<
 	                                         programName << "\n";
 	      run. store (false);
 	   }
-	}
-
-	the_tiiHandler. start ();
-	if (run. load ()) {
-	   dabReset_msc (theRadio);
-	   set_audioChannel (theRadio, ad);
 	}
 
 	while (run. load () && (theDuration != 0)) {

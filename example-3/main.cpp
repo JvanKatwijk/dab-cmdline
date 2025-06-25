@@ -75,11 +75,11 @@ static
 std::atomic<bool> run;
 
 static
-void	*theRadio	= NULL;
+void	*theRadio	= nullptr;
 
 #ifdef	STREAMER_OUTPUT
 static
-streamer	*theStreamer	= NULL;
+streamer	*theStreamer	= nullptr;
 #endif
 
 static
@@ -214,6 +214,12 @@ int16_t i;
 void    tii_data_Handler        (tiiData *theData, void *x) {
 	(void)theData;
 	(void)x;
+}
+
+
+void    timeHandler             (int hours, int minutes, void *ctx) {
+//      fprintf (stderr, "%2d:%2d\n", hours, minutes);
+        (void)ctx;
 }
 
 //
@@ -500,6 +506,7 @@ deviceHandler	*theDevice;
               }
 
 	      default:
+	         fprintf (stderr, "Option %c ??\n", opt);
 	         printOptions ();
 	         exit (1);
 	   }
@@ -580,7 +587,7 @@ deviceHandler	*theDevice;
 	interface. program_quality_Handler		= mscQuality;
 	interface. motdata_Handler	= wantInfo == true ? motdata_Handler : nullptr;
 	interface. tii_data_Handler	= tii_data_Handler;
-	interface. timeHandler		= nullptr;
+	interface. timeHandler		= timeHandler;
 
 //	and with a sound device we can create a "backend"
 	theRadio	= (void *)dabInit (theDevice,
@@ -590,7 +597,7 @@ deviceHandler	*theDevice;
 	                                   NULL		//ctx
 	                               );
 	if (theRadio == NULL) {
-	   fprintf (stderr, "sorry, no radio available, fatal\n");
+	   fprintf (stderr, "sorry, no radio device available, fatal\n");
 	   exit (4);
 	}
 
@@ -643,23 +650,25 @@ deviceHandler	*theDevice;
 	   programName = dab_getserviceName (theRadio, serviceIdentifier);
 	}
 
-	fprintf (stderr,"we try to start program %s\n",programName.c_str());
-	if (!is_audioService (theRadio, programName. c_str ())) {
+	fprintf (stderr,"we try to start program %s\n", programName.c_str());
+	if (!is_audioService (theRadio, programName)) {
 	   std::cerr << "sorry  we cannot handle service " <<
                                                  programName << "\n";
 	   run. store (false);
 	}
-
-	audiodata ad;
-	dataforAudioService (theRadio, programName. c_str (), ad, 0);
-	if (!ad. defined) {
-	   std::cerr << "sorry  we cannot handle service " <<
+	else {
+	   audiodata ad;
+	   dataforAudioService (theRadio, programName, ad, 0);
+	   if (ad. defined) {
+	      dabReset_msc (theRadio);
+	      set_audioChannel (theRadio, ad);
+	   }
+	   else {
+	      std::cerr << "sorry  we cannot handle service " <<
                                                  programName << "\n";
-	   run. store (false);
+	      run. store (false);
+	   }
 	}
-
-	dabReset_msc (theRadio);
-	set_audioChannel (theRadio, ad);
 
 	while (run. load () && (theDuration != 0)) {
 	   if (theDuration > 0)

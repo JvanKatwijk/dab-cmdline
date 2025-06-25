@@ -289,7 +289,7 @@ SyncOnPhase:
 	}
 
 	catch (int e) {
-	   fprintf (stderr, "dab processor will stop\n");
+//	   fprintf (stderr, "dab processor will stop\n");
 	}
 	my_mscHandler.  stop ();
 //	fprintf (stderr, "dabProcessor is shutting down\n");
@@ -328,8 +328,8 @@ bool	dabProcessor::signalSeemsGood		() {
 //	to be handled by delegates
 uint8_t dabProcessor::serviceType		(const std::string &s) {
 int index	= my_ficHandler. getServiceComp (s);
-	fprintf (stderr, "for service %s we find index %d\n",
-	                  s. c_str (), index);
+//	fprintf (stderr, "for service %s we find index %d\n",
+//	                  s. c_str (), index);
         return my_ficHandler. serviceType (index);
 }
 

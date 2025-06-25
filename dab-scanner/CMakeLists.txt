@@ -1,10 +1,10 @@
 cmake_minimum_required( VERSION 2.8.11 )
 set (objectName dab_scanner)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
-#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -g")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+#set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -g -fsanitize=address")
+#set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g")
-
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -g -fsanitize=address")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set (CMAKE_INSTALL_PREFIX "/usr/local/bin" CACHE PATH "default install path" FORCE )
 endif()
@@ -324,6 +324,7 @@ endif ()
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
 	           ./
+	           ./tii-handling
 	           ../
 	           ../devices
 	           ../library
@@ -342,6 +343,10 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
+	     ./tii-handling/tii-handler.h
+             ./tii-handling/tiiQueue.h
+             ./tii-handling/tii-reader.h
+             ./tii-handling/cacheElement.h
 	     ./dab_tables.h
 	     ./service-printer.h
 	     ../dab-api.h
@@ -349,17 +354,21 @@ endif ()
 	     ../devices/device-exceptions.h
 	     ../library/includes/dab-constants.h
 	     ../library/includes/dab-processor.h
+	     ../library/includes/bit-extractors.h
+             ../library/includes/time-converter.h
 	     ../library/includes/ofdm/phasereference.h
 	     ../library/includes/ofdm/phasetable.h
 	     ../library/includes/ofdm/freq-interleaver.h
 	     ../library/includes/ofdm/timesyncer.h
 	     ../library/includes/ofdm/fic-handler.h
-	     ../library/includes/ofdm/fib-processor.h
+	     ../library/includes/ofdm/fib-table.h
+             ../library/includes/ofdm/ensemble.h
+             ../library/includes/ofdm/fib-config.h
+             ../library/includes/ofdm/fib-decoder.h
 	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/ofdm/tii-detector.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/backend-base.h
-	     ../library/includes/backend/charsets.h
 	     ../library/includes/backend/galois.h
 	     ../library/includes/backend/reed-solomon.h
 	     ../library/includes/backend/msc-handler.h
@@ -377,6 +386,7 @@ endif ()
 	     ../library/includes/backend/data/mot/mot-dir.h 
 	     ../library/includes/backend/data/mot/mot-object.h
 	     ../library/includes/support/band-handler.h 
+	     ../library/includes/support/charsets.h
 #	     ../library/includes/support/viterbi_handler.h
 	     ../library/includes/support/protTables.h
 	     ../library/includes/support/protection.h
@@ -393,21 +403,26 @@ endif ()
 	     ./main.cpp
 	     ./dab_tables.cpp
 	     ./service-printer.cpp
+	     ./tii-handling/tii-handler.cpp
+             ./tii-handling/tiiQueue.cpp
+             ./tii-handling/tii-reader.cpp
 	     ../devices/device-handler.cpp
 	     ../library/dab-api.cpp
 	     ../library/src/dab-processor.cpp
+	     ../library/src/time-converter.cpp
 	     ../library/src/ofdm/ofdm-decoder.cpp
 	     ../library/src/ofdm/phasereference.cpp
 	     ../library/src/ofdm/phasetable.cpp
 	     ../library/src/ofdm/freq-interleaver.cpp
 	     ../library/src/ofdm/timesyncer.cpp
 	     ../library/src/ofdm/sample-reader.cpp
-	     ../library/src/ofdm/fib-processor.cpp
 	     ../library/src/ofdm/fic-handler.cpp
+	     ../library/src/ofdm/ensemble.cpp
+             ../library/src/ofdm/fib-config.cpp
+             ../library/src/ofdm/fib-decoder.cpp
 	     ../library/src/ofdm/tii-detector.cpp
 	     ../library/src/backend/firecode-checker.cpp
 	     ../library/src/backend/backend-base.cpp
-	     ../library/src/backend/charsets.cpp
 	     ../library/src/backend/galois.cpp
 	     ../library/src/backend/reed-solomon.cpp
 	     ../library/src/backend/msc-handler.cpp
@@ -424,6 +439,7 @@ endif ()
 	     ../library/src/backend/data/mot/mot-dir.cpp 
 	     ../library/src/backend/data/mot/mot-object.cpp
 	     ../library/src/support/band-handler.cpp
+	     ../library/src/support/charsets.cpp
 #	     ../library/src/support/viterbi-handler.cpp
 	     ../library/src/support/protTables.cpp
 	     ../library/src/support/protection.cpp

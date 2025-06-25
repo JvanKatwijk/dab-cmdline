@@ -711,7 +711,8 @@ uint16_t	theTime	[6];
 //	   int utc_hour		= currentConfig -> dateTime [3];
 //	   int utc_minute 	= currentConfig -> dateTime [4];
 //	   int utc_seconds	= currentConfig -> dateTime [5];
-	   adjustTime (currentConfig -> dateTime);
+	adjustTime (currentConfig -> dateTime);
+	if (theParameters -> timeHandler != nullptr)
 	   theParameters -> timeHandler (
 	                    currentConfig -> dateTime [3],
 	                    currentConfig -> dateTime [4], userData);

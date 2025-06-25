@@ -32,6 +32,7 @@
 #include	<iostream>
 #include	"dab-api.h"
 #include	"includes/support/band-handler.h"
+#include	"tii-handler.h"
 #include	"service-printer.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
@@ -63,6 +64,9 @@ static
 void	*theRadio	= nullptr;
 
 static
+tiiHandler the_tiiHandler;
+
+static
 std::atomic<bool>timeSynced;
 
 static
@@ -89,9 +93,9 @@ void	syncsignalHandler (bool b, void *userData) {
 std::string	ensembleName;
 uint32_t	ensembleId;
 static
-void	ensemblename_Handler (const char *name, int Id, void *userData) {
+void	name_of_ensemble (const std::string &name, int Id, void *userData) {
 	fprintf (stderr, "ensemble %s is (%X) recognized\n",
-	                          name, (uint32_t)Id);
+	                          name. c_str (), (uint32_t)Id);
 	ensembleRecognized. store (true);
 	ensembleName	= name;
 	ensembleId	= Id;
@@ -101,14 +105,21 @@ std::vector<std::string> programNames;
 std::vector<int> programSIds;
 
 static
-void	programname_Handler (const char * s, int SId, void *userdata) {
+void	serviceName (const std::string &s, int SId,
+	                                 uint16_t subChId, void *userdata) {
 	for (std::vector<std::string>::iterator it = programNames.begin();
 	             it != programNames. end(); ++it)
-	   if (*it == std::string (s))
+	   if (*it == s)
 	      return;
-	programNames. push_back (std::string (s));
+	programNames. push_back (s);
 	programSIds . push_back (SId);
-	fprintf (stderr, "program %s is part of the ensemble\n", s);
+//	fprintf (stderr, "program %s is part of the ensemble\n", s. c_str ());
+}
+
+static
+void	tii_data_Handler	(tiiData *theData, void *ctx) {
+	the_tiiHandler. add (*theData);
+	(void)ctx;
 }
 
 static
@@ -193,7 +204,7 @@ const char	*optionsString	= "F:jD:d:M:B:C:G:L:Qp:";
 #elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
-bool		autogain	= false;
+bool		autogain	= true;
 int16_t		ppmOffset	= 0;
 const char	*optionsString	= "F:jD:d:M:B:C:G:L:Qp:";
 #elif	HAVE_AIRSPY
@@ -218,10 +229,11 @@ bandHandler	dabBand;
 deviceHandler	*theDevice;
 bool firstEnsemble = true;
 
-	fprintf (stderr, "dab_scanner V 1.0alfa,\n"
+	fprintf (stderr, "dab_scanner V 2.0alfa,\n"
 	                "Copyright 2018 J van Katwijk, Lazy Chair Computing\n"	                         "2018 Hayati Ayguen\n"
 	                 "2019 J van Katwijk\n"
-	                 "2020 J van Katwijk\n");
+	                 "2020 J van Katwijk\n"
+	                 "2025 J van Katwijk\n");
 	timeSynced.	store (false);
 	timesyncSet.	store (false);
 	run.		store (false);
@@ -416,10 +428,11 @@ bool firstEnsemble = true;
 //	and with a sound device we now can create a "backend"
         API_struct interface;
         interface. dabMode      = theMode;
+	interface. thresholdValue	= 6;
         interface. syncsignal_Handler   = syncsignalHandler;
         interface. systemdata_Handler   = systemData;
-        interface. ensemblename_Handler = ensemblename_Handler;
-        interface. programname_Handler  = programname_Handler;
+        interface. name_of_ensemble 	= name_of_ensemble;
+        interface. serviceName  	= serviceName;
         interface. fib_quality_Handler  = fibQuality;
         interface. audioOut_Handler     = pcmHandler;
         interface. dataOut_Handler      = dataOut_Handler;
@@ -427,7 +440,7 @@ bool firstEnsemble = true;
         interface. programdata_Handler  = programdata_Handler;
         interface. program_quality_Handler              = mscQuality;
         interface. motdata_Handler	= nullptr;
-        interface. tii_data_Handler	= nullptr;
+        interface. tii_data_Handler	= tii_data_Handler;
         interface. timeHandler		= nullptr;
 //
 //	and with a sound device we can create a "backend"
@@ -438,7 +451,7 @@ bool firstEnsemble = true;
 	                           nullptr
 	                          );
 	if (theRadio == nullptr) {
-	   fprintf (stderr, "sorry, no radio available, fatal\n");
+	   fprintf (stderr, "sorry, no radio device available, fatal\n");
 	   exit (4);
 	}
 
@@ -452,10 +465,10 @@ bool firstEnsemble = true;
 	   bool	firstTime	= true;
 	   bool firstService	= true;
 	   theDevice	-> stopReader ();
+	   the_tiiHandler. stop ();
 	   int32_t frequency =
 	               dabBand. Frequency (theBand, theChannel);
 	   theDevice	-> restartReader (frequency);
-	   
 	   ensembleRecognized.	store (false);
 	   dabReset (theRadio);
 //	The device should be working right now
@@ -465,7 +478,7 @@ bool firstEnsemble = true;
 	   timesyncSet.		store (false);
 	   timeSynced. 		store (false);
 	   timeSyncTime		= 4;
-	   freqSyncTime		= 5;
+	   freqSyncTime		= 10;
 
 	   while (!timesyncSet. load () && (--timeSyncTime >= 0))
 	      sleep (4);
@@ -493,7 +506,8 @@ bool firstEnsemble = true;
 	      else
 	         continue;
 	   }
-	   
+
+	   the_tiiHandler. start (ensembleId);
 #ifdef	HAVE_RTLSDR
 	   if (rawDump) {
 	      ((rtlsdrHandler *)theDevice) -> startDumping (theChannel,
@@ -504,7 +518,7 @@ bool firstEnsemble = true;
 	      }
 	   }
 #else
-	   sleep (5);
+	   sleep (10);
 #endif
 //	print ensemble data here
 	   print_ensembleData (outFile,
@@ -517,84 +531,52 @@ bool firstEnsemble = true;
 
 	   print_audioheader (outFile, jsonOutput);
 	   for (int i = 0; i < (int)(programNames. size ()); i ++) {
-	      if (is_audioService (theRadio, programNames [i]. c_str ())) {
+	      if (is_audioService (theRadio, programNames [i])) {
 	         audiodata ad;
 	         dataforAudioService (theRadio,
-	                              programNames [i]. c_str (),
-	                              &ad, 0);
+	                              programNames [i],
+	                              ad, 0);
 	         print_audioService (outFile, 
                                      jsonOutput,
 	                             theRadio,
-	                             programNames [i]. c_str (),
+	                             programNames [i],
 	                             theChannel,
 	                             &ad,
 	                             &firstService);
-	         for (int j = 1; j < 5; j ++) {
-	            packetdata pd;
-	            dataforDataService (theRadio,
-	                                programNames [i]. c_str (),
-                                        &pd, j);
-	            if (pd. defined)
-	               print_dataService (outFile,
-                                          jsonOutput,
-                                          theRadio,
-                                          programNames [i]. c_str (),
-                                          theChannel,
-                                          j,
-	                                  &pd,
-	                                  &firstService);
-	         }
 	      }
 	   }
 
 	   for (int i = 0; i < (int)(programNames. size ()); i ++) {
-	      if (is_dataService (theRadio, programNames [i]. c_str ())) {
+	      if (is_dataService (theRadio, programNames [i])) {
 	         if (firstTime)
 	            print_dataHeader (outFile, jsonOutput);
 	         firstTime	= false;
-	         for (int j = 0; j < 5; j ++) {
-                    packetdata pd;
-                    dataforDataService (theRadio,
-                                        programNames [i]. c_str (),
-                                        &pd, j);
-                    if (pd. defined)
-                       print_dataService (outFile,
-                                          jsonOutput,
-                                          theRadio,
-                                          programNames [i]. c_str (),
-                                          theChannel,
-                                          j,
-	                                  &pd,
-                                          &firstService);
-                 }
-	      }
-	      else
-	      if (is_audioService (theRadio, programNames [i]. c_str ())) {
-	         for (int j = 1; j < 5; j ++) {
-	            packetdata pd;
-	            dataforDataService (theRadio,
-	                                programNames [i]. c_str (),
-                                        &pd, j);
-	            if (pd. defined)
-	               print_dataService (outFile,
-                                          jsonOutput,
-                                          theRadio,
-                                          programNames [i]. c_str (),
-                                          theChannel,
-                                          j,
-	                                  &pd,
-                                      &firstService);
-	         }
+                 packetdata pd;
+                 dataforDataService (theRadio,
+                                        programNames [i],
+                                        pd, 9);
+                 if (pd. defined)
+                    print_dataService (outFile,
+                                       jsonOutput,
+                                       theRadio,
+                                       programNames [i],
+                                       theChannel,
+                                       0,
+	                               &pd,
+                                       &firstService);
+                
 	      }
 	   }
 	   
 	   print_ensembleFooter (outFile, jsonOutput);
 
+	   the_tiiHandler. print ();
 #ifdef	HAVE_RTLSDR
 	   if (rawDump)
 	      ((rtlsdrHandler *)theDevice) -> stopDumping ();
 #endif
 	   theDevice	-> stopReader ();
+	   the_tiiHandler. stop ();
 	   dabStop (theRadio);
 	   programNames. resize (0);
 	   programSIds.  resize (0);
@@ -610,7 +592,7 @@ bool firstEnsemble = true;
 	delete theDevice;	
 }
 
-void    printOptions (void) {
+void    printOptions () {
         fprintf (stderr,
 "                        dab-scanner options are\n\
                         -F filename      in case the output is to a file\n\
