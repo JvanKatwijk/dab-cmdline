@@ -49,56 +49,50 @@ same time by more than a single transmitter. Each transmitter then
 adds some encoding to the so-called NULL segment of the DAB frame,
 that identifies the transmitter.
 
-In Qt-DAB the TII data is by default decoded and - after consulting
-a databae - transformed into the name of the transmitter and some
-additional data.
+In an experimental setting, TII decoders are added to both the
+dab-scanner and example-2.
 
-As an experiment, example-2 is modified to download the database and
-show some info on the transmitters begin received.
+Of course one needs a database with TII data. While for Linux (X64) and
+Windows (on an X64 PC) a simple loader can be downloaded from the Qt-DAB
+repository, for other systems a reasonable recent database can be
+downloaded from the Qt-DAB repo.
+Installing such a database in the home directory is (should be)
+sufficient for the dab-cmdline software to detect it abd extract
+the data.
 
-Shown below is the output of a recording
+The dab-scanner has an additional command line parameter, one
+that specifies the number of seconds that the software will 
+inspect the incoming data for TII data, the "-I" command.
 
-	program KLASSIK RADIO    is part of the ensemble
-	program RADIO BOB!       is part of the ensemble
-	program Absolut relax    is part of the ensemble
-	program SCHLAGERPARADIES is part of the ensemble
-	program Dlf              is part of the ensemble
-	program ENERGY           is part of the ensemble
-	program Schwarzwaldradio is part of the ensemble
-	program PPP-RTK-AdV      is part of the ensemble
-	program DRadio DokDeb    is part of the ensemble
-	there might be a DAB signal here
-	ensemble DR Deutschland   is (10BC) recognized
-	program ERF Plus         is part of the ensemble
-	16 1 -> DE 5C DR Deutschland Hamburg/Heinrich-Hertz-Turm 53.563122 9.975833
-	
-	16 2 -> DE 5C DR Deutschland Hamburg/Moorfleet 53.519230 10.102853
-	we try to start program radio horeb
-	for service radio horeb we find index 7
-		startaddress	= 156
-		length		= 36
-		subChId		= 5
-		protection	= 2
-		bitrate		= 48
+As an example, part of the output of the dab-scanner (for channel 5B):
 
-It shows that two transmitters are identified, with the transmitter's name and
-the coordinates
+Audioservice;Amor FM         ;5B;845A;8;360;72;96;DAB+;0;EEP 3-A;1/2;unknown;
+audioservice;KINK            ;5B;8358;2;72;72;96;DAB+;11;EEP 3-A;1/2;unknown;
+audioservice;RADIONL Zuid-H  ;5B;8421;6;252;36;64;DAB+;0;EEP 3-B;4/6;unknown;
+audioservice;Omroep West     ;5B;8419;7;288;72;96;DAB+;1;EEP 3-A;1/2;unknown;
+audioservice;Tukker FM       ;5B;8457;11;468;36;64;DAB+;10;EEP 3-B;4/6;unknown;
+audioservice;ArrowClassicRock;5B;80D9;20;504;48;64;DAB+;11;EEP 3-A;1/2;unknown;
+audioservice;Ujala Radio     ;5B;82FF;9;432;36;48;DAB+;7;EEP 3-A;1/2;unknown;
+audioservice;Omroep Zeeland  ;5B;841B;1;0;72;96;DAB+;2;EEP 3-A;1/2;unknown;
+audioservice;Radio Rijnmond  ;5B;841A;4;180;72;96;DAB+;2;EEP 3-A;1/2;unknown;
+audioservice;RADIONL2 Zeeland;5B;8521;3;144;36;48;DAB+;0;EEP 3-A;1/2;unknown;
+ 805B 15 7	-> 1.634082 NL 5B 5B Z-H/Zeeland Den Haag/Cellnex toren 52.080704 4.335917 (3.00 1 116)
 
-As said, the "feature" is still experimental and further work is
-being done
+The last line shows the output of the TII decoding for that channel
 
 ----------------------------------------------------------------------
 Supported devices
 ----------------------------------------------------------------------
 
-	- SDRplay RSP's (using 2.13 lib or 3.06 lib)
+	- SDRplay RSP's (using 2.13 lib or 3.XX lib)
+	(note currently the dab-scanner does not support the 3.XX lib)
 	- AIRspy
 	- RTLSDR based devices
 	- HACKRF (only example programs 2, 3, 4)
 	- LimeSDR (only example programs 2, 3 and 4)
 	- Pluto (only example 2)
 
-and of course fileinput of ".raw" and ".sdr" files is supported, as
+and of course fileinput of ".raw", ".sdr" and ".uff" files is supported, as
 well as input through the rtl_tcp driver.
 
 -----------------------------------------------------------------
