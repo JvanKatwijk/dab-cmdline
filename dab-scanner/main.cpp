@@ -223,6 +223,7 @@ const char	*optionsString	= "F:jD:d:M:B:C:G:p:QR:T:";
 int	opt;
 int	freqSyncTime		= 10;
 int	timeSyncTime		= 10;
+int	tiiSyncTime		= 10;
 bool	jsonOutput		= false;
 struct sigaction sigact;
 bandHandler	dabBand;
@@ -261,6 +262,10 @@ bool firstEnsemble = true;
 
 	      case 'd':
 	         timeSyncTime	= atoi (optarg);
+	         break;
+
+	      case 'T':
+	         tiiSyncTime	= atoi (optarg);
 	         break;
 
 	      case 'M':
@@ -464,6 +469,10 @@ bool firstEnsemble = true;
 	while (true) {
 	   bool	firstTime	= true;
 	   bool firstService	= true;
+	   int	the_timeSyncTime	= timeSyncTime;
+	   int	the_freqSyncTime	= freqSyncTime;
+	   int	the_tiiSyncTime		= tiiSyncTime;
+
 	   theDevice	-> stopReader ();
 	   the_tiiHandler. stop ();
 	   int32_t frequency =
@@ -477,10 +486,8 @@ bool firstEnsemble = true;
 	                                          theChannel. c_str ());
 	   timesyncSet.		store (false);
 	   timeSynced. 		store (false);
-	   timeSyncTime		= 4;
-	   freqSyncTime		= 10;
 
-	   while (!timesyncSet. load () && (--timeSyncTime >= 0))
+	   while (!timesyncSet. load () && (--the_timeSyncTime >= 0))
 	      sleep (4);
 
 	   if (!timeSynced. load ()) {
@@ -493,8 +500,8 @@ bool firstEnsemble = true;
 //
 //	we might have data here, not sure yet
 	   while (!ensembleRecognized. load () &&
-	                             (--freqSyncTime >= 0)) {
-	       fprintf (stderr, "%d\r", freqSyncTime);
+	                             (--the_freqSyncTime >= 0)) {
+	       fprintf (stderr, "%d\r", the_freqSyncTime);
 	       sleep (1);
 	   }
 	   fprintf (stderr, "\n");
@@ -518,7 +525,8 @@ bool firstEnsemble = true;
 	      }
 	   }
 #else
-	   sleep (10);
+	   while (--the_tiiSyncTime > 0)
+	      sleep (1);
 #endif
 //	print ensemble data here
 	   print_ensembleData (outFile,
@@ -554,7 +562,7 @@ bool firstEnsemble = true;
                  packetdata pd;
                  dataforDataService (theRadio,
                                         programNames [i],
-                                        pd, 9);
+                                        pd, 0);
                  if (pd. defined)
                     print_dataService (outFile,
                                        jsonOutput,

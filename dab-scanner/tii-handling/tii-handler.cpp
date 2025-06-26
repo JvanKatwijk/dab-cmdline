@@ -100,7 +100,7 @@ cacheElement *tiiHandler::lookup (tiiData &tii) {
 
 void	tiiHandler::print	() {
 	for (auto &ce : tiiTable) 
-	   fprintf (stderr, " %X %d %d\t-> %f %s %s %s %s %f %f (%2f %d %d)\n",
+	   fprintf (stderr, " %X %d %d\t-> %f %s %s %s %s %f %f (%.2f %d %d)\n",
 	                        ce. Eid,
 	                        ce. mainId,
 	                        ce. subId,
