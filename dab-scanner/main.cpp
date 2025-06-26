@@ -190,35 +190,35 @@ uint8_t		theBand		= BAND_III;
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "F:jD:d:M:B:C::G:g:p:";
+const char	*optionsString	= "I:F:jD:d:M:B:C::G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "F:jD:d:M:B:C:G:g:X:";
+const char	*optionsString	= "I:F:jD:d:M:B:C:G:g:X:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "F:jD:d:M:B:C:G:L:Qp:";
+const char	*optionsString	= "I:F:jD:d:M:B:C:G:L:Qp:";
 #elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "F:jD:d:M:B:C:G:L:Qp:";
+const char	*optionsString	= "I:F:jD:d:M:B:C:G:L:Qp:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
-const char	*optionsString	= "F:jD:d:M:B:C:G:bp:";
+const char	*optionsString	= "I:F:jD:d:M:B:C:G:bp:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
 int		dumpDuration	= 1;
 bool		rawDump		= false;
-const char	*optionsString	= "F:jD:d:M:B:C:G:p:QR:T:";
+const char	*optionsString	= "I:F:jD:d:M:B:C:G:p:QR:T:";
 #endif
 int	opt;
 int	freqSyncTime		= 10;
@@ -264,7 +264,7 @@ bool firstEnsemble = true;
 	         timeSyncTime	= atoi (optarg);
 	         break;
 
-	      case 'T':
+	      case 'I':
 	         tiiSyncTime	= atoi (optarg);
 	         break;
 
