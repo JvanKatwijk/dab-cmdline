@@ -53,12 +53,12 @@
         this    -> userData             = userData;
         memset (dateTime, 0, 8 * sizeof (uint32_t));
 
-        reset   ();
 //
 //	Note that they may change "roles", 
 	currentConfig	= new fibConfig();
 	nextConfig	= new fibConfig();
 	theEnsemble	= new ensemble ();
+        reset   ();
 	CIFcount	= 0;
 	mjd		= 0;
 }
@@ -1183,7 +1183,9 @@ void	fibDecoder::disconnect_channel () {
 }
 
 void	fibDecoder::reset	() {
-//	connect_channel ();
+	theEnsemble	-> reset ();
+	currentConfig	-> reset ();
+	nextConfig	-> reset ();
 }
 
 bool	fibDecoder::syncReached() {

@@ -524,11 +524,10 @@ bool firstEnsemble = true;
 	         fprintf (stderr, "%d\r", dumpDuration - i);
 	      }
 	   }
-#else
+#endif
 	   while (--the_tiiSyncTime > 0) {
 	      sleep (1);
 	   }
-#endif
 //	print ensemble data here
 	   print_ensembleData (outFile,
 	                       jsonOutput,

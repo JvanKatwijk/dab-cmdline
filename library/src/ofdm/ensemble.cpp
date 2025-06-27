@@ -24,7 +24,7 @@
 #include	"ensemble.h"
 
 void	ensemble::reset	() {
-	isSynced	= false;
+//	isSynced	= false;
 	primaries. resize (0);
 	secondaries. resize (0);
 	namePresent = false;
