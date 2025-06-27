@@ -525,8 +525,9 @@ bool firstEnsemble = true;
 	      }
 	   }
 #else
-	   while (--the_tiiSyncTime > 0)
+	   while (--the_tiiSyncTime > 0) {
 	      sleep (1);
+	   }
 #endif
 //	print ensemble data here
 	   print_ensembleData (outFile,
