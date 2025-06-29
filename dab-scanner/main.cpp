@@ -221,8 +221,8 @@ bool		rawDump		= false;
 const char	*optionsString	= "I:F:jD:d:M:B:C:G:p:QR:T:";
 #endif
 int	opt;
-int	freqSyncTime		= 10;
-int	timeSyncTime		= 10;
+int	freqSyncTime		= 8;
+int	timeSyncTime		= 4;
 int	tiiSyncTime		= 10;
 bool	jsonOutput		= false;
 struct sigaction sigact;
@@ -487,8 +487,10 @@ bool firstEnsemble = true;
 	   timesyncSet.		store (false);
 	   timeSynced. 		store (false);
 
-	   while (!timesyncSet. load () && (--the_timeSyncTime >= 0))
-	      sleep (4);
+	   while (!timesyncSet. load () && (--the_timeSyncTime >= 0)) {
+	      fprintf (stderr, "Waiting for time sync %d\r", the_timeSyncTime);
+	      sleep (1);
+	   }
 
 	   if (!timeSynced. load ()) {
 	      theChannel = dabBand. nextChannel (theBand, theChannel);
@@ -501,7 +503,7 @@ bool firstEnsemble = true;
 //	we might have data here, not sure yet
 	   while (!ensembleRecognized. load () &&
 	                             (--the_freqSyncTime >= 0)) {
-	       fprintf (stderr, "%d\r", the_freqSyncTime);
+	       fprintf (stderr, "waiting for frequency sync %d\r", the_freqSyncTime);
 	       sleep (1);
 	   }
 	   fprintf (stderr, "\n");
@@ -526,6 +528,7 @@ bool firstEnsemble = true;
 	   }
 #endif
 	   while (--the_tiiSyncTime > 0) {
+	      fprintf (stderr, "Looking for TII signals %d\r", the_tiiSyncTime);
 	      sleep (1);
 	   }
 //	print ensemble data here

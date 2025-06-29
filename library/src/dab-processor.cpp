@@ -122,10 +122,10 @@ notSynced:
                  break;                 // yes, we are ready
 
               case NO_DIP_FOUND:
-                 if  (++ dip_attempts >= 5) {
-                    syncsignalHandler (false, userData);
-                    dip_attempts = 0;
-                 }
+//                 if  (++ dip_attempts >= 5) {
+//                    syncsignalHandler (false, userData);
+//                    dip_attempts = 0;
+//                 }
                  goto notSynced;
 
               default:                  // does not happen
@@ -140,10 +140,10 @@ notSynced:
 	                        findIndex (ofdmBuffer. data (), THRESHOLD);
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
-	      if (++index_attempts > 5) {
-	         syncsignalHandler (false, userData);
-	         index_attempts	= 0;
-	      }
+//	      if (++index_attempts > 25) {
+//	         syncsignalHandler (false, userData);
+//	         index_attempts	= 0;
+//	      }
 //	      fprintf (stderr, "startIndex %d\n", startIndex);
 	      goto notSynced;
 	   }
@@ -162,10 +162,10 @@ Check_endofNull:
 	                         findIndex (ofdmBuffer. data (), 4 * THRESHOLD);
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
-	      if (++index_attempts > 5) {
-	         syncsignalHandler (false, userData);
-	         index_attempts	= 0;
-	      }
+//	      if (++index_attempts > 5) {
+//	         syncsignalHandler (false, userData);
+//	         index_attempts	= 0;
+//	      }
 //	      fprintf (stderr, "startIndex %d\n", startIndex);
 	      goto notSynced;
 	   }
