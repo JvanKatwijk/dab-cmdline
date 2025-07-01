@@ -1,6 +1,28 @@
 
 DAB COMMAND LINE and DAB LIBRARY
 
+--------------------------------------------------------------------
+Notes
+
+   -d parameter removed. 
+   The -d parameter specified the maximum amount of time used for
+   timesyncing. The DAB decoding software is, however, such that
+   after a number of tries to detect the coarse border between
+   the NULL period of the DAB frame and the first datablock
+   it sends a signal that there is no data.
+   Even if a coarse border is detected, there is no guarantee that
+   we are dealing with a DAB signal. A second test is done by
+   trying to locate the precise border between NULL period and data,
+   and if after a number of tries not precise border could be detected
+   the decoder sent a signal to the mainprogram
+   So, if no DAB data is detected, a signal is sent, making the -d
+   parameter superfluous
+
+   -I parameter for the DAB scanner
+   The DAB scanner is equipped with a TII decoder. The -I <some number>
+   parameter specifies the amount of time the software will investigate
+   the NULL periods of the incoming data for TII data
+   
 ---------------------------------------------------------------------
 Introduction
 ---------------------------------------------------------------------
@@ -49,9 +71,7 @@ same time by more than a single transmitter. Each transmitter then
 adds some encoding to the so-called NULL segment of the DAB frame,
 that identifies the transmitter.
 
-In an experimental setting, TII decoders are added to both the
-dab-scanner and example-2.
-
+The dab-scanner is now equipped with a TII decoder. 
 Of course one needs a database with TII data. While for Linux (X64) and
 Windows (on an X64 PC) a simple loader can be downloaded from the Qt-DAB
 repository, for other systems a reasonable recent database can be

@@ -50,7 +50,7 @@
 	                                    my_ficHandler (p,
 	                                                   userData),
 	                                    my_mscHandler  (p,
-                                                            userData) {
+	                                                    userData) {
 	this	-> inputDevice		= inputDevice;
 	this	-> syncsignalHandler	= p -> syncsignal_Handler;
 	this	-> systemdataHandler	= p -> systemdata_Handler;
@@ -117,21 +117,21 @@ int		startIndex		= -1;
 notSynced:
 //Initing:
 	   my_TII_Detector. reset ();
-           switch (myTimeSyncer. sync (T_null, T_F)) {
-              case TIMESYNC_ESTABLISHED:
-                 break;                 // yes, we are ready
+	   switch (myTimeSyncer. sync (T_null, T_F)) {
+	      case TIMESYNC_ESTABLISHED:
+	         break;                 // yes, we are ready
 
-              case NO_DIP_FOUND:
-//                 if  (++ dip_attempts >= 5) {
-//                    syncsignalHandler (false, userData);
-//                    dip_attempts = 0;
-//                 }
-                 goto notSynced;
+	      case NO_DIP_FOUND:
+	         if  (++ dip_attempts >= 5) {
+	            syncsignalHandler (false, userData);
+	            dip_attempts = 0;
+	         }
+	         goto notSynced;
 
-              default:                  // does not happen
-              case NO_END_OF_DIP_FOUND:
-                 goto notSynced;
-           }
+	      default:                  // does not happen
+	      case NO_END_OF_DIP_FOUND:
+	         goto notSynced;
+	   }
 
 	   myReader. getSamples (ofdmBuffer. data (),
 	                         T_u, coarseOffset + fineOffset);
@@ -140,11 +140,10 @@ notSynced:
 	                        findIndex (ofdmBuffer. data (), THRESHOLD);
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
-//	      if (++index_attempts > 25) {
-//	         syncsignalHandler (false, userData);
-//	         index_attempts	= 0;
-//	      }
-//	      fprintf (stderr, "startIndex %d\n", startIndex);
+	      if (++index_attempts > 25) {
+	         syncsignalHandler (false, userData);
+	         index_attempts	= 0;
+	      }
 	      goto notSynced;
 	   }
 	   index_attempts	= 0;
@@ -162,11 +161,11 @@ Check_endofNull:
 	                         findIndex (ofdmBuffer. data (), 4 * THRESHOLD);
 	   if (startIndex < 0) { // no sync, try again
 	      isSynced	= false;
-//	      if (++index_attempts > 5) {
-//	         syncsignalHandler (false, userData);
-//	         index_attempts	= 0;
-//	      }
-//	      fprintf (stderr, "startIndex %d\n", startIndex);
+	      if (++index_attempts > 5) {
+	         syncsignalHandler (false, userData);
+	         index_attempts	= 0;
+	      }
+	      fprintf (stderr, "startIndex %d\n", startIndex);
 	      goto notSynced;
 	   }
 
@@ -255,12 +254,12 @@ SyncOnPhase:
  *      The TII data is encoded in the null period of the
  *      odd frames
  */
-           if (params. get_dabMode () == 1) {
+	   if (params. get_dabMode () == 1) {
 	      if (wasSecond (my_ficHandler. get_CIFcount (), &params)) {
 	         my_TII_Detector. addBuffer (ofdmBuffer);
 	         if (++tii_counter >= 4) {
 	            std::vector<tiiData> res =
-                          my_TII_Detector. processNULL (threshold);
+	                  my_TII_Detector. processNULL (threshold);
 	            if ((res. size () > 0) && (show_tii != nullptr)) {
 	               uint8_t the_ecc	= my_ficHandler. get_ecc ();
 	               uint16_t the_EId	= my_ficHandler. get_EId ();
@@ -270,10 +269,10 @@ SyncOnPhase:
 	                  show_tii (&d, userData);
 	               }
 	            }
-                    tii_counter = 0;
+	            tii_counter = 0;
 	            my_TII_Detector. reset ();
-                 }
-              }
+	         }
+	      }
 
 	   }
 	   if (fineOffset > carrierDiff / 2) {
@@ -330,7 +329,7 @@ uint8_t dabProcessor::serviceType		(const std::string &s) {
 int index	= my_ficHandler. getServiceComp (s);
 //	fprintf (stderr, "for service %s we find index %d\n",
 //	                  s. c_str (), index);
-        return my_ficHandler. serviceType (index);
+	return my_ficHandler. serviceType (index);
 }
 
 void    dabProcessor::dataforAudioService	(const std::string &s,
@@ -347,13 +346,13 @@ void    dabProcessor::dataforAudioService	(const std::string &s,
 }
 
 void    dabProcessor::dataforDataService	(const std::string &s,
-                                                    packetdata &pd) {
+	                                            packetdata &pd) {
 	int index	= my_ficHandler. getServiceComp (s);
 	my_ficHandler. packetData (index, pd);
 }
 
 void    dabProcessor::dataforDataService	(const std::string &s,
-                                                    packetdata &pd, int16_t o) {
+	                                            packetdata &pd, int16_t o) {
 	(void)o;
 	int index	= my_ficHandler. getServiceComp (s);
 	my_ficHandler. packetData (index, pd);
@@ -369,11 +368,11 @@ std::string dabProcessor::get_serviceName (int32_t SId) {
 }
 
 void    dabProcessor::reset_msc		() {
-        my_mscHandler. reset ();
+	my_mscHandler. reset ();
 }
 
 void    dabProcessor::set_audioChannel (audiodata &d) {
-        my_mscHandler. set_audioChannel (d);
+	my_mscHandler. set_audioChannel (d);
 	programdataHandler (&d, userData);
 }
 
@@ -382,7 +381,7 @@ void    dabProcessor::set_dataChannel (packetdata &d) {
 }
 
 void    dabProcessor::clearEnsemble	() {
-        my_ficHandler. reset ();
+	my_ficHandler. reset ();
 }
 
 std::string dabProcessor::get_ensembleName	() {
@@ -390,15 +389,15 @@ std::string dabProcessor::get_ensembleName	() {
 }
 
 bool    dabProcessor::wasSecond (int16_t cf, dabParams *p) {
-        switch (p -> get_dabMode ()) {
-           default:
-           case 1:
-              return (cf & 07) >= 4;
-           case 2:
-           case 3:
-              return (cf & 02);
-           case 4:
-              return (cf & 03) >= 2;
-        }
+	switch (p -> get_dabMode ()) {
+	   default:
+	   case 1:
+	      return (cf & 07) >= 4;
+	   case 2:
+	   case 3:
+	      return (cf & 02);
+	   case 4:
+	      return (cf & 03) >= 2;
+	}
 }
 

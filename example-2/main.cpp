@@ -36,7 +36,6 @@
 #include	"filesink.h"
 #include	"dab-api.h"
 #include	"includes/support/band-handler.h"
-#include	"tii-handler.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
 #elif	HAVE_SDRPLAY_V3
@@ -86,7 +85,6 @@ std::atomic<bool>timeSynced;
 static
 std::atomic<bool>timesyncSet;
 
-tiiHandler	the_tiiHandler;
 static
 std::atomic<bool>ensembleRecognized;
 
@@ -172,7 +170,7 @@ void	motdata_Handler (uint8_t *data, int size,
 }
 
 void	tii_data_Handler	(tiiData *theData, void *ctx) {
-	the_tiiHandler. add (*theData);
+	(void)theData;
 	(void)ctx;
 }
 
@@ -263,63 +261,63 @@ uint8_t		theBand		= BAND_III;
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:g:p:";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:g:X:";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:g:X:";
 #elif	HAVE_PLUTO
 int16_t		gain		= 60;
 bool		autogain	= true;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:Q";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:Q";
 #elif	HAVE_SDRPLAY
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
 bool		X_dump		= false;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:L:Qp:X";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:L:Qp:X";
 #elif	HAVE_SDRPLAY_V3
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 3;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:L:Qp:X";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:L:Qp:X";
 bool		X_dump		= false;
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:p:b";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:p:b";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:p:Q";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:p:Q";
 #elif	HAVE_WAVFILES
 std::string	fileName;
 bool		repeater	= true;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:F:R:";
 #elif	HAVE_RAWFILES
 std::string	fileName;
 bool	repeater		= true;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:F:R:";
 #elif	HAVE_XMLFILES
 std::string	fileName;
 bool		repeater	= true;
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:F:R:";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:F:R:";
 #elif	HAVE_RTL_TCP
 int		gain		= 50;
 bool		autogain	= false;
 int		ppmOffset	= 0;
 std::string	hostname	= "127.0.0.1";	// default
 int32_t		basePort	= 1234;		// default
-const char	*optionsString	= "t:T:D:d:M:B:P:O:A:C:G:Qp:H:I";
+const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
-int16_t		timeSyncTime	= 10;
+//int16_t		timeSyncTime	= 10;
 int16_t		freqSyncTime	= 5;
 int		opt;
 struct sigaction sigact;
@@ -328,7 +326,6 @@ deviceHandler	*theDevice	= nullptr;
 int16_t		thresholdValue	= 6;		// default;
 bool	err;
 int	theDuration		= -1;	// no limit
-//tiiHandler the_tiiHandler;
 	std::cerr << "dab_cmdline example II,\n \
 	                Copyright 2017 J van Katwijk, Lazy Chair Computing\n";
 	timeSynced.	store (false);
@@ -355,9 +352,9 @@ int	theDuration		= -1;	// no limit
 	         freqSyncTime	= atoi (optarg);
 	         break;
 
-	      case 'd':
-	         timeSyncTime	= atoi (optarg);
-	         break;
+//	      case 'd':
+//	         timeSyncTime	= atoi (optarg);
+//	         break;
 
 	      case 'M':
 	         theMode	= atoi (optarg);
@@ -729,11 +726,10 @@ int	theDuration		= -1;	// no limit
 	   run. store (false);
 	}
 	else {
-	   autiodata ad;
+	   audiodata ad;
 	   dataforAudioService (theRadio,
 	                     programName. c_str (), ad, 0);
 	   if (ad. defined) {
-	      the_tiiHandler. start ();
 	      dabReset_msc (theRadio);
 	      set_audioChannel (theRadio, ad);
 	   }
@@ -750,7 +746,6 @@ int	theDuration		= -1;	// no limit
 	   sleep (1);
 	}
 	theDevice	-> stopReader ();
-	the_tiiHandler. stop ();
 //	dabReset (theRadio);
 	dabExit  (theRadio);
 	delete theDevice;
@@ -763,7 +758,6 @@ void    printOptions (void) {
 "	                  -T Duration\tstop after <Duration> seconds\n"
 "	                  -M Mode\tMode is 1, 2 or 4. Default is Mode 1\n"
 "	                  -D number\tamount of time to look for an ensemble\n"
-"	                  -d number\tseconds to reach time sync\n"
 "	                  -P name\tprogram to be selected in the ensemble\n"
 "			  -A name\t select the audio channel (portaudio)\n"
 "	                  -O fileName\t output to file <name>\n"

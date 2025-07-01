@@ -1,6 +1,6 @@
 #
 /*
- *    Copyright (C) 2015, 2016, 2017
+ *    Copyright (C) 2015, 2016, 2025
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
@@ -190,39 +190,38 @@ uint8_t		theBand		= BAND_III;
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "I:F:jD:d:M:B:C::G:g:p:";
+const char	*optionsString	= "I:F:jD:M:B:C::G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "I:F:jD:d:M:B:C:G:g:X:";
+const char	*optionsString	= "I:F:jD:M:B:C:G:g:X:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 4;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "I:F:jD:d:M:B:C:G:L:Qp:";
+const char	*optionsString	= "I:F:jD:M:B:C:G:L:Qp:";
 #elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "I:F:jD:d:M:B:C:G:L:Qp:";
+const char	*optionsString	= "I:F:jD:M:B:C:G:L:Qp:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
-const char	*optionsString	= "I:F:jD:d:M:B:C:G:bp:";
+const char	*optionsString	= "I:F:jD:M:B:C:G:bp:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
 int		dumpDuration	= 1;
 bool		rawDump		= false;
-const char	*optionsString	= "I:F:jD:d:M:B:C:G:p:QR:T:";
+const char	*optionsString	= "I:F:jD:M:B:C:G:p:QR:T:";
 #endif
 int	opt;
 int	freqSyncTime		= 8;
-int	timeSyncTime		= 4;
 int	tiiSyncTime		= 10;
 bool	jsonOutput		= false;
 struct sigaction sigact;
@@ -258,10 +257,6 @@ bool firstEnsemble = true;
 
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
-	         break;
-
-	      case 'd':
-	         timeSyncTime	= atoi (optarg);
 	         break;
 
 	      case 'I':
@@ -469,7 +464,7 @@ bool firstEnsemble = true;
 	while (true) {
 	   bool	firstTime	= true;
 	   bool firstService	= true;
-	   int	the_timeSyncTime	= timeSyncTime;
+	   int	the_timeSyncTime	= 5;
 	   int	the_freqSyncTime	= freqSyncTime;
 	   int	the_tiiSyncTime		= tiiSyncTime;
 
@@ -608,10 +603,11 @@ void    printOptions () {
 "                        dab-scanner options are\n\
                         -F filename      in case the output is to a file\n\
                         -j               output data in json format\n\
-                        -d number        amount of time to look for time synchr\n\
+                        -t number        threshold for tii detection\n\
                         -D number        amount of time to look for full sync\n\
                         -M Mode          Mode is 1, 2 or 4. Default is Mode 1\n\
                         -B Band          Band is either L_BAND or BAND_III (default)\n\
+	                -I number	amount of time used to gather TII data\n\
                         -C start channel the start channel, default: 5A\n\
 	                -R filename	raw dump of the input data\n"
 "	for hackrf:\n"

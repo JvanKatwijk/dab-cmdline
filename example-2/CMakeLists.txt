@@ -494,7 +494,6 @@ endif ()
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
 	           ./
-	           ./tii-handling
 	           ./server-thread
 	           ./audio-sink
 	           ../devices
@@ -515,10 +514,6 @@ endif ()
 	set (${objectName}_HDRS
 	     ${${objectName}_HDRS}
 	     ./ringbuffer.h
-	     ./tii-handling/tii-handler.h
-	     ./tii-handling/tiiQueue.h
-	     ./tii-handling/tii-reader.h
-	     ./tii-handling/cacheElement.h
 	     ./audio-sink/audio-base.h
 	     ./audio-sink/audiosink.h
 	     ./audio-sink/filesink.h
@@ -576,9 +571,6 @@ endif ()
 	set (${objectName}_SRCS
 	     ${${objectName}_SRCS}
 	     ./main.cpp
-	     ./tii-handling/tii-handler.cpp
-	     ./tii-handling/tiiQueue.cpp
-	     ./tii-handling/tii-reader.cpp
 	     ./audio-sink/audio-base.cpp
 	     ./audio-sink/audiosink.cpp
 	     ./audio-sink/filesink.cpp
