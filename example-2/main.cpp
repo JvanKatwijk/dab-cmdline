@@ -317,7 +317,7 @@ const char	*optionsString	= "t:T:D:M:B:P:O:A:C:G:Qp:H:I";
 #endif
 std::string	soundChannel	= "default";
 int16_t		latency		= 10;
-//int16_t		timeSyncTime	= 10;
+int16_t		timeSyncTime	= 10;
 int16_t		freqSyncTime	= 5;
 int		opt;
 struct sigaction sigact;
@@ -352,9 +352,9 @@ int	theDuration		= -1;	// no limit
 	         freqSyncTime	= atoi (optarg);
 	         break;
 
-//	      case 'd':
-//	         timeSyncTime	= atoi (optarg);
-//	         break;
+	      case 'd':
+	         timeSyncTime	= atoi (optarg);
+	         break;
 
 	      case 'M':
 	         theMode	= atoi (optarg);
