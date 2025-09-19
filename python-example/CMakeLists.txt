@@ -191,7 +191,6 @@ endif ()
 	     ../library/includes/ofdm/sample-reader.h
 	     ../library/includes/backend/firecode-checker.h
 	     ../library/includes/backend/backend-base.h
-	     ../library/includes/backend/charsets.h
 	     ../library/includes/backend/galois.h
 	     ../library/includes/backend/reed-solomon.h
 	     ../library/includes/backend/msc-handler.h
@@ -210,6 +209,7 @@ endif ()
 	     ../library/includes/backend/data/data-processor.h
 	      ../library/includes/support/band-handler.h
 	     ../library/includes/support/protTables.h
+	     ../library/includes/support/charsets.h
 	     ../library/includes/support/protection.h
 	     ../library/includes/support/uep-protection.h
 	     ../library/includes/support/eep-protection.h
@@ -242,7 +242,6 @@ endif ()
 	     ../library/src/ofdm/tii-detector.cpp
 	     ../library/src/backend/firecode-checker.cpp
 	     ../library/src/backend/backend-base.cpp
-	     ../library/src/backend/charsets.cpp
 	     ../library/src/backend/galois.cpp
 	     ../library/src/backend/reed-solomon.cpp
 	     ../library/src/backend/msc-handler.cpp
@@ -260,6 +259,7 @@ endif ()
 	     ../library/src/backend/data/data-processor.cpp
 	     ../library/src/support/band-handler.cpp
 	     ../library/src/support/protTables.cpp
+	     ../library/src/support/charsets.cpp
 	     ../library/src/support/protection.cpp
 	     ../library/src/support/eep-protection.cpp
 	     ../library/src/support/uep-protection.cpp

@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8.11 )
+cmake_minimum_required( VERSION 3.5 )
 
 project(dab_lib)
 set (objectName dab_lib)
@@ -106,7 +106,6 @@ set (${objectName}_HDRS
     ./includes/ofdm/tii-detector.h
     ./includes/backend/firecode-checker.h
     ./includes/backend/backend-base.h
-    ./includes/backend/charsets.h
     ./includes/backend/galois.h
     ./includes/backend/reed-solomon.h
     ./includes/backend/msc-handler.h
@@ -125,6 +124,7 @@ set (${objectName}_HDRS
     ./includes/backend/data/mot/mot-object.h
     ./includes/support/band-handler.h
     ./includes/support/protTables.h
+    ./includes/support/charsets.h
     #	 ./includes/support/viterbi-handler.h
     ./includes/support/protection.h
     ./includes/support/dab-semaphore.h
@@ -152,7 +152,6 @@ set (${objectName}_SRCS
     ./src/ofdm/tii-detector.cpp
     ./src/backend/firecode-checker.cpp
     ./src/backend/backend-base.cpp
-    ./src/backend/charsets.cpp
     ./src/backend/galois.cpp
     ./src/backend/reed-solomon.cpp
     ./src/backend/msc-handler.cpp
@@ -169,6 +168,7 @@ set (${objectName}_SRCS
     ./src/backend/data/mot/mot-dir.cpp
     ./src/backend/data/mot/mot-object.cpp
     ./src/support/band-handler.cpp
+    ./src/support/charsets.cpp
     #	 ./src/support/viterbi-handler.cpp
     ./src/support/protection.cpp
     ./src/support/protTables.cpp

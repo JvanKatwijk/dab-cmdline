@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.25 )
+cmake_minimum_required( VERSION 3.5 )
 set (objectName dab_cmdline-2)
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -flto")
 #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
