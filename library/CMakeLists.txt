@@ -102,7 +102,7 @@ set (${objectName}_HDRS
     ./includes/ofdm/sample-reader.h
     ./includes/ofdm/timesyncer.h
     ./includes/ofdm/fic-handler.h
-    ./includes/ofdm/fib-processor.h
+    ./includes/ofdm/fib-decoder.h
     ./includes/ofdm/tii-detector.h
     ./includes/backend/firecode-checker.h
     ./includes/backend/backend-base.h
@@ -148,7 +148,7 @@ set (${objectName}_SRCS
     ./src/ofdm/sample-reader.cpp
     ./src/ofdm/timesyncer.cpp
     ./src/ofdm/fic-handler.cpp
-    ./src/ofdm/fib-processor.cpp
+    ./src/ofdm/fib-decoder.cpp
     ./src/ofdm/tii-detector.cpp
     ./src/backend/firecode-checker.cpp
     ./src/backend/backend-base.cpp

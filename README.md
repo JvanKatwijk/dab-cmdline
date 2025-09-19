@@ -1,6 +1,20 @@
 
 DAB COMMAND LINE and DAB LIBRARY
 
+-----------------------------------------------------------------------
+
+The software is provided as is, it is available under the GPL-V2,
+the examples might or might not work.
+As far as I can see they work on my Linux-x86 box, no garantees are
+given that the library software or the examples will work on
+Windows or any other system.
+
+THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
+THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
+MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
+PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN
+ERROR BEFORE ASKING ME.
+
 --------------------------------------------------------------------
 Notes
 
