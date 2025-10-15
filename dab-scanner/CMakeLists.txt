@@ -34,13 +34,14 @@ OPTION(RTLSDR   "Input: RTLSDR"   OFF)
 OPTION(SDRPLAY  "Input: SDRPLAY"  OFF)
 OPTION(AIRSPY   "Input: AirSpy"   OFF)
 OPTION(HACKRF	"Input: HACKRF"	  OFF)
+OPTION(RTL_TCP	"Input: RTL_TCP"  OFF)
 OPTION(LIMESDR	"Input: LIMESDR"  OFF)
 OPTION(SDRPLAY_V3  "Input: SDRPlay_V3"  OFF)
 
 OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
 OPTION(RPI_DEFINED "optimize for ARM/NEON" OFF)
 
-if ( (NOT RTLSDR) AND (NOT SDRPLAY) AND (NOT AirSpy) AND (NOT HACKRF) AND (NOT LIMESDR) AND (NOT SDRPLAY_V3) )
+if ( (NOT RTLSDR) AND (NOT SDRPLAY) AND (NOT AirSpy) AND (NOT HACKRF) AND (NOT LIMESDR) AND (NOT SDRPLAY_V3) AND (NOT RTL_TCP) )
    message("None of the Input Options selected. Using default SDRPlay")
    set(SDRPlay ON)
 endif ()
@@ -69,6 +70,15 @@ if(AIRSPY)
    if (objectName STREQUAL "")
       set(AIRSPY ON)
       set(objectName dab-scanner-airspy)
+   else ()
+      message ("Ignoring second option")
+   endif ()
+endif ()
+
+if(RTL_TCP)
+   if (objectName STREQUAL "")
+      set(RTL_TCP ON)
+      set(objectName dab-scanner-rtl_tcp)
    else ()
       message ("Ignoring second option")
    endif ()
@@ -142,6 +152,22 @@ endif ()
 #	The devices
 #
 
+	if (RTL_TCP)
+	   include_directories (
+	     ../devices/rtl_tcp
+	   )
+	   set ($(objectName)_HDRS
+	        ${${objectName}_HDRS}
+	        ../devices/rtl_tcp/rtl_tcp-client.h
+           )
+
+	   set (${objectName}_SRCS
+	        ${${objectName}_SRCS}
+	        ../devices/rtl_tcp/rtl_tcp-client.cpp
+	   )
+
+	add_definitions (-DHAVE_RTL_TCP)
+	endif (RTL_TCP)
 	if (SDRPLAY)
 	   find_path (SDRPLAYLIB_INCLUDE_DIR
                       NAMES mirsdrapi-rsp.h

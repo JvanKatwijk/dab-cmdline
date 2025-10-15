@@ -3,30 +3,27 @@
  *    Jan van Katwijk (J.vanKatwijk@gmail.com)
  *    Lazy Chair Computing
  *
- *    This file is part of the SDR-J.
- *    Many of the ideas as implemented in SDR-J are derived from
- *    other work, made available through the GNU general Public License.
- *    All copyrights of the original authors are recognized.
+ *    This file is part of dab-cmdline
  *
- *    SDR-J is free software; you can redistribute it and/or modify
+ *    dab-cmdline is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
  *    (at your option) any later version.
  *
- *    SDR-J is distributed in the hope that it will be useful,
+ *    dab-cmdline is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    along with SDR-J; if not, write to the Free Software
+ *    along with dab-cmdline; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *    A simple client for rtl_tcp
  */
 
 #include	"rtl_tcp-client.h"
-#include  "device-exceptions.h"
+#include 	"device-exceptions.h"
 
 //
 	rtl_tcp_client::rtl_tcp_client	(std::string	hostname,
@@ -98,20 +95,20 @@
         threadHandle    = std::thread (&rtl_tcp_client::run, this);
 }
 
-	rtl_tcp_client::~rtl_tcp_client (void) {
+	rtl_tcp_client::~rtl_tcp_client () {
 	stopReader ();
 
 	close (theSocket);
 }
 
-void	rtl_tcp_client:: run (void) {
+void	rtl_tcp_client:: run () {
 
 	running. store (true);
 	while (running. load ()) {
            uint8_t buffer [1024];
            int res = read (theSocket, buffer, 1024);
            if (res < 0) {
-						 	DEBUG_PRINT("Error: %s",strerror(errno));
+	      DEBUG_PRINT("Error: %s",strerror(errno));
 	      running. store (false);
               return;
            }
@@ -125,24 +122,24 @@ void	rtl_tcp_client:: run (void) {
 //	size: still in I/Q pairs, but we have to convert the data from
 //	uint8_t to std::complex<float>
 int32_t	rtl_tcp_client::getSamples (std::complex<float> *V, int32_t size) {
-int32_t	amount, i;
-uint8_t	*tempBuffer = (uint8_t *)alloca (2 * size * sizeof (uint8_t));
+int32_t	amount;
+uint8_t	tempBuffer = [2 * size];
 //
 	amount = theBuffer	-> getDataFromBuffer (tempBuffer, 2 * size);
-	for (i = 0; i < amount / 2; i ++)
+	for (int i = 0; i < amount / 2; i ++)
 	    V [i] = std::complex<float> (
 	                        (float (tempBuffer [2 * i] - 128)) / 128.0,
 	                        (float (tempBuffer [2 * i + 1] - 128)) / 128.0);
 	return amount / 2;
 }
 
-int32_t	rtl_tcp_client::Samples	(void) {
+int32_t	rtl_tcp_client::Samples	() {
 	return  theBuffer	-> GetRingBufferReadAvailable () / 2;
 }
-//
 
 //	bitDepth is is used to set the scale for the spectrum
-int16_t	rtl_tcp_client::bitDepth	(void) {
+//	not really something you would expect here
+int16_t	rtl_tcp_client::bitDepth	() {
 	return 8;
 }
 
@@ -157,7 +154,7 @@ uint8_t theCommand [5];
 	write (theSocket, &theCommand, 5);
 }
 
-void	rtl_tcp_client::stopReader (void) {
+void	rtl_tcp_client::stopReader () {
 	if (running) {
 	   running. store (false);
 	   threadHandle. join ();

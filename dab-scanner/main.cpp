@@ -44,6 +44,8 @@
 #include	"hackrf-handler.h"
 #elif	HAVE_LIME
 #include	"lime-handler.h"
+#elif	HAVE_RTL_TCP
+#include	"rtl_tcp-client.h"
 #elif	HAVE_SDRPLAY_V3
 #include	"sdrplay-handler-v3.h"
 #endif
@@ -182,8 +184,8 @@ void	mscQuality	(int16_t fe, int16_t rsE, int16_t aacE, void *ctx) {
 
 int	main (int argc, char **argv) {
 // Default values
-std::string	startChannel	= "5A";
 uint8_t		theMode		= 1;
+std::string	startChannel	= "5A";
 std::string	theChannel	= "5C";
 uint8_t		theBand		= BAND_III;
 #ifdef	HAVE_HACKRF
@@ -219,6 +221,13 @@ int16_t		ppmOffset	= 0;
 int		dumpDuration	= 1;
 bool		rawDump		= false;
 const char	*optionsString	= "I:F:jD:M:B:C:G:p:QR:T:";
+#elif   HAVE_RTL_TCP
+int		rtl_tcp_gain	= 50;
+bool		autogain	= false;
+int		rtl_tcp_ppm	= 0;
+std::string	rtl_tcp_hostname	= "127.0.0.1";  // default
+int32_t		rtl_tcp_basePort	= 1234;         // default
+const char      *optionsString  = "I:F:jD:M:B:C:G:g:P:H:h:p:Q";
 #endif
 int	opt;
 int	freqSyncTime		= 8;
@@ -245,6 +254,10 @@ bool firstEnsemble = true;
 
 	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
+	      case 'I':
+	         tiiSyncTime	= atoi (optarg);
+	         break;
+
 	      case 'F':
 	         outFile	= fopen (optarg, "w");
 	         if (outFile == nullptr)
@@ -257,10 +270,6 @@ bool firstEnsemble = true;
 
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
-	         break;
-
-	      case 'I':
-	         tiiSyncTime	= atoi (optarg);
 	         break;
 
 	      case 'M':
@@ -281,7 +290,25 @@ bool firstEnsemble = true;
 
 //	device specific options
 
-#ifdef	HAVE_HACKRF
+#ifdef	HAVE_RTL_TCP
+	      case 'G':
+	      case 'g':
+		 rtl_tcp_gain	= atoi (optarg);
+	         break;
+	      case 'P':	
+	         rtl_tcp_basePort	= atoi (optarg);
+	         break;
+	      case 'h':
+	      case 'H':
+	         rtl_tcp_hostname	= std::string (optarg);
+	         break;
+	      case  'p':
+	         rtl_tcp_ppm	= atoi (optarg);
+	         break;
+	      case 'Q':
+	         autogain	= true;
+	         break;
+#elif	HAVE_HACKRF
 	      case 'G':
 	         lnaGain	= atoi (optarg);
 	         break;
@@ -413,6 +440,13 @@ bool firstEnsemble = true;
 	                                     ppmOffset,
 	                                     gain,
 	                                     autogain);
+#elif	HAVE_RTL_TCP
+	   theDevice    = new rtl_tcp_client (rtl_tcp_hostname,
+                                              rtl_tcp_basePort,
+                                              frequency,
+                                              rtl_tcp_gain,
+                                              autogain,
+                                              rtl_tcp_ppm);
 #elif	HAVE_HACKRF
 	   theDevice	= new hackrfHandler (frequency,
 	                                     ppmOffset,
@@ -427,7 +461,7 @@ bool firstEnsemble = true;
 
 //	and with a sound device we now can create a "backend"
         API_struct interface;
-        interface. dabMode      = theMode;
+        interface. dabMode		= theMode;
 	interface. thresholdValue	= 6;
         interface. syncsignal_Handler   = syncsignalHandler;
         interface. systemdata_Handler   = systemData;

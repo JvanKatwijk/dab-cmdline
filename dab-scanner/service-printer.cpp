@@ -31,9 +31,9 @@ void	print_fileHeader (FILE *f, bool jsonOutput) {
 	}
 }
 
-void	print_ensembleData (FILE *f,
-	                    bool jsonOutput,
-	                    void *theRadio,
+void	print_ensembleData (FILE	*f,
+	                    bool	jsonOutput,
+	                    void 	*theRadio,
 	                    std::string currentChannel,
 	                    std::string ensembleLabel,
 	                    uint32_t	ensembleId,
