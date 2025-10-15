@@ -15,6 +15,10 @@ MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
 PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN
 ERROR BEFORE ASKING ME.
 
+If you contact me, please be clear and unambiguous in what you ask,
+questions as "Hey, it does not work" (or semantically similar)
+are considered unfriendly as does not mentioning your name.
+
 --------------------------------------------------------------------
 Notes
 
