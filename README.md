@@ -15,9 +15,13 @@ MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
 PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN
 ERROR BEFORE ASKING ME.
 
+Important:
 If you contact me, please be clear and unambiguous in what you ask,
 questions as "Hey, it does not work" (or semantically similar)
-are considered unfriendly as does not mentioning your name.
+are considered unfriendly,  furthermore, I am too old to be called "Hey",
+that is also rather impolite. Furthermore, if you do not use your name
+- but only the "git" name - you are basically insulting me
+and I will not act on your "issue".
 Furthermore, please remember that I am not your "private programmer"
 
 --------------------------------------------------------------------
