@@ -24,6 +24,13 @@ but only the "git" name)  you are basically insulting me
 and I will not act on your "issue".
 Furthermore, please remember that I am not your "private programmer"
 
+Notes
+---------------------------------------------------------------------
+
+I am rewriting the dab-scanner. In the directory you will find 
+a. dab-scanner, which is the old one
+b. scanner, which is a completely written one, still under test
+
 --------------------------------------------------------------------
 Notes
 

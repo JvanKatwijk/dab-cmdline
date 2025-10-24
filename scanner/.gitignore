@@ -1,0 +1,12 @@
+# Ignore temporary files
+*.swp
+# Ignore build folders
+/dab-scanner/build/
+/devices/build/
+/example-*/build/
+/library/build/
+/simple-dab/build/
+/python-example/build/
+# Ignore vscode data directory
+/.vscode/
+*~
