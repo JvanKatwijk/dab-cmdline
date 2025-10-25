@@ -339,7 +339,6 @@ endif ()
 	           ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
 	           .
 	           ./
-	           ../
 	           ./main
 	           ./devices
 	           ./includes
