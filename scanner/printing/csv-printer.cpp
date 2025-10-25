@@ -22,26 +22,20 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include	"printer.h"
+#include	"csv-printer.h"
 #include	"dab-tables.h"
 
-	printer::printer	(const std::string &fileName) {
-	theFile	= fopen (fileName. c_str (), "w");
-	if (theFile == nullptr)
-	   theFile	= stderr;
+	csv_printer::csv_printer	(const std::string &fileName):
+	                                            scannerPrinter (fileName) {
 }
 
-	printer::~printer	() {
-	if (theFile != nullptr)
-	   fclose (theFile);
+	csv_printer::~csv_printer	() {
 }
 
-void	printer::close		() {
-//	fclose (theFile);
-//	theFile	= nullptr;
+void	csv_printer::close		() {
 }
 
-void	printer::print  (const std::vector<ensembleDescriptor> &theResults) {
+void	csv_printer::print (const std::vector<ensembleDescriptor> &theResults) {
 typedef struct {
 	std::string ensembleName;
 	std::string channel;
@@ -76,34 +70,28 @@ std::vector<printed> done;
 	print_footer ();
 }
 	
-void	printer::print_ensemble (const ensembleDescriptor &ens,
+void	csv_printer::print_ensemble (const ensembleDescriptor &ens,
 	                                        std::string s, bool last) {
-
-	fprintf (theFile, "\"%s\": {\"name\": \"%s\", \"EId\":\"%X\",",
-	                   ens. channel. c_str (),
-	                   ens. ensemble. c_str (), ens. ensembleId);
+	
+	fprintf (theFile, "\n%s; %X;%s;",
+	                   ens. channel. c_str (), ens. ensembleId,
+	                   ens. ensemble. c_str ());
 	if (s != "")
-	   fprintf (theFile, "\"Link\" : \"%s\",", s. c_str ());
-	fprintf (theFile, "\n");
+	   fprintf (theFile, " see %s;n", s. c_str ());
+	else	
+	   fprintf (theFile, "\n");
+	fprintf (theFile, "\nAudio services\ntype;;serviceId;service name;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
+
 	if (ens. transmitterData. size () > 0) {
-	   fprintf (theFile, "    \"Transmitters\" : {\n");
 	   int nrTransmitters = ens. transmitterData. size ();
 	   int counter = 1;
 	   for (auto &c: ens. transmitterData) {
 	      fprintf (theFile,
-	           "\"%d-%d\" : { \"name\":\"%s\", \"lat\":\"%f\", \"lon\":\"%f\"}",
+	           "(%d-%d);%s; %f;%f\n",
 	                          c. mainId, c. subId,
 	                          c. transmitterName. c_str (),
 	                          c. latitude, c. longitude);
-	      if (counter < nrTransmitters)
-	         fprintf (theFile, ",\n");
-	      else
-	         fprintf (theFile, "\n");
 	   }
-	   if (s == "")
-	      fprintf (theFile, "},\n\n");
-	   else
-	      fprintf (theFile, "}\n\n");
 	}
 	if (s == "") {
 	   bool first = true;
@@ -118,22 +106,17 @@ void	printer::print_ensemble (const ensembleDescriptor &ens,
 	      print_packetService (ps);
 	   }
 	}
-	if (!last)
-	   fprintf (theFile, "\n},\n");
-	else
-	   fprintf (theFile, "\n}\n");
 }
 
-void	printer::print_header	() {
-	fprintf (theFile, "\n{\n");
+void	csv_printer::print_header	() {
 }
 
-void	printer::print_footer	() {
-	fprintf (theFile, "\n}\n");
+void	csv_printer::print_footer	() {
 }
 
-void	printer::print_audioService (const contentType &as) {
-	fprintf (theFile,  "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"program type\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\" }",
+void	csv_printer::print_audioService (const contentType &as) {
+	fprintf (theFile, 
+	         ";;%X;%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
                      as. SId,
                      as. serviceName. c_str (),
                      as. subChId,
@@ -147,8 +130,9 @@ void	printer::print_audioService (const contentType &as) {
                      getLanguage (as. language));
 }
 
-void	printer::print_packetService (const contentType &ps) {
-	   fprintf (theFile, "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"FEC\": \"%s\", \"protectionLevel\": \"%s\", \"appType\": \"%s\", \"data\": \"%s\", \"subService\": \"%s\" }",
+void	csv_printer::print_packetService (const contentType &ps) {
+	fprintf (theFile, 
+	         ";;%X;%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
 	             ps. SId,
 	             ps. serviceName. c_str (),
 	             ps. subChId,

@@ -30,7 +30,9 @@
 #include	<iostream>
 #include	"band-handler.h"
 #include	"tii-handler.h"
-#include	"printer.h"
+#include	"scanner-printer.h"
+#include	"csv-printer.h"
+#include	"json-printer.h"
 #ifdef	HAVE_SDRPLAY
 #include	"sdrplay-handler.h"
 #elif	HAVE_AIRSPY
@@ -129,41 +131,41 @@ int	main (int argc, char **argv) {
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "I:F:D:G:g:p:";
+const char	*optionsString	= "JI:F:D:G:g:p:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "I:F:D:G:g:X:";
+const char	*optionsString	= "JI:F:D:G:g:X:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 3;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "I:F:D:G:L:Qp:";
+const char	*optionsString	= "JI:F:D:G:L:Qp:";
 #elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "I:F:D:G:L:Qp:";
+const char	*optionsString	= "JI:F:D:G:L:Qp:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
-const char	*optionsString	= "I:F:D:G:bp:";
+const char	*optionsString	= "JI:F:D:G:bp:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
 int		dumpDuration	= 1;
-const char	*optionsString	= "IF:D:G:p:QT:";
+const char	*optionsString	= "JIF:D:G:p:QT:";
 #elif   HAVE_RTL_TCP
 int		rtl_tcp_gain	= 50;
 bool		autogain	= false;
 int		rtl_tcp_ppm	= 0;
 std::string	rtl_tcp_hostname	= "127.0.0.1";  // default
 int32_t		rtl_tcp_basePort	= 1234;         // default
-const char      *optionsString  = "I:F:D:G:g:P:H:h:p:Q";
+const char      *optionsString  = "JI:F:D:G:g:P:H:h:p:Q";
 #endif
 int	opt;
 int	freqSyncTime		= 8;
@@ -171,7 +173,8 @@ int	tiiWaitTime		= 10;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
-std::string	fileName = "test.json";
+std::string	fileName = "";
+bool	json		= false;
 
 	fprintf (stderr, "dab_scanner V 3.0,\n"
 	                "Copyright 2025 J van Katwijk, Lazy Chair Computing\n");
@@ -185,6 +188,9 @@ std::string	fileName = "test.json";
 
 	while ((opt = getopt (argc, argv, optionsString)) != -1) {
 	   switch (opt) {
+	      case 'J':
+	         json		= true;
+	         break;
 	      case 'I':
 	         tiiWaitTime	= atoi (optarg);
 	         break;
@@ -452,9 +458,15 @@ std::string	fileName = "test.json";
 	}
 
 	theDevice	-> stopReader ();
-	printer thePrinter (fileName);
-	thePrinter.  print (theResult);
-	thePrinter.  close ();
+	if (fileName == ")
+	   fileName = json ? "test.json" : "test.csv";
+	scannerPrinter *thePrinter;
+	if (json)
+	   thePrinter  = new json_printer (fileName);
+	else
+	   thePrinter  = new csv_printer (fileName);
+	thePrinter ->  print (theResult);
+	delete thePrinter;
 	delete	theRadio;
 	delete	theDevice;	
 }
@@ -462,10 +474,10 @@ std::string	fileName = "test.json";
 void    printOptions () {
         fprintf (stderr,
 "                        dab-scanner options are\n\
+	                -J		output in json rather than csv format
                         -F filename      in case the output is to a file\n\
                         -D number        amount of time to look for full sync\n\
 	                -I number	amount of time used to gather TII data\n\
-	                -R filename	raw dump of the input data\n"
 "	for hackrf:\n"
 "	                  -v vgaGain\n"
 "	                  -l lnaGain\n"

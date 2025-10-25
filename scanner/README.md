@@ -19,8 +19,11 @@ The scanner will perform a SINGLE scan over the DAB channels in the old
 Band III region (i.e. app 175 .. 230 Mhz) and store the results
 automatically in a file.
 
+
 Output is
-a. on the terminal for each channel where DAB signals were detected
+a. Default  detailed output format is ".csv" with ";" (semicolo) as separator,
+use -J option to set output format to Json
+b. on the terminal for each channel where DAB signals were detected
 a brief description of the ensemble and a list of services as shown below
 
 	channel 5B -> EId 805B	ensembleName 5B Z-H/Zeeland  
@@ -36,9 +39,6 @@ a brief description of the ensemble and a list of services as shown below
 	8DAF	Sunrise FM      
 	8DAD	GLXY.RADIO      
 	84AE	THE GROOVE   
-
-b. a Json file is created with more details on the ensemble and the
-services.
 
 
 ----------------------------------------------------------------------------

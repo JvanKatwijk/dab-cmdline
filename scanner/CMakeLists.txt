@@ -386,7 +386,9 @@ endif ()
              ./tii-handling/tiiQueue.h
              ./tii-handling/tii-reader.h
              ./tii-handling/cacheElement.h
-	     ./tii-handling/printer.h
+	     ./printing/scanner_printer.h
+	     ./printing/csv_printer.h
+	     ./printing/json_printer.h
 	)
 
 	set (${objectName}_SRCS
@@ -419,7 +421,9 @@ endif ()
 	     ./tii-handling/tii-handler.cpp
              ./tii-handling/tiiQueue.cpp
              ./tii-handling/tii-reader.cpp
-	     ./printing/printer.cpp
+	     ./printing/scanner-printer.cpp
+	     ./printing/csv-printer.cpp
+	     ./printing/json-printer.cpp
 	)
 
 	include_directories (

@@ -24,13 +24,14 @@
 #pragma once
 
 #include	"dab-constants.h"
+#include	"scanner-printer.h"
 #include	<vector>
 #include	<stdio.h>
 
-class	printer {
+class	csv_printer: public scannerPrinter {
 public:
-		printer		(const std::string &);
-		~printer	();
+		csv_printer	(const std::string &);
+		~csv_printer	();
 	void	print		(const std::vector<ensembleDescriptor> &theResult);
 	void	close		();
 private:
@@ -39,6 +40,5 @@ private:
 	void	print_footer	();
 	void	print_audioService	(const contentType &);
 	void	print_packetService	(const contentType &);
-	FILE	*theFile;
 };
 
