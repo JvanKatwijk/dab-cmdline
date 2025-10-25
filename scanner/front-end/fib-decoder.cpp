@@ -998,12 +998,12 @@ char		label [17];
 	prim. name 		= dataName;
 	prim. SId		= SId;
 	prim. fmFrequencies. resize (0);
-	theEnsemble. primaries. push_back (prim);
 	int subChId	= currentConfig -> subChId_for_SId (0, SId);
 	if (subChId != -1) {
 	   serviceName (dataName, SId, subChId, nullptr);
 	   if (theEnsemble. primaries. size () >= 2)
 	      theEnsemble. isSynced = true;
+	   theEnsemble. primaries. push_back (prim);
 	}
 }
 
