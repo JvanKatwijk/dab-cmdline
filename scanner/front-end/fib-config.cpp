@@ -482,9 +482,21 @@ int	fibConfig::findIndex_SC_P_Table (uint16_t SCId) {
 	return -1;
 }
 
-//
-////////////////////////////////////////////////////////////////////
-//////////	The public interface  functions ////////////////////
+int	fibConfig::SCIds_of (uint32_t SId, uint16_t subCh) {
+	for (auto &t : SC_G_table) {
+	   if (t. LS_flag == 0) {	// short form
+	      if ((t. SId == SId) && (t. subChId == subCh)) {
+	         return t. SCIds;
+	      }
+	   }
+	   else	{	// long form
+	      for (auto &s: SC_P_table) {
+	         if ((t. SCId == s. SCId) && (s. subChId == subCh))
+	            return t. SCIds;
+	      }
+	   }
+	}
+	return 0;
+}
 
-//	needed for generating eti files
 

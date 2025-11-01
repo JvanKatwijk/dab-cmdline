@@ -1,6 +1,18 @@
 
 DAB COMMAND LINE and DAB LIBRARY
 
+IMPORTANT
+
+I GET SOMETIMES "ISSUE" REQUESTS. NO PROBLEM, 
+HOWEVER, MY NAME IS NOT "HEY" OR "HELLO" OR SOMETHING LIKE THAT.
+IF YOU ARE NOT IDENTIFYING YOURSELF, YOU ARE TREATING ME AS YOUR PRIVATE
+PROGRAMMER, WHICH I M NOT.
+IN THESE CASES I WILL NOT SPEND ANY SECOND TO YOUR "ISSUE"
+
+IF YOU HAVE AN ISSUE, PLEASE SPECIFY CLEARLY (NOT: "HEY, IT DOES NOT WORK")
+THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
+THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
+
 -----------------------------------------------------------------------
 
 The software is provided as is, it is available under the GPL-V2,
@@ -9,46 +21,19 @@ As far as I can see they work on my Linux-x86 box, no garantees are
 given that the library software or the examples will work on
 Windows or any other system.
 
-THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
-THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
-MODIFICATIONS IN THE LIBRARY ARE NOT ALWAYS TESTED ON ALL EXAMPLES,
-PLEASE CORRECT THEM YOURSELF IF YOU (THINK YOU) FIND AN
-ERROR BEFORE ASKING ME.
 
-Important:
-If you contact me, please be clear and unambiguous in what you ask,
-questions as "Hey, it does not work" (or semantically similar)
-are considered unfriendly,  furthermore, I am too old to be called "Hey",
-that is also rather impolite. Furthermore, if you do not use your name(
-but only the "git" name)  you are basically insulting me
-and I will not act on your "issue".
-Furthermore, please remember that I am not your "private programmer"
 
 Notes
 ---------------------------------------------------------------------
 
 I am rewriting the dab-scanner. In the directory you will find 
-a. dab-scanner, which is the old one
-b. scanner, which is a completely written one, still under test
+a.  directory dab-scanner, which is the old one
+b.  directory scanner, which is a completely written one, still under test
 
 --------------------------------------------------------------------
 Notes
 
-   -d parameter removed. 
-   The -d parameter specified the maximum amount of time used for
-   timesyncing. The DAB decoding software is, however, such that
-   after a number of tries to detect the coarse border between
-   the NULL period of the DAB frame and the first datablock
-   it sends a signal that there is no data.
-   Even if a coarse border is detected, there is no guarantee that
-   we are dealing with a DAB signal. A second test is done by
-   trying to locate the precise border between NULL period and data,
-   and if after a number of tries not precise border could be detected
-   the decoder sent a signal to the mainprogram
-   So, if no DAB data is detected, a signal is sent, making the -d
-   parameter superfluous
-
-   -I parameter for the DAB scanner
+   -I parameter for the DAB scanners
    The DAB scanner is equipped with a TII decoder. The -I <some number>
    parameter specifies the amount of time the software will investigate
    the NULL periods of the incoming data for TII data

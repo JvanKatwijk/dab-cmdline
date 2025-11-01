@@ -113,5 +113,7 @@ private:
 	int	DSCTy			(int index);
 	int	DG_flag			(int index);
 	int	findIndex_SC_P_Table	(uint16_t SCId);
+	int	SCIds_of		(uint32_t SId, uint16_t subCh);
+
 };
 
