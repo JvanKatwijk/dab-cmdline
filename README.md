@@ -13,14 +13,9 @@ IF YOU HAVE AN ISSUE, PLEASE SPECIFY CLEARLY (NOT: "HEY, IT DOES NOT WORK")
 THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
 THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
 
------------------------------------------------------------------------
-
-The software is provided as is, it is available under the GPL-V2,
-the examples might or might not work.
-As far as I can see they work on my Linux-x86 box, no garantees are
-given that the library software or the examples will work on
-Windows or any other system.
-
+THE SOFTWARE IS AVAILABLE "AS IS", IT IS AVAILABLE UNDER THE GPL-V2.
+THE EXAMPLES MIGHT OR MIGHT NOT WORK IN YOUR ENVIRONMENT, IN ANY CASE,
+SOLVE IT YOURSELF BEFORE BOTHERING ME
 
 
 Notes
