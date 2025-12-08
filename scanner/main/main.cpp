@@ -458,7 +458,7 @@ bool	json		= false;
 	}
 
 	theDevice	-> stopReader ();
-	if (fileName == ")
+	if (fileName == "")
 	   fileName = json ? "test.json" : "test.csv";
 	scannerPrinter *thePrinter;
 	if (json)
@@ -473,11 +473,11 @@ bool	json		= false;
 
 void    printOptions () {
         fprintf (stderr,
-"                        dab-scanner options are\n\
-	                -J		output in json rather than csv format
-                        -F filename      in case the output is to a file\n\
-                        -D number        amount of time to look for full sync\n\
-	                -I number	amount of time used to gather TII data\n\
+"                        dab-scanner options are\n"
+"	                -J		output in json rather than csv format\n"
+"	                -F filename	in case the output is to a file\n"
+"	                -D number	amount of time to look for full sync\n"
+"	                -I number	amount of time used to gather TII data\n"
 "	for hackrf:\n"
 "	                  -v vgaGain\n"
 "	                  -l lnaGain\n"
