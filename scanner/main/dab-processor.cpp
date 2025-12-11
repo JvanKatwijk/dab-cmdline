@@ -305,3 +305,7 @@ contentType dabProcessor::content	(int compnr) {
 	return my_ficHandler. content (compnr);
 }
 
+int	dabProcessor::get_snr		() {
+	return snr;
+}
+

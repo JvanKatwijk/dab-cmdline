@@ -38,8 +38,7 @@ OPTION(RTL_TCP	"Input: RTL_TCP"  OFF)
 OPTION(LIMESDR	"Input: LIMESDR"  OFF)
 OPTION(SDRPLAY_V3  "Input: SDRPlay_V3"  OFF)
 
-OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
-
+#OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
 
 if ( (NOT RTLSDR) AND (NOT SDRPLAY) AND (NOT AirSpy) AND (NOT HACKRF) AND (NOT LIMESDR) AND (NOT SDRPLAY_V3) AND (NOT RTL_TCP) )
    message("None of the Input Options selected. Using default SDRPlay")
@@ -373,6 +372,7 @@ endif ()
 	     ./front-end/sample-reader.h
 	     ./front-end/tii-detector.h
 	     ./front-end/viterbi-spiral/viterbi-spiral.h
+	     ./front-end/viterbi-spiral/viterbi-no-sse.h
 	     ./support/ringbuffer.h
 	     ./support/band-handler.h 
 	     ./support/charsets.h
@@ -409,7 +409,7 @@ endif ()
              ./front-end/fib-decoder.cpp
 	     ./front-end/tii-detector.cpp
 	     ./front-end/viterbi-spiral/viterbi-spiral.cpp
-	     ./front-end/viterbi-spiral/spiral-sse.c
+	     ./front-end/viterbi-spiral/spiral-no-sse.c
 	     ./support/band-handler.cpp
 	     ./support/charsets.cpp
 	     ./support/protTables.cpp

@@ -29,6 +29,7 @@ void	ensemble::reset	() {
 	primaries. resize (0);
 	secondaries. resize (0);
 	namePresent = false;
+	
 }
 
 uint32_t  ensemble::serviceToSId	(const std::string &s) {

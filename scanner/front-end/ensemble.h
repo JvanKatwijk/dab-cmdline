@@ -43,6 +43,7 @@ public:
 	uint8_t		lto;
 	uint16_t	EId;
 	std::string	ensembleName;
+	int		snr;
 	bool		namePresent;
 	typedef struct {
 	   std::string	name;

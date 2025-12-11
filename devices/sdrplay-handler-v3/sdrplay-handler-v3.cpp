@@ -219,6 +219,8 @@ int			lna_upperBound = 4;
 
 	fprintf (stderr, "%d devices detected\n", ndev);
 	chosenDevice	= &devs [0];
+	chosenDevice	-> tuner  = sdrplay_api_Tuner_A;
+        chosenDevice	-> rspDuoMode = sdrplay_api_RspDuoMode_Single_Tuner;
 	err	= sdrplay_api_SelectDevice (chosenDevice);
 	if (err != sdrplay_api_Success) {
 	   fprintf (stderr, "sdrplay_api_SelectDevice failed %s\n",

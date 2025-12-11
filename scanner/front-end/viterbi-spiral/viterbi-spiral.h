@@ -51,6 +51,8 @@ public:
 		viterbiSpiral	(int16_t);
 		~viterbiSpiral	(void);
 	void	deconvolve	(int16_t *, uint8_t *);
+	void	convolve	(uint8_t *input,
+	                         uint8_t * out, int blockLength);
 private:
 
 	struct v	vp;

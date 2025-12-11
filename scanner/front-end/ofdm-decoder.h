@@ -62,5 +62,7 @@ private:
 
 	float		sqrt_2;
 	float		meanValue;
+
+	float		computeQuality (Complex *);
 };
 

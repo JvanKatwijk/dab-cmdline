@@ -48,17 +48,18 @@ std::vector<printed> done;
 	for (auto &ens: theResults) {
 	   std::string name = ens. ensemble;
 	   bool second	= false;
-	   for (auto &s : done) {
-	      if (s. ensembleName == ens. ensemble) {
-	         second = true;
-	         print_ensemble (ens, s. channel, counter == nrEnsembles);
-	         printed x;
-	         x . ensembleName = ens. ensemble;
-	         x. channel	= ens. channel;
-	         done. push_back (x);
-	      }
-	   }
+//	   for (auto &s : done) {
+//	      if (s. ensembleName == ens. ensemble) {
+//	         second = true;
+//	         print_ensemble (ens, s. channel, counter == nrEnsembles);
+//	         printed x;
+//	         x . ensembleName = ens. ensemble;
+//	         x. channel	= ens. channel;
+//	         done. push_back (x);
+//	      }
+//	   }
 	   if (!second) {
+	      fprintf (stderr, "Printing %s\n", ens. ensemble. c_str ());
 	      print_ensemble (ens, "", counter == nrEnsembles);
 	      printed x;
 	      x . ensembleName = ens. ensemble;
@@ -73,9 +74,10 @@ std::vector<printed> done;
 void	json_printer::print_ensemble (const ensembleDescriptor &ens,
 	                                        std::string s, bool last) {
 
-	fprintf (theFile, "\"%s\": {\"name\": \"%s\", \"EId\":\"%X\",",
+	fprintf (theFile,
+	           "\"%s\": {\"name\": \"%s\", \"EId\":\"%X\", \"snr\":\"%d\"",
 	                   ens. channel. c_str (),
-	                   ens. ensemble. c_str (), ens. ensembleId);
+	                   ens. ensemble. c_str (), ens. ensembleId, ens. snr);
 	if (s != "")
 	   fprintf (theFile, "\"Link\" : \"%s\",", s. c_str ());
 	fprintf (theFile, "\n");

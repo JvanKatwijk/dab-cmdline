@@ -31,7 +31,7 @@
 #include	<windows.h>
 #endif
 
-#define	SSE_AVAILABLE
+#define	NO_SSE_AVAILABLE
 //
 //	It took a while to discover that the polynomes we used
 //	in our own "straightforward" implementation was bitreversed!!
@@ -368,5 +368,39 @@ int32_t i;
 	vp -> new_metrics = &vp -> metrics2;
 /* Bias known start state */
 	vp -> old_metrics-> t[starting_state & (NUMSTATES-1)] = 0;
+}
+
+void	viterbiSpiral::convolve (uint8_t *input,
+	                         uint8_t *out, int blockLength) {
+uint8_t a0, a1 = 0,
+	    a2 = 0, 
+	    a3 = 0,
+	    a4 = 0,
+	    a5 = 0,
+	    a6 = 0;
+
+//#define POLYS { 0155, 0117, 0123, 0155}
+	for (int i = 0; i < blockLength; i ++) {
+	   a0 = input [i];
+	   out [4 * i + 0] = a0 ^ a2 ^ a3 ^ a5 ^ a6;
+           out [4 * i + 1] = a0 ^ a1 ^ a2 ^ a3 ^ a6;
+           out [4 * i + 2] = a0 ^ a1 ^ a4 ^ a6;
+           out [4 * i + 3] = out [4 * i + 0];
+
+//	now shift
+           a6 = a5; a5 = a4; a4 = a3; a3 = a2; a2 = a1; a1 = a0;
+        }
+//
+//      Now the residu bits. Empty the registers by shifting in
+//      zeros
+        for (int i = blockLength; i < blockLength + 6; i ++) {
+           a0 = 0;
+	   out [4 * i + 0] = a0 ^ a2 ^ a3 ^ a5 ^ a6;
+           out [4 * i + 1] = a0 ^ a1 ^ a2 ^ a3 ^ a6;
+           out [4 * i + 2] = a0 ^ a1 ^ a4 ^ a6;
+           out [4 * i + 3] = out [4 * i + 0];
+//	now shift
+           a6 = a5; a5 = a4; a4 = a3; a3 = a2; a2 = a1; a1 = a0;
+        }
 }
 

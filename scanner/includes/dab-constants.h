@@ -165,6 +165,7 @@ typedef struct {
 	std::string ensemble;
 	int	ensembleId;
 	std::string channel;
+	int	snr;
 	std::vector<cacheElement> transmitterData;
 	std::vector<contentType> audioServices;
 	std::vector<contentType> packetServices;

@@ -150,7 +150,32 @@ float	sum = 0;
 	   sum                       += abs (R1);
 	}
 	meanValue	= compute_avg (meanValue, sum / carriers, 0.1);
+	static int teller = 0;
+	static float MER	= 0;
+	MER	= 0.9 * MER + 0.1 * computeQuality (fft_buffer. data ());
+	if (++ teller > 400) {
+	   teller = 0;
+	   fprintf (stderr, "MER (ETSI TR 101 290): %f\n", MER);
+	}
 	memcpy (phaseReference. data (),
 	          fft_buffer. data (), T_u * sizeof (Complex));
 }
+
+//	For the computation of the MER we use the definition
+//	from ETSI TR 101 290 (appendix C1)
+float	ofdmDecoder::computeQuality (Complex *v) {
+float f_n = 0;
+float f_d = 0;
+	for (int i = 0; i < carriers; i ++) {
+	   Complex ss	= v [(T_u - carriers / 2 + i) % T_u];
+	   float ab	= abs (ss) / sqrt_2;
+	   f_n		=  f_n + (real (ss) * real (ss) +
+	                                    imag (ss) * imag (ss));
+	   float R1	= real (ss) - ab;
+	   float I1	= imag (ss) - ab;
+	   f_d		= f_d + R1 * R1 + I1 * I1;
+	}
+	return 10 * log10 (f_n / f_d + 0.1);
+}
+
 

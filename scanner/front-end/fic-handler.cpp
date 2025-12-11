@@ -179,6 +179,9 @@ void	ficHandler::processFICBlock (std::vector<int16_t> &softBits,
 bool	ficHandler::processFICInput (int16_t ficno) {
 static
 int16_t	viterbiInput [FIC_BLOCKSIZE + FIC_RESIDU] = {0};
+static
+uint8_t checkBlock   [FIC_BLOCKSIZE + FIC_RESIDU] = {0};
+
 int16_t	inputCount	= 0;
 
 	for (int i = 0; i < FIC_BLOCKSIZE + FIC_RESIDU; i ++)  {
@@ -190,6 +193,29 @@ int16_t	inputCount	= 0;
   *	deconvolution is according to DAB standard section 11.2
   */
 	myViterbi. deconvolve (viterbiInput, hardBits);
+
+//	we reconstruct the input as it should have been for this result:
+	myViterbi. convolve (hardBits, checkBlock, FIC_BLOCKSIZE / 4);
+//
+//	and compute the errors
+	for (int i = 0; i < 3072 + 24; i ++) {
+	   if (punctureTable [i]) {
+	      if ((checkBlock [i] == 0) && viterbiInput [i] >= 0)
+	         ficErrors ++;
+	      else
+	      if ((checkBlock [i] != 0) && viterbiInput [i] < 0)
+	         ficErrors ++;
+	   }
+	}
+	ficBits		+= FIC_BLOCKSIZE + FIC_RESIDU;
+	ficBlocks ++;
+	if (ficBlocks >= 40) {	// 4 blocks per frame, app 10 frames per sec
+//	   emit showFICBER ((float)ficErrors / ficBits);
+	   fprintf (stderr, "BER: %f\n", (float)ficErrors / ficBits);
+	   ficBlocks	 = 0;
+	   ficErrors	 /= 2;
+	   ficBits	 /= 2;
+	}
 /**
   *	if everything worked as planned, we now have a
   *	768 bit vector containing three FIB's (fib blocks) with "hard" bits

@@ -176,7 +176,7 @@ deviceHandler	*theDevice;
 std::string	fileName = "";
 bool	json		= false;
 
-	fprintf (stderr, "dab_scanner V 3.0,\n"
+	fprintf (stdout, "dab_scanner V 3.0,\n"
 	                "Copyright 2025 J van Katwijk, Lazy Chair Computing\n");
 	timeSynced.	store (false);
 	run.		store (false);
@@ -197,7 +197,6 @@ bool	json		= false;
 	      case 'F':
 	         fileName	= std::string (optarg);
 	         break;
-
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
 	         break;
@@ -389,7 +388,7 @@ bool	json		= false;
 	if (autogain)
 	   theDevice	-> set_autogain (autogain);
 
-   
+	for (int l = 0; l < 2; l ++)
 	for (auto &currFreq : dabBand. theFreqs) {
 	   int	the_timeSyncTime	= 5;
 	   int	the_freqSyncTime	= freqSyncTime;
@@ -428,6 +427,7 @@ bool	json		= false;
 	                                                currFreq. key);
 	      continue;
 	   }
+
 	   int tiiTime	= tiiWaitTime;
 	   while (--tiiTime > 0)
 	      sleep (1);
@@ -441,6 +441,7 @@ bool	json		= false;
 	   ensem. channel	= currFreq. key;
 	   ensem. ensemble	= ensembleName;
 	   ensem. ensembleId	= ensembleId;
+	   ensem. snr		= theRadio	-> get_snr ();
 	   for (int i = 0; i < the_tiiHandler. nrTransmitters (); i ++) {
 	      cacheElement e = the_tiiHandler. deliver (i);
 	      ensem. transmitterData. push_back (e);
@@ -457,6 +458,8 @@ bool	json		= false;
 	   theResult. push_back (ensem);
 	}
 
+	fprintf (stderr, "The result has %d elements\n",
+	                               (int)theResult. size ());
 	theDevice	-> stopReader ();
 	if (fileName == "")
 	   fileName = json ? "test.json" : "test.csv";

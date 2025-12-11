@@ -76,6 +76,7 @@ public:
 
 	int		get_nrComponents	();
 	contentType	content			(int);
+	int		get_snr			();
 private:
 	deviceHandler	*inputDevice;
 	phaseTable	theTable;

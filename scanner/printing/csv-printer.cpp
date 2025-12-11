@@ -48,16 +48,16 @@ std::vector<printed> done;
 	for (auto &ens: theResults) {
 	   std::string name = ens. ensemble;
 	   bool second	= false;
-	   for (auto &s : done) {
-	      if (s. ensembleName == ens. ensemble) {
-	         second = true;
-	         print_ensemble (ens, s. channel, counter == nrEnsembles);
-	         printed x;
-	         x . ensembleName = ens. ensemble;
-	         x. channel	= ens. channel;
-	         done. push_back (x);
-	      }
-	   }
+//	   for (auto &s : done) {
+//	      if (s. ensembleName == ens. ensemble) {
+//	         second = true;
+//	         print_ensemble (ens, s. channel, counter == nrEnsembles);
+//	         printed x;
+//	         x . ensembleName = ens. ensemble;
+//	         x. channel	= ens. channel;
+//	         done. push_back (x);
+//	      }
+//	   }
 	   if (!second) {
 	      print_ensemble (ens, "", counter == nrEnsembles);
 	      printed x;
@@ -73,26 +73,26 @@ std::vector<printed> done;
 void	csv_printer::print_ensemble (const ensembleDescriptor &ens,
 	                                        std::string s, bool last) {
 	
-	fprintf (theFile, "\n%s; %X;%s;",
+	fprintf (theFile, "\n%s; %X;%s; snr %d",
 	                   ens. channel. c_str (), ens. ensembleId,
-	                   ens. ensemble. c_str ());
+	                   ens. ensemble. c_str (), ens. snr);
 	if (s != "")
 	   fprintf (theFile, " see %s;n", s. c_str ());
 	else	
 	   fprintf (theFile, "\n");
-	fprintf (theFile, "\nAudio services\ntype;;serviceId;service name;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
-
 	if (ens. transmitterData. size () > 0) {
 	   int nrTransmitters = ens. transmitterData. size ();
 	   int counter = 1;
 	   for (auto &c: ens. transmitterData) {
 	      fprintf (theFile,
-	           "(%d-%d);%s; %f;%f\n",
+	           ";;(%d-%d);%s; %f;%f\n",
 	                          c. mainId, c. subId,
 	                          c. transmitterName. c_str (),
 	                          c. latitude, c. longitude);
 	   }
 	}
+	fprintf (theFile, "\nAudio services\ntype;;serviceId;service name;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
+
 	if (s == "") {
 	   bool first = true;
 	   for (auto &as: ens. audioServices) {
