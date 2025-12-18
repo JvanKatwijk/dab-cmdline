@@ -48,6 +48,7 @@ private:
 	interLeaver	myMapper;
 	fftHandler	my_fftHandler;
 	std::vector <Complex>	phaseReference;
+	std::vector <Complex>	conjVector;
 	std::vector <Complex>	fft_buffer;
 	std::vector <float>	meanLevelVector;
 	std::vector <float>	sigmaSQ_Vector;

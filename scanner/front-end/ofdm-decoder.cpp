@@ -53,7 +53,9 @@ void	limit_symmetrically (float &in, float ref) {
 	ofdmDecoder::ofdmDecoder	():
 	                               myMapper    (),
 	                               my_fftHandler (params. get_T_u (),
-	                                                              false),		                               phaseReference (params. get_T_u ()),
+	                                                              false),
+	                               phaseReference (params. get_T_u ()),
+	                               conjVector 	(params. get_T_u ()),
 	                               fft_buffer (params. get_T_u ()),
 	                               meanLevelVector (params. get_T_u ()),
 	                               sigmaSQ_Vector (params. get_T_u ()) {
@@ -115,6 +117,7 @@ float	sum = 0;
 	   Complex current	= fft_buffer [index];
 	   Complex prevS	= phaseReference [index];
 	   Complex fftBin	= current * normalize (conj (prevS));
+	   conjVector [index]	= fftBin;
 	   float binAbsLevel	= abs (fftBin);
 
 	   std::complex<float> fftBin_at_1 =
@@ -150,13 +153,12 @@ float	sum = 0;
 	   sum                       += abs (R1);
 	}
 	meanValue	= compute_avg (meanValue, sum / carriers, 0.1);
-	static int teller = 0;
-	static float MER	= 0;
-	MER	= 0.9 * MER + 0.1 * computeQuality (fft_buffer. data ());
-	if (++ teller > 400) {
-	   teller = 0;
-	   fprintf (stderr, "MER (ETSI TR 101 290): %f\n", MER);
-	}
+//	static int teller = 0;
+//	if (++ teller > 100) {
+//	   teller = 0;
+//	   float MER	= computeQuality (conjVector. data ());
+//	   fprintf (stderr, "MER (ETSI TR 101 290): %f\n", MER);
+//	}
 	memcpy (phaseReference. data (),
 	          fft_buffer. data (), T_u * sizeof (Complex));
 }
@@ -164,16 +166,15 @@ float	sum = 0;
 //	For the computation of the MER we use the definition
 //	from ETSI TR 101 290 (appendix C1)
 float	ofdmDecoder::computeQuality (Complex *v) {
-float f_n = 0;
-float f_d = 0;
+float f_n, f_d;
 	for (int i = 0; i < carriers; i ++) {
-	   Complex ss	= v [(T_u - carriers / 2 + i) % T_u];
-	   float ab	= abs (ss) / sqrt_2;
-	   f_n		=  f_n + (real (ss) * real (ss) +
-	                                    imag (ss) * imag (ss));
-	   float R1	= real (ss) - ab;
-	   float I1	= imag (ss) - ab;
-	   f_d		= f_d + R1 * R1 + I1 * I1;
+	   Complex ss	= v [(T_u / 2 - carriers / 2 + i)];
+	   float ab	= abs (ss) / sqrt (2);
+	   f_n		=  (real (ss) * real (ss) +
+	                                       imag (ss) * imag (ss));
+	   float R1	= abs (real (ss)) - ab;
+	   float I1	= abs (imag (ss)) - ab;
+	   f_d		=  (R1 * R1 + I1 * I1);
 	}
 	return 10 * log10 (f_n / f_d + 0.1);
 }

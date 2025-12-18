@@ -124,13 +124,16 @@ uint8_t patternTable [] = {
         for (int i = 0; i < T_u; i ++)
            window [i] = 0.54 - 0.46 * cos (2 * M_PI * (float)i / T_u);
 
-        table_2. resize (carriers / 2);
+        rotationTable. resize (carriers);
         int teller = 0;
         for (int carrier = - carriers / 2;
                        carrier < carriers / 2; carrier += 2) {
            int index    = carrier < 0 ? carrier + T_u : carrier + 1;
-           table_2 [teller ++] = theTable. refTable [index] *
+           Complex r	= theTable. refTable [index] *
                                  conj (theTable. refTable [index + 1]);
+	   float aa = (arg (r) < 0) ? arg (r) + 2 * M_PI : arg (r);
+	   rotationTable [teller ++] =
+	             (int)(floor ((aa + 0.1) / (M_PI / 2)));
         }
 	reset ();
 }
@@ -161,14 +164,29 @@ Complex tmpBuffer [T_u];
 	   nullSymbolBuffer [i] += tmpBuffer [i];
 }
 
+// rotate  0, 90, 180 or 270 degrees
+Complex	TII_Detector::rotate (Complex value, uint8_t phaseIndicator) {   
+        switch (phaseIndicator) {
+           case 0:
+              return value;
+           case 1:	// PI / 2
+              return Complex (imag (value), -real (value));
+           case 2:	// PI
+              return -value;
+           case 3:	// 3 * PI / 2
+              return Complex (-imag (value), real (value));
+           default:     // should not happen
+              return value;
+        }
+}
+
 void	TII_Detector::collapse (const Complex *inVec,
-	                          Complex *etsiVec, Complex *nonetsiVec,
-	                          bool tiiFilter) {
+	                          Complex *etsiVec, Complex *nonetsiVec) {
 Complex buffer [carriers / 2];
 bool	carrierDelete	= false;
 	memcpy (buffer, inVec, carriers / 2 * sizeof (Complex));
 
-	int nrSections	= tiiFilter ? 2 : 4;
+	int nrSections	= 4;
 //	a single carrier cannot be a TII carrier.
 	if (carrierDelete) {
 	   for (int i = 0; i < SECTION_SIZE; i++) {
@@ -198,7 +216,8 @@ bool	carrierDelete	= false;
 	   for (int j = 0; j < nrSections; j++) {
 	      Complex x = buffer [i + j * SECTION_SIZE];
 	      etsiVec [i] += x;
-	      nonetsiVec [i] += x * conj (table_2 [i + j * SECTION_SIZE]);
+	      nonetsiVec [i] +=
+	               rotate (x, rotationTable [i + j * SECTION_SIZE]);
 	   }
 	}
 }
@@ -235,8 +254,7 @@ std::vector<tiiData> theResult;		// results
 float	avg_etsi	[NUM_GROUPS];
 float	avg_nonetsi	[NUM_GROUPS];
 
-	tiiThreshold	= 4;
-bool	tiiFilter	= true;
+//tiiThreshold	= 4;
 float threshold = pow (10, (float)threshold_db / 10); // threshold above noise
 int Teller = 0;
 
@@ -246,7 +264,7 @@ int Teller = 0;
 	       nullSymbolBuffer [fftIdx] * conj (nullSymbolBuffer [fftIdx + 1]);
 	}
 
-	collapse (decodedBuffer, etsiTable, nonetsiTable, tiiFilter);
+	collapse (decodedBuffer, etsiTable, nonetsiTable);
 
 
 // fill the float tables, determine the abs value of the strongest carrier
@@ -298,16 +316,14 @@ int Teller = 0;
 	   float *float_ptr	= nullptr;
 //	The number of times the limit is reached in the group is counted
 	   for (int i = 0; i < NUM_GROUPS; i++) {
-	      float etsi_noiseLevel = tiiFilter ? avg_etsi [i] : noise;
-	      float nonetsi_noiseLevel = tiiFilter ? avg_nonetsi [i] : noise;
-	      if (etsi_floatTable [subId + i * GROUPSIZE] >
-	                                      etsi_noiseLevel * threshold) {
+	      float thresholdLevel = 
+                       noise * std::pow (10.0f, threshold_db / 10.0f);
+	      if (etsi_floatTable [subId + i * GROUPSIZE] > thresholdLevel) {
 	         etsi_count++;
 	         etsi_pattern	|= bits [i];
 	         etsi_sum	+= etsiTable [subId + GROUPSIZE * i]; 
 	      }
-	      if (nonetsi_floatTable [subId + i * GROUPSIZE] >
-	                                    nonetsi_noiseLevel * threshold) {
+	      if (nonetsi_floatTable [subId + i * GROUPSIZE] > thresholdLevel) {
 	         nonetsi_count++;
 	         nonetsi_pattern |= bits [i];
 	         nonetsi_sum += nonetsiTable [subId + GROUPSIZE * i];
@@ -362,7 +378,7 @@ int Teller = 0;
 	   if (count >= 4) {
 	      element. mainId	= mainId;
 	      element. subId	= subId;
-	      element. strength = jan_abs (sum) / max / (tiiFilter ? 2 : 4);
+	      element. strength = jan_abs (sum) / max /  4;
 	      element. phase	= arg (sum) * F_DEG_PER_RAD;
 	      element. norm	= norm;
 	      element. collision	= false;

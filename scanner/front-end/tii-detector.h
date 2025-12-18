@@ -54,7 +54,8 @@ public:
 private:
 	dabParams	params;
 	phaseTable	theTable;
-	std::vector<Complex> table_2;
+	std::vector<uint8_t>	rotationTable;
+	Complex		rotate		(Complex, uint8_t);
 	void		resetBuffer	();
 	uint16_t	getPattern	(int);
 	uint16_t	nrPatterns	();
@@ -66,7 +67,7 @@ private:
 	fftHandler	my_fftHandler;
 	Complex		decodedBuffer [768];
 	void		collapse	(const Complex *, 
-	                                 Complex *, Complex *, bool);
+	                                 Complex *, Complex *);
 
 	int		tiiThreshold;
 };

@@ -211,7 +211,7 @@ int16_t	inputCount	= 0;
 	ficBlocks ++;
 	if (ficBlocks >= 40) {	// 4 blocks per frame, app 10 frames per sec
 //	   emit showFICBER ((float)ficErrors / ficBits);
-	   fprintf (stderr, "BER: %f\n", (float)ficErrors / ficBits);
+//	   fprintf (stderr, "BER: %f\n", (float)ficErrors / ficBits);
 	   ficBlocks	 = 0;
 	   ficErrors	 /= 2;
 	   ficBits	 /= 2;

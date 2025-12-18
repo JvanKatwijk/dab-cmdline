@@ -131,45 +131,46 @@ int	main (int argc, char **argv) {
 int		lnaGain		= 40;
 int		vgaGain		= 40;
 int		ppmOffset	= 0;
-const char	*optionsString	= "JI:F:D:G:g:p:";
+const char	*optionsString	= "JI:F:D:G:g:p:t:";
 #elif	HAVE_LIME
 int16_t		gain		= 70;
 std::string	antenna		= "Auto";
-const char	*optionsString	= "JI:F:D:G:g:X:";
+const char	*optionsString	= "JI:F:D:G:g:X:t:";
 #elif	HAVE_SDRPLAY	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 3;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "JI:F:D:G:L:Qp:";
+const char	*optionsString	= "JI:F:D:G:L:Qp:t:";
 #elif	HAVE_SDRPLAY_V3	
 int16_t		GRdB		= 30;
 int16_t		lnaState	= 2;
 bool		autogain	= true;
 int16_t		ppmOffset	= 0;
-const char	*optionsString	= "JI:F:D:G:L:Qp:";
+const char	*optionsString	= "JI:F:D:G:L:Qp:t:";
 #elif	HAVE_AIRSPY
 int16_t		gain		= 20;
 bool		autogain	= false;
 bool		rf_bias		= false;
-const char	*optionsString	= "JI:F:D:G:bp:";
+const char	*optionsString	= "JI:F:D:G:bp:t:";
 #elif	HAVE_RTLSDR
 int16_t		gain		= 50;
 bool		autogain	= false;
 int16_t		ppmOffset	= 0;
 int		dumpDuration	= 1;
-const char	*optionsString	= "JIF:D:G:p:QT:";
+const char	*optionsString	= "JIF:D:G:p:QT:t:";
 #elif   HAVE_RTL_TCP
 int		rtl_tcp_gain	= 50;
 bool		autogain	= false;
 int		rtl_tcp_ppm	= 0;
 std::string	rtl_tcp_hostname	= "127.0.0.1";  // default
 int32_t		rtl_tcp_basePort	= 1234;         // default
-const char      *optionsString  = "JI:F:D:G:g:P:H:h:p:Q";
+const char      *optionsString  = "JI:F:D:G:g:P:H:h:p:Qt:";
 #endif
 int	opt;
 int	freqSyncTime		= 8;
 int	tiiWaitTime		= 10;
+int	thresholdValue		= 6;
 struct sigaction sigact;
 bandHandler	dabBand;
 deviceHandler	*theDevice;
@@ -199,6 +200,9 @@ bool	json		= false;
 	         break;
 	      case 'D':
 	         freqSyncTime	= atoi (optarg);
+	         break;
+	      case 't':
+	         thresholdValue	= atoi (optarg);
 	         break;
 
 //	device specific options
@@ -339,12 +343,12 @@ bool	json		= false;
                                               0,
                                               0);
 #elif	HAVE_AIRSPY
-	   theDevice	= new airspyHandler (frequency,
+	   theDevice	= new airspyHandler (defaultFrequency,
 	                                     ppmOffset,
 	                                     gain,
 	                                     rf_bias);
 #elif	HAVE_RTLSDR
-	   theDevice	= new rtlsdrHandler (frequency,
+	   theDevice	= new rtlsdrHandler (defaultFrequency,
 	                                     ppmOffset,
 	                                     gain,
 	                                     autogain);
@@ -356,7 +360,7 @@ bool	json		= false;
                                               autogain,
                                               rtl_tcp_ppm);
 #elif	HAVE_HACKRF
-	   theDevice	= new hackrfHandler (frequency,
+	   theDevice	= new hackrfHandler (defaultFrequency,
 	                                     ppmOffset,
 	                                     lnaGain,
 	                                     vgaGain);
@@ -369,7 +373,7 @@ bool	json		= false;
 
 //	and with a sound device we now can create a "backend"
         API_struct interface;
-	interface. thresholdValue	= 6;
+	interface. thresholdValue	= thresholdValue;
         interface. syncsignal_Handler   = syncSignalHandler;
 	interface. tii_data_Handler	= tii_data_Handler;
         interface. name_of_ensemble 	= name_of_ensemble;
@@ -388,7 +392,7 @@ bool	json		= false;
 	if (autogain)
 	   theDevice	-> set_autogain (autogain);
 
-	for (int l = 0; l < 2; l ++)
+//	for (int l = 0; l < 2; l ++)
 	for (auto &currFreq : dabBand. theFreqs) {
 	   int	the_timeSyncTime	= 5;
 	   int	the_freqSyncTime	= freqSyncTime;
