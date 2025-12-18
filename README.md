@@ -24,7 +24,7 @@ Notes
 
 I am rewriting the dab-scanner. In the directory you will find 
 a.  directory dab-scanner, which is the old one
-b.  directory scanner, which is a completely written one, still under test
+b.  directory scanner, which is a completely rewritten one and has improved TII decoding 
 
 --------------------------------------------------------------------
 Notes
@@ -33,6 +33,7 @@ Notes
    The DAB scanner is equipped with a TII decoder. The -I <some number>
    parameter specifies the amount of time the software will investigate
    the NULL periods of the incoming data for TII data
+   -t <some number> sets the threshold for the TII decoder
    
 ---------------------------------------------------------------------
 Introduction
