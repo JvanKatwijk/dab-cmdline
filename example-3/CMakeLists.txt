@@ -47,6 +47,29 @@ OPTION(SERVER	"CReate TDC server"	  OFF)
 OPTION(X64_DEFINED "optimize for x64/SSE"  OFF)
 OPTION(RPI_DEFINED "optimize for ARM/NEON" OFF)
 
+####### DEBUG_PRINT is on by default and goes to STDOUT
+####### Creates a problem if expecting PCM on stdout
+####### This switches it by default to STDERR but leaves it as is everywhere else
+# Control debug output behavior:
+# -DDEBUG_ENABLED=OFF disables all debug prints
+# -DDEBUG_PRINT_TO_STDERR=OFF sends debug to stdout (dangerous for raw audio)
+
+OPTION(DEBUG_ENABLED "Enable debug printing" ON)
+OPTION(DEBUG_PRINT_TO_STDERR "Send debug output to stderr (otherwise stdout)" ON)
+
+if(DEBUG_ENABLED)
+    add_compile_definitions(DEBUG_ENABLED=1)
+else()
+    add_compile_definitions(DEBUG_ENABLED=0)
+endif()
+
+if(DEBUG_PRINT_TO_STDERR)
+    add_compile_definitions(DEBUG_PRINT_TO_STDERR=1)
+else()
+    add_compile_definitions(DEBUG_PRINT_TO_STDERR=0)
+endif()
+#######
+
 if ( (NOT RTLSDR) AND (NOT SDRPLAY) AND (NOT AirSpy) AND (NOT HACKRF) AND (NOT LIMESDR) AND (NOT RTL_TCP) AND (NOT SDRPLAY_V3) AND (NOT WAVFILES) AND (NOT RAWFILES) AND (NOT XMLFILES) )
    message("None of the Input Options selected. Using default SDRPlay")
    set(SDRPlay ON)
