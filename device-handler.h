@@ -30,16 +30,32 @@
 #include	<complex>
 #include	<thread>
 
-#define DEBUG_ENABLED
+/* Default DEBUG_ENABLED to 1 if not defined elsewhere */
+#ifndef DEBUG_ENABLED
+#define DEBUG_ENABLED 1
+#endif
 
-#ifdef DEBUG_ENABLED
-#define DEBUG_PRINT(...) \
-    do { \
-				printf(__VA_ARGS__); \
-    } while (0)
+/* Default DEBUG_PRINT_TO_STDERR to 0, ie stdout if not defined */
+#ifndef DEBUG_PRINT_TO_STDERR
+#define DEBUG_PRINT_TO_STDERR 0
+#endif
+
+#if DEBUG_ENABLED
+    #if DEBUG_PRINT_TO_STDERR
+        #define DEBUG_PRINT(...) \
+            do { \
+                fprintf(stderr, __VA_ARGS__); \
+            } while (0)
+    #else
+        #define DEBUG_PRINT(...) \
+            do { \
+                printf(__VA_ARGS__); \
+            } while (0)
+    #endif
+
 #else
-#define DEBUG_PRINT(...) \
-    do { } while (0)
+    #define DEBUG_PRINT(...) \
+        do { } while (0)
 #endif
 
 
