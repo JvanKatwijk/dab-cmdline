@@ -59,8 +59,6 @@
 #endif
 
 
-using namespace std;
-
 class	deviceHandler {
 public:
 			deviceHandler 	();
