@@ -155,11 +155,11 @@ void	TII_Detector::reset() {
 //	To eliminate (reduce?) noise in the input signal, we might
 //	add a few spectra before computing (up to the user)
 void	TII_Detector::addBuffer (const std::vector<Complex>  &v) {
-Complex tmpBuffer [T_u];
+std::vector<Complex> tmpBuffer (T_u);
 
 	for (int i = 0; i < T_u; i ++)
            tmpBuffer [i] = v [T_g + i] * window [i];
-	my_fftHandler. fft (tmpBuffer);
+	my_fftHandler. fft (tmpBuffer.data());
 	for (int i = 0; i < T_u; i ++)
 	   nullSymbolBuffer [i] += tmpBuffer [i];
 }
@@ -167,9 +167,9 @@ Complex tmpBuffer [T_u];
 void	TII_Detector::collapse (const Complex *inVec,
 	                          Complex *etsiVec, Complex *nonetsiVec,
 	                          bool tiiFilter) {
-Complex buffer [carriers / 2];
+std::vector<Complex> buffer (carriers / 2);
 bool	carrierDelete	= false;
-	memcpy (buffer, inVec, carriers / 2 * sizeof (Complex));
+	memcpy (buffer.data(), inVec, carriers / 2 * sizeof (Complex));
 
 	int nrSections	= tiiFilter ? 2 : 4;
 //	a single carrier cannot be a TII carrier.
