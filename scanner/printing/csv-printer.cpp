@@ -72,10 +72,11 @@ std::vector<printed> done;
 	
 void	csv_printer::print_ensemble (const ensembleDescriptor &ens,
 	                                        std::string s, bool last) {
-	
-	fprintf (theFile, "\n%s; %X;%s; snr %d",
+	std::string country	= getCountry (ens. ECC, (ens. ensembleId >> 12) & 0xF);
+	fprintf (theFile, "\n%s; %X;%s; %s; snr %d",
 	                   ens. channel. c_str (), ens. ensembleId,
-	                   ens. ensemble. c_str (), ens. snr);
+	                   ens. ensemble. c_str (),
+	                   country. c_str (), ens. snr);
 	if (s != "")
 	   fprintf (theFile, " see %s;n", s. c_str ());
 	else	
@@ -91,7 +92,7 @@ void	csv_printer::print_ensemble (const ensembleDescriptor &ens,
 	                          c. latitude, c. longitude);
 	   }
 	}
-	fprintf (theFile, "\nAudio services\ntype;;serviceId;service name;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language\n\n");
+	fprintf (theFile, "\nAudio services\ntype;;serviceId;service name;subchannelId;start address;length (CU); bit rate;DAB/DAB+; genre; prot level; code rate; language; country\n\n");
 
 	if (s == "") {
 	   bool first = true;
@@ -99,7 +100,7 @@ void	csv_printer::print_ensemble (const ensembleDescriptor &ens,
 	      if (!first)
 	         fprintf (theFile, ",\n");
 	      first = false;
-	      print_audioService (as);
+	      print_audioService (as, ens. ECC);
 	   }
 	   for (auto &ps: ens. packetServices) {
 	      fprintf (theFile, ",\n");
@@ -114,9 +115,16 @@ void	csv_printer::print_header	() {
 void	csv_printer::print_footer	() {
 }
 
-void	csv_printer::print_audioService (const contentType &as) {
+void	csv_printer::print_audioService (const contentType &as, uint8_t ecc) {
+uint8_t	local_ecc;
+	if (as. service_ecc == 0)
+	   local_ecc	= ecc;
+	else
+	   local_ecc	= as. service_ecc;
+	std::string country	= getCountry (local_ecc, 
+	                                      (as. SId >> 12) & 0xF);
 	fprintf (theFile, 
-	         ";;%X;%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;\n",
+	         ";;%X;%s;%d;%d;%d;%d;%s;%s;%s;%s;%s;%s\n",
                      as. SId,
                      as. serviceName. c_str (),
                      as. subChId,
@@ -127,7 +135,9 @@ void	csv_printer::print_audioService (const contentType &as) {
                      getProgramType (as.  programType),
                      as. protLevel. c_str (),
                      as. codeRate. c_str (),
-                     getLanguage (as. language));
+                     getLanguage (as. language),
+	             country. c_str ());
+
 }
 
 void	csv_printer::print_packetService (const contentType &ps) {

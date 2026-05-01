@@ -38,6 +38,9 @@
 	this	-> name_of_ensemble	= parent -> name_of_ensemble;
 	this	-> serviceName		= parent -> serviceName;
 	this	-> timeHandler		= parent -> timeHandler;
+	this	-> service_ecc		= parent -> service_ecc;
+	this	-> set_ensemble_ecc	= parent -> set_ensemble_ecc;
+
 //	Note that they may change "roles", 
 	currentConfig	= new fibConfig	(&theEnsemble);
 	nextConfig	= new fibConfig (&theEnsemble);
@@ -549,11 +552,13 @@ fibConfig::serviceComp_G comp;
 //	FIG0/9 Country, LTO and International table, clause 8.1.3.2;
 void	fibDecoder::FIG0Extension9 (uint8_t *d) {
 int16_t	used	= 2;		// offset in bytes
-//int16_t	Length		= getBits_5 (d, 3);
-//uint8_t	CN_bit		= getBits_1 (d, 8 + 0);
-//uint8_t	OE_bit		= getBits_1 (d, 8 + 1);
-//uint8_t	PD_bit		= getBits_1 (d, 8 + 2);
+int16_t	Length		= getBits_5 (d, 3);
+uint8_t	CN_bit		= getBits_1 (d, 8 + 0);
+uint8_t	OE_bit		= getBits_1 (d, 8 + 1);
+uint8_t	PD_bit		= getBits_1 (d, 8 + 2);
 //	bit 6 indicates the number of hours
+	uint8_t extFlag	= getBits_1 (d, used * 8 + 0);
+
         const int signbit = getBits_1 (d, used * 8 + 2);
         currentConfig -> dateTime [6] = (signbit == 1)?
                                          -1 * getBits_4 (d, used * 8 + 3):
@@ -566,8 +571,35 @@ int16_t	used	= 2;		// offset in bytes
 
 	uint8_t	LTO	= currentConfig -> dateTime [6];
 	uint8_t ecc	= getBits (d, used * 8 + 8, 8);
-	theEnsemble.	eccByte	= ecc;
+	if (theEnsemble. eccByte == 0) {
+	   theEnsemble.	eccByte	= ecc;
+	   set_ensemble_ecc (ecc, nullptr);
+	}
 	theEnsemble.	lto	= LTO;
+	if (!extFlag)
+	   return;
+	int bitOffset	= used * 8 + 16;
+	int interTable	= getBits_8 (d, bitOffset);
+	bitOffset += 8;
+	while (bitOffset < Length * 8) {
+	   uint16_t nrServices = getBits_2 (d, bitOffset);
+	   bitOffset += 2;
+//	Rfa2	
+	   bitOffset += 6;
+	   int local_ecc = getBits_8 (d, bitOffset);
+	   bitOffset += 8;
+	   for (int i = 0; i < nrServices; i ++) {
+	      uint16_t SId = getLBits (d, bitOffset, 16);
+	      bitOffset += 16;
+	      for (auto &serv : theEnsemble. primaries) {
+                 if ((serv. SId == SId)) {
+	            serv. ecc = local_ecc;
+	            service_ecc (SId, local_ecc, nullptr);
+	            break;
+	         }
+	      }
+	   }
+	}
 }
 
 int	monthLength [] {
@@ -997,6 +1029,7 @@ char		label [17];
 	prim. programType	= 0;
 	prim. name 		= dataName;
 	prim. SId		= SId;
+	prim. ecc		= 0;
 	prim. fmFrequencies. resize (0);
 	int subChId	= currentConfig -> subChId_for_SId (0, SId);
 	if (subChId != -1) {

@@ -265,6 +265,8 @@ contentType	fibConfig::content (int compnr) {
 	                          theEnsemble -> programType (ad. SId);
 	   theData. fmFrequencies	=
 	                        theEnsemble -> fmFrequencies (ad. SId);
+	   theData. service_ecc		=
+	                        theEnsemble -> get_service_ecc (ad. SId);
 	   return theData;
 	}
 	if (comp. TMid == 3) {	// packet 

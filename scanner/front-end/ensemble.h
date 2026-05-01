@@ -49,6 +49,7 @@ public:
 	   std::string	name;
 	   std::string	shortName;
 	   uint32_t	SId;
+	   uint8_t	ecc;
 	   uint8_t	programType;
 	   uint8_t	SCIds;
 	   std::vector<int>	fmFrequencies;
@@ -61,6 +62,7 @@ public:
 	void	reset		();
 	uint32_t serviceToSId	(const std::string &s);
 	std::string	SIdToserv	(uint32_t SId);
+	uint8_t		get_service_ecc	(uint32_t);
 	int	programType	(uint32_t);
 	std::vector<int>	fmFrequencies	(uint32_t);
 };

@@ -38,7 +38,7 @@ private:
 	void	print_ensemble	(const ensembleDescriptor &, std::string, bool);
 	void	print_header	();
 	void	print_footer	();
-	void	print_audioService	(const contentType &);
+	void	print_audioService	(const contentType &, uint8_t);
 	void	print_packetService	(const contentType &);
 };
 

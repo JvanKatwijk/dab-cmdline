@@ -1,35 +1,10 @@
 
 DAB COMMAND LINE and DAB LIBRARY
 
-IMPORTANT
-
-I GET SOMETIMES "ISSUE" REQUESTS. NO PROBLEM, ALWAYS GLAD TO HELP. 
-HOWEVER, BE POLITE,  MY NAME IS NOT "HEY" OR "HELLO" OR SOMETHING LIKE THAT,
-AND IF YOU ARE NOT IDENTIFYING YOURSELF WHEN ISSUING A REQUEST,
-I FEEL YOU ARE TREATING ME AS YOUR PRIVATE PROGRAMMER, WHICH DEFINITELY I M NOT.
-IN THESE CASES I WILL IMMEDIATELY CLOSE THE ISSUE AN NOT SPEND ANY SECOND AT IT.
-
-IF YOU HAVE A REAL ISSUE, PLEASE SPECIFY CLEARLY (NOT: "HEY, IT DOES NOT WORK")
-WHAT HAPPENS VS WHAT SHOULD HAPPEN.
-NOTE THAT THE EXAMPLES ARE NOT INTENDED TO BE FULL SOLUTIONS, BUT MERELY
-THERE TO GIVE YOU AN IDEA HOW TO USE THE LIBRARY OR ITS SOURCES.
-
-THE SOFTWARE IS AVAILABLE "AS IS", IT IS AVAILABLE UNDER THE GPL-V2.
-THE EXAMPLES MIGHT OR MIGHT NOT WORK IN YOUR ENVIRONMENT, IN ANY CASE,
-SOLVE IT YOURSELF BEFORE BOTHERING ME
-
-
 Notes
 ---------------------------------------------------------------------
 
-I am rewriting the dab-scanner. In the directory you will find 
-a.  directory dab-scanner, which is the old one
-b.  directory scanner, which is a completely rewritten one and has improved TII decoding 
-
---------------------------------------------------------------------
-Notes
-
-   -I parameter for the DAB scanners
+   -I parameter for the DAB scanner
    The DAB scanner is equipped with a TII decoder. The -I <some number>
    parameter specifies the amount of time the software will investigate
    the NULL periods of the incoming data for TII data
@@ -73,6 +48,15 @@ audio output device.
 The Library code will be set to interpret the input as being of Mode 1.
 
 ![example 3 with sdrplay input](/example-3.png?raw=true)
+
+
+The scanner output is either ".csv" or json format, fragments given below,
+and now includes the country names
+
+
+![scanner with sdrplay input](/scanner-1.png?raw=true)
+
+![scanner with sdrplay input](/scanner-2.png?raw=true)
 
 ---------------------------------------------------------------------
 Handling TII data

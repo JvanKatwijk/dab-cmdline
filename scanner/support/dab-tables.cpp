@@ -464,9 +464,8 @@ const char * getLanguage (int16_t language) {
 	}
 }
 
-const char *getCountry (uint8_t ecc, uint8_t countryId) {
+std::string getCountry (uint8_t ecc, uint8_t countryId) {
 int16_t	i = 0;
-
 	while (countryTable [i].ecc != 0) {
 	   if ((countryTable[i].ecc == ecc) &&
 	           (countryTable[i].countryId == countryId) )
@@ -474,7 +473,7 @@ int16_t	i = 0;
 	   ++i;
 	}
 
-	return nullptr;
+	return "";
 }
 
 //	from Table 12

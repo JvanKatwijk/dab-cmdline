@@ -74,10 +74,14 @@ std::vector<printed> done;
 void	json_printer::print_ensemble (const ensembleDescriptor &ens,
 	                                        std::string s, bool last) {
 
+	std::string country	= getCountry (ens. ECC, 
+	                                      (ens. ensembleId >> 12) & 0xF);
 	fprintf (theFile,
-	           "\"%s\": {\"name\": \"%s\", \"EId\":\"%X\", \"snr\":\"%d\"",
+	           "\"%s\": {\"name\": \"%s\", \"EId\":\"%X\", \"country\": \"%s\", \"snr\":\"%d\"",
 	                   ens. channel. c_str (),
-	                   ens. ensemble. c_str (), ens. ensembleId, ens. snr);
+	                   ens. ensemble. c_str (), ens. ensembleId,
+	                   country. c_str (),
+	                   ens. snr);
 	if (s != "")
 	   fprintf (theFile, "\"Link\" : \"%s\",", s. c_str ());
 	fprintf (theFile, "\n");
@@ -107,7 +111,7 @@ void	json_printer::print_ensemble (const ensembleDescriptor &ens,
 	      if (!first)
 	         fprintf (theFile, ",\n");
 	      first = false;
-	      print_audioService (as);
+	      print_audioService (as, ens. ECC);
 	   }
 	   for (auto &ps: ens. packetServices) {
 	      fprintf (theFile, ",\n");
@@ -128,8 +132,25 @@ void	json_printer::print_footer	() {
 	fprintf (theFile, "\n}\n");
 }
 
-void	json_printer::print_audioService (const contentType &as) {
-	fprintf (theFile,  "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"program type\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\" }",
+void	json_printer::print_audioService (const contentType &as, uint8_t ECC) {
+uint8_t local_ecc = as. service_ecc == 0 ? ECC : as. service_ecc;
+	std::string country = getCountry (local_ecc, (as. SId >> 12) & 0xF);
+	if (country != "") 
+	fprintf (theFile,  "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"program type\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\", \"country\": \"%s\"}",
+                     as. SId,
+                     as. serviceName. c_str (),
+                     as. subChId,
+                     as. startAddress,
+                     as. length,
+                     as. bitRate,
+                     getASCTy  (as. ASCTy_DSCTy),
+                     getProgramType (as.  programType),
+                     as. protLevel. c_str (),
+                     as. codeRate. c_str (),
+                     getLanguage (as. language),
+	             country. c_str ());
+	else
+	fprintf (theFile,  "        \"%X\": { \"name\": \"%s\", \"subchannelId\": \"%d\", \"startAddress\": \"%d\", \"length\": \"%d\", \"bitRate\": \"%d\", \"audio\": \"%s\", \"program type\": \"%s\", \"protectionLevel\": \"%s\", \"codeRate\": \"%s\", \"language\": \"%s\"}",
                      as. SId,
                      as. serviceName. c_str (),
                      as. subChId,

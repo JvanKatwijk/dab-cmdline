@@ -135,6 +135,7 @@ public:
 	std::string	serviceName;
 	uint32_t	SId;
 	uint16_t	SCIds;
+	uint8_t		service_ecc;
 //	the following values are subChannel values
 	uint16_t	subChId;
 	uint16_t	startAddress;
@@ -166,6 +167,7 @@ typedef struct {
 	int	ensembleId;
 	std::string channel;
 	int	snr;
+	uint8_t	ECC;
 	std::vector<cacheElement> transmitterData;
 	std::vector<contentType> audioServices;
 	std::vector<contentType> packetServices;

@@ -72,7 +72,11 @@
 //      integer
         typedef void (*tii_data_t)(tiiData *, void *);
 
+//	//FIG0/9: ecc for services
+	typedef void (*service_ecc_t)(uint32_t, uint8_t, void *);
 
+//	FIG0/9: ensemble_ecc
+	typedef void (*set_ensemble_ecc_t) (uint8_t, void *);
 typedef struct {
         int16_t         thresholdValue;
         syncsignal_t    syncsignal_Handler;
@@ -80,6 +84,8 @@ typedef struct {
         name_of_ensemble_t      name_of_ensemble;
         serviceName_t   serviceName;
         theTime_t       timeHandler;
+	service_ecc_t	service_ecc;
+	set_ensemble_ecc_t set_ensemble_ecc;
 } API_struct;
  
 

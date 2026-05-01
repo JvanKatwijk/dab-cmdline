@@ -29,7 +29,7 @@ void	ensemble::reset	() {
 	primaries. resize (0);
 	secondaries. resize (0);
 	namePresent = false;
-	
+	eccByte		= 0;
 }
 
 uint32_t  ensemble::serviceToSId	(const std::string &s) {
@@ -54,6 +54,13 @@ int	ensemble::programType (uint32_t SId) {
 	   if (serv. SId == SId)
 	      return serv. programType;
 	return -1;
+}
+
+uint8_t	ensemble::get_service_ecc	(uint32_t SId) {
+	for (auto &serv : primaries)
+	   if (serv. SId == SId)
+	      return serv. ecc;
+	return 0;
 }
 
 std::vector<int>	ensemble::fmFrequencies	(uint32_t SId) {

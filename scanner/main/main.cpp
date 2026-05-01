@@ -29,6 +29,7 @@
 #include	<vector>
 #include	<iostream>
 #include	"band-handler.h"
+#include	"dab-tables.h"
 #include	"tii-handler.h"
 #include	"scanner-printer.h"
 #include	"csv-printer.h"
@@ -85,8 +86,18 @@ void	syncSignalHandler (bool b, void *userData) {
 	(void)userData;
 }
 
-static std::string ensembleName;
-static int ensembleId;
+static
+std::string	ensembleName;
+static
+int		ensembleId;
+static
+uint8_t		ensemble_ecc;
+
+static
+void	set_ensemble_ecc	(uint8_t ecc, void *userData) {
+	(void)userData;
+	ensemble_ecc = ecc;
+}
 
 static
 std::vector<ensembleDescriptor> theResult;
@@ -106,8 +117,9 @@ void    tii_data_Handler        (tiiData *theData, void *ctx) {
 }
 
 typedef struct {
-	std::string serviceName;
-	int	serviceId;
+	std::string	serviceName;
+	uint32_t	serviceId;
+	uint8_t		ecc;
 } service;
 static
 std::vector<service> serviceList;
@@ -121,6 +133,16 @@ void	serviceName (const std::string &name, int SId,
 	serviceList. push_back (s);
 }
 
+static
+void	service_ecc (uint32_t SId, uint8_t ecc, void *userdata) {
+	for (auto &s : serviceList) {
+	   if (s. serviceId == SId) {
+	      s. ecc = ecc;
+	      break;
+	   }
+	}
+}
+	      
 static
 void	theTime (int hours, int minutes, void *userData) {
 }
@@ -177,8 +199,8 @@ deviceHandler	*theDevice;
 std::string	fileName = "";
 bool	json		= false;
 
-	fprintf (stdout, "dab_scanner V 3.0,\n"
-	                "Copyright 2025 J van Katwijk, Lazy Chair Computing\n");
+	fprintf (stdout, "dab_scanner V 4.0,\n"
+	                "Copyright 2026 J van Katwijk, Lazy Chair Computing\n");
 	timeSynced.	store (false);
 	run.		store (false);
 
@@ -379,6 +401,8 @@ bool	json		= false;
         interface. name_of_ensemble 	= name_of_ensemble;
         interface. serviceName  	= serviceName;
 	interface. timeHandler		= theTime;
+	interface. service_ecc		= service_ecc;
+	interface. set_ensemble_ecc	= set_ensemble_ecc;
 //
 //	and with a sound device we can create a "worker"
 	theRadio	= new dabProcessor (theDevice,
@@ -435,16 +459,19 @@ bool	json		= false;
 	   int tiiTime	= tiiWaitTime;
 	   while (--tiiTime > 0)
 	      sleep (1);
-	   fprintf (stderr, "channel %s -> EId %X\tensembleName %s\n",
+	   fprintf (stderr, "channel %s -> EId %X\tensembleName %s %s\n",
 	                           currFreq. key, ensembleId,
-	                                        ensembleName. c_str ());
-	   for (auto &serv : serviceList)
+	                                        ensembleName. c_str (),
+	                            getCountry (ensemble_ecc, 
+	                                        (ensembleId >> 12) & 0xF). c_str ());
+	   for (auto &serv : serviceList) 
 	      fprintf (stderr, "%X\t%s\n", serv. serviceId,
 	                                          serv. serviceName. c_str ());
 	   ensembleDescriptor ensem;
 	   ensem. channel	= currFreq. key;
 	   ensem. ensemble	= ensembleName;
 	   ensem. ensembleId	= ensembleId;
+	   ensem. ECC		= ensemble_ecc;
 	   ensem. snr		= theRadio	-> get_snr ();
 	   for (int i = 0; i < the_tiiHandler. nrTransmitters (); i ++) {
 	      cacheElement e = the_tiiHandler. deliver (i);

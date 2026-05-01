@@ -604,6 +604,7 @@ int16_t	used	= 2;		// offset in bytes
 //uint8_t	OE_bit		= getBits_1 (d, 8 + 1);
 //uint8_t	PD_bit		= getBits_1 (d, 8 + 2);
 //	6 indicates the number of hours
+	uint8_t extFlag         = getBits_1 (d, used * 8 + 0);
         int     signbit = getBits_1 (d, used * 8 + 2);
         currentConfig -> dateTime [6] = (signbit == 1)?
                                          -1 * getBits_4 (d, used * 8 + 3):
@@ -611,7 +612,7 @@ int16_t	used	= 2;		// offset in bytes
 //      7 indicates a possible remaining half our
         currentConfig -> dateTime [7] =
 	                   (getBits_1 (d, used * 8 + 7) == 1) ? 30 : 0;
-        if (signbit == 1)
+        if (signbit != 0)
            currentConfig -> dateTime [7] = - currentConfig -> dateTime [7];
 
 	uint8_t	LTO	= currentConfig -> dateTime [6];
@@ -619,6 +620,29 @@ int16_t	used	= 2;		// offset in bytes
 	theEnsemble	-> eccByte	= ecc;
 	theEnsemble	-> lto		= LTO;
 //	lto_ecc (LTO, ecc);
+ if (!extFlag)
+           return;
+        int bitOffset   = used * 8 + 16;
+        int interTable  = getBits_8 (d, bitOffset);
+        bitOffset += 8;
+        while (bitOffset < Length * 8) {
+           uint16_t nrServices = getBits_2 (d, bitOffset);
+           bitOffset += 2;
+//      Rfa2
+           bitOffset += 6;
+           int service_ecc = getBits_8 (d, bitOffset);
+           bitOffset += 8;
+           for (int i = 0; i < nrServices; i ++) {
+              uint16_t SId = getLBits (d, bitOffset, 16);
+              bitOffset += 16;
+              for (auto &serv : theEnsemble. primaries) {
+                 if ((serv. SId == SId)) {
+                    serv. ecc = service_ecc;
+                    break;
+                 }
+              }
+	   }
+	}
 }
 
 int	monthLength [] {

@@ -80,6 +80,8 @@ private:
 
 	name_of_ensemble_t  name_of_ensemble;
         serviceName_t   serviceName;
+	service_ecc_t	service_ecc;
+	set_ensemble_ecc_t set_ensemble_ecc;
 	theTime_t	timeHandler;
 	void		process_FIG0		(uint8_t *);
 	void		process_FIG1		(uint8_t *);
