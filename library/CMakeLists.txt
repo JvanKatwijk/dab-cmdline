@@ -140,7 +140,8 @@ set (${objectName}_SRCS
     ${${objectName}_SRCS}
     ./dab-api.cpp
     ./src/dab-processor.cpp
-    ./src/ofdm/ofdm-decoder.cpp
+    ./src/time-converter.cpp
+    ./src/ofdm/ensemble.cpp
     ./src/ofdm/phasereference.cpp
     ./src/ofdm/phasetable.cpp
     ./src/ofdm/freq-interleaver.cpp
@@ -148,6 +149,7 @@ set (${objectName}_SRCS
     ./src/ofdm/sample-reader.cpp
     ./src/ofdm/timesyncer.cpp
     ./src/ofdm/fic-handler.cpp
+    ./src/ofdm/fib-config.cpp
     ./src/ofdm/fib-decoder.cpp
     ./src/ofdm/tii-detector.cpp
     ./src/backend/firecode-checker.cpp
