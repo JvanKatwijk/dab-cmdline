@@ -49,6 +49,7 @@ public:
 	   uint32_t	SId;
 	   uint8_t	programType;
 	   uint8_t	SCIds;
+	   uint8_t	ecc;
 	   std::vector<int>	fmFrequencies;
 	} service;
 

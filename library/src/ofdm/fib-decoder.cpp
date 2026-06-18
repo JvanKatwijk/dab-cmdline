@@ -599,7 +599,7 @@ fibConfig::serviceComp_G comp;
 //	FIG0/9 Country, LTO and International table, clause 8.1.3.2;
 void	fibDecoder::FIG0Extension9 (uint8_t *d) {
 int16_t	used	= 2;		// offset in bytes
-//int16_t	Length		= getBits_5 (d, 3);
+int16_t	Length		= getBits_5 (d, 3);
 //uint8_t	CN_bit		= getBits_1 (d, 8 + 0);
 //uint8_t	OE_bit		= getBits_1 (d, 8 + 1);
 //uint8_t	PD_bit		= getBits_1 (d, 8 + 2);
@@ -620,7 +620,7 @@ int16_t	used	= 2;		// offset in bytes
 	theEnsemble	-> eccByte	= ecc;
 	theEnsemble	-> lto		= LTO;
 //	lto_ecc (LTO, ecc);
- if (!extFlag)
+	if (!extFlag)
            return;
         int bitOffset   = used * 8 + 16;
         int interTable  = getBits_8 (d, bitOffset);
@@ -635,7 +635,7 @@ int16_t	used	= 2;		// offset in bytes
            for (int i = 0; i < nrServices; i ++) {
               uint16_t SId = getLBits (d, bitOffset, 16);
               bitOffset += 16;
-              for (auto &serv : theEnsemble. primaries) {
+              for (auto &serv : theEnsemble -> primaries) {
                  if ((serv. SId == SId)) {
                     serv. ecc = service_ecc;
                     break;
